@@ -69,7 +69,7 @@ button{font-family:inherit}
 #roll:active{transform:translateY(5px);box-shadow:0 1px 0 #b98d22}
 #roll:disabled{opacity:.6}
 .foot{display:flex;justify-content:center;margin-top:6px}
-#reset{background:none;border:0;color:var(--mute);font:500 .9rem Fredoka,sans-serif;padding:4px 10px}
+#reset{background:#4a2630;border:0;border-radius:14px;color:#ffb3bd;font:700 1rem Fredoka,sans-serif;padding:12px 18px;width:100%}
 #ov{position:fixed;inset:0;background:#000b;display:none;place-items:center;z-index:9;padding:16px;overflow-y:auto}
 #ov.on{display:grid}
 .box{background:#2f2b37;border-radius:20px;padding:14px;width:min(100%,360px);display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
@@ -123,7 +123,7 @@ button{font-family:inherit}
   <div class="res" id="res"></div>
   <div class="hits" id="hits"></div>
   <button id="roll">Lanzar dados</button>
-  <div class="foot"><button id="reset">Reiniciar partida</button></div>
+  <div class="foot"><button id="reset">Reiniciar toda la partida</button></div>
 </div>
 <div id="bt"></div>
 <div id="ov"></div>
@@ -134,7 +134,7 @@ const rng=(p,a,b)=>Array.from({length:b-a+1},(_,i)=>p+pad(a+i));
 const shuf=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 const card=(id,c='')=>`<div class="card ${c}" data-id="${id}"><img src="cartas/${id}.png" alt="${id}" onerror="this.remove()"></div>`;
 const fresh0=()=>({turn:1,hp:10,dM:shuf(rng('m',1,18)),dK:shuf(rng('k',1,6)),dC:shuf(rng('c',1,57)),hand:[],mesa:[],disc:[],comp:[],cross:[{id:'j01',p:10},null,null,null,null],final:0,hab:0});
-const fresh=()=>{const s=fresh0();s.hand=s.dM.splice(-8);return s};
+const fresh=()=>{const s=fresh0();s.hand=s.dM.splice(-8);for(let k=0;k<3;k++)s.disc.push(s.dC.pop());for(let i=1;i<=4;i++)s.cross[i]={id:s.dC.pop(),p:0};return s};
 let S=fresh();
 try{const v=JSON.parse(localStorage.getItem('mesa-juego')||'null');if(v&&v.cross)S=v}catch(e){}
 
@@ -292,7 +292,7 @@ Object.assign(CH,{g01:{c:'v',l:10},g02:{c:'a',l:9},g03:{c:'r',l:9},g04:{c:'v',l:
 const MC={};'r52,a11,av01,vr42,a21,r21,w21,a21,r31,w31,va31,a31,a21,av22,w32,w42,vr01,r21'.split(',').forEach((t,i)=>{const m=t.match(/^([a-z]+)(\d)(\d)$/);MC['m'+pad(i+1)]=[m[1],+m[2],+m[3]]});
 let PICK=0,B=null;
 const okc=id=>{const c=MC[id][0];return c==='w'||c.includes(CH[S.cross[B.i].id].c)};
-const sumB=()=>B.act?MC[B.act][1]+B.as.reduce((s,x)=>s+MC[x][2],0):0;
+const sumB=()=>B.act?MC[B.act][1]+(B.act==='m03'?fireDisc():0)+B.as.reduce((s,x)=>s+MC[x][2],0):0;
 function openBat(i){B={i,act:null,as:[]};$('#bt').classList.add('on');rb()}
 function rb(){
   const c=S.cross[B.i],h=CH[c.id],sl=(id,t,a)=>`<div data-bp="${a}">${id?card(id):t}</div>`;
@@ -305,18 +305,30 @@ $('#bt').onclick=e=>{const g=k=>{const n=e.target.closest(`[data-${k}]`);return 
   else if((v=g('bp'))!==null){if(v==='a'){B.act=null;B.as=[]}else B.as.splice(+v[1],1);rb()}
   else if(e.target.id==='nogo'){B=null;$('#bt').classList.remove('on')}
   else if(e.target.id==='go'){$('#sh-st').classList.add('on');roll(COLN[CH[S.cross[B.i].id].c],resolve)}};
+const FI='11,11,00,11,11,11,00,11,00,00,11,00,00,11,11,00,00,00'.split(',');
+const fireDisc=()=>S.disc.filter(x=>x[0]==='m'&&FI[+x.slice(1)-1]&&FI[+x.slice(1)-1][0]==='1').length;
+const draw=n=>{for(let k=0;k<n&&S.dM.length;k++)S.hand.push(S.dM.pop())};
+function res2(id,html,fx){ov(id,fx.map((f,i)=>['Aplicar: '+f[0],()=>{f[1]();fx.splice(i,1);render();res2(id,html,fx);return 1}]),html)}
 function resolve(h){
   const c=S.cross[B.i],lv=CH[c.id].l,add=sumB()+h,id=c.id;
   [B.act,...B.as].filter(Boolean).forEach(x=>{S.hand.splice(S.hand.indexOf(x),1);S.disc.push(x)});
+  const act=B.act,as=B.as.slice(),fx=[];
+  const nf=(act?+FI[+act.slice(1)-1][0]:0)+as.reduce((t,x)=>t+ +FI[+x.slice(1)-1][1],0);
+  if(nf)fx.push([`robar ${nf} carta(s) por fuego (m19)`,()=>draw(nf)]);
+  if(act==='m01')fx.push(['m01: sufrir 1 de daño',()=>{S.hp=Math.max(0,S.hp-1)}],['m01: barajar en el mazo en lugar del descarte',()=>{S.disc.splice(S.disc.lastIndexOf('m01'),1);S.dM.push('m01');shuf(S.dM)}]);
+  if(act==='m05')fx.push([`m05: robar ${1+as.length} carta(s)`,()=>draw(1+as.length)]);
+  if(act==='m06')fx.push(['m06: +2 de progreso por cada fuego en descartes',()=>{if(S.cross.includes(c))c.p+=2*fireDisc()}]);
+  if(act==='m04')fx.push(['m04: activar la carta de habilidad (m20)',()=>{S.hab=1}],['m04: barajar los descartes de personaje al mazo',()=>{const d=S.disc.filter(x=>x[0]==='m'&&x!=='m04');S.disc=S.disc.filter(x=>!d.includes(x));S.dM.push(...d);shuf(S.dM)}]);
+  if(act==='m13'&&S.hand.length)fx.push(['m13: devolverla a tu mano',()=>{S.disc.splice(S.disc.lastIndexOf('m13'),1);S.hand.push('m13')}]);
   c.p+=add;const win=c.p>=lv;
   if(win){S.comp.push(id);S.cross[B.i]=null}
   B=null;$('#bt').classList.remove('on');$('#sh-st').classList.remove('on');render();
-  ov(id,[],`<div class="pv">${win?'¡Desafío completado!':'No se completó'}</div><p>Cartas: +${add-h} · Dados: +${h}${win?'':` · Progreso: ${c.p}/${lv}`}</p><p>${win?'Aplica la recompensa a mano.':'Aplica la penalización a mano.'}</p>`);
+  res2(id,`<div class="pv">${win?'¡Desafío completado!':'No se completó'}</div><p>Cartas: +${add-h} · Dados: +${h}${win?'':` · Progreso: ${c.p}/${lv}`}</p><p>${win?'Aplica la recompensa a mano.':'Aplica la penalización a mano.'}</p>`,fx);
 }
 
 /* ---------- reiniciar ---------- */
 let armed=0;const rs=$('#reset');
-rs.onclick=()=>{if(!armed){armed=1;rs.textContent='Toca otra vez para reiniciar';setTimeout(()=>{armed=0;rs.textContent='Reiniciar partida'},2500)}else{S=fresh();hits.textContent='';render();armed=0;rs.textContent='Reiniciar partida'}};
+rs.onclick=()=>{if(!armed){armed=1;rs.textContent='Toca otra vez para borrar todo';setTimeout(()=>{armed=0;rs.textContent='Reiniciar toda la partida'},2500)}else{S=fresh();PICK=0;B=null;$('#bt').classList.remove('on');$('#tTurn').textContent='Turno';hits.textContent='';render();armed=0;rs.textContent='Reiniciar toda la partida'}};
 render();
 </script>
 </body>
