@@ -94,6 +94,8 @@ button{font-family:inherit}
 .pl{display:flex;gap:6px;width:100%}
 .pl>div{flex:1;aspect-ratio:5/7;border:2px dashed #fff3;border-radius:8px;display:grid;place-items:center;font-size:.7rem}
 .dim{opacity:.45}
+.row3{display:flex;gap:8px;width:100%}.b3{flex:1;aspect-ratio:5/7;transition:.4s}.b3.sel{box-shadow:0 0 0 4px var(--gold);transform:scale(1.07)}.b3 .deck{height:100%;font-size:2rem}
+#apart{position:fixed;right:6px;top:64px;display:flex;flex-direction:column;gap:4px;width:9vw;max-width:48px;z-index:1}#apart>div{aspect-ratio:5/7}
 </style>
 </head>
 <body>
@@ -125,6 +127,7 @@ button{font-family:inherit}
   <button id="roll">Lanzar dados</button>
   <div class="foot"><button id="reset">Reiniciar toda la partida</button></div>
 </div>
+<div id="apart"></div>
 <div id="bt"></div>
 <div id="ov"></div>
 
@@ -133,20 +136,23 @@ const $=s=>document.querySelector(s),pad=n=>String(n).padStart(2,'0');
 const rng=(p,a,b)=>Array.from({length:b-a+1},(_,i)=>p+pad(a+i));
 const shuf=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 const card=(id,c='')=>`<div class="card ${c}" data-id="${id}"><img src="cartas/${id}.png" alt="${id}" onerror="this.remove()"></div>`;
-const fresh0=()=>({turn:1,hp:10,dM:shuf(rng('m',1,18)),dK:shuf(rng('k',1,6)),dC:shuf(rng('c',1,57)),hand:[],mesa:[],disc:[],comp:[],cross:[{id:'j01',p:10},null,null,null,null],final:0,hab:0});
+const fresh0=()=>({turn:1,hp:10,dM:shuf(rng('m',1,18)),dK:shuf(rng('k',1,6)),dC:shuf(rng('c',1,57)),hand:[],mesa:[],disc:[],comp:[],cross:[{id:'j01',p:10},null,null,null,null],final:0,hab:0,apart:[]});
 const fresh=()=>{const s=fresh0();s.hand=s.dM.splice(-8);for(let k=0;k<3;k++)s.disc.push(s.dC.pop());for(let i=1;i<=4;i++)s.cross[i]={id:s.dC.pop(),p:0};return s};
 let S=fresh();
 try{const v=JSON.parse(localStorage.getItem('mesa-juego')||'null');if(v&&v.cross)S=v}catch(e){}
 
 /* ---------- pintar ---------- */
 function render(){
+  S.apart=S.apart||[];$('#apart').innerHTML=S.apart.map(id=>`<div data-ap="${id}">${card(id)}</div>`).join('');
+  checkEnd();
+  if(!S.over&&(S.hp<=0||(S.cross[0]&&S.cross[0].id==='j01'&&S.cross[0].p<=0)))whenFree(endGame);
   $('#cross').innerHTML=[null,1,null,2,0,3,null,4,null].map(i=>{
     if(i===null)return'<div></div>';const c=S.cross[i];
-    return c?`<div class="cell${PICK&&i&&CH[c.id]?' blink':''}" data-s="${i}">${card(c.id)}<b class="pg">${c.p}</b></div>`:'<div class="cell empty"></div>'}).join('');
+    return c?`<div class="cell${PICK&&(i||S.final&&unl().length)&&CH[c.id]&&!blk(c)?' blink':''}" data-s="${i}">${card(c.id)}<b class="pg">${c.p}</b></div>`:'<div class="cell empty"></div>'}).join('');
   $('#mesa').innerHTML=S.mesa.map((id,i)=>`<div data-m="${i}">${card(id)}</div>`).join('');
-  $('#hand').innerHTML=S.hand.length?S.hand.map((id,i)=>`<div data-h="${i}">${card(id)}</div>`).join(''):'';
+  $('#hand').innerHTML=S.hand.length?S.hand.map((id,i)=>`<div data-h="${i}"${id==='m08'||id==='m14'?' class="blink"':''}>${card(id)}</div>`).join(''):'';
   if(!S.hand.length)$('#hand').innerHTML='<div class="empt" style="grid-column:1/-1;aspect-ratio:auto">Sin cartas en la mano</div>';
-  $('#tHand').textContent='Mano ('+S.hand.length+')';
+  $('#tHand').textContent='Mano ('+S.hand.length+')';$('#tHand').classList.toggle('blink',S.hand.some(x=>x==='m08'||x==='m14'));
   $('#m19').innerHTML=card('m19');$('#m20').innerHTML=card('m20',S.hab?'':'off');
   $('#dM').innerHTML=`<span>Personaje<b>${S.dM.length}</b></span>`;
   $('#dK').innerHTML=`<span>Agotamiento<b>${S.dK.length}</b></span>`;
@@ -171,13 +177,17 @@ const gridOf=(ids,attr)=>`<div class="grid">${ids.map((id,i)=>`<div ${attr}="${i
 /* ---------- cartas del tablero ---------- */
 function openCross(i){
   const c=S.cross[i],t=c.id[0],id=c.id;
+  if(t==='g'&&+id.slice(1)>4)return ov(id,[]);
+  if(/^c(07|08|50|52)$/.test(id))return evt(i);
   const b=[['+ Progreso',()=>{c.p++;render();openCross(i);return 1}],['− Progreso',()=>{c.p=Math.max(0,c.p-1);render();openCross(i);return 1}]];
-  if(t==='c')b.push(['Descartar',()=>{S.disc.push(id);S.cross[i]=null}],['Completar',()=>{S.comp.push(id);S.cross[i]=null}]);
-  if(t==='g')b.push(['Completar',()=>{const n=+id.slice(1);S.cross[i]={id:'g'+pad(n<=4?n+4:n-4),p:0}}]);
+  if(t==='c')b.push(['Descartar',()=>dropCh(i),/^c1[456]$/.test(id)],['Completar',()=>{S.comp.push(id);S.cross[i]=null}]);
+  if(t==='g'){const f=()=>{S.cross[i]={id:'g'+pad(+id.slice(1)+4),p:0}};if(id!=='g04')b.push(['Completar (voltear)',f]);if(id!=='g03')b.push(['Descartar (voltear)',f])}
   ov(id,b,`<div class="pv">Progreso: ${c.p}</div>`);
 }
-function openHand(i){const id=S.hand[i];
-  ov(id,[['Jugar en mesa',()=>{S.mesa.push(id);S.hand.splice(i,1)}],['Descartar',()=>{S.disc.push(id);S.hand.splice(i,1)}],['Regresar al mazo',()=>{S.dM.push(id);S.hand.splice(i,1)}]]);
+function openHand(i){const id=S.hand[i];const ex=[];
+  if(id==='m08')ex.push(['Descartar al inicio del turno: +1 progreso por fuego a un desafío',()=>{S.hand.splice(i,1);S.disc.push(id);pickCh('Elige el desafío',x=>{x.p+=fireDisc()},()=>close());return 1}]);
+  if(id==='m14')ex.push(['Descartar al inicio del turno: buscar en el mazo',()=>{S.hand.splice(i,1);S.disc.push(id);SHF=1;ov(null,[],'<p>Toca una carta</p>'+gridOf(S.dM,'data-sc'));return 1}]);
+  ov(id,[...ex,['Jugar en mesa',()=>{S.mesa.push(id);S.hand.splice(i,1)}],['Descartar',()=>{S.disc.push(id);S.hand.splice(i,1)}],['Regresar al mazo',()=>{S.dM.push(id);S.hand.splice(i,1)}]]);
 }
 function openMesa(i){const id=S.mesa[i],b=[];
   if(id[0]==='m')b.push(['Descartar',()=>{S.disc.push(id);S.mesa.splice(i,1)}]);
@@ -186,11 +196,17 @@ function openMesa(i){const id=S.mesa[i],b=[];
 }
 
 /* ---------- fase final ---------- */
-function checkEnd(){
-  if(S.final||S.dC.length)return;
-  const j=['j02','j03','j04'][Math.floor(Math.random()*3)];
+const whenFree=f=>{if($('#ov').classList.contains('on')||$('#bt').classList.contains('on'))setTimeout(()=>whenFree(f),700);else f()};
+function checkEnd(){if(S.final||S.dC.length||![1,2,3,4].some(i=>!S.cross[i]))return;startFinal()}
+function startFinal(){const j=['j02','j03','j04'][Math.floor(Math.random()*3)];
+  S.cross.slice(1).forEach(x=>{if(x&&x[0]!=='g'&&x.id[0]==='c')S.disc.push(x.id)});
   S.cross=[{id:j,p:S.cross[0].p},...[1,2,3,4].map(n=>({id:'g0'+n,p:0}))];S.final=1;
-}
+  if((S.apart||[]).includes('c52')&&S.cross[0].p>=13){S.over=1;whenFree(()=>ov(null,[['Nueva partida',()=>newGame()]],'<h2>¡Victoria!</h2><p>Llegaste al fondo del mazo con el jefe final en 13 o más de progreso.</p>'));return}
+  whenFree(()=>intro(j))}
+function intro(j){const all=['j02','j03','j04'],r3=st=>`<div class="row3">${all.map(x=>`<div class="b3 ${x===j&&st?'sel':''}">${st>1?card(x):'<div class="deck">?</div>'}</div>`).join('')}</div>`,sw=st=>{const r=$('.row3');if(r)r.outerHTML=r3(st)};
+  ov(null,[['Continuar',()=>{}]],'<p>¡Llega el jefe final!</p>'+r3(0));setTimeout(()=>sw(1),1300);setTimeout(()=>sw(2),2600)}
+function endGame(){S.over=1;ov(null,[['Nueva partida',()=>newGame()]],`<h2>Derrota</h2><p>${S.hp<=0?'Te quedaste sin corazones.':'El jefe final se quedó sin progreso.'}</p>`)}
+const newGame=()=>{S=fresh();PICK=0;B=null;$('#bt').classList.remove('on');$('#tTurn').textContent='Turno';hits.textContent='';render()};
 
 /* ---------- mazos ---------- */
 function openDeck(k){
@@ -201,13 +217,13 @@ function openDeck(k){
   ],`<p>Mazo de personaje: ${S.dM.length}</p>`);
   if(k==='K')ov(null,[
     ['Barajar el mazo',()=>{shuf(S.dK)}],
-    ['Robar una carta',()=>{if(!S.dK.length)return msg('El mazo está vacío');S.mesa.push(S.dK.pop())}]
+    ['Robar una carta',()=>{if(!S.dK.length)return msg('El mazo está vacío');S.mesa.push(S.dK.pop());kShow(S.mesa[S.mesa.length-1]);return 1}]
   ],`<p>Mazo de agotamiento: ${S.dK.length}</p>`);
   if(k==='C'){const e=[1,2,3,4].find(i=>!S.cross[i]);
     ov(null,[
       ['Barajar el mazo',()=>{shuf(S.dC)}],
       ['Descartar una carta del mazo',()=>{if(!S.dC.length)return msg('El mazo está vacío');S.disc.push(S.dC.pop());checkEnd()}],
-      ['Robar una carta',()=>{S.cross[e]={id:S.dC.pop(),p:0};checkEnd()},!(e&&S.dC.length&&!S.final)]
+      ['Robar una carta',()=>{const d=S.dC.pop();S.cross[e]={id:d,p:S.apart.includes('c53')&&TY[d]&&TY[d]!=='C'?2:0};entry(e);checkEnd()},!(e&&S.dC.length&&!S.final)]
     ],`<p>Mazo de calabozo: ${S.dC.length}</p>`);}
 }
 
@@ -223,13 +239,14 @@ document.addEventListener('click',e=>{
   if((v=g('b'))!==null){if(v==='x')return close();const r=OV[+v][1]();render();if(r!==1)close();}
   else if(e.target.id==='ov')close();
   else if(e.target.id==='tTurn'){PICK=PICK?0:1;$('#tTurn').textContent=PICK?'Elige desafío':'Turno';render()}
-  else if((v=g('sc'))!==null){const id=S.dM[+v];ov(id,[['Agregar a la mano',()=>{S.dM.splice(+v,1);S.hand.push(id)}]])}
+  else if((v=g('sc'))!==null){const id=S.dM[+v];ov(id,[['Agregar a la mano',()=>{S.dM.splice(+v,1);S.hand.push(id);if(SHF){shuf(S.dM);SHF=0}}]])}
   else if((v=g('cp'))!==null)ov(S.comp[+v],[]);
   else if((v=g('sh'))!==null){const on=$('#sh-'+v).classList.contains('on');
     ['hand','st'].forEach(n=>{$('#sh-'+n).classList.remove('on');});['tHand','tSt'].forEach(n=>$('#'+n).classList.remove('on'));
     if(!on){$('#sh-'+v).classList.add('on');(v==='hand'?$('#tHand'):$('#tSt')).classList.add('on')}}
   else if(e.target.closest('.step')){const b=e.target.closest('.step'),k=b.dataset.k;S[k]=Math.max(k==='turn'?1:0,S[k]+ +b.dataset.d);render()}
-  else if((v=g('s'))!==null){const c=S.cross[+v];if(PICK&&+v&&c&&CH[c.id]){PICK=0;$('#tTurn').textContent='Turno';openBat(+v);render()}else openCross(+v)}
+  else if((v=g('ap'))!==null)ov(v,[]);
+  else if((v=g('s'))!==null){const c=S.cross[+v];if(PICK&&(+v||S.final&&unl().length)&&c&&CH[c.id]&&!blk(c)){PICK=0;$('#tTurn').textContent='Turno';openBat(+v);render()}else openCross(+v)}
   else if((v=g('h'))!==null)openHand(+v);
   else if((v=g('m'))!==null)openMesa(+v);
   else if((v=g('dk'))!==null)openDeck(v);
@@ -290,40 +307,113 @@ const CH={},COLN={r:'rojo',v:'verde',a:'azul'};
 [[1,2,'r',8],[3,4,'a',7],[5,6,'v',8],[9,10,'a',8],[11,13,'a',8],[14,16,'v',7],[17,19,'v',8],[20,22,'r',5],[23,25,'v',7],[26,28,'a',6],[29,32,'r',8],[33,33,'r',20],[35,35,'v',7],[36,36,'a',13],[37,37,'r',6],[38,38,'a',8],[39,39,'a',12],[40,42,'a',7],[43,45,'v',7],[46,48,'r',7],[49,49,'v',11],[51,51,'r',8],[53,53,'a',13],[54,54,'a',7],[55,55,'r',9],[56,56,'v',7],[57,57,'r',7]].forEach(([a,b,c,l])=>{for(let i=a;i<=b;i++)CH['c'+pad(i)]={c,l}});
 Object.assign(CH,{g01:{c:'v',l:10},g02:{c:'a',l:9},g03:{c:'r',l:9},g04:{c:'v',l:99}});
 const MC={};'r52,a11,av01,vr42,a21,r21,w21,a21,r31,w31,va31,a31,a21,av22,w32,w42,vr01,r21'.split(',').forEach((t,i)=>{const m=t.match(/^([a-z]+)(\d)(\d)$/);MC['m'+pad(i+1)]=[m[1],+m[2],+m[3]]});
-let PICK=0,B=null;
-const okc=id=>{const c=MC[id][0];return c==='w'||c.includes(CH[S.cross[B.i].id].c)};
-const sumB=()=>B.act?MC[B.act][1]+(B.act==='m03'?fireDisc():0)+B.as.reduce((s,x)=>s+MC[x][2],0):0;
-function openBat(i){B={i,act:null,as:[]};$('#bt').classList.add('on');rb()}
+MC.m20=['w',5,0];
+Object.assign(CH,{j02:{c:'n',l:20},j03:{c:'n',l:30},j04:{c:'n',l:25}});
+const LV0=c=>c.id==='j02'?20+5*S.cross.filter(x=>x&&/^g0[1-4]$/.test(x.id)).length:c.id==='j03'?30+5*S.mesa.filter(k=>k[0]==='k').length:CH[c.id].l;
+const LV=c=>{const b=LV0(c);if(c.id[0]!=='c')return b;let d=-S.cross.filter(y=>y&&y!==c&&/^c(29|3[0-2])$/.test(y.id)).length;if(/^c2[345]$/.test(c.id))d+=7*S.cross.filter(y=>y&&y!==c&&/^c2[345]$/.test(y.id)).length;return b+d};
+const TY={};{const R={C:[[1,2],[11,16],[23,28],[33,33],[35,35],[40,48]],P:[[3,6],[29,32],[36,36],[53,53]],T:[[9,10],[20,22],[38,38],[49,49],[51,51],[55,55]],O:[[17,19],[37,37],[39,39],[54,54],[56,57]]};for(const k in R)R[k].forEach(([a,b])=>{for(let i=a;i<=b;i++)TY['c'+pad(i)]=k})}
+['g01','g02','g03','g04'].forEach(g=>TY[g]='C');TY.j02='J';TY.j03='T';TY.j04='P';
+let PICK=0,B=null,SHF=0;
+const col=()=>B.col||CH[S.cross[B.i].id].c;
+const okc=id=>{const c=MC[id][0];return c==='w'||c.includes(col())};
+const ty=()=>TY[S.cross[B.i].id];
+const av=x=>({m09:'O',m10:'T',m12:'P'}[x]===ty()?3:MC[x][2]);
+const sumB=()=>B.act?MC[B.act][1]+(B.act==='m03'||B.act==='m20'?fireDisc():0)+(B.act==='m17'?B.v17||0:0)-(B.act==='m16'&&ty()==='C'?2:0)+B.as.reduce((t,x)=>t+av(x),0):0;
+const blk=c=>S.cross.some(y=>y&&/^c1[123]$/.test(y.id))&&!/^c1[123]$/.test(c.id);
+function entry(i){const x=S.cross[i],n=+x.id.slice(1);if(x.id[0]!=='c')return;
+  if(n>=20&&n<=22)S.cross.forEach((y,k)=>{if(y&&k&&k!==i){x.p+=y.p;y.p=0}});
+  if(n>=40&&n<=48&&S.cross[0])S.cross[0].p=Math.max(0,S.cross[0].p-1)}
+function dropCh(i){const x=S.cross[i];
+  if(x.id==='c33'){x.p+=5;return}
+  if(/^c1[456]$/.test(x.id))return;
+  if(x.id==='c01'||x.id==='c02'){S.hand.forEach(h=>S.disc.push(h));S.hand=[];return}
+  S.disc.push(x.id);S.cross[i]=null;
+  if(x.id==='c57')S.hp=0;
+  S.cross.forEach(y=>{if(y&&/^c1[456]$/.test(y.id))hurt(2)})}
+function evt(i){const id=S.cross[i].id;
+  if(id==='c50')return ov(id,[['Activar: recuperar 6 de salud y quitar 2 al jefe final',()=>{S.hp=Math.min(10,S.hp+6);S.cross[0].p=Math.max(0,S.cross[0].p-2);S.disc.push(id);S.cross[i]=null}]]);
+  if(id==='c52')return ov(id,[['Activar: +2 al jefe final y apartar la carta',()=>{S.cross[0].p+=2;S.apart.push(id);S.cross[i]=null}]]);
+  ov(id,[['Activar: descartar otro desafío',()=>{S.disc.push(id);S.cross[i]=null;render();pickCh('Elige el desafío a descartar',x=>{const mj=/^c4[0-8]$/.test(x.id);dropCh(S.cross.indexOf(x));if(mj){S.hand.forEach(h=>S.disc.push(h));S.hand=[];S.dM.push(...S.disc.filter(q=>q[0]==='m'));S.disc=S.disc.filter(q=>q[0]!=='m');shuf(S.dM);draw(8)}},()=>close(),null);return 1}]])}
+const unl=()=>[['a',6],['r',7],['v',8]].filter(([k,n])=>S.cross.some(x=>x&&x.id==='g0'+n));
+function openBat(i){const go=k=>{B={i,act:null,as:[],col:k};$('#bt').classList.add('on');rb()};
+  if(i)return go();
+  const u=unl();if(!u.length)return;
+  ov(null,u.map(([k])=>['Desafiar con '+COLN[k],()=>go(k)]),'<p>Elige el color con el que desafías al jefe</p>')}
 function rb(){
   const c=S.cross[B.i],h=CH[c.id],sl=(id,t,a)=>`<div data-bp="${a}">${id?card(id):t}</div>`;
-  $('#bt').innerHTML=`<div class="vs"><div class="side"><div class="cell">${card(c.id)}</div><div class="orb">${Math.max(0,h.l-c.p)}</div><small>falta</small></div><b class="vsx">VS</b><div class="side"><div class="pl">${sl(B.act,'Acción','a')}${sl(B.as[0],'Asist.','s0')}${sl(B.as[1],'Asist.','s1')}</div><div class="orb p">${sumB()}</div><small>tu progreso</small></div></div>
-  <span class="lbl">Tu mano: toca una carta</span><div class="strip">${S.hand.filter(x=>x!==B.act&&!B.as.includes(x)).map(id=>`<div data-bh="${id}" class="${okc(id)?'':'dim'}">${card(id)}</div>`).join('')}</div>
+  $('#bt').innerHTML=`<div class="vs"><div class="side"><div class="cell">${card(c.id)}</div><div class="orb">${Math.max(0,LV(c)-c.p)}</div><small>falta</small></div><b class="vsx">VS</b><div class="side"><div class="pl">${sl(B.act,'Acción','a')}${sl(B.as[0],'Asist.','s0')}${sl(B.as[1],'Asist.','s1')}</div><div class="orb p">${sumB()}</div><small>tu progreso</small></div></div>
+  <span class="lbl">Tu mano: toca una carta</span><div class="strip">${[...S.hand,...(S.hab?['m20']:[])].filter(x=>x!==B.act&&!B.as.includes(x)).map(id=>`<div data-bh="${id}" class="${okc(id)?'':'dim'}">${card(id)}</div>`).join('')}</div>
   <div class="btns"><button id="go">Tirar dados</button><button id="nogo" class="ghost">Cancelar</button></div>`;
 }
 $('#bt').onclick=e=>{const g=k=>{const n=e.target.closest(`[data-${k}]`);return n?n.dataset[k]:null};let v;
-  if((v=g('bh'))!==null)ov(v,[['Jugar como acción',()=>{B.act=v;rb()},!!B.act||!okc(v)],['Jugar como asistencia',()=>{B.as.push(v);rb()},!B.act||B.as.length>1]]);
+  if((v=g('bh'))!==null)ov(v,[['Jugar como acción',()=>{B.act=v;rb()},!!B.act||!okc(v)],['Jugar como asistencia',()=>{B.as.push(v);rb()},!B.act||B.as.length>1||v==='m20']]);
   else if((v=g('bp'))!==null){if(v==='a'){B.act=null;B.as=[]}else B.as.splice(+v[1],1);rb()}
   else if(e.target.id==='nogo'){B=null;$('#bt').classList.remove('on')}
-  else if(e.target.id==='go'){$('#sh-st').classList.add('on');roll(COLN[CH[S.cross[B.i].id].c],resolve)}};
-const FI='11,11,00,11,11,11,00,11,00,00,11,00,00,11,11,00,00,00'.split(',');
+  else if(e.target.id==='go'){if(B.act==='m17'&&B.v17===undefined){const d=S.dM.pop();B.v17=0;if(d){S.disc.push(d);B.v17=MC[d][1]+(+FI[+d.slice(1)-1][0]?2:0)}render();rb()}$('#sh-st').classList.add('on');roll(COLN[col()],resolve)}};
+const FI='11,11,00,11,11,11,00,11,00,00,11,00,00,11,11,00,00,00,00,00'.split(',');
 const fireDisc=()=>S.disc.filter(x=>x[0]==='m'&&FI[+x.slice(1)-1]&&FI[+x.slice(1)-1][0]==='1').length;
 const draw=n=>{for(let k=0;k<n&&S.dM.length;k++)S.hand.push(S.dM.pop())};
-function res2(id,html,fx){ov(id,fx.map((f,i)=>['Aplicar: '+f[0],()=>{f[1]();fx.splice(i,1);render();res2(id,html,fx);return 1}]),html)}
+function res2(id,html,fx){ov(id,fx.map((f,i)=>['Aplicar: '+f[0],()=>{fx.splice(i,1);const b=()=>res2(id,html,fx);const r=f[1](b);render();if(r!==2)b();return 1}]),html)}
+function pickHand(n,b,r){if(!r&&n&&S.mesa.includes('k04'))n++;if(n>S.hand.length&&S.cross.some(y=>y&&y.id==='c38'))S.hp=0;if(!n||!S.hand.length)return b();ov(null,S.hand.map(x=>[x,()=>{S.hand.splice(S.hand.indexOf(x),1);S.disc.push(x);if(S.cross.some(y=>y&&y.id==='c34'))hurt(1);render();pickHand(n-1,b,1);return 1}]),`<p>Descarta ${n} carta(s)</p>`)}
+const hurt=(n,r)=>{S.hp=Math.max(0,S.hp-n*(!r&&S.cross.some(y=>y&&y.id==='c37')?2:1)-(S.mesa.includes('k05')?1:0))};
+function kShow(id){const n=+id.slice(1),f=S.final,bj=q=>{S.cross[0].p=Math.max(0,S.cross[0].p-q)};
+  if(S.cross.some(x=>x&&(x.id==='c05'||x.id==='c06')))S.hp=0;
+  const E={1:[`quitar ${f?5:1} de progreso al jefe final`,()=>bj(f?5:1)],3:[`quitar ${f?10:2} de progreso al jefe final`,()=>bj(f?10:2)],6:['sufrir 3 de daño',()=>hurt(3)]}[n],b=[];
+  if(E)b.push(['Aplicar: '+E[0]+' y barajarla al mazo',()=>{E[1]();S.mesa.splice(S.mesa.indexOf(id),1);S.dK.push(id);shuf(S.dK);render()}]);
+  b.push(['Descartar toda tu mano y robar 8 (opcional)',()=>{S.hand.forEach(x=>S.disc.push(x));S.hand=[];draw(8);render()}]);
+  ov(id,b,E?'':'<p>Efecto continuo: se queda en mesa hasta que otra carta la regrese al mazo.</p>')}
+const dmg=n=>[`sufrir ${n} de daño`,()=>hurt(n)],
+ dd=n=>[`descartar ${n} del mazo de calabozo`,()=>{for(let k=0;k<n&&S.dC.length;k++)S.disc.push(S.dC.pop());checkEnd()}],
+ hd=n=>[`descartar ${n} de tu mano`,b=>{pickHand(n,b);return 2}],
+ boss=n=>[`jefe final ${n>0?'+':''}${n} de progreso`,()=>{S.cross[0].p=Math.max(0,S.cross[0].p+n)}],
+ HAB=['activar tu habilidad',()=>{S.hab=1}];
+const spec={},sp=(a,b,r,q)=>{for(let i=a;i<=b;i++)spec['c'+pad(i)]=[r,q]};
+sp(1,2,[dd(3)],[dmg(2)]);
+sp(3,4,[HAB,['descartar otro desafío de la cruz',b=>{pickCh('Descarta otro desafío',x=>dropCh(S.cross.indexOf(x)),b,null);return 2}]],[dmg(1)]);
+sp(5,6,[dd(4)],[hd(1)]);sp(9,10,[dd(3)],[hd(2)]);sp(11,13,[dd(5)],[dmg(1)]);sp(14,16,[dd(2)],[dmg(1)]);
+sp(17,19,[dd(3),boss(2)],[['jefe final -1 (+1 por cada Mini-jefe en juego)',()=>{const m=S.cross.filter(x=>x&&x.id>='c40'&&x.id<='c48').length;S.cross[0].p=Math.max(0,S.cross[0].p-1-m)}]]);
+sp(23,25,[dd(4)],[dmg(1)]);
+sp(26,28,[dd(1)],[['regresar 6 cartas del descarte al mazo de calabozo',()=>{const r=S.disc.filter(x=>x[0]==='c').slice(-6);S.disc=S.disc.filter(x=>!r.includes(x));S.dC.push(...r);shuf(S.dC)}]]);
+sp(29,32,[dd(3)],[dmg(1)]);sp(33,33,[dd(12)],[dmg(1)]);sp(35,35,[HAB],[]);sp(36,36,[dd(13)],[hd(3)]);sp(37,37,[dd(1)],[['sufrir 4 de daño',()=>hurt(4,1)]]);sp(38,38,[dd(3)],[hd(1)]);
+sp(39,39,[['robar 2 cartas de agotamiento',()=>{for(let k=0;k<2&&S.dK.length;k++)S.mesa.push(S.dK.pop())}]],[dd(2)]);
+sp(40,48,[dd(3)],[dmg(1)]);sp(49,49,[dd(5)],[dmg(1)]);sp(51,51,[dd(5)],[]);sp(53,53,[dd(4)],[]);
+sp(54,54,[['recuperar 5 de salud',()=>{S.hp=Math.min(10,S.hp+5)}]],[]);sp(55,55,[dd(9)],[]);sp(56,56,[dd(2)],[dmg(1)]);sp(57,57,[dd(2),boss(2)],[dmg(2)]);
+function pickCh(t,fn,back,ex){ov(null,[1,2,3,4].filter(i=>S.cross[i]&&S.cross[i]!==ex).map(i=>[S.cross[i].id+' · progreso '+S.cross[i].p,()=>{fn(S.cross[i]);render();back();return 1}]),`<p>${t}</p>`)}
+function discDraw(back){const sel=new Set(),sh=()=>ov(null,[...S.hand.map(x=>[(sel.has(x)?'✓ ':'')+x,()=>{sel.has(x)?sel.delete(x):sel.add(x);sh();return 1}]),[`Descartar ${sel.size} y robar ${sel.size}`,()=>{const n=sel.size;S.hand=S.hand.filter(x=>!sel.has(x));sel.forEach(x=>S.disc.push(x));const fin=()=>{draw(n);render();back()};if(n&&S.mesa.includes('k04'))pickHand(1,fin,1);else fin();return 1}]],'<p>Elige las cartas a descartar</p>');sh()}
 function resolve(h){
-  const c=S.cross[B.i],lv=CH[c.id].l,add=sumB()+h,id=c.id;
-  [B.act,...B.as].filter(Boolean).forEach(x=>{S.hand.splice(S.hand.indexOf(x),1);S.disc.push(x)});
+  const c=S.cross[B.i],lv=LV(c),add=sumB()+h,id=c.id;
+  [B.act,...B.as].filter(Boolean).forEach(x=>{if(x==='m20'){S.hab=0;return}S.hand.splice(S.hand.indexOf(x),1);S.disc.push(x)});
   const act=B.act,as=B.as.slice(),fx=[];
   const nf=(act?+FI[+act.slice(1)-1][0]:0)+as.reduce((t,x)=>t+ +FI[+x.slice(1)-1][1],0);
   if(nf)fx.push([`robar ${nf} carta(s) por fuego (m19)`,()=>draw(nf)]);
-  if(act==='m01')fx.push(['m01: sufrir 1 de daño',()=>{S.hp=Math.max(0,S.hp-1)}],['m01: barajar en el mazo en lugar del descarte',()=>{S.disc.splice(S.disc.lastIndexOf('m01'),1);S.dM.push('m01');shuf(S.dM)}]);
+  if(act==='m01')fx.push(['m01: sufrir 1 de daño',()=>hurt(1)],['m01: barajar en el mazo en lugar del descarte',()=>{S.disc.splice(S.disc.lastIndexOf('m01'),1);S.dM.push('m01');shuf(S.dM)}]);
   if(act==='m05')fx.push([`m05: robar ${1+as.length} carta(s)`,()=>draw(1+as.length)]);
   if(act==='m06')fx.push(['m06: +2 de progreso por cada fuego en descartes',()=>{if(S.cross.includes(c))c.p+=2*fireDisc()}]);
   if(act==='m04')fx.push(['m04: activar la carta de habilidad (m20)',()=>{S.hab=1}],['m04: barajar los descartes de personaje al mazo',()=>{const d=S.disc.filter(x=>x[0]==='m'&&x!=='m04');S.disc=S.disc.filter(x=>!d.includes(x));S.dM.push(...d);shuf(S.dM)}]);
   if(act==='m13'&&S.hand.length)fx.push(['m13: devolverla a tu mano',()=>{S.disc.splice(S.disc.lastIndexOf('m13'),1);S.hand.push('m13')}]);
-  c.p+=add;const win=c.p>=lv;
-  if(win){S.comp.push(id);S.cross[B.i]=null}
+  const w0=c.p+add>=lv;
+  if(S.mesa.includes('k02'))fx.push(['k02: elegir entre 1 de daño o quitar 1 de progreso al jefe final',b=>{ov(null,[['Sufrir 1 de daño',()=>{hurt(1);render();b();return 1}],['Quitar 1 al jefe final',()=>{S.cross[0].p=Math.max(0,S.cross[0].p-1);render();b();return 1}]],'<p>Efecto de k02</p>');return 2}]);
+  if(act==='m02')fx.push(['m02: elegir otro desafío y añadirle 1 progreso por fuego en descartes',b=>{pickCh('Elige el otro desafío',x=>{x.p+=fireDisc()},b,c);return 2}]);
+  if(act==='m07')fx.push(['m07: descartar cartas de tu mano y robar igual número',b=>{discDraw(b);return 2}]);
+  if(act==='m10'&&S.hand.length)fx.push(['m10: poner una carta de tu mano encima del mazo',b=>{ov(null,S.hand.map(x=>[x,()=>{S.hand.splice(S.hand.indexOf(x),1);S.dM.push(x);render();b();return 1}]),'<p>Elige la carta</p>');return 2}]);
+  if(act==='m15'&&!w0)fx.push(['m15: descartar el desafío sin sufrir penalización',()=>dropCh(S.cross.indexOf(c))]);
+  c.p+=add;const win=c.p>=lv&&!(id[0]==='j'&&S.cross.some(x=>x&&x.id==='g01'));
+  {const L=[...(spec[id]||[[],[]])[win?0:1]];
+  if(id==='c35'&&!win)L.push(dmg(B.act?sumB()-B.as.reduce((t,x)=>t+av(x),0):10));
+  if(id==='c51'&&!win)L.push(hd(lv-c.p));
+  if(id==='c56'&&win&&c.p>lv)L.push([`robar ${c.p-lv} carta(s) por exceso`,()=>draw(c.p-lv)]);
+  const dk=dice[3].f[dice[3].face]==='negro';
+  if(!win&&S.cross.some(y=>y&&/^c2[678]$/.test(y.id)))L.push(['c26-c28: descartar el desafío fallado',()=>dropCh(S.cross.indexOf(c))]);
+  if(!win&&id==='c36')L.push(['c36: descartar este desafío en lugar de sufrir su penalización',()=>dropCh(S.cross.indexOf(c))]);
+  if(dk&&S.cross.some(y=>y&&/^c(09|10)$/.test(y.id)))L.push(['trampa: descartar 1 carta por oscuridad',b=>{pickHand(1,b);return 2}]);
+  if(dk&&!win&&S.cross.some(y=>y&&y.id==='c49'))L.push(['c49: sufrir 1 de daño por oscuridad',()=>hurt(1)]);
+  if(dk&&!win&&id==='j04'&&S.hand.length)L.push(['j04: descartar una carta al azar y sufrir daño igual a su valor',()=>{const x=S.hand[Math.floor(Math.random()*S.hand.length)];S.hand.splice(S.hand.indexOf(x),1);S.disc.push(x);hurt(MC[x][1])}]);
+  fx.unshift(...(act==='m11'&&!win?[]:L))}
+  if(win){if(id[0]==='g')S.cross[B.i]={id:'g'+pad(+id.slice(1)+4),p:0};else if(id[0]==='j')S.over=1;else if(id==='c53'){S.apart.push(id);S.cross[B.i]=null}else{S.comp.push(id);S.cross[B.i]=null}}
+  S.cross.forEach(y=>{if(y&&y.id==='c39')y.p+=2});
+  if(!h)S.cross.forEach((x,k)=>{if(x&&x.id==='g05')S.cross[k]={id:'g01',p:0}});
   B=null;$('#bt').classList.remove('on');$('#sh-st').classList.remove('on');render();
-  res2(id,`<div class="pv">${win?'¡Desafío completado!':'No se completó'}</div><p>Cartas: +${add-h} · Dados: +${h}${win?'':` · Progreso: ${c.p}/${lv}`}</p><p>${win?'Aplica la recompensa a mano.':'Aplica la penalización a mano.'}</p>`,fx);
+  res2(id,`<div class="pv">${win?(id[0]==='j'?'¡GANAS LA PARTIDA!':'¡Desafío completado!'):'No se completó'}</div><p>Cartas: +${add-h} · Dados: +${h}${win?'':` · Progreso: ${c.p}/${lv}`}</p><p>${win?'Recompensa:':'Penalización:'}</p>`,fx);
 }
 
 /* ---------- reiniciar ---------- */
