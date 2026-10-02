@@ -13,7 +13,7 @@ html,body{height:100%;margin:0}
 body{background:radial-gradient(120% 80% at 50% 40%,#3a3544,var(--felt));color:var(--ink);font-family:Fredoka,system-ui,sans-serif;overflow:hidden;user-select:none}
 button{font-family:inherit}
 .app{height:100%;display:flex;flex-direction:column;gap:8px;padding:10px;max-width:520px;margin:0 auto}
-.bar{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.bar{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
 .tab{border:0;border-radius:14px;background:var(--panel);color:var(--ink);font:700 1.05rem Fredoka,sans-serif;padding:11px}
 .tab.on{background:var(--gold);color:#2b2208}
 #cross{flex:1;min-height:0;display:grid;grid-template-columns:repeat(3,var(--cw));grid-template-rows:repeat(3,auto);justify-content:center;align-content:center;gap:6px;--cw:min(29vw,calc((100dvh - 310px)*5/21))}
@@ -81,11 +81,24 @@ button{font-family:inherit}
 .btns button.verde,.btns button.rojo,.btns button.azul{color:#fff}
 .btns .ghost{background:none;color:var(--mute);font-weight:500}
 .pv{font-weight:700;color:var(--gold);font-size:1.2rem}
+@keyframes bl{50%{box-shadow:0 0 0 4px var(--gold),0 0 18px var(--gold)}}
+.blink{animation:bl 1s infinite}
+#bt{position:fixed;inset:0;background:#1d1a24;z-index:4;display:none;flex-direction:column;gap:10px;padding:12px;max-width:520px;margin:0 auto;overflow-y:auto}
+#bt.on{display:flex}
+.vs{display:grid;grid-template-columns:1fr auto 1.5fr;gap:8px;align-items:center}
+.side{display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--mute);font-size:.8rem}
+.vs .cell{width:30vw;max-width:130px}
+.vsx{font-size:1.8rem;color:var(--gold)}
+.orb{width:84px;height:84px;border-radius:50%;background:var(--gold);color:#2b2208;display:grid;place-items:center;font:700 2.4rem Fredoka,sans-serif}
+.orb.p{background:#6fb1ff}
+.pl{display:flex;gap:6px;width:100%}
+.pl>div{flex:1;aspect-ratio:5/7;border:2px dashed #fff3;border-radius:8px;display:grid;place-items:center;font-size:.7rem}
+.dim{opacity:.45}
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="bar"><button class="tab" data-sh="hand" id="tHand">Mano</button><button class="tab" data-sh="st" id="tSt">Estado</button></div>
+  <div class="bar"><button class="tab" id="tTurn">Turno</button><button class="tab" data-sh="hand" id="tHand">Mano</button><button class="tab" data-sh="st" id="tSt">Estado</button></div>
   <div id="cross"></div>
   <div><span class="lbl">En mesa</span><div class="strip" id="mesa"></div></div>
   <div class="decks">
@@ -112,6 +125,7 @@ button{font-family:inherit}
   <button id="roll">Lanzar dados</button>
   <div class="foot"><button id="reset">Reiniciar partida</button></div>
 </div>
+<div id="bt"></div>
 <div id="ov"></div>
 
 <script>
@@ -119,7 +133,8 @@ const $=s=>document.querySelector(s),pad=n=>String(n).padStart(2,'0');
 const rng=(p,a,b)=>Array.from({length:b-a+1},(_,i)=>p+pad(a+i));
 const shuf=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 const card=(id,c='')=>`<div class="card ${c}" data-id="${id}"><img src="cartas/${id}.png" alt="${id}" onerror="this.remove()"></div>`;
-const fresh=()=>({turn:1,hp:10,dM:shuf(rng('m',1,18)),dK:shuf(rng('k',1,6)),dC:shuf(rng('c',1,57)),hand:[],mesa:[],disc:[],comp:[],cross:[{id:'j01',p:10},null,null,null,null],final:0,hab:0});
+const fresh0=()=>({turn:1,hp:10,dM:shuf(rng('m',1,18)),dK:shuf(rng('k',1,6)),dC:shuf(rng('c',1,57)),hand:[],mesa:[],disc:[],comp:[],cross:[{id:'j01',p:10},null,null,null,null],final:0,hab:0});
+const fresh=()=>{const s=fresh0();s.hand=s.dM.splice(-8);return s};
 let S=fresh();
 try{const v=JSON.parse(localStorage.getItem('mesa-juego')||'null');if(v&&v.cross)S=v}catch(e){}
 
@@ -127,7 +142,7 @@ try{const v=JSON.parse(localStorage.getItem('mesa-juego')||'null');if(v&&v.cross
 function render(){
   $('#cross').innerHTML=[null,1,null,2,0,3,null,4,null].map(i=>{
     if(i===null)return'<div></div>';const c=S.cross[i];
-    return c?`<div class="cell" data-s="${i}">${card(c.id)}<b class="pg">${c.p}</b></div>`:'<div class="cell empty"></div>'}).join('');
+    return c?`<div class="cell${PICK&&i&&CH[c.id]?' blink':''}" data-s="${i}">${card(c.id)}<b class="pg">${c.p}</b></div>`:'<div class="cell empty"></div>'}).join('');
   $('#mesa').innerHTML=S.mesa.map((id,i)=>`<div data-m="${i}">${card(id)}</div>`).join('');
   $('#hand').innerHTML=S.hand.length?S.hand.map((id,i)=>`<div data-h="${i}">${card(id)}</div>`).join(''):'';
   if(!S.hand.length)$('#hand').innerHTML='<div class="empt" style="grid-column:1/-1;aspect-ratio:auto">Sin cartas en la mano</div>';
@@ -207,13 +222,14 @@ document.addEventListener('click',e=>{
   const g=k=>{const n=e.target.closest(`[data-${k}]`);return n?n.dataset[k]:null};let v;
   if((v=g('b'))!==null){if(v==='x')return close();const r=OV[+v][1]();render();if(r!==1)close();}
   else if(e.target.id==='ov')close();
+  else if(e.target.id==='tTurn'){PICK=PICK?0:1;$('#tTurn').textContent=PICK?'Elige desafío':'Turno';render()}
   else if((v=g('sc'))!==null){const id=S.dM[+v];ov(id,[['Agregar a la mano',()=>{S.dM.splice(+v,1);S.hand.push(id)}]])}
   else if((v=g('cp'))!==null)ov(S.comp[+v],[]);
   else if((v=g('sh'))!==null){const on=$('#sh-'+v).classList.contains('on');
     ['hand','st'].forEach(n=>{$('#sh-'+n).classList.remove('on');});['tHand','tSt'].forEach(n=>$('#'+n).classList.remove('on'));
     if(!on){$('#sh-'+v).classList.add('on');(v==='hand'?$('#tHand'):$('#tSt')).classList.add('on')}}
   else if(e.target.closest('.step')){const b=e.target.closest('.step'),k=b.dataset.k;S[k]=Math.max(k==='turn'?1:0,S[k]+ +b.dataset.d);render()}
-  else if((v=g('s'))!==null)openCross(+v);
+  else if((v=g('s'))!==null){const c=S.cross[+v];if(PICK&&+v&&c&&CH[c.id]){PICK=0;$('#tTurn').textContent='Turno';openBat(+v);render()}else openCross(+v)}
   else if((v=g('h'))!==null)openHand(+v);
   else if((v=g('m'))!==null)openMesa(+v);
   else if((v=g('dk'))!==null)openDeck(v);
@@ -238,10 +254,10 @@ const dice=DICE.map(f=>{
 });
 function showRes(color){
   res.innerHTML=dice.map(d=>`<i style="background:${COL[d.f[d.face]]}"></i>`).join('');
-  if(color){const n=dice.slice(0,3).filter(d=>d.f[d.face]===color).length,bw=dice[3].f[dice[3].face]==='blanco'?1:0;hits.textContent='Aciertos: '+(n+bw)+(bw?' (incluye el blanco)':'')}
+  if(color){const n=dice.slice(0,3).filter(d=>d.f[d.face]===color).length,bw=dice[3].f[dice[3].face]==='blanco'?1:0;hits.textContent='Aciertos: '+(n+bw)+(bw?' (incluye el blanco)':'');return n+bw}
 }
 showRes();
-function roll(color){
+function roll(color,cb){
   btn.disabled=true;res.innerHTML='';hits.textContent='';
   const s=dice[0].slot.offsetWidth,dur=2000;
   const anims=dice.map((d,i)=>{
@@ -265,9 +281,38 @@ function roll(color){
       d.cube.style.transform=T(d.x,d.y);
     });
   });
-  Promise.all(anims).then(()=>{showRes(color);btn.disabled=false;if(navigator.vibrate)try{navigator.vibrate(40)}catch(e){}});
+  Promise.all(anims).then(()=>{const h=showRes(color);btn.disabled=false;if(cb)setTimeout(()=>cb(h),1000);if(navigator.vibrate)try{navigator.vibrate(40)}catch(e){}});
 }
 btn.onclick=()=>ov(null,['verde','rojo','azul'].map(c=>[c[0].toUpperCase()+c.slice(1),()=>{roll(c)},0,c]),'<p>Elige un color</p>');
+
+/* ---------- turno: batalla ---------- */
+const CH={},COLN={r:'rojo',v:'verde',a:'azul'};
+[[1,2,'r',8],[3,4,'a',7],[5,6,'v',8],[9,10,'a',8],[11,13,'a',8],[14,16,'v',7],[17,19,'v',8],[20,22,'r',5],[23,25,'v',7],[26,28,'a',6],[29,32,'r',8],[33,33,'r',20],[35,35,'v',7],[36,36,'a',13],[37,37,'r',6],[38,38,'a',8],[39,39,'a',12],[40,42,'a',7],[43,45,'v',7],[46,48,'r',7],[49,49,'v',11],[51,51,'r',8],[53,53,'a',13],[54,54,'a',7],[55,55,'r',9],[56,56,'v',7],[57,57,'r',7]].forEach(([a,b,c,l])=>{for(let i=a;i<=b;i++)CH['c'+pad(i)]={c,l}});
+Object.assign(CH,{g01:{c:'v',l:10},g02:{c:'a',l:9},g03:{c:'r',l:9},g04:{c:'v',l:99}});
+const MC={};'r52,a11,av01,vr42,a21,r21,w21,a21,r31,w31,va31,a31,a21,av22,w32,w42,vr01,r21'.split(',').forEach((t,i)=>{const m=t.match(/^([a-z]+)(\d)(\d)$/);MC['m'+pad(i+1)]=[m[1],+m[2],+m[3]]});
+let PICK=0,B=null;
+const okc=id=>{const c=MC[id][0];return c==='w'||c.includes(CH[S.cross[B.i].id].c)};
+const sumB=()=>B.act?MC[B.act][1]+B.as.reduce((s,x)=>s+MC[x][2],0):0;
+function openBat(i){B={i,act:null,as:[]};$('#bt').classList.add('on');rb()}
+function rb(){
+  const c=S.cross[B.i],h=CH[c.id],sl=(id,t,a)=>`<div data-bp="${a}">${id?card(id):t}</div>`;
+  $('#bt').innerHTML=`<div class="vs"><div class="side"><div class="cell">${card(c.id)}</div><div class="orb">${Math.max(0,h.l-c.p)}</div><small>falta</small></div><b class="vsx">VS</b><div class="side"><div class="pl">${sl(B.act,'Acción','a')}${sl(B.as[0],'Asist.','s0')}${sl(B.as[1],'Asist.','s1')}</div><div class="orb p">${sumB()}</div><small>tu progreso</small></div></div>
+  <span class="lbl">Tu mano: toca una carta</span><div class="strip">${S.hand.filter(x=>x!==B.act&&!B.as.includes(x)).map(id=>`<div data-bh="${id}" class="${okc(id)?'':'dim'}">${card(id)}</div>`).join('')}</div>
+  <div class="btns"><button id="go">Tirar dados</button><button id="nogo" class="ghost">Cancelar</button></div>`;
+}
+$('#bt').onclick=e=>{const g=k=>{const n=e.target.closest(`[data-${k}]`);return n?n.dataset[k]:null};let v;
+  if((v=g('bh'))!==null)ov(v,[['Jugar como acción',()=>{B.act=v;rb()},!!B.act||!okc(v)],['Jugar como asistencia',()=>{B.as.push(v);rb()},!B.act||B.as.length>1]]);
+  else if((v=g('bp'))!==null){if(v==='a'){B.act=null;B.as=[]}else B.as.splice(+v[1],1);rb()}
+  else if(e.target.id==='nogo'){B=null;$('#bt').classList.remove('on')}
+  else if(e.target.id==='go'){$('#sh-st').classList.add('on');roll(COLN[CH[S.cross[B.i].id].c],resolve)}};
+function resolve(h){
+  const c=S.cross[B.i],lv=CH[c.id].l,add=sumB()+h,id=c.id;
+  [B.act,...B.as].filter(Boolean).forEach(x=>{S.hand.splice(S.hand.indexOf(x),1);S.disc.push(x)});
+  c.p+=add;const win=c.p>=lv;
+  if(win){S.comp.push(id);S.cross[B.i]=null}
+  B=null;$('#bt').classList.remove('on');$('#sh-st').classList.remove('on');render();
+  ov(id,[],`<div class="pv">${win?'¡Desafío completado!':'No se completó'}</div><p>Cartas: +${add-h} · Dados: +${h}${win?'':` · Progreso: ${c.p}/${lv}`}</p><p>${win?'Aplica la recompensa a mano.':'Aplica la penalización a mano.'}</p>`);
+}
 
 /* ---------- reiniciar ---------- */
 let armed=0;const rs=$('#reset');
