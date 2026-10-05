@@ -5,7 +5,7 @@
      (se refrescan en segundo plano cuando hay internet).
    - la música se entrega por rangos (Range) para que suene sin conexión.
    - la descarga completa de cartas y música la hace la página (botón del lobby). */
-const SHELL = 'lm-shell-v5', ASSETS = 'lm-assets';
+const SHELL = 'lm-shell-v6', ASSETS = 'lm-assets';
 const BASE = new URL('./', self.location).href;
 const SHELL_FILES = ['./', 'index.html', 'manifest.json', 'icon-192.png', 'icon-512.png'];
 
@@ -46,7 +46,10 @@ async function ranged(req, res) {
   });
 }
 
+const REFRESCADAS = new Set(); /* cada archivo se revisa en la red una sola vez por sesión del service worker */
 async function refresh(url) {
+  if (REFRESCADAS.has(url)) return;
+  REFRESCADAS.add(url);
   try {
     const res = await fetch(url, { cache: 'no-cache' });
     if (res.ok && res.status === 200) (await caches.open(ASSETS)).put(url, res);

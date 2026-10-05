@@ -1,0 +1,25 @@
+# Genera version.json en cada subida para que los jugadores reciban el aviso de actualización.
+name: Actualizar version.json
+on:
+  push:
+    paths-ignore:
+      - 'version.json'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generar version.json
+        run: python3 generar-version.py
+      - name: Guardar si cambió
+        run: |
+          if [ -n "$(git status --porcelain version.json)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add version.json
+            git commit -m "Actualizar version.json"
+            git push
+          fi
