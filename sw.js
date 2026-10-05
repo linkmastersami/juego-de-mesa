@@ -5,7 +5,7 @@
      (se refrescan en segundo plano cuando hay internet).
    - la música se entrega por rangos (Range) para que suene sin conexión.
    - la descarga completa de cartas y música la hace la página (botón del lobby). */
-const SHELL = 'lm-shell-v6', ASSETS = 'lm-assets';
+const SHELL = 'lm-shell-v7', ASSETS = 'lm-assets';
 const BASE = new URL('./', self.location).href;
 const SHELL_FILES = ['./', 'index.html', 'manifest.json', 'icon-192.png', 'icon-512.png'];
 
@@ -22,6 +22,8 @@ self.addEventListener('install', e => {
 
 self.addEventListener('activate', e => e.waitUntil((async () => {
   for (const k of await caches.keys()) if (k.startsWith('lm-shell-') && k !== SHELL) await caches.delete(k);
+  /* copias viejas de index/manifest que quedaron en lm-assets al guardar el juego: se borran */
+  try{const as=await caches.open(ASSETS);for(const k of await as.keys()){const p=new URL(k.url).pathname;if(/\/(index\.html|manifest\.json)$/.test(p)||k.url===BASE)await as.delete(k)}}catch(_){}
   await self.clients.claim();
 })()));
 
@@ -63,17 +65,27 @@ self.addEventListener('fetch', e => {
   const font = /(^|\.)fonts\.(googleapis|gstatic)\.com$/.test(u.hostname);
   if (u.origin !== location.origin && !font) return;
 
-  /* index.html / manifest: red primero */
+  /* index.html / manifest: red primero. Sin internet se usa SIEMPRE la copia más reciente guardada en el shell
+     (antes caches.match podía devolver una copia vieja que quedó en lm-assets al guardar el juego). */
   if (r.mode === 'navigate' || /\/(index\.html|manifest\.json|version\.json)$/.test(u.pathname)) {
     e.respondWith((async () => {
       try {
         const res = await fetch(r, { cache: 'no-cache' });
-        if (res.ok) (await caches.open(SHELL)).put(r, res.clone());
+        if (res.ok) {
+          const sh = await caches.open(SHELL), as = await caches.open(ASSETS), idx = new URL('index.html', BASE).href;
+          await sh.put(r, res.clone());
+          if (r.mode === 'navigate') await sh.put(idx, res.clone());
+          /* si lm-assets ya tiene una copia de este archivo, se actualiza para que no quede vieja */
+          for (const k of [r.url, ...(r.mode === 'navigate' ? [idx, BASE] : [])]) if (await as.match(k)) await as.put(k, res.clone());
+        }
         return res;
       } catch (_) {
-        return (await caches.match(r, { ignoreSearch: true })) ||
+        const sh = await caches.open(SHELL);
+        return (await sh.match(r, { ignoreSearch: true })) ||
+               (await sh.match(new URL('index.html', BASE).href)) ||
+               (await sh.match(BASE)) ||
+               (await caches.match(r, { ignoreSearch: true })) ||
                (await caches.match(new URL('index.html', BASE).href)) ||
-               (await caches.match(BASE)) ||
                Response.error();
       }
     })());
