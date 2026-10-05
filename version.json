@@ -102,6 +102,7 @@
   "personajes/personaje 1/m18.png": "b94398d467cf",
   "personajes/personaje 1/m19.png": "e172533801f4",
   "personajes/personaje 1/m20.png": "443ded2f62c2",
+  "personajes/personaje 2/l01.png": "3870450e3b49",
   "personajes/personaje 2/l01.webp": "a710800af7f8",
   "personajes/personaje 2/l02.webp": "9b82a6638e8b",
   "personajes/personaje 2/l03.webp": "66046b098a48",
@@ -111,11 +112,15 @@
   "personajes/personaje 2/l07.webp": "853e530df158",
   "personajes/personaje 2/l08.webp": "cc807c34ab2b",
   "personajes/personaje 2/l09.webp": "e7eb568d7e70",
+  "personajes/personaje 2/l10.png": "78f5ad3cdc65",
   "personajes/personaje 2/l10.webp": "91e85c34ed34",
+  "personajes/personaje 2/l11.png": "0965310e95eb",
   "personajes/personaje 2/l11.webp": "3b42affd04d7",
   "personajes/personaje 2/l12.webp": "119dcf2e98ee",
+  "personajes/personaje 2/l13.png": "01cc672bab8f",
   "personajes/personaje 2/l13.webp": "562bcad93933",
   "personajes/personaje 2/l14.webp": "120961e8de2a",
+  "personajes/personaje 2/l15.png": "3b7c2142751e",
   "personajes/personaje 2/l15.webp": "a4aa696f33f2",
   "personajes/personaje 2/l16.webp": "0eb18ed66beb",
   "personajes/personaje 2/l17.webp": "0d4b0f0ffa7c",
@@ -125,5 +130,5 @@
   "personajes/personaje 2/l20.webp": "ec6233065035",
   "personajes/personaje 2/l20a.webp": "102be73e872a"
  },
- "version": "6b8f32110c4b"
+ "version": "03cf797841ae"
 }
