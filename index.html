@@ -496,7 +496,7 @@ function render(){
   if(!S.over&&!ENDQ&&(!COOP||MYT)&&lost()){ENDQ=1;whenFree(()=>{ENDQ=0;if(!S.over&&lost())endGame()})}
   $('#cross').innerHTML=[null,1,null,2,0,3,null,4,null].map(i=>{
     if(i===null)return'<div></div>';const c=S.cross[i];
-    return c?`<div class="cell${PICK&&(i||S.final&&unl().length)&&CH[c.id]&&!blk(c)?' blink':''}${HIDE.has(i)?' hid':''}" data-s="${i}">${card(c.id)}<b class="pg">${c.p}</b></div>`:PEND[i]?`<div class="cell">${PEND[i].h}<b class="pg">${PEND[i].p}</b></div>`:'<div class="cell empty"></div>'}).join('');
+    return c?`<div class="cell${PICK&&(i||S.final&&unl().length)&&CH[c.id]&&!blk(c)?' blink':''}${HIDE.has(i)?' hid':''}" data-s="${i}">${card(c.id)}<b class="pg">${PGOLD[i]!==undefined?PGOLD[i]:c.p}</b></div>`:PEND[i]?`<div class="cell">${PEND[i].h}<b class="pg">${PEND[i].p}</b></div>`:'<div class="cell empty"></div>'}).join('');
   $('#mesa').innerHTML=S.mesa.map((id,i)=>`<div data-m="${i}">${card(id)}</div>`).join('');
   {const pfxH=S.personaje||'m';$('#hand').innerHTML=S.hand.length?S.hand.map((id,i)=>`<div data-h="${i}"${(pfxH==='l'?id==='l17':id==='m08'||id==='m14')?' class="blink"':''}>${card(id)}</div>`).join(''):'';
   if(!S.hand.length)$('#hand').innerHTML='<div class="empt" style="grid-column:1/-1;aspect-ratio:auto">Sin cartas en la mano</div>';
@@ -520,7 +520,7 @@ let SL=0,INTRO=0,FXR=0,HIDE=new Set();const FXQ=[],wait=ms=>new Promise(r=>setTi
 function fxPlay(job){FXQ.push(job);if(FXR)return;FXR=1;FXL.classList.add('on');(async()=>{while(FXQ.length){try{await FXQ.shift()(FXL)}catch(e){}if(!FXQ.length){FXL.classList.add('fo');await wait(250)}}FXL.classList.remove('on','fo','clear');FXL.innerHTML='';FXR=0})()}
 
 /* ---------- animaciones extra ---------- */
-const PEND={};
+const PEND={},PGOLD={},PGN={};/* PGOLD: valor de progreso que se sigue mostrando hasta que le toca su animación (antes se veía el nuevo y luego subía/bajaba) */
 let SKIPG=new Set(),PV=[],PHP=null,PM=null,PMA=null,PT=null,PHAB=null,DFQ=[],NOFX=0,BR=0,TP=null,IDLE=0;const BQ=[];
 /* Fase de tablero: todo lo que se anima en el tablero espera a que se cierren la pantalla de
    efectos (#ov), la batalla (#bt) y los efectos a pantalla completa (FXR). Entonces se reproduce
@@ -555,7 +555,7 @@ function fxDiff(){
   CPOS.forEach((i,j)=>{if(i===null)return;const c=S.cross[i],el=ch[j];nv[i]=c&&el&&el.firstElementChild?{id:c.id,p:c.p,r:el.getBoundingClientRect(),h:el.firstElementChild.outerHTML,el}:null});
   if(PT!==null&&S.turn<PT){PV=[];PHP=null;PM=null;PMA=null}
   if(!NOFX)for(let i=0;i<5;i++){const o=PV[i],n=nv[i];
-    if(o&&n&&o.id===n.id&&o.p!==n.p&&n.r.width){const d=n.p-o.p,j=CPOS.indexOf(i),op=o.p,np=n.p;BQ.push(async()=>{const el=$('#cross').children[j];if(!el)return;const pg=el.querySelector('.pg');if(pg)pg.textContent=op;await wait(250);const r=el.getBoundingClientRect(),f=document.createElement('b');f.className='pgf';f.textContent=(d>0?'+':'')+d;f.style.cssText=`left:${r.left+r.width/2}px;top:${r.top+r.height/3}px;color:${d>0?'#ffd34d':'#7dffb0'}`;document.body.appendChild(f);setTimeout(()=>f.remove(),1200);if(pg){pg.textContent=np;pg.classList.remove('bump');void pg.offsetWidth;pg.classList.add('bump')}await wait(900)})}
+    if(o&&n&&o.id===n.id&&o.p!==n.p&&n.r.width){const d=n.p-o.p,j=CPOS.indexOf(i),op=o.p,np=n.p;if(PGOLD[i]===undefined)PGOLD[i]=op;PGN[i]=(PGN[i]||0)+1;{const pg0=n.el.querySelector('.pg');if(pg0)pg0.textContent=PGOLD[i]}BQ.push(async()=>{try{const el=$('#cross').children[j];if(!el)return;const pg=el.querySelector('.pg');if(pg)pg.textContent=op;await wait(250);const r=el.getBoundingClientRect(),f=document.createElement('b');f.className='pgf';f.textContent=(d>0?'+':'')+d;f.style.cssText=`left:${r.left+r.width/2}px;top:${r.top+r.height/3}px;color:${d>0?'#ffd34d':'#7dffb0'}`;document.body.appendChild(f);setTimeout(()=>f.remove(),1200);if(pg){pg.textContent=np;pg.classList.remove('bump');void pg.offsetWidth;pg.classList.add('bump')}await wait(900)}finally{if(--PGN[i]<=0){delete PGN[i];delete PGOLD[i]}else PGOLD[i]=np}})}
     else if(o&&i&&(!n||n.id!==o.id)&&S.cross.length&&!SKIPG.delete(i)){const k=S.comp[S.comp.length-1]===o.id?'gdone':'gout',j=CPOS.indexOf(i);if(!n){PEND[i]={h:o.h,p:o.p};const ce=ch[j];if(ce){ce.className='cell';ce.innerHTML=o.h+'<b class="pg">'+o.p+'</b>'}}BQ.push(async()=>{const e=$('#cross').children[j],r=e?e.getBoundingClientRect():null;if(PEND[i]){delete PEND[i];if(e&&!S.cross[i]){e.className='cell empty';e.innerHTML=''}}ghost(r&&r.width?r:o.r,o.h,k,950);await wait(1000)})}}
   if(!NOFX&&PHP!==null&&S.hp>PHP&&S.turn>=PT&&!S.over)fxHeal(PHP,S.hp);
   if(!NOFX&&PM!==null&&S.mesa.length===PM+1){const ix=S.mesa.length-1;BQ.push(async()=>{const m=$('#mesa').children[ix];if(m){m.classList.add('land');await wait(750)}})}
@@ -1357,7 +1357,7 @@ setInterval(autoFill,400);
 function startGame(){
   closeSheets();close();
   /* CHAR ya fue fijado por el lobby antes de llamar a startGame */
-  SYON=0;SYQ=null;SYLAST='';SYSENT=0;OWNER='a';COOPFX=0;CMQ.length=0;S=fresh0();if(COOPDC){S.dC=COOPDC;COOPDC=null}if(COOPDK){S.dK=COOPDK;COOPDK=null}BQ.length=0;DFQ.length=0;PHAB=null;PMA=null;for(const k in PEND)delete PEND[k];FXQ.length=0;TP=null;PV=[];PHP=null;PM=null;PT=null;PICK=1;B=null;PH=0;ENDQ=0;SHF=0;M18=0;HIDE.clear();
+  SYON=0;SYQ=null;SYLAST='';SYSENT=0;OWNER='a';COOPFX=0;CMQ.length=0;S=fresh0();if(COOPDC){S.dC=COOPDC;COOPDC=null}if(COOPDK){S.dK=COOPDK;COOPDK=null}BQ.length=0;DFQ.length=0;PHAB=null;PMA=null;for(const k in PGOLD)delete PGOLD[k];for(const k in PGN)delete PGN[k];for(const k in PEND)delete PEND[k];FXQ.length=0;TP=null;PV=[];PHP=null;PM=null;PT=null;PICK=1;B=null;PH=0;ENDQ=0;SHF=0;M18=0;HIDE.clear();
   $('#bt').classList.remove('on');$('#sh-st').classList.remove('on');$('#tTurn').textContent='Turno';hits.textContent='';
   SL=1;INTRO=1;render();
   fxPlay(async L=>{try{
