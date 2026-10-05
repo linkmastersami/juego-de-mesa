@@ -185,7 +185,15 @@ button{font-family:inherit}
 .co.p{background:#6fb1ff;box-shadow:0 0 18px #6fb1ff99}
 .cfire{position:relative;width:11vw;max-width:50px;aspect-ratio:5/7;margin-right:22px}
 .cfire>div{position:absolute;inset:0}
-.cgh{position:fixed;z-index:41;pointer-events:none}.cgh .card{width:100%;height:100%}
+.cgh{position:fixed;z-index:41;pointer-events:none}
+#pres{position:fixed;inset:0;z-index:8;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:16px;background:radial-gradient(circle,#1a1020d9,#000f);cursor:pointer}
+#pres .ptx{text-align:center;max-width:94vw}
+#pres .pk{font:700 .95rem Fredoka,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--col)}
+#pres .pt{font:800 1.55rem/1.15 Fredoka,sans-serif;color:#fff;margin-top:4px;text-shadow:0 0 18px var(--col),0 3px 0 #000}
+#pres .pc{width:min(56vw,240px);aspect-ratio:5/7;border-radius:12px;box-shadow:0 0 44px 12px var(--col)}#pres .pc .card{width:100%;height:100%}
+#pres.dec{justify-content:flex-start;padding-top:calc(env(safe-area-inset-top,0px) + 56px);gap:10px}#pres.dec .pc{width:min(36vw,150px);transition:width .3s}
+#ov.ovp .box{max-height:54vh;overflow-y:auto}
+#ov.ovp{background:transparent;place-items:end center;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 14px)}.cgh .card{width:100%;height:100%}
 .cspk{position:fixed;z-index:42;width:28px;height:28px;margin:-14px 0 0 -14px;border-radius:50%;background:radial-gradient(#fff 25%,var(--c) 62%,transparent 72%);box-shadow:0 0 14px 6px var(--c);pointer-events:none}
 .cbig{position:fixed;z-index:42;pointer-events:none;line-height:1;transform:translate(-50%,-50%)}
 .cas{display:flex;gap:6px;justify-content:center;min-height:calc(min(9vw,40px)*1.4)}
@@ -772,7 +780,7 @@ function endGame(){coopOver('lose',S.why);S.over=1;fxStamp('DERROTA','ko');
   const cs=(S.whyC||[]).filter(Boolean),cards=cs.length?`<div class="grid" style="grid-template-columns:repeat(${Math.min(cs.length,2)},1fr);max-width:${Math.min(cs.length,2)*110}px;margin:8px auto">${cs.map(id=>`<div>${card(id)}</div>`).join('')}</div>`:'';
   /* ventana fija (sin "Cerrar"): siempre hay una salida, nunca queda el tablero trabado */
   ov(null,[['Nueva partida',()=>newGame()],['Menú principal',()=>{toMenu(1);return 1}]],`<h2>Derrota</h2>${cards}<p>${S.why||(S.hp<=0?'Te quedaste sin corazones.':'El jefe final se quedó sin progreso.')}</p>`,1)}
-const newGame=()=>{RES2=null;close();try{localStorage.removeItem('mesa-juego')}catch(e){}const inRoom=COOP&&MP.code&&MP.ws;NEWG=1;showLobby();if(inRoom)mpRoom()};
+const newGame=()=>{RES2=null;RUNFX=0;presHide(1);close();try{localStorage.removeItem('mesa-juego')}catch(e){}const inRoom=COOP&&MP.code&&MP.ws;NEWG=1;showLobby();if(inRoom)mpRoom()};
 
 /* ---------- mazos ---------- */
 /* solo queda el robo voluntario del mazo de agotamiento (lo demás es automático) */
@@ -964,7 +972,7 @@ const FI=new Proxy({},{get:(_,k)=>{const fi=getFI();return Number.isInteger(+k)?
 const fireDisc=()=>{const pfx=S.personaje||'m',fi=getFI();return S.disc.filter(x=>x[0]===pfx&&fi[+x.slice(1)-1]&&fi[+x.slice(1)-1][0]==='1').length};
 const draw=n=>{const g=[];for(let k=0;k<n;k++){if(!S.dM.length){const pm=S.disc.filter(x=>x[0]===PC());if(!pm.length)break;S.disc=S.disc.filter(x=>x[0]!==PC());S.dM.push(...shuf(pm));fxShufM()}const id=S.dM.pop();S.hand.push(id);g.push(id)}if(g.length)fxDraw(g)};
 /* etiqueta de efecto: miniatura de la carta que lo origina + texto, sin mostrar el código */
-function fxLbl(t){
+function fxInfo(t){
   let id=null,txt=t,m;
   if(m=txt.match(/\s*\(([lm]\d\d)\)$/)){id=m[1];txt=txt.slice(0,m.index)}
   if(m=txt.match(/^(trampa|[lmckjg]\d\d)(?:[-–]([lmckjg]?\d\d))?(?: \(([^)]*)\))?:\s*([\s\S]*)$/)){
@@ -974,10 +982,51 @@ function fxLbl(t){
     else if(b){const n1=+a.slice(1),n2=+(b.length>2?b.slice(1):b),x=S.cross.find(y=>y&&y.id[0]===a[0]&&+y.id.slice(1)>=n1&&+y.id.slice(1)<=n2);id=x?x.id:a}
     else id=a;
     txt=rest}
+  return {id,txt}}
+function fxLbl(t){const {id,txt}=fxInfo(t);
   return (id?`<span class="fth">${card(id)}</span>`:'')+`<span>Aplicar: ${txt}</span>`}
 let RES2=null;
-function res2(id,html,fx,cont){if(COOP&&MYT)SYON=1;RES2=fx.length?[id,html,fx,cont]:null;ov(id,fx.length?fx.map((f,i)=>[fxLbl(f[0]),()=>{fx.splice(i,1);const b=()=>res2(id,html,fx,cont);sy('tap',{i});const r=f[1](b);render();if(r!==2)b();return 1},0,'fxb']):[['Continuar',()=>{RES2=null;SYON=0;close();sweep(cont||(()=>{TP=1}));return 1}]],html,1)}
-const reopenFx=()=>{if(RES2&&!S.over&&S.hp>0)setTimeout(()=>{if(RES2&&!$('#ov').classList.contains('on')&&!$('#bt').classList.contains('on'))res2(...RES2)},50)};
+/* Efectos después de la batalla: salen solos, uno por uno, con la carta en grande y el texto arriba.
+   Solo los que piden una decisión dejan sus opciones en pantalla. */
+let RUNFX=0,PRES=null;
+const presHide=now=>{const e=PRES;PRES=null;$('#ov').classList.remove('ovp');if(!e)return;if(now||RM){e.remove();return}e.animate([{opacity:1},{opacity:0}],{duration:220,fill:'forwards'}).finished.then(()=>e.remove(),()=>e.remove())};
+function presShow(cid,kind,txt,col,ms,spec){
+  presHide(1);
+  const L=document.createElement('div');L.id='pres';PRES=L;L.style.setProperty('--col',col);
+  L.innerHTML=`<div class="ptx"><div class="pk">${kind}</div><div class="pt">${txt}</div></div><div class="pc">${card(cid)}</div>`;
+  document.body.appendChild(L);
+  const c=L.querySelector('.pc'),t=L.querySelector('.ptx');
+  if(kind==='Penalización'){SFX.thud();vib([30,30,50])}else{SFX.combo(5);vib(25)}
+  if(!RM){
+    L.animate([{opacity:0},{opacity:1}],{duration:200,fill:'forwards'});
+    t.animate([{transform:'translateY(-30px) scale(.8)',opacity:0},{transform:'none',opacity:1}],{duration:380,easing:'cubic-bezier(.2,.9,.3,1.3)',fill:'forwards'});
+    c.animate([{transform:'scale(.15) rotate(-14deg)',opacity:0},{transform:'scale(1.18) rotate(3deg)',opacity:1,offset:.55},{transform:'none',opacity:1}],{duration:560,easing:'cubic-bezier(.2,.9,.3,1.2)',fill:'forwards'});
+    setTimeout(()=>{if(PRES!==L)return;const r=c.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;ring(x,y,col);rays(x,y,col,1100);shakeApp(kind==='Penalización'?10:5,380)},300)}
+  return new Promise(ok=>{let d=0;const go=()=>{if(d)return;d=1;L.onclick=null;ok()};L.onclick=go;setTimeout(go,ms)})}
+/* la carta se hace un poco más pequeña y sube, para dejar espacio a las opciones de la decisión */
+function presDec(L){if(PRES!==L)return;$('#ov').classList.add('ovp');L.classList.add('dec')}
+/* con AFB (relleno de la cruz) la cola BQ no corre, así que no se espera por ella */
+const fxReady=()=>!(FXR||BR||(BQ.length&&!AFB)||CINE||SFB||$('#bt').classList.contains('on'));
+async function fxWait(ms){const t0=Date.now();for(;;){if(S.over||S.hp<=0||COOPEND)return 0;if(fxReady()&&!$('#ov').classList.contains('on'))break;if(Date.now()-t0>60000)break;await wait(120)}await wait(ms);return !(S.over||S.hp<=0)}
+async function res2(id,html,fx,cont){
+  if(COOP&&MYT)SYON=1;
+  const first=!RUNFX;RUNFX=1;RES2=fx.length?[id,html,fx,cont]:null;
+  if($('#ov').classList.contains('on'))close();
+  if(!await fxWait(first?900:350)){RUNFX=0;RES2=null;presHide(1);return}
+  if(!fx.length){RUNFX=0;RES2=null;SYON=0;presHide();close();return sweep(cont||(()=>{TP=1}))}
+  const f=fx.shift(),b=()=>res2(id,html,fx,cont),{id:fid,txt}=fxInfo(f[0]);
+  const fail=/No se complet/.test(html),own=fid&&/^([ml]\d\d|k\d\d)$/.test(fid),cid=fid||id;
+  const kind=own?'Efecto de carta':fail?'Penalización':'Recompensa',col=own?'#6fd0ff':fail?'#ff5c5c':'#ffd34d';
+  const tx=txt.charAt(0).toUpperCase()+txt.slice(1);
+  sy('fx',{f:'efx',a:[cid,kind,tx,col]});
+  await presShow(cid,kind,tx,col,1700);
+  const mine=PRES;
+  if(!mine){/* otro efecto de pantalla lo quitó: seguimos igual */}
+  /* sin decisión: la carta se va y se ve la animación del efecto */
+  const r=f[1](b);render();
+  if(r!==2){presHide();b();return}
+  setTimeout(()=>{const o=$('#ov');if(!mine||PRES!==mine)return;if(o.classList.contains('on')){if(o.querySelector(`.card[data-id="${cid}"]`))presHide();else presDec(mine)}},80)}
+const reopenFx=()=>{if(RES2&&!RUNFX&&!S.over&&S.hp>0)setTimeout(()=>{if(RES2&&!$('#ov').classList.contains('on')&&!$('#bt').classList.contains('on'))res2(...RES2)},50)};
 function sweepLV(x){if(!x||(x.id[0]!=='c'&&x.id[0]!=='g'))return null;if(CH[x.id])return LV(x);/* cartas sin nivel de combate pero con nivel propio (ej. c07, c08) usan el campo l de su definición */const m=x.id.match(/^c(\d+)$/);if(!m)return null;const n=+m[1];/* c07=5, c08=5 según sus cartas físicas */if(n===7||n===8||n===34)return 5;return null}
 function sweep(cont){
   const i=[1,2,3,4].find(k=>{const x=S.cross[k];const lv=sweepLV(x);return lv!==null&&x.p>=lv});
@@ -1240,7 +1289,7 @@ async function autoFill(){
   if(lobbyOn())return;
   if(COOP&&!MYT&&!INTRO)return;
   if(COOP&&MYT&&OWNER!=='a')return;
-  if(AFB||BR||BQ.length||S.over||S.hp<=0||FXR||$('#ov').classList.contains('on')||$('#bt').classList.contains('on')||document.querySelector('.sheet.on'))return;
+  if(AFB||RUNFX||BR||BQ.length||S.over||S.hp<=0||FXR||$('#ov').classList.contains('on')||$('#bt').classList.contains('on')||document.querySelector('.sheet.on'))return;
   /* red de seguridad: cualquier desafío con progreso suficiente se completa cuando el tablero está libre, sin importar cómo llegó ahí el progreso */
   if([1,2,3,4].some(k=>{const x=S.cross[k],lv=sweepLV(x);return lv!==null&&x.p>=lv})){AFB=1;sweep(()=>{AFB=0});return}
   /* jefe final: si ya tiene el progreso necesario y nada lo bloquea (g01 en la cruz), se gana sin tener que volver a intentarlo */
@@ -1710,6 +1759,7 @@ function syRecv(d){
     else if(a.f==='hurt')fxPlay(jHurt(...x));
     else if(a.f==='dd')fxPlay(jDd(...x));
     else if(a.f==='shuf')fxPlay(jShuf(...x));
+    else if(a.f==='efx')presShow(...x,1700).then(()=>presHide())
     else if(a.f==='evt')fxPlay(async()=>{await eventFx(...x)})
     else if(a.f==='hab')fxPlay(async()=>{await habFx(x[0],x[1],1)})
     else if(a.f==='draw')fxPlay(jDraw(Array(a.n).fill('back'),1,1))}
