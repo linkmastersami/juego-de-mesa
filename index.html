@@ -185,7 +185,7 @@ button{font-family:inherit}
 .co.p{background:#6fb1ff;box-shadow:0 0 18px #6fb1ff99}
 .cfire{position:relative;width:11vw;max-width:50px;aspect-ratio:5/7;margin-right:22px}
 .cfire>div{position:absolute;inset:0}
-.cgh{position:fixed;z-index:41;pointer-events:none}
+.cgh{position:fixed;z-index:41;pointer-events:none}.cgh .card{width:100%;height:100%}
 .cspk{position:fixed;z-index:42;width:28px;height:28px;margin:-14px 0 0 -14px;border-radius:50%;background:radial-gradient(#fff 25%,var(--c) 62%,transparent 72%);box-shadow:0 0 14px 6px var(--c);pointer-events:none}
 .cbig{position:fixed;z-index:42;pointer-events:none;line-height:1;transform:translate(-50%,-50%)}
 .cas{display:flex;gap:6px;justify-content:center;min-height:calc(min(9vw,40px)*1.4)}
@@ -502,7 +502,7 @@ function fxPlay(job){FXQ.push(job);if(FXR)return;FXR=1;FXL.classList.add('on');(
 
 /* ---------- animaciones extra ---------- */
 const PEND={};
-let PV=[],PHP=null,PM=null,PT=null,NOFX=0,BR=0,TP=null,IDLE=0;const BQ=[];
+let PV=[],PHP=null,PM=null,PT=null,PHAB=null,DFQ=[],NOFX=0,BR=0,TP=null,IDLE=0;const BQ=[];
 /* Fase de tablero: todo lo que se anima en el tablero espera a que se cierren la pantalla de
    efectos (#ov), la batalla (#bt) y los efectos a pantalla completa (FXR). Entonces se reproduce
    UNA A UNA (cola BQ), luego se rellena la cruz (autoFill) y SOLO AL FINAL empieza el turno. */
@@ -540,7 +540,38 @@ function fxDiff(){
     else if(o&&i&&(!n||n.id!==o.id)&&S.cross.length){const k=S.comp[S.comp.length-1]===o.id?'gdone':'gout',j=CPOS.indexOf(i);if(!n){PEND[i]={h:o.h,p:o.p};const ce=ch[j];if(ce){ce.className='cell';ce.innerHTML=o.h+'<b class="pg">'+o.p+'</b>'}}BQ.push(async()=>{const e=$('#cross').children[j],r=e?e.getBoundingClientRect():null;if(PEND[i]){delete PEND[i];if(e&&!S.cross[i]){e.className='cell empty';e.innerHTML=''}}ghost(r&&r.width?r:o.r,o.h,k,950);await wait(1000)})}}
   if(!NOFX&&PHP!==null&&S.hp>PHP&&S.turn>=PT&&!S.over)fxHeal(PHP,S.hp);
   if(!NOFX&&PM!==null&&S.mesa.length===PM+1){const ix=S.mesa.length-1;BQ.push(async()=>{const m=$('#mesa').children[ix];if(m){m.classList.add('land');await wait(750)}})}
-  PV=nv;PHP=S.hp;PM=S.mesa.length;PT=S.turn}
+  if(!NOFX&&PHAB!==null&&S.turn>=PT&&!S.over){if(!PHAB&&S.hab)BQ.push(()=>habFx(1));else if(PHAB&&!S.hab)BQ.push(()=>habFx(0))}
+  PHAB=S.hab;PV=nv;PHP=S.hp;PM=S.mesa.length;PT=S.turn}
+const rc=sel=>{const e=document.querySelector(sel),r=e&&e.getBoundingClientRect();return r&&r.width?r:null};
+/* una carta vuela de un punto a otro con brillo (si no hay punto visible, sale del centro / llega abajo) */
+async function flyCard(id,a,b,ms=850,col='#ffd34d'){try{if(RM)return;const w=64,h=w*1.4,A=a?ctr(a):[innerWidth/2,innerHeight*.45],B=b?ctr(b):[innerWidth/2,innerHeight-60];
+  const g=document.createElement('div');g.className='cgh';g.style.cssText=`left:${A[0]-w/2}px;top:${A[1]-h/2}px;width:${w}px;height:${h}px;border-radius:8px;box-shadow:0 0 22px 6px ${col}`;g.innerHTML=card(id);document.body.appendChild(g);
+  try{SFX.swoosh()}catch(e){}
+  await AN(g,[{transform:'scale(.6)',opacity:0},{transform:'scale(1.5)',opacity:1,offset:.28},{transform:`translate(${B[0]-A[0]}px,${B[1]-A[1]}px) scale(.5)`,opacity:.9}],{duration:ms,easing:'ease-in-out'});g.remove();ring(B[0],B[1],col)}catch(e){}}
+const qFly=(id,fa,fb,col)=>{if(!NOFX)BQ.push(()=>flyCard(id,rc(fa),rc(fb),850,col))};
+/* descartes desde la mano: se juntan en una sola animación */
+function qDisc(id){if(NOFX)return;if(!DFQ.length)BQ.push(async()=>{const ids=DFQ.splice(0).slice(0,5);await Promise.all(ids.map((x,i)=>wait(i*140).then(()=>flyCard(x,null,rc('#pDm'),700,'#ff8a8a'))))});DFQ.push(id)}
+/* habilidad: entra la carta enorme con rayos, destello y temblor; luego vuela a Estado. Al gastarla se apaga con una onda gris */
+async function habFx(on){try{const id=(S.personaje||'m')+'20',W=innerWidth,H=innerHeight;
+  if(RM){await wait(500);return}
+  const t=document.querySelector('#tSt'),tr=t&&t.getBoundingClientRect();
+  if(!on){SFX.thud();const e=document.createElement('div');e.className='cgh';const w=Math.min(W*.4,170);e.style.cssText=`left:${W/2-w/2}px;top:${H*.42-w*.7}px;width:${w}px;height:${w*1.4}px;border-radius:10px`;e.innerHTML=card(id,'off');document.body.appendChild(e);
+    ring(W/2,H*.42,'#9aa0aa');await AN(e,[{transform:'scale(1.3)',opacity:0},{transform:'scale(1)',opacity:1,offset:.3},{transform:'scale(.9)',opacity:1,offset:.7},{transform:'scale(.2)',opacity:0}],{duration:900,easing:'ease-out'});e.remove();return}
+  const dim=document.createElement('div');dim.className='cgh';dim.style.cssText='inset:0;background:radial-gradient(circle,#2a1d00cc,#000d)';document.body.appendChild(dim);dim.animate([{opacity:0},{opacity:1}],{duration:260,fill:'forwards'});
+  const w=Math.min(W*.58,250),x=W/2,y=H*.44;
+  rays(x,y,'#ffd34d',1500);SFX.boom();vib([30,40,70]);
+  const c=document.createElement('div');c.className='cgh';c.style.cssText=`left:${x-w/2}px;top:${y-w*.7}px;width:${w}px;height:${w*1.4}px;border-radius:12px;z-index:42;box-shadow:0 0 50px 14px #ffd34d,0 0 120px 40px #ff9a2e88`;c.innerHTML=card(id);document.body.appendChild(c);
+  const tx=big('¡HABILIDAD ACTIVADA!',x,H*.14,Math.min(34,W/11));tx.style.cssText+=';color:#ffd34d;font-weight:800;text-align:center;width:90vw;text-shadow:0 0 18px #ff9a2e,0 3px 0 #000';tx.style.fontFamily='Fredoka,sans-serif';
+  tx.animate([{transform:'translate(-50%,-50%) scale(.2)',opacity:0},{transform:'translate(-50%,-50%) scale(1.25)',opacity:1,offset:.4},{transform:'translate(-50%,-50%) scale(1)',opacity:1}],{duration:500,fill:'forwards',easing:'ease-out'});
+  await AN(c,[{transform:'scale(.1) rotate(-25deg)',opacity:0},{transform:'scale(1.25) rotate(4deg)',opacity:1,offset:.45},{transform:'scale(1) rotate(0)',opacity:1}],{duration:650,easing:'cubic-bezier(.2,.9,.3,1.2)'});
+  impact(x,y,'#ffd34d',26);shakeApp(12,500);ring(x,y,'#fff');setTimeout(()=>ring(x,y,'#ffb347'),140);SFX.combo(7);
+  await wait(900);
+  const B=tr?ctr(tr):[W/2,H-40];
+  tx.animate([{opacity:1},{opacity:0}],{duration:300,fill:'forwards'});dim.animate([{opacity:1},{opacity:0}],{duration:500,fill:'forwards'});
+  await AN(c,[{transform:'none',opacity:1},{transform:`translate(${B[0]-x}px,${B[1]-y}px) scale(.12)`,opacity:.3}],{duration:620,easing:'ease-in'});
+  c.remove();dim.remove();tx.remove();ring(B[0],B[1],'#ffd34d');
+  if(t)t.animate([{boxShadow:'0 0 0 0 #ffd34d'},{boxShadow:'0 0 30px 12px #ffd34d',transform:'scale(1.2)'},{boxShadow:'0 0 0 0 #ffd34d00'}],{duration:800})
+}catch(e){}}
 const jDraw=(ids,toHand,spec)=>async L=>{
   /* cualquier robo: las cartas entran una por una (pequeñas, en cuadrícula), se quedan un momento, se juntan y vuelan juntas a la mano */
   const n=ids.length,cols=Math.min(n,3),rows=Math.ceil(n/3),cw=Math.max(40,Math.floor(Math.min((Math.min(innerWidth-32,420)-16)/3,((innerHeight-170-(rows-1)*8)/rows)/1.4)));
@@ -925,7 +956,7 @@ function sweep(cont){
   if(id[0]==='g')S.cross[i]={id:'g'+pad(+id.slice(1)+4),p:0};else if(id==='c53'){S.apart.push(id);S.cross[i]=null}else{S.comp.push(id);S.cross[i]=null}
   render();
   res2(id,'<div class="pv">¡Desafío completado!</div><p>Alcanzó su progreso total.</p><p>Recompensa:</p>',[...(spec[id]||[[],[]])[0]],()=>sweep(cont))}
-function discCard(id){S.hand.splice(S.hand.indexOf(id),1);S.disc.push(id);if(S.cross.some(y=>y&&y.id==='c34'))hurt(1)}
+function discCard(id){S.hand.splice(S.hand.indexOf(id),1);S.disc.push(id);qDisc(id);if(S.cross.some(y=>y&&y.id==='c34'))hurt(1)}
 function pickHand(n,b,r){if(!r&&n&&S.mesa.includes('k04'))n++;if(n>S.hand.length&&S.cross.some(y=>y&&y.id==='c38')){S.hp=0;S.why='No tenías cartas suficientes para descartar con este desafío en juego.';S.whyC=['c38']}if(!n||!S.hand.length)return b();ov(null,S.hand.map(x=>[x,()=>{discCard(x);render();pickHand(n-1,b,1);return 1},0,'',x]),`<p>Descarta ${n} carta(s)</p>`,1)}
 const hurt=(n,r)=>{const h0=S.hp;if(M18&&n>0){n--;M18=0}S.hp=Math.max(0,S.hp-n*(!r&&S.cross.some(y=>y&&y.id==='c37')?2:1)-(S.mesa.includes('k05')?1:0));if(S.hp<h0)fxHurt(h0,S.hp)};
 function kShow(id,back,hd){coopKEv(id);const n=+id.slice(1),f=S.final,bj=q=>{S.cross[0].p=Math.max(0,S.cross[0].p-q)};
@@ -966,12 +997,12 @@ function resolve(h,nd){
   if(act==='m01')fx.push([`m01: sufrir 1 de daño`,()=>hurt(1)],[`m01: barajar en el mazo en lugar del descarte`,()=>{const k=S.disc.lastIndexOf('m01');if(k<0)return;S.disc.splice(k,1);S.dM.push('m01');shuf(S.dM);fxShufM()}]);
   if(act==='m05')fx.push([`m05: robar ${COOP?1:1+as.length} carta(s)`,()=>draw(COOP?1:1+as.length)]);
   if(act==='m04'){fx.push([`m04 (elige): activar habilidad O regresar agotamiento al mazo`,b=>{const km=S.mesa.filter(x=>/^k0[245]$/.test(x));ov('m04',[['Activar la carta de habilidad',()=>{S.hab=1;render();b();return 1}],...(km.length?[['Regresar una carta de agotamiento al mazo',b2=>{ov(null,km.map(x=>[x,()=>{S.mesa.splice(S.mesa.indexOf(x),1);S.dK.push(x);shuf(S.dK);render();fxShufK();b();return 1},0,'',x]),'<p>Elige el agotamiento a regresar</p>',1);return 1}]]:[])],'<p>Elige el efecto</p>',1);return 2}]);fx.push([`m04: barajar los descartes de personaje al mazo (sin esta carta)`,()=>{const d=S.disc.filter(x=>x[0]===pfx&&x!=='m04');S.disc=S.disc.filter(x=>!d.includes(x));S.dM.push(...d);shuf(S.dM);fxShufM()}]);}
-  if(act==='m13'&&S.hand.length)fx.push([`m13: devolverla a tu mano`,()=>{S.disc.splice(S.disc.lastIndexOf('m13'),1);S.hand.push('m13')}]);
+  if(act==='m13'&&S.hand.length)fx.push([`m13: devolverla a tu mano`,()=>{S.disc.splice(S.disc.lastIndexOf('m13'),1);S.hand.push('m13');qFly('m13','#pDm','#tHand','#7dffb0')}]);
   if(act==='m18')M18=1;
   if(act==='l15'&&TY[id]==='T')M18=1;
   if(pfx==='l'){
     if(act==='l01')fx.push(['l01: colocar 2 de progreso en un desafío a tu elección',b=>{pickCh('Elige el desafío (+2 de progreso)',x=>{x.p+=2},b,null,1);return 2}]);
-    if(act==='l02'&&S.hand.some(swd))fx.push(['l02: devolverla a tu mano (te queda una espada en la mano)',()=>{if(!S.hand.some(swd))return;const k=S.disc.lastIndexOf('l02');if(k<0)return;S.disc.splice(k,1);S.hand.push('l02')}]);
+    if(act==='l02'&&S.hand.some(swd))fx.push(['l02: devolverla a tu mano (te queda una espada en la mano)',()=>{if(!S.hand.some(swd))return;const k=S.disc.lastIndexOf('l02');if(k<0)return;S.disc.splice(k,1);S.hand.push('l02');qFly('l02','#pDm','#tHand','#7dffb0')}]);
     if(act==='l03')fx.push(['l03: robar 2 cartas',()=>draw(2)]);
     if(act==='l06'&&!as.length)fx.push(['l06 (elige): activar tu habilidad o quitar 1 agotamiento activo',b=>{const km=S.mesa.filter(x=>/^k0[245]$/.test(x));ov('l06',[['Activar la carta de habilidad',()=>{S.hab=1;render();b();return 1}],...(km.length?[['Quitar un agotamiento activo (regresa al mazo)',()=>{ov(null,km.map(x=>[x,()=>{S.mesa.splice(S.mesa.indexOf(x),1);S.dK.push(x);shuf(S.dK);render();fxShufK();b();return 1},0,'',x]),'<p>Elige el agotamiento a quitar</p>',1);return 1}]]:[])],'<p>Elige el efecto</p>',1);return 2}]);
     if(act==='l07'&&as.length)fx.push([`l07: sufrir ${as.length} de daño (fue asistida ${as.length} ${as.length>1?'veces':'vez'})`,()=>hurt(as.length)]);
@@ -982,7 +1013,7 @@ function resolve(h,nd){
   if(S.mesa.includes('k02'))fx.push(['k02: elegir entre 1 de daño o quitar 1 de progreso al jefe final',b=>{ov('k02',[['Sufrir 1 de daño',()=>{hurt(1);render();b();return 1}],['Quitar 1 al jefe final',()=>{S.cross[0].p=Math.max(0,S.cross[0].p-1);render();b();return 1}]],'<p>Elige el efecto</p>',1);return 2}]);
   if(act==='m02')fx.push([`m02: elegir otro desafío y añadirle 1 progreso por fuego en descartes`,b=>{pickCh('Elige el otro desafío',x=>{x.p+=fireDisc()},b,c,1);return 2}]);
   if(act==='m07'&&as.length)fx.push([`m07: alguien asistió, puedes descartar cartas (o ninguna) y el que asistió roba igual número`,b=>{COOP?discDraw(b,1,n=>{if(n)mpSend({k:'draw',n})}):discDraw(b);return 2}]);
-  if(act==='m10'&&S.hand.length)fx.push([`m10: poner una carta de tu mano encima del mazo`,b=>{ov(null,S.hand.map(x=>[x,()=>{S.hand.splice(S.hand.indexOf(x),1);S.dM.push(x);render();b();return 1},0,'',x]),'<p>Elige la carta</p>',1);return 2}]);
+  if(act==='m10'&&S.hand.length)fx.push([`m10: poner una carta de tu mano encima del mazo`,b=>{ov(null,S.hand.map(x=>[x,()=>{S.hand.splice(S.hand.indexOf(x),1);S.dM.push(x);qFly(x,'#tHand','#dM','#8ab4ff');render();b();return 1},0,'',x]),'<p>Elige la carta</p>',1);return 2}]);
   if(act==='m15'&&!w0)fx.push([`m15: descartar el desafío sin sufrir penalización`,()=>dropCh(S.cross.indexOf(c))]);
   c.p+=add;const win=c.p>=lv&&id!=='g04'&&!(id[0]==='j'&&S.cross.some(x=>x&&x.id==='g01'));
   {const L=[...(spec[id]||[[],[]])[win?0:1]];
@@ -1214,7 +1245,7 @@ setInterval(autoFill,400);
 function startGame(){
   closeSheets();close();
   /* CHAR ya fue fijado por el lobby antes de llamar a startGame */
-  SYON=0;SYQ=null;SYLAST='';SYSENT=0;OWNER='a';COOPFX=0;CMQ.length=0;S=fresh0();if(COOPDC){S.dC=COOPDC;COOPDC=null}if(COOPDK){S.dK=COOPDK;COOPDK=null}BQ.length=0;for(const k in PEND)delete PEND[k];FXQ.length=0;TP=null;PV=[];PHP=null;PM=null;PT=null;PICK=1;B=null;PH=0;ENDQ=0;SHF=0;M18=0;HIDE.clear();
+  SYON=0;SYQ=null;SYLAST='';SYSENT=0;OWNER='a';COOPFX=0;CMQ.length=0;S=fresh0();if(COOPDC){S.dC=COOPDC;COOPDC=null}if(COOPDK){S.dK=COOPDK;COOPDK=null}BQ.length=0;DFQ.length=0;PHAB=null;for(const k in PEND)delete PEND[k];FXQ.length=0;TP=null;PV=[];PHP=null;PM=null;PT=null;PICK=1;B=null;PH=0;ENDQ=0;SHF=0;M18=0;HIDE.clear();
   $('#bt').classList.remove('on');$('#sh-st').classList.remove('on');$('#tTurn').textContent='Turno';hits.textContent='';
   SL=1;INTRO=1;render();
   fxPlay(async L=>{try{
