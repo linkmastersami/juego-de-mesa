@@ -78,7 +78,7 @@
   "cartas/k06.webp": "9d25324938e4",
   "icon-192.png": "1832840b96ab",
   "icon-512.png": "c42de4552324",
-  "index.html": "210328fd7ac6",
+  "index.html": "61877d94a43c",
   "k02.png": "0eb551aafe99",
   "manifest.json": "77a90e3f8df2",
   "package.json": "8fcadbba66bd",
@@ -122,10 +122,10 @@
   "personajes/personaje 2/l16.webp": "0eb18ed66beb",
   "personajes/personaje 2/l17.webp": "0d4b0f0ffa7c",
   "personajes/personaje 2/l18.webp": "a5e0f30eaf39",
-  "personajes/personaje 2/l19.gif": "442602918fcb",
   "personajes/personaje 2/l19.webp": "458fb2165082",
-  "personajes/personaje 2/l20.gif": "1dd599d78539",
-  "personajes/personaje 2/l20.webp": "ec6233065035"
+  "personajes/personaje 2/l19a.webp": "82c89b631c07",
+  "personajes/personaje 2/l20.webp": "ec6233065035",
+  "personajes/personaje 2/l20a.webp": "102be73e872a"
  },
- "version": "f2239efe320c"
+ "version": "3742c207773d"
 }

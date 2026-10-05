@@ -452,7 +452,7 @@ const shuf=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i
 const imgSrc=id=>id[0]==='m'?`personajes/personaje 1/${id}.webp`:id[0]==='l'?`personajes/personaje 2/${id}.webp`:`cartas/${id}.webp`;
 const BACKH=c=>`<div class="card ${c}" data-id=""><div class="deck" style="width:100%;height:100%"></div></div>`;
 /* m19 y m20 tienen versión animada (m19a/m20a); la habilidad apagada y "reducir movimiento" usan la imagen fija */
-const ANIMC=new Set(['m19','m20']);
+const ANIMC=new Set(['m19','m20','l19','l20']);
 const card=(id,c='')=>id==='back'?BACKH(c):`<div class="card ${c}" data-id="${id}"><img src="${ANIMC.has(id)&&!RM&&!/\boff\b/.test(c)?imgSrc(id).replace('.webp','a.webp'):imgSrc(id)}" alt="${id}" onerror="this.remove()"></div>`;
 /* personaje activo: 'm' = personaje 1 (cartas m), 'l' = personaje 2 (cartas l) */
 let CHAR='m'; /* se elige en el lobby antes de startGame */
@@ -558,7 +558,7 @@ function qDisc(id){if(NOFX)return;if(!DFQ.length)BQ.push(async()=>{const ids=DFQ
 /* habilidad: entra la carta enorme con rayos, destello y temblor; luego vuela a Estado. Al gastarla se apaga con una onda gris */
 async function habFx(on,idp,amigo){try{const id=idp||(S.personaje||'m')+'20',W=innerWidth,H=innerHeight;
   if(RM){await wait(500);return}
-  const t=document.querySelector('#tSt'),tr=t&&t.getBoundingClientRect();
+  const t=document.querySelector('#m20'),tr=rc('#m20')||rc('#tSt');if(on&&t&&!amigo)t.style.opacity=0;
   if(!on){SFX.thud();const e=document.createElement('div');e.className='cgh';const w=Math.min(W*.4,170);e.style.cssText=`left:${W/2-w/2}px;top:${H*.42-w*.7}px;width:${w}px;height:${w*1.4}px;border-radius:10px`;e.innerHTML=card(id,'off');document.body.appendChild(e);
     ring(W/2,H*.42,'#9aa0aa');await AN(e,[{transform:'scale(1.3)',opacity:0},{transform:'scale(1)',opacity:1,offset:.3},{transform:'scale(.9)',opacity:1,offset:.7},{transform:'scale(.2)',opacity:0}],{duration:900,easing:'ease-out'});e.remove();return}
   const dim=document.createElement('div');dim.className='cgh';dim.style.cssText='inset:0;background:radial-gradient(circle,#2a1d00cc,#000d)';document.body.appendChild(dim);dim.animate([{opacity:0},{opacity:1}],{duration:260,fill:'forwards'});
@@ -574,8 +574,8 @@ async function habFx(on,idp,amigo){try{const id=idp||(S.personaje||'m')+'20',W=i
   tx.animate([{opacity:1},{opacity:0}],{duration:300,fill:'forwards'});dim.animate([{opacity:1},{opacity:0}],{duration:500,fill:'forwards'});
   await AN(c,[{transform:'none',opacity:1},{transform:`translate(${B[0]-x}px,${B[1]-y}px) scale(.12)`,opacity:.3}],{duration:620,easing:'ease-in'});
   c.remove();dim.remove();tx.remove();ring(B[0],B[1],'#ffd34d');
-  if(t)t.animate([{boxShadow:'0 0 0 0 #ffd34d'},{boxShadow:'0 0 30px 12px #ffd34d',transform:'scale(1.2)'},{boxShadow:'0 0 0 0 #ffd34d00'}],{duration:800})
-}catch(e){}}
+  if(t){t.style.opacity='';t.animate([{boxShadow:'0 0 0 0 #ffd34d',transform:'scale(1.5)'},{boxShadow:'0 0 30px 12px #ffd34d',transform:'scale(1.25)',offset:.5},{boxShadow:'0 0 0 0 #ffd34d00',transform:'none'}],{duration:900})}
+}catch(e){const t=document.querySelector('#m20');if(t)t.style.opacity=''}}
 const jDraw=(ids,toHand,spec)=>async L=>{
   /* cualquier robo: las cartas entran una por una (pequeñas, en cuadrícula), se quedan un momento, se juntan y vuelan juntas a la mano */
   const n=ids.length,cols=Math.min(n,3),rows=Math.ceil(n/3),cw=Math.max(40,Math.floor(Math.min((Math.min(innerWidth-32,420)-16)/3,((innerHeight-170-(rows-1)*8)/rows)/1.4)));
