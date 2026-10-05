@@ -880,11 +880,11 @@ function roll(color,cb,faces){
 const CH={},COLN={r:'rojo',v:'verde',a:'azul'};
 [[1,2,'r',8],[3,4,'a',7],[5,6,'v',8],[9,10,'a',8],[11,13,'a',8],[14,16,'v',7],[17,19,'v',8],[20,22,'r',5],[23,25,'v',7],[26,28,'a',6],[29,32,'r',8],[33,33,'r',20],[35,35,'v',7],[36,36,'a',13],[37,37,'r',6],[38,38,'a',8],[39,39,'a',12],[40,42,'a',7],[43,45,'v',7],[46,48,'r',7],[49,49,'v',11],[51,51,'r',8],[53,53,'a',13],[54,54,'a',7],[55,55,'r',9],[56,56,'v',7],[57,57,'r',7]].forEach(([a,b,c,l])=>{for(let i=a;i<=b;i++)CH['c'+pad(i)]={c,l}});
 Object.assign(CH,{g01:{c:'v',l:10},g02:{c:'a',l:9},g03:{c:'r',l:9},g04:{c:'v',l:99}});
-const MC={};'r52,a11,av01,vr42,a21,r21,w21,a21,r31,w31,va31,a31,a21,av22,w32,w42,vr01,r21'.split(',').forEach((t,i)=>{const m=t.match(/^([a-z]+)(\d)(\d)$/);MC['m'+pad(i+1)]=[m[1],+m[2],+m[3]]});
+const MC={};'r52,a11,av01,vr42,a21,r21,w21,a21,w31,w31,va31,w31,a21,av22,w32,w42,vr01,w21'.split(',').forEach((t,i)=>{const m=t.match(/^([a-z]+)(\d)(\d)$/);MC['m'+pad(i+1)]=[m[1],+m[2],+m[3]]});
 MC.m20=['w',5,0];
 /* Personaje 2 (espada en lugar de fuego): datos reales de l01-l18
    Formato: [colores, valor acción, valor asistencia] */
-'av11,vr21,va21,rv21,v22,w54,rv52,ra21,w53,av31,ra21,w04,av32,r62,vr21,ra01,v32,w21'.split(',').forEach((t,i)=>{const m=t.match(/^([a-z]+)(\d)(\d)$/);MC['l'+pad(i+1)]=[m[1],+m[2],+m[3]]});
+'w11,vr21,va21,rv21,v22,w54,rv52,ra21,w53,w21,w11,w04,av32,r62,w11,ra01,v32,w21'.split(',').forEach((t,i)=>{const m=t.match(/^([a-z]+)(\d)(\d)$/);MC['l'+pad(i+1)]=[m[1],+m[2],+m[3]]});
 MC.l20=['w',0,0]; /* l20: valor 0 a 7 a elección (ver baseV); l12: valor X, no se juega como acción */
 Object.assign(CH,{j02:{c:'n',l:20},j03:{c:'n',l:30},j04:{c:'n',l:25}});
 const LV0=c=>c.id==='j02'?20+5*S.cross.filter(x=>x&&/^g0[1-4]$/.test(x.id)).length:c.id==='j03'?30+5*S.mesa.filter(k=>k[0]==='k').length:CH[c.id].l;
@@ -896,11 +896,11 @@ let PICK=1,B=null,SHF=0,M18=0;
 const col=()=>B.col||CH[S.cross[B.i].id].c;
 const okc=id=>{const c=MC[id][0];return c==='w'||c.includes(col())};
 /* color de la asistencia: personaje 1 = todas blancas (asisten a cualquier desafío); personaje 2 = según su carta */
-const ASC={l01:'a',l02:'v',l03:'v',l04:'rv',l05:'w',l06:'w',l07:'rv',l08:'ar',l09:'w',l10:'av',l11:'a',l12:'w',l13:'av',l14:'w',l15:'vr',l16:'ra',l17:'v',l18:'w'};
+const ASC={l01:'w',l02:'v',l03:'v',l04:'rv',l05:'w',l06:'w',l07:'rv',l08:'ar',l09:'w',l10:'w',l11:'w',l12:'w',l13:'av',l14:'w',l15:'w',l16:'ra',l17:'v',l18:'w'};
 const oka=id=>{if(id==='m20'||id==='l20')return false;const c=ASC[id];return !c||c==='w'||c.includes(col())};
 const ty=()=>TY[S.cross[B.i].id];
 /* equivalentes del personaje 2 a las cartas con bonificación de tipo */
-const BONUS_TY={m09:'O',m10:'T',m12:'P'};
+const BONUS_TY={m09:'O',m10:'T',m12:'P',m18:'C',l01:'O',l10:'C',l11:'P',l15:'T'}; /* cada personaje tiene 4 cartas blancas: +3 contra Obstáculo, Trampa, Puzle y Combate (como acción y como asistencia) */
 const av=x=>(BONUS_TY[x]&&BONUS_TY[x]===ty()?3:MC[x][2]);
 const p20=()=>S.personaje==='l'?'l20':'m20';
 const p06=()=>'m06'; /* efecto exclusivo del personaje 1 */
@@ -917,7 +917,7 @@ const baseV=()=>{const a=B.act;if(!a)return 0;let v=MC[a][1];
   if(l05on())v+=1;
   return v};
 const l05on=()=>!!(B&&B.act&&B.act[0]==='l'&&swd(B.act)&&S.hand.includes('l05')&&!B.as.includes('l05'));
-const sumB=()=>B.frz!==undefined?B.frz:B.act?baseV()+(B.act==='m03'||B.act==='m20'?fireDisc():0)+(B.act===p17()?B.v17||0:0)-(B.act===p16()&&ty()==='C'?2:0)+(B.act===p10()&&ty()==='T'?3:0)+B.as.reduce((t,x)=>t+av(x),0):0;
+const sumB=()=>B.frz!==undefined?B.frz:B.act?baseV()+(B.act==='m03'||B.act==='m20'?fireDisc():0)+(B.act===p17()?B.v17||0:0)-(B.act===p16()&&ty()==='C'?2:0)+(BONUS_TY[B.act]&&BONUS_TY[B.act]===ty()?3:0)+B.as.reduce((t,x)=>t+av(x),0):0;
 const totB=()=>B.act?sumB()+(B.act===p06()?2*fireDisc():0):0;
 const blk=c=>S.cross.some(y=>y&&/^c1[123]$/.test(y.id))&&!/^c1[123]$/.test(c.id);
 /* efecto al entrar a la cruz (c20-c22 absorben progreso; los mini-jefes c40-c48 quitan 1 al jefe final): se muestra y luego se aplica */
@@ -1109,7 +1109,7 @@ function resolve(h,nd){
     if(act==='l03')fx.push(['l03: robar 2 cartas',()=>draw(2)]);
     if(act==='l06'&&!as.length)fx.push(['l06 (elige): activar tu habilidad o quitar 1 agotamiento activo',b=>{const km=S.mesa.filter(x=>/^k0[245]$/.test(x));ov('l06',[['Activar la carta de habilidad',()=>{S.hab=1;render();b();return 1}],...(km.length?[['Quitar un agotamiento activo (regresa al mazo)',()=>{ov(null,km.map(x=>[x,()=>{S.mesa.splice(S.mesa.indexOf(x),1);S.dK.push(x);shuf(S.dK);render();fxShufK();b();return 1},0,'',x]),'<p>Elige el agotamiento a quitar</p>',1);return 1}]]:[])],'<p>Elige el efecto</p>',1);return 2}]);
     if(act==='l07'&&as.length)fx.push([`l07: sufrir ${as.length} de daño (fue asistida ${as.length} ${as.length>1?'veces':'vez'})`,()=>hurt(as.length)]);
-    if(act==='l13')fx.push(['l13 (elige): robar 1 carta o avanzar 2 de progreso',b=>{ov('l13',[['Robar 1 carta',()=>{draw(1);render();b();return 1}],['Avanzar 2 de progreso en un desafío',()=>{pickCh('Elige el desafío (+2 de progreso)',x=>{x.p+=2},b,null,1);return 1}]],'<p>Elige el efecto</p>',1);return 2}]);
+    if(act==='l13')fx.push(['l13 (elige): buscar 1 carta en tu mazo o avanzar 2 de progreso',b=>{ov('l13',[...(S.dM.length?[['Buscar 1 carta en tu mazo',()=>{ov(null,[...S.dM].sort().map(x=>[x,()=>{S.dM.splice(S.dM.indexOf(x),1);S.hand.push(x);shuf(S.dM);fxShufM();render();b();return 1},0,'',x]),'<p>Elige la carta (luego se baraja el mazo)</p>',1);return 1}]]:[]),['Avanzar 2 de progreso en un desafío',()=>{pickCh('Elige el desafío (+2 de progreso)',x=>{x.p+=2},b,null,1);return 1}]],'<p>Elige el efecto</p>',1);return 2}]);
     if(nf)fx.push([`l19: añadir 1 de progreso por espada (${nf}) a desafíos que no intentaste este turno`,b=>{const go=n=>{if(!n)return b();pickCh(`l19: elige el desafío (+1 de progreso) · quedan ${n}`,x=>{x.p+=1},()=>go(n-1),c,1)};go(nf);return 2}]);
   }
   const w0=c.p+add>=lv;
