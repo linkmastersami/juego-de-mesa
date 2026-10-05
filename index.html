@@ -244,6 +244,10 @@ button{font-family:inherit}
 #coin-r{font:600 1.3rem Fredoka,sans-serif;margin-top:6px;min-height:1.6rem}
 @keyframes cflA{from{transform:translateY(60px) rotateY(0)}40%{transform:translateY(-70px) rotateY(900deg)}to{transform:translateY(0) rotateY(1800deg)}}
 @keyframes cflB{from{transform:translateY(60px) rotateY(0)}40%{transform:translateY(-70px) rotateY(990deg)}to{transform:translateY(0) rotateY(1980deg)}}
+body.lowhp::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:3;box-shadow:inset 0 0 70px 14px #ff1f3a99;animation:hb 1.15s ease-in-out infinite}
+@keyframes hb{0%,100%{opacity:.2}14%{opacity:.95}28%{opacity:.3}42%{opacity:.8}}
+#mpdrop{display:none;position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 8px);z-index:95;max-width:92vw;text-align:center;background:#2f2b37f2;border:2px solid var(--gold);color:var(--ink);border-radius:999px;padding:8px 16px;font:600 .9rem Fredoka,sans-serif;box-shadow:0 6px 20px #000a}
+#mpdrop.on{display:block}
 #coopb{display:none;position:fixed;left:0;right:0;top:56px;bottom:0;z-index:45}
 #coopb span{position:fixed;top:10px;left:50%;transform:translateX(-50%);padding:7px 16px;border-radius:20px;background:#2a1f45ee;color:#f2c14e;font:700 .95rem Fredoka,sans-serif;box-shadow:0 0 0 2px #f2c14e88;pointer-events:none;white-space:nowrap}
 body.waitp #coopb{display:block}
@@ -344,6 +348,7 @@ body.sbton #coopb span,body.incine #coopb span{display:none}
   </div>
 </div></div>
 <div id="mpcoin"><div><div class="coin" id="coin"><b>CARA</b><b class="bk">CRUZ</b></div><div id="coin-t"></div><div id="coin-r"></div></div></div>
+<div id="mpdrop"></div>
 <div id="coopb"><span>⏳ Turno de tu amigo</span></div>
 <div id="coopw"><div><i></i><b id="coopw-t"></b></div></div>
 <div id="coopfeed"></div>
@@ -432,6 +437,8 @@ const SFX={
   bell:()=>[880,1108].forEach((f,i)=>tone(f,.35,'sine',.09,i*.06)),      /* campana de turno nuevo */
   fanfare:()=>[523,659,784,1047,1319].forEach((f,i)=>tone(f,.55,'triangle',.18,i*.07)), /* victoria final */
   slash:()=>{noiz(.08,.35);tone(420,.12,'sawtooth',.12,0,80)},           /* corte de victoria en batalla */
+  combo:k=>{const f=460+Math.min(k,8)*95;tone(f,.16,'triangle',.14,0,f*1.5);tone(f*2,.09,'sine',.06,.03)}, /* acierto de dado: sube de tono con cada acierto */
+  boom:()=>{tone(60,.7,'sine',.3,0,28);noiz(.5,.25)},                   /* golpe grande */
   tap:()=>{tone(700,.06,'triangle',.225,0,420);tone(1400,.03,'sine',.1)},                           /* toque en pantalla */
 };
 /* nivelación: ganancia por efecto para que todos suenen parejo (medido con ponderación A) */
@@ -483,6 +490,7 @@ function render(){
   {const pfxR=S.personaje||'m';const dm=S.disc.filter(x=>x[0]===pfxR);$('#pDm').innerHTML=(dm.length?card(dm[dm.length-1]):'<div class="card" style="opacity:.4"></div>')+`<span class="cn">${dm.length}</span>`;$('#pFire').textContent=(S.personaje==='l'?'⚔️ ':'🔥 ')+fireDisc()}
   $('#pComp').innerHTML=S.comp.length?card(S.comp[S.comp.length-1]):'<div class="card" style="opacity:.4"></div>';
   $('#turn').textContent=S.turn;$('#hp').textContent=S.hp;
+  document.body.classList.toggle('lowhp',!S.over&&S.hp>0&&S.hp<=3&&document.getElementById('lobby').classList.contains('oculto'));
   if(!SL&&!COOP)try{localStorage.setItem('mesa-juego',JSON.stringify(S))}catch(e){}
   try{fxDiff()}catch(e){}
   try{syState()}catch(e){}
@@ -649,7 +657,7 @@ function finalAnim(fp){
     HIDE=new Set([0,1,2,3,4]);render();
     L.classList.add('clear');T.style.opacity=0;bs.forEach((e,i)=>{if(i!==idx)e.style.opacity=0});await wait(350);
     /* 3) el jefe entra en su lugar */
-    let c=cellOf(0);await fly(bs[idx],c,900);HIDE.delete(0);c.classList.remove('hid');c.classList.add('land');SFX.thud();vib([30,20,40]);bs[idx].remove();await wait(600);
+    let c=cellOf(0);await fly(bs[idx],c,900);HIDE.delete(0);c.classList.remove('hid');c.classList.add('land');SFX.thud();vib([30,20,40]);bossSlam(c);bs[idx].remove();await wait(900);
     /* 4) los guardianes giran como una dona y se colocan en la cruz */
     L.innerHTML='<div class="ring"></div>';
     const R=L.querySelector('.ring'),w=Math.min(innerWidth*.24,108),Rx=Math.min(innerWidth*.34,160),Ry=Rx*.42,th0=fp.th0,TOT=Math.PI*7,DUR=3800;
@@ -783,6 +791,7 @@ function roll(color,cb,faces){
     return a.finished.then(()=>{
       d.cube.getAnimations().concat(d.fly.getAnimations(),d.shadow.getAnimations()).forEach(x=>x.cancel());
       d.cube.style.transform=T(d.x,d.y);
+      landFx(d);
     });
   });
   return Promise.all(anims).then(()=>{const h=showRes(color);btn.disabled=false;if(cb)setTimeout(()=>cb(h),1000);if(navigator.vibrate)try{navigator.vibrate(40)}catch(e){}});
@@ -1021,6 +1030,24 @@ function impact(x,y,color='#ffd34d',n=18){
   if(!RM)for(let i=0;i<n;i++){const a=i/n*6.283+Math.random()*.4,d=60+Math.random()*90;
     mk(`left:${x-4}px;top:${y-4}px;width:8px;height:8px;border-radius:50%;background:${color}`,[{transform:'none',opacity:1},{transform:`translate(${Math.cos(a)*d}px,${Math.sin(a)*d+30}px) scale(.2)`,opacity:0}],{duration:600+Math.random()*300,easing:'ease-out'})}
 }
+/* rayos de luz que giran detrás de un punto de impacto */
+function rays(x,y,color='#ffd34d',ms=1000){if(RM)return;
+  const e=document.createElement('div');e.className='cgh';const w=Math.min(innerWidth*1.3,560);
+  e.style.cssText=`left:${x-w/2}px;top:${y-w/2}px;width:${w}px;height:${w}px;border-radius:50%;background:repeating-conic-gradient(from 0deg,${color}88 0 5deg,transparent 5deg 15deg);-webkit-mask-image:radial-gradient(circle,#000 8%,transparent 66%);mask-image:radial-gradient(circle,#000 8%,transparent 66%)`;
+  document.body.appendChild(e);
+  e.animate([{transform:'scale(.3) rotate(0deg)',opacity:0},{opacity:1,offset:.25},{transform:'scale(1.25) rotate(45deg)',opacity:0}],{duration:ms,easing:'ease-out'}).finished.then(()=>e.remove())}
+/* temblor de todo el tablero */
+function shakeApp(px=10,ms=420){if(RM)return;const a=document.querySelector('.app');if(!a)return;
+  a.animate([{transform:'none'},{transform:`translate(${-px}px,${px*.6}px)`},{transform:`translate(${px*.9}px,${-px*.6}px)`},{transform:`translate(${-px*.5}px,${px*.3}px)`},{transform:'none'}],{duration:ms,easing:'ease-out'})}
+/* al caer cada dado: onda de choque, polvo y golpe sordo */
+function landFx(d){try{SFX.thud();vib(8);if(RM)return;const r=d.slot.getBoundingClientRect();if(!r.width)return;
+  const x=r.left+r.width/2,y=r.top+r.height*.9;ring(x,y,'#ffffffaa');
+  for(let i=0;i<5;i++){const e=document.createElement('div');e.className='cgh';const s=5+Math.random()*5,dx=(Math.random()-.5)*r.width*1.3;
+    e.style.cssText=`left:${x-s/2}px;top:${y-s/2}px;width:${s}px;height:${s}px;border-radius:50%;background:#fff8`;document.body.appendChild(e);
+    e.animate([{transform:'none',opacity:.8},{transform:`translate(${dx}px,${-8-Math.random()*16}px) scale(.3)`,opacity:0}],{duration:420+Math.random()*200,easing:'ease-out'}).finished.then(()=>e.remove())}}catch(e){}}
+/* el jefe final cae: onda morada, rayos y temblor fuerte */
+function bossSlam(c){try{const r=c.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;
+  SFX.boom();ring(x,y,'#b06bff');setTimeout(()=>ring(x,y,'#ffffff'),120);rays(x,y,'#b06bff',1200);vig('#7a2cff',800);shakeApp(14,600);vib([40,30,60])}catch(e){}}
 const askC=(t,y,n)=>new Promise(ok=>{const d=document.createElement('div');d.style.cssText='position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 20px);z-index:43;width:min(92vw,360px);display:flex;flex-direction:column;gap:10px;background:#2f2b37;border-radius:18px;padding:14px;text-align:center;box-shadow:0 10px 40px #000a';
   d.innerHTML=`<div>${t}</div><div class="btns"><button data-y="1" style="background:var(--gold);color:#2b2208">${y}</button><button class="ghost" data-y="0">${n}</button></div>`;
   d.onclick=e=>{const b=e.target.closest('[data-y]');if(!b)return;d.remove();ok(b.dataset.y==='1')};document.body.appendChild(d)});
@@ -1068,7 +1095,13 @@ async function cine(color,nd,SP){
         const r=d.slot.getBoundingClientRect(),[sx,sy]=ctr(r),[tx,ty]=ctr(tg.getBoundingClientRect()),sp=document.createElement('div');
         sp.className='cspk';sp.style.cssText=`left:${sx}px;top:${sy}px;--c:${COL[f]}`;document.body.appendChild(sp);ring(sx,sy,COL[f]);
         d.slot.animate([{filter:'none'},{filter:`drop-shadow(0 0 18px ${COL[f]}) brightness(1.5)`},{filter:'none'}],{duration:500});
-        await AN(sp,[{transform:'scale(.4)',opacity:1},{transform:'scale(1.6)',opacity:1,offset:.25},{transform:`translate(${tx-sx}px,${ty-sy}px) scale(.8)`,opacity:.9}],{duration:dec?1100:700,easing:'ease-in'});sp.remove();SFX.pop();vib(dec?[20,30,40]:15);if(dec)ring(tx,ty,'#ffd34d');v=R?v+1:Math.max(0,v-1);popV(tg,v);await wait(150)}};
+        await AN(sp,[{transform:'scale(.4)',opacity:1},{transform:'scale(1.6)',opacity:1,offset:.25},{transform:`translate(${tx-sx}px,${ty-sy}px) scale(.8)`,opacity:.9}],{duration:dec?1100:700,easing:'ease-in'});sp.remove();SFX.combo(h);vib(dec?[20,30,40]:15);v=R?v+1:Math.max(0,v-1);popV(tg,v);
+          if(!RM){const fl=big('+1',tx,ty-54,24+Math.min(h,6)*4);fl.style.color=COL[f]||'#fff';fl.style.textShadow='0 2px 8px #000,0 0 14px currentColor';fl.style.fontWeight=700;
+            fl.animate([{opacity:1,transform:'translate(-50%,-50%) scale(.6)'},{opacity:1,transform:'translate(-50%,-110%) scale(1.1)',offset:.35},{opacity:0,transform:'translate(-50%,-190%) scale(1)'}],{duration:800,fill:'forwards'}).finished.then(()=>fl.remove());
+            tg.style.filter=`drop-shadow(0 0 ${6+h*5}px #ffd34d)`;
+            if(h>=3){const g=big('¡x'+h+'!',tx,ty+66,22+h*2);g.style.color='#ffd34d';g.style.fontWeight=700;g.style.textShadow='0 2px 8px #000';g.animate([{opacity:0,transform:'translate(-50%,-50%) scale(.4)'},{opacity:1,transform:'translate(-50%,-50%) scale(1.15)',offset:.3},{opacity:0,transform:'translate(-50%,-50%) scale(1)'}],{duration:900,fill:'forwards'}).finished.then(()=>g.remove())}}
+          if(dec){ring(tx,ty,'#ffd34d');if(!RM){impact(tx,ty,'#ffd34d',16);$('#cmid').animate([{transform:'scale(1)'},{transform:'scale(1.09)'},{transform:'scale(1)'}],{duration:520,easing:'ease-out'});await wait(260)}}
+          await wait(150)}};
       /* l11: descartarla tras una tirada para omitirla */
       const l11=async()=>{SKR=0;let ext=0;
         const showSkip=async()=>{const [dx,dy]=ctr($('#cdice').getBoundingClientRect()),t=big('Tirada omitida',dx,dy+70,26);
@@ -1117,8 +1150,9 @@ async function cine(color,nd,SP){
       await AN(cr.querySelector('path'),[{strokeDashoffset:1},{strokeDashoffset:0}],{duration:260,easing:'ease-out'});
       await wait(120);cr.remove();
       const clipL=`polygon(0 0,${pt},0 100%)`,clipR=`polygon(${pt},100% 100%,100% 0)`;
-      Lc.style.visibility='hidden';impact(cx,cy,'#ffd34d',30);SFX.fanfare();vib([20,30,70]);
+      Lc.style.visibility='hidden';impact(cx,cy,'#ffd34d',30);rays(cx,cy,'#ffd34d',1100);SFX.boom();SFX.fanfare();vib([20,30,70]);
       const mk=(clip,rot,dx)=>{const w=document.createElement('div');w.className='cgh';w.style.cssText=`left:${lr.left}px;top:${lr.top}px;width:${lr.width}px;height:${lr.height}px;clip-path:${clip}`;w.innerHTML=Lc.innerHTML;document.body.appendChild(w);return AN(w,[{transform:'none',opacity:1},{transform:`translate(${dx*.3}px,10px) rotate(${rot*.3}deg)`,opacity:1,offset:.25},{transform:`translate(${dx}px,170px) rotate(${rot}deg)`,opacity:0}],{duration:1000,easing:'ease-in'}).then(()=>w.remove())};
+      await wait(RM?0:130); /* congelado un instante antes de partirse */
       mk(clipL,-22,-50);mk(clipR,22,50);
       AN(Lo,[{opacity:1},{opacity:0}],{duration:600});
       await wait(1100)}
@@ -1168,6 +1202,7 @@ async function autoFill(){
     }
   }catch(e){}
   const id=S.dC.pop();S.cross[i]={id,p:S.apart.includes('c53')&&TY[id]&&TY[id]!=='C'?2:0};entry(i);checkEnd();render();SFX.place();vib(10);
+  try{const ce=cellOf(i);if(ce){ce.classList.add('land');if(!RM){const r=ce.getBoundingClientRect();ring(r.left+r.width/2,r.top+r.height/2,'#ffffff77')}}}catch(e){}
   blk.remove();AFB=0;setTimeout(autoFill,150)
 }
 setInterval(autoFill,400);
@@ -1266,13 +1301,16 @@ $('#lob-btn-resume').addEventListener('click',()=>{
 /* ===== MULTIJUGADOR (2 jugadores en línea) ===== */
 /* Pon aquí la dirección de tu servicio en Render */
 const MP_URL='https://link-master-dungeon.onrender.com';
-const MP={ws:null,code:null,role:null,peer:null,join:null,cancel:0,tm:null,hb:null};
+const MP={ws:null,code:null,role:null,peer:null,join:null,cancel:0,tm:null,hb:null,tok:null,last:0,rc:0};
+/* mensajes numerados: si se corta la conexión, al volver cada lado reenvía lo que el otro no recibió */
+const OUTB=[];let SEQ=0,LASTIN=0;
+const mpReset=()=>{OUTB.length=0;SEQ=0;LASTIN=0};
 const mpEl=$('#mp'),mpNm=c=>c==='l'?'Personaje 2':'Personaje 1';
 const mpShow=v=>{mpEl.className='on '+v};
 const mpLink=()=>location.origin+location.pathname+'?sala='+MP.code;
 const MP_TIPS=['Despertando al servidor…','Encendiendo las antorchas del calabozo…','Afilando las espadas…','Barajando el mazo…','Casi listo, aventurero…'];
 function mpStop(){clearInterval(MP.tm);clearInterval(MP.hb);MP.tm=MP.hb=null}
-function mpClose(){mpStop();MP.cancel=1;const w=MP.ws;MP.ws=null;try{w&&w.close()}catch(e){}MP.code=null;MP.peer=null;MP.role=null}
+function mpClose(){mpStop();MP.cancel=1;MP.rc=0;mpDropBanner(null);const w=MP.ws;MP.ws=null;try{if(w&&w.readyState===1&&MP.tok)w.send('{"t":"leave"}')}catch(e){}try{w&&w.close()}catch(e){}MP.code=null;MP.peer=null;MP.role=null;MP.tok=null;mpReset()}
 function mpErr(t){mpStop();$('#mp-err').textContent=t;mpShow('err')}
 async function mpWake(){
   const t0=Date.now();
@@ -1302,22 +1340,71 @@ async function mpStart(join){
 }
 function mpOpen(){
   let ws;try{ws=new WebSocket(MP_URL.replace(/^http/,'ws'))}catch(e){mpErr('No se pudo abrir la conexión.');return}
-  MP.ws=ws;
-  ws.onopen=()=>{ws.send(JSON.stringify(MP.join?{t:'join',code:MP.join}:{t:'create',char:CHAR}));
-    MP.hb=setInterval(()=>{try{ws.send('{"t":"ping"}')}catch(e){}},25000)};
-  ws.onmessage=e=>{let m;try{m=JSON.parse(e.data)}catch(_){return}mpOn(m)};
-  ws.onclose=()=>{if(MP.ws===ws&&!MP.cancel){MP.ws=null;mpErr('Se perdió la conexión con el servidor.')}};
-  ws.onerror=()=>{};
+  MP.ws=ws;MP.last=Date.now();
+  ws.onopen=()=>{MP.last=Date.now();ws.send(JSON.stringify(MP.join?{t:'join',code:MP.join,v:2}:{t:'create',char:CHAR,v:2}))};
+  mpBind(ws);
 }
+/* mensajes del servidor + latido: si pasan 22 s sin oír nada, se da la conexión por perdida */
+function mpBind(ws){
+  ws.onmessage=e=>{MP.last=Date.now();let m;try{m=JSON.parse(e.data)}catch(_){return}mpOn(m)};
+  ws.onclose=()=>mpLost(ws);ws.onerror=()=>{};
+  clearInterval(MP.hb);
+  MP.hb=setInterval(()=>{if(MP.ws!==ws)return;if(Date.now()-MP.last>22000){mpLost(ws);return}try{ws.send('{"t":"ping"}')}catch(e){}},7000);
+}
+function mpLost(ws){
+  if(MP.ws!==ws||MP.cancel)return;
+  MP.ws=null;clearInterval(MP.hb);MP.hb=null;try{ws.close()}catch(e){}
+  if(MP.code&&MP.tok)mpReconnect();else mpErr('Se perdió la conexión con el servidor.');
+}
+/* reconexión automática: reintenta hasta 90 s (el servidor guarda tu lugar ese tiempo) */
+async function mpReconnect(){
+  if(MP.rc)return;MP.rc=1;const t0=Date.now();
+  mpDropBanner('📡 Se cortó tu conexión · reconectando…');
+  let res=0;
+  while(MP.rc&&!MP.cancel&&Date.now()-t0<90000){
+    res=await new Promise(done=>{
+      let fin=0;const end=v=>{if(!fin){fin=1;clearTimeout(to);done(v)}};
+      let ws;try{ws=new WebSocket(MP_URL.replace(/^http/,'ws'))}catch(e){return done(0)}
+      const to=setTimeout(()=>{try{ws.close()}catch(e){}end(0)},8000);
+      ws.onopen=()=>ws.send(JSON.stringify({t:'resume',code:MP.code,tok:MP.tok}));
+      ws.onmessage=e=>{let m;try{m=JSON.parse(e.data)}catch(_){return}
+        if(m.t==='resumed'){MP.ws=ws;MP.last=Date.now();mpBind(ws);mpOn(m);end(1)}
+        else if(m.t==='err'){try{ws.close()}catch(e){}end(m.gone?-1:0)}};
+      ws.onclose=()=>end(0);ws.onerror=()=>{};
+    });
+    if(res!==0)break;
+    await new Promise(r=>setTimeout(r,1500));
+  }
+  MP.rc=0;
+  if(MP.cancel||res===1)return;
+  mpDropBanner(null);mpErr('No se pudo recuperar la conexión con la sala.');
+}
+let DROPT=null;
+function mpDropBanner(t,secs){
+  clearInterval(DROPT);DROPT=null;const e=$('#mpdrop');if(!e)return;
+  if(!t){e.classList.remove('on');return}
+  const t0=Date.now(),up=()=>{e.textContent=t+(secs?` (${Math.max(0,secs-Math.floor((Date.now()-t0)/1000))} s)`:'')};
+  up();e.classList.add('on');if(secs)DROPT=setInterval(up,1000);
+}
+/* pide al otro lado lo que no recibí y le reenvío lo que no recibió */
+const mpResync=()=>mpRaw({t:'msg',data:{k:'rs',got:LASTIN}});
 function mpOn(m){
-  if(m.t==='created'){MP.role='host';MP.code=m.code;MP.peer=null;mpStop2();mpRoom()}
-  else if(m.t==='joined'){MP.role='guest';MP.code=m.code;CHAR=m.char;MP.peer={char:m.hostChar};mpStop2();mpRoom()}
-  else if(m.t==='peer'){MP.peer=m.on?{char:m.char}:null;if(MP.role==='guest'&&!m.on){mpErr('Tu amigo cerró la sala.');return}mpRoom()}
+  if(m.t==='created'){MP.role='host';MP.code=m.code;MP.tok=m.tok;MP.peer=null;mpReset();mpStop2();mpRoom()}
+  else if(m.t==='joined'){MP.role='guest';MP.code=m.code;MP.tok=m.tok;CHAR=m.char;MP.peer={char:m.hostChar};mpReset();mpStop2();mpRoom()}
+  else if(m.t==='resumed'){MP.role=m.role;MP.peer=m.peer?{char:m.peerChar}:null;mpDropBanner(null);mpResync();if(!COOP||COOPEND)mpRoom()}
+  else if(m.t==='peer'){
+    if(m.on){MP.peer={char:m.char};mpDropBanner(null);if(m.back){mpResync();return}mpReset()}
+    else if(m.wait){mpDropBanner('⏳ Tu amigo perdió la conexión · esperándolo',m.wait);return}
+    else{MP.peer=null;mpDropBanner(null);
+      if(COOP&&!COOPEND){mpOnMsg({k:'left'});return}
+      if(MP.role==='guest'&&!m.on){mpErr('Tu amigo cerró la sala.');return}}
+    mpRoom()}
   else if(m.t==='err'){mpErr(m.msg||'Error en la sala.')}
-  else if(m.t==='msg'&&typeof mpOnMsg==='function'){mpOnMsg(m.data)}
+  else if(m.t==='msg'&&typeof mpOnMsg==='function'){if(m.n){if(m.n<=LASTIN)return;LASTIN=m.n}mpOnMsg(m.data)}
 }
 function mpStop2(){clearInterval(MP.tm);MP.tm=null}
-function mpSend(data){try{MP.ws&&MP.ws.readyState===1&&MP.ws.send(JSON.stringify({t:'msg',data}))}catch(e){}}
+function mpRaw(o){try{MP.ws&&MP.ws.readyState===1&&MP.ws.send(JSON.stringify(o))}catch(e){}}
+function mpSend(data){const n=++SEQ;OUTB.push({n,data});if(OUTB.length>400)OUTB.shift();mpRaw({t:'msg',n,data})}
 function mpRoom(){
   mpShow('room');
   $('#mp-code').textContent=MP.code;
@@ -1332,8 +1419,10 @@ function mpRoom(){
 }
 $('#lob-btn-friend').addEventListener('click',()=>mpStart());
 $('#mp-cancel').addEventListener('click',()=>{mpClose();mpEl.className=''});
-$('#mp-back').addEventListener('click',()=>{COOP=0;MYT=1;coopUi();mpClose();mpEl.className='';try{history.replaceState(null,'',location.pathname)}catch(e){}});
-$('#mp-leave').addEventListener('click',()=>{COOP=0;MYT=1;coopUi();mpClose();mpEl.className='';try{history.replaceState(null,'',location.pathname)}catch(e){}});
+/* salir de la sala; si había una partida en marcha, también al menú */
+const mpExit=()=>{const enJuego=!lobbyOn();COOP=0;MYT=1;coopUi();mpClose();mpEl.className='';try{history.replaceState(null,'',location.pathname)}catch(e){}if(enJuego)toMenu(1)};
+$('#mp-back').addEventListener('click',mpExit);
+$('#mp-leave').addEventListener('click',mpExit);
 $('#mp-retry').addEventListener('click',()=>mpStart(MP.join));
 $('#mp-share').addEventListener('click',async()=>{
   const url=mpLink(),text='¡Juega conmigo en Link Master! Entra a mi sala '+MP.code+':';
@@ -1490,6 +1579,7 @@ function coopEv(d){
 function coopOver(kind,msg){if(!COOP||COOPEND)return;COOPEND=1;mpSend({k:'over',kind,msg,sh:coopShared()});MYT=1;coopUi()}
 function mpOnMsg(d){
   if(!d)return;
+  if(d.k==='rs'){const g=d.got||0;for(let i=OUTB.length-1;i>=0;i--)if(OUTB[i].n<=g)OUTB.splice(i,1);OUTB.forEach(x=>mpRaw({t:'msg',n:x.n,data:x.data}));return}
   if(d.k==='start')coopBegin(d.first,d.dC,d.dK);
   else if(d.k==='assistReq'&&COOP)coopAssistAsk(d);
   else if(d.k==='l11Ask'&&COOP)coopL11Ask(d);
