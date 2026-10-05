@@ -451,7 +451,9 @@ const shuf=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i
 /* ruta de imagen según el prefijo: m→personaje 1, l→personaje 2, resto→cartas/ */
 const imgSrc=id=>id[0]==='m'?`personajes/personaje 1/${id}.webp`:id[0]==='l'?`personajes/personaje 2/${id}.webp`:`cartas/${id}.webp`;
 const BACKH=c=>`<div class="card ${c}" data-id=""><div class="deck" style="width:100%;height:100%"></div></div>`;
-const card=(id,c='')=>id==='back'?BACKH(c):`<div class="card ${c}" data-id="${id}"><img src="${imgSrc(id)}" alt="${id}" onerror="this.remove()"></div>`;
+/* m19 y m20 tienen versión animada (m19a/m20a); la habilidad apagada y "reducir movimiento" usan la imagen fija */
+const ANIMC=new Set(['m19','m20']);
+const card=(id,c='')=>id==='back'?BACKH(c):`<div class="card ${c}" data-id="${id}"><img src="${ANIMC.has(id)&&!RM&&!/\boff\b/.test(c)?imgSrc(id).replace('.webp','a.webp'):imgSrc(id)}" alt="${id}" onerror="this.remove()"></div>`;
 /* personaje activo: 'm' = personaje 1 (cartas m), 'l' = personaje 2 (cartas l) */
 let CHAR='m'; /* se elige en el lobby antes de startGame */
 const PC=()=>S.personaje||'m';

@@ -78,7 +78,7 @@
   "cartas/k06.webp": "9d25324938e4",
   "icon-192.png": "1832840b96ab",
   "icon-512.png": "c42de4552324",
-  "index.html": "0b2a9e50ce1a",
+  "index.html": "210328fd7ac6",
   "k02.png": "0eb551aafe99",
   "manifest.json": "77a90e3f8df2",
   "package.json": "8fcadbba66bd",
@@ -100,10 +100,10 @@
   "personajes/personaje 1/m16.webp": "e2321a23b98a",
   "personajes/personaje 1/m17.webp": "7c6df4b28433",
   "personajes/personaje 1/m18.webp": "641e0baa35e8",
-  "personajes/personaje 1/m19.gif": "9f600090b25e",
   "personajes/personaje 1/m19.webp": "38d1dae1d108",
-  "personajes/personaje 1/m20.gif": "6b6f1e9742fb",
+  "personajes/personaje 1/m19a.webp": "54d29a234f43",
   "personajes/personaje 1/m20.webp": "04b56d6285c3",
+  "personajes/personaje 1/m20a.webp": "d2600f63b8a0",
   "personajes/personaje 2/l01.webp": "a710800af7f8",
   "personajes/personaje 2/l02.webp": "9b82a6638e8b",
   "personajes/personaje 2/l03.webp": "66046b098a48",
@@ -125,5 +125,5 @@
   "personajes/personaje 2/l19.webp": "458fb2165082",
   "personajes/personaje 2/l20.webp": "ec6233065035"
  },
- "version": "b0ea3e339987"
+ "version": "84f99ce09c56"
 }
