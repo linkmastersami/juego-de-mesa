@@ -707,7 +707,10 @@ async function shareVictory(st){
     const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='victoria.png';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
   }catch(e){}
 }
-function endGame(){coopOver('lose',S.why);S.over=1;fxStamp('DERROTA','ko');ov(null,[['Nueva partida',()=>newGame()]],`<h2>Derrota</h2><p>${S.why||(S.hp<=0?'Te quedaste sin corazones.':'El jefe final se quedó sin progreso.')}</p>`)}
+function endGame(){coopOver('lose',S.why);S.over=1;fxStamp('DERROTA','ko');
+  const cs=(S.whyC||[]).filter(Boolean),cards=cs.length?`<div class="grid" style="grid-template-columns:repeat(${Math.min(cs.length,2)},1fr);max-width:${Math.min(cs.length,2)*110}px;margin:8px auto">${cs.map(id=>`<div>${card(id)}</div>`).join('')}</div>`:'';
+  /* ventana fija (sin "Cerrar"): siempre hay una salida, nunca queda el tablero trabado */
+  ov(null,[['Nueva partida',()=>newGame()],['Menú principal',()=>{toMenu(1);return 1}]],`<h2>Derrota</h2>${cards}<p>${S.why||(S.hp<=0?'Te quedaste sin corazones.':'El jefe final se quedó sin progreso.')}</p>`,1)}
 const newGame=()=>{RES2=null;close();try{localStorage.removeItem('mesa-juego')}catch(e){}const inRoom=COOP&&MP.code&&MP.ws;NEWG=1;showLobby();if(inRoom)mpRoom()};
 
 /* ---------- mazos ---------- */
@@ -850,7 +853,7 @@ function dropCh(i){const x=S.cross[i];if(i<0||!x)return;
   if(/^c1[456]$/.test(x.id))return;
   if(x.id==='c01'||x.id==='c02'){S.hand.forEach(h=>S.disc.push(h));S.hand=[];return}
   S.disc.push(x.id);S.cross[i]=null;
-  if(x.id==='c57'){S.hp=0;S.why='Descartaste c57.'}
+  if(x.id==='c57'){S.hp=0;S.why='Descartaste este desafío y perdiste.';S.whyC=['c57']}
   S.cross.forEach(y=>{if(y&&/^c1[456]$/.test(y.id))hurt(2)})}
 function evt(i){const id=S.cross[i].id;
   if(id==='c50')return ov(id,[['Activar: recuperar 6 de salud y quitar 2 al jefe final',()=>{S.hp=Math.min(10,S.hp+6);S.cross[0].p=Math.max(0,S.cross[0].p-2);S.disc.push(id);S.cross[i]=null}]]);
@@ -923,10 +926,10 @@ function sweep(cont){
   render();
   res2(id,'<div class="pv">¡Desafío completado!</div><p>Alcanzó su progreso total.</p><p>Recompensa:</p>',[...(spec[id]||[[],[]])[0]],()=>sweep(cont))}
 function discCard(id){S.hand.splice(S.hand.indexOf(id),1);S.disc.push(id);if(S.cross.some(y=>y&&y.id==='c34'))hurt(1)}
-function pickHand(n,b,r){if(!r&&n&&S.mesa.includes('k04'))n++;if(n>S.hand.length&&S.cross.some(y=>y&&y.id==='c38')){S.hp=0;S.why='c38: no tenías cartas suficientes para descartar.'}if(!n||!S.hand.length)return b();ov(null,S.hand.map(x=>[x,()=>{discCard(x);render();pickHand(n-1,b,1);return 1},0,'',x]),`<p>Descarta ${n} carta(s)</p>`,1)}
+function pickHand(n,b,r){if(!r&&n&&S.mesa.includes('k04'))n++;if(n>S.hand.length&&S.cross.some(y=>y&&y.id==='c38')){S.hp=0;S.why='No tenías cartas suficientes para descartar con este desafío en juego.';S.whyC=['c38']}if(!n||!S.hand.length)return b();ov(null,S.hand.map(x=>[x,()=>{discCard(x);render();pickHand(n-1,b,1);return 1},0,'',x]),`<p>Descarta ${n} carta(s)</p>`,1)}
 const hurt=(n,r)=>{const h0=S.hp;if(M18&&n>0){n--;M18=0}S.hp=Math.max(0,S.hp-n*(!r&&S.cross.some(y=>y&&y.id==='c37')?2:1)-(S.mesa.includes('k05')?1:0));if(S.hp<h0)fxHurt(h0,S.hp)};
 function kShow(id,back,hd){coopKEv(id);const n=+id.slice(1),f=S.final,bj=q=>{S.cross[0].p=Math.max(0,S.cross[0].p-q)};
-  if(S.cross.some(x=>x&&(x.id==='c05'||x.id==='c06'))){S.hp=0;S.why='Robaste un agotamiento con c05 o c06 en juego.'}
+  if(S.cross.some(x=>x&&(x.id==='c05'||x.id==='c06'))){S.hp=0;S.why='Robaste un agotamiento con este desafío en juego.';S.whyC=S.cross.filter(x=>x&&(x.id==='c05'||x.id==='c06')).map(x=>x.id)}
   const E={1:[`quitar ${f?5:1} de progreso al jefe final`,()=>bj(f?5:1)],3:[`quitar ${f?10:2} de progreso al jefe final`,()=>bj(f?10:2)],6:['sufrir 3 de daño',()=>hurt(3)]}[n],b=[];
   if(E)b.push(['Aplicar: '+E[0]+' y barajarla al mazo',()=>{E[1]();S.mesa.splice(S.mesa.indexOf(id),1);S.dK.push(id);shuf(S.dK);render();fxShufK();if(back){back();return 1}}]);
   else if(back)b.push(['Continuar',()=>{back();return 1}]);
@@ -962,7 +965,7 @@ function resolve(h,nd){
   if(nf&&pfx==='m')fx.push([`robar ${nf} carta(s) por fuego (m19)`,()=>draw(nf)]);
   if(act==='m01')fx.push([`m01: sufrir 1 de daño`,()=>hurt(1)],[`m01: barajar en el mazo en lugar del descarte`,()=>{const k=S.disc.lastIndexOf('m01');if(k<0)return;S.disc.splice(k,1);S.dM.push('m01');shuf(S.dM);fxShufM()}]);
   if(act==='m05')fx.push([`m05: robar ${COOP?1:1+as.length} carta(s)`,()=>draw(COOP?1:1+as.length)]);
-  if(act==='m04'){fx.push([`m04 (elige): activar habilidad O regresar agotamiento al mazo`,b=>{const km=S.mesa.filter(x=>/^k0[245]$/.test(x));ov(null,[['Activar la carta de habilidad',()=>{S.hab=1;render();b();return 1}],...(km.length?[['Regresar una carta de agotamiento al mazo',b2=>{ov(null,km.map(x=>[x,()=>{S.mesa.splice(S.mesa.indexOf(x),1);S.dK.push(x);shuf(S.dK);render();fxShufK();b();return 1},0,'',x]),'<p>Elige el agotamiento a regresar</p>',1);return 1}]]:[])],'<p>Elige el efecto</p>',1);return 2}]);fx.push([`m04: barajar los descartes de personaje al mazo (sin esta carta)`,()=>{const d=S.disc.filter(x=>x[0]===pfx&&x!=='m04');S.disc=S.disc.filter(x=>!d.includes(x));S.dM.push(...d);shuf(S.dM);fxShufM()}]);}
+  if(act==='m04'){fx.push([`m04 (elige): activar habilidad O regresar agotamiento al mazo`,b=>{const km=S.mesa.filter(x=>/^k0[245]$/.test(x));ov('m04',[['Activar la carta de habilidad',()=>{S.hab=1;render();b();return 1}],...(km.length?[['Regresar una carta de agotamiento al mazo',b2=>{ov(null,km.map(x=>[x,()=>{S.mesa.splice(S.mesa.indexOf(x),1);S.dK.push(x);shuf(S.dK);render();fxShufK();b();return 1},0,'',x]),'<p>Elige el agotamiento a regresar</p>',1);return 1}]]:[])],'<p>Elige el efecto</p>',1);return 2}]);fx.push([`m04: barajar los descartes de personaje al mazo (sin esta carta)`,()=>{const d=S.disc.filter(x=>x[0]===pfx&&x!=='m04');S.disc=S.disc.filter(x=>!d.includes(x));S.dM.push(...d);shuf(S.dM);fxShufM()}]);}
   if(act==='m13'&&S.hand.length)fx.push([`m13: devolverla a tu mano`,()=>{S.disc.splice(S.disc.lastIndexOf('m13'),1);S.hand.push('m13')}]);
   if(act==='m18')M18=1;
   if(act==='l15'&&TY[id]==='T')M18=1;
@@ -970,13 +973,13 @@ function resolve(h,nd){
     if(act==='l01')fx.push(['l01: colocar 2 de progreso en un desafío a tu elección',b=>{pickCh('Elige el desafío (+2 de progreso)',x=>{x.p+=2},b,null,1);return 2}]);
     if(act==='l02'&&S.hand.some(swd))fx.push(['l02: devolverla a tu mano (te queda una espada en la mano)',()=>{if(!S.hand.some(swd))return;const k=S.disc.lastIndexOf('l02');if(k<0)return;S.disc.splice(k,1);S.hand.push('l02')}]);
     if(act==='l03')fx.push(['l03: robar 2 cartas',()=>draw(2)]);
-    if(act==='l06'&&!as.length)fx.push(['l06 (elige): activar tu habilidad o quitar 1 agotamiento activo',b=>{const km=S.mesa.filter(x=>/^k0[245]$/.test(x));ov(null,[['Activar la carta de habilidad',()=>{S.hab=1;render();b();return 1}],...(km.length?[['Quitar un agotamiento activo (regresa al mazo)',()=>{ov(null,km.map(x=>[x,()=>{S.mesa.splice(S.mesa.indexOf(x),1);S.dK.push(x);shuf(S.dK);render();fxShufK();b();return 1},0,'',x]),'<p>Elige el agotamiento a quitar</p>',1);return 1}]]:[])],'<p>Elige el efecto de l06</p>',1);return 2}]);
+    if(act==='l06'&&!as.length)fx.push(['l06 (elige): activar tu habilidad o quitar 1 agotamiento activo',b=>{const km=S.mesa.filter(x=>/^k0[245]$/.test(x));ov('l06',[['Activar la carta de habilidad',()=>{S.hab=1;render();b();return 1}],...(km.length?[['Quitar un agotamiento activo (regresa al mazo)',()=>{ov(null,km.map(x=>[x,()=>{S.mesa.splice(S.mesa.indexOf(x),1);S.dK.push(x);shuf(S.dK);render();fxShufK();b();return 1},0,'',x]),'<p>Elige el agotamiento a quitar</p>',1);return 1}]]:[])],'<p>Elige el efecto</p>',1);return 2}]);
     if(act==='l07'&&as.length)fx.push([`l07: sufrir ${as.length} de daño (fue asistida ${as.length} ${as.length>1?'veces':'vez'})`,()=>hurt(as.length)]);
-    if(act==='l13')fx.push(['l13 (elige): robar 1 carta o avanzar 2 de progreso',b=>{ov(null,[['Robar 1 carta',()=>{draw(1);render();b();return 1}],['Avanzar 2 de progreso en un desafío',()=>{pickCh('Elige el desafío (+2 de progreso)',x=>{x.p+=2},b,null,1);return 1}]],'<p>Elige el efecto de l13</p>',1);return 2}]);
+    if(act==='l13')fx.push(['l13 (elige): robar 1 carta o avanzar 2 de progreso',b=>{ov('l13',[['Robar 1 carta',()=>{draw(1);render();b();return 1}],['Avanzar 2 de progreso en un desafío',()=>{pickCh('Elige el desafío (+2 de progreso)',x=>{x.p+=2},b,null,1);return 1}]],'<p>Elige el efecto</p>',1);return 2}]);
     if(nf)fx.push([`l19: añadir 1 de progreso por espada (${nf}) a desafíos que no intentaste este turno`,b=>{const go=n=>{if(!n)return b();pickCh(`l19: elige el desafío (+1 de progreso) · quedan ${n}`,x=>{x.p+=1},()=>go(n-1),c,1)};go(nf);return 2}]);
   }
   const w0=c.p+add>=lv;
-  if(S.mesa.includes('k02'))fx.push(['k02: elegir entre 1 de daño o quitar 1 de progreso al jefe final',b=>{ov(null,[['Sufrir 1 de daño',()=>{hurt(1);render();b();return 1}],['Quitar 1 al jefe final',()=>{S.cross[0].p=Math.max(0,S.cross[0].p-1);render();b();return 1}]],'<p>Efecto de k02</p>',1);return 2}]);
+  if(S.mesa.includes('k02'))fx.push(['k02: elegir entre 1 de daño o quitar 1 de progreso al jefe final',b=>{ov('k02',[['Sufrir 1 de daño',()=>{hurt(1);render();b();return 1}],['Quitar 1 al jefe final',()=>{S.cross[0].p=Math.max(0,S.cross[0].p-1);render();b();return 1}]],'<p>Elige el efecto</p>',1);return 2}]);
   if(act==='m02')fx.push([`m02: elegir otro desafío y añadirle 1 progreso por fuego en descartes`,b=>{pickCh('Elige el otro desafío',x=>{x.p+=fireDisc()},b,c,1);return 2}]);
   if(act==='m07'&&as.length)fx.push([`m07: alguien asistió, puedes descartar cartas (o ninguna) y el que asistió roba igual número`,b=>{COOP?discDraw(b,1,n=>{if(n)mpSend({k:'draw',n})}):discDraw(b);return 2}]);
   if(act==='m10'&&S.hand.length)fx.push([`m10: poner una carta de tu mano encima del mazo`,b=>{ov(null,S.hand.map(x=>[x,()=>{S.hand.splice(S.hand.indexOf(x),1);S.dM.push(x);render();b();return 1},0,'',x]),'<p>Elige la carta</p>',1);return 2}]);
@@ -1576,7 +1579,7 @@ function coopEv(d){
   }catch(e){}
 }
 /* ---- victoria / derrota compartidas ---- */
-function coopOver(kind,msg){if(!COOP||COOPEND)return;COOPEND=1;mpSend({k:'over',kind,msg,sh:coopShared()});MYT=1;coopUi()}
+function coopOver(kind,msg){if(!COOP||COOPEND)return;COOPEND=1;mpSend({k:'over',kind,msg,cards:S.whyC||[],sh:coopShared()});MYT=1;coopUi()}
 function mpOnMsg(d){
   if(!d)return;
   if(d.k==='rs'){const g=d.got||0;for(let i=OUTB.length-1;i>=0;i--)if(OUTB[i].n<=g)OUTB.splice(i,1);OUTB.forEach(x=>mpRaw({t:'msg',n:x.n,data:x.data}));return}
@@ -1591,7 +1594,7 @@ function mpOnMsg(d){
   else if(d.k==='fxDone'&&COOP&&COOPCONT){coopWait(null);OWNER='a';coopUi();d.ids.forEach((id,k)=>{if(id&&S.cross[k]&&S.cross[k].id===id)S.cross[k].p=d.p[k]});render();const f=COOPCONT;COOPCONT=null;f()}
   else if(d.k==='draw'&&COOP){coopFeed(`🎴 Robas ${d.n} carta(s) por m07 de tu amigo`);draw(d.n);render()}
   else if(d.k==='ev'&&COOP)coopEv(d)
-  else if(d.k==='over'&&COOP&&!COOPEND){COOPEND=1;SYQ=null;sbtHide();coopWait(null);COOPBUSY=0;MYT=1;coopUi();close();coopApply(d.sh);if(d.kind==='win')showVictory(d.msg);else{S.why=d.msg;endGame()}}
+  else if(d.k==='over'&&COOP&&!COOPEND){COOPEND=1;SYQ=null;sbtHide();coopWait(null);COOPBUSY=0;MYT=1;coopUi();close();coopApply(d.sh);if(d.kind==='win')showVictory(d.msg);else{S.why=d.msg;S.whyC=d.cards||[];endGame()}}
   else if(d.k==='left'&&COOP&&!COOPEND){COOPEND=1;SYQ=null;sbtHide();coopWait(null);COOPBUSY=0;close();ov(null,[['Volver al menú',()=>{toMenu(1);return 1}]],'<h2>Tu amigo salió</h2><p>La partida cooperativa terminó.</p>',1)}
   else if(d.k==='sy'&&syR())syRecv(d)
   else if(d.k==='pass'&&COOP){SYQ=null;syOvHide();SYLAST='';coopApply(d.sh);MYT=1;OWNER='a';COOPFX=0;sbtHide();PICK=1;coopUi();render();fxTurn(d.sh.turn-1)}
