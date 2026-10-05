@@ -565,10 +565,10 @@ function fxDiff(){
   PMA=S.mesa.slice();PHAB=S.hab?1:0;PV=nv;PHP=S.hp;PM=S.mesa.length;PT=S.turn}
 const rc=sel=>{const e=document.querySelector(sel),r=e&&e.getBoundingClientRect();return r&&r.width?r:null};
 /* una carta vuela de un punto a otro con brillo (si no hay punto visible, sale del centro / llega abajo) */
-async function flyCard(id,a,b,ms=850,col='#ffd34d'){try{if(RM)return;const w=64,h=w*1.4,A=a?ctr(a):[innerWidth/2,innerHeight*.45],B=b?ctr(b):[innerWidth/2,innerHeight-60];
+async function flyCard(id,a,b,ms=850,col='#ffd34d',w=64,g=1.5){try{if(RM)return;const h=w*1.4,A=a?ctr(a):[innerWidth/2,innerHeight*.45],B=b?ctr(b):[innerWidth/2,innerHeight-60];
   const g=document.createElement('div');g.className='cgh';g.style.cssText=`left:${A[0]-w/2}px;top:${A[1]-h/2}px;width:${w}px;height:${h}px;border-radius:8px;box-shadow:0 0 22px 6px ${col}`;g.innerHTML=card(id);document.body.appendChild(g);
   try{SFX.swoosh()}catch(e){}
-  await AN(g,[{transform:'scale(.6)',opacity:0},{transform:'scale(1.5)',opacity:1,offset:.28},{transform:`translate(${B[0]-A[0]}px,${B[1]-A[1]}px) scale(.5)`,opacity:.9}],{duration:ms,easing:'ease-in-out'});g.remove();ring(B[0],B[1],col)}catch(e){}}
+  await AN(g,[{transform:`scale(${g*.4})`,opacity:0},{transform:`scale(${g})`,opacity:1,offset:.28},{transform:`translate(${B[0]-A[0]}px,${B[1]-A[1]}px) scale(${Math.min(.5,55/w)})`,opacity:.9}],{duration:ms,easing:'ease-in-out'});g.remove();ring(B[0],B[1],col)}catch(e){}}
 const qFly=(id,fa,fb,col)=>{if(!NOFX)BQ.push(()=>flyCard(id,rc(fa),rc(fb),850,col))};
 /* descartes desde la mano: se juntan en una sola animación */
 function qDisc(id){if(NOFX)return;if(!DFQ.length)BQ.push(async()=>{const ids=DFQ.splice(0).slice(0,5);await Promise.all(ids.map((x,i)=>wait(i*140).then(()=>flyCard(x,null,rc('#pDm'),700,'#ff8a8a'))))});DFQ.push(id)}
@@ -698,21 +698,28 @@ async function fly(el,target,ms){
 function startFinal(){
   if(S.final||SFB)return;
   S.apart=S.apart||[];
-  /* al llegar al fondo del mazo: c53 pasa a completados; c52 se resuelve (si se cumplió ganas, si no) y también pasa a completados */
-  const mv=[],tx=[];
-  if(S.apart.includes('c53')){S.apart=S.apart.filter(x=>x!=='c53');S.comp.push('c53');mv.push('c53');tx.push('c53 pasa a completados.')}
+  /* al llegar al fondo del mazo: c53 pasa a completados; c52 se resuelve (si se cumplió ganas, si no) y también pasa a completados.
+     Cada carta sale en grande, avisa y vuela sola a completados. */
+  const items=[];let win=0;
+  if(S.apart.includes('c53')){S.apart=S.apart.filter(x=>x!=='c53');S.comp.push('c53');items.push({id:'c53',txt:'Esta carta pasa a completados'})}
   if(S.apart.includes('c52')){
     const p=S.cross[0].p,ok=p>=13;
-    S.apart=S.apart.filter(x=>x!=='c52');S.comp.push('c52');mv.push('c52');
-    if(ok){S.final=1;confetti();showVictory('Llegaste al fondo del mazo y se cumplió c52: el jefe final tiene 13 o más de progreso.');return}
-    tx.push(`c52 no se cumplió (el jefe final tiene ${p} de 13 de progreso) y pasa a completados.`)}
-  if(mv.length){render();ov(null,[['Continuar',()=>{}]],`<p>Llegaste al fondo del mazo.</p><div class="grid">${mv.map(id=>`<div>${card(id)}</div>`).join('')}</div><p>${tx.join(' ')}</p>`,1);return}
-  SFB=1;const fp={j:BOSSES[Math.floor(Math.random()*3)],st:Math.floor(Math.random()*3),th0:Math.random()*6.28};
+    S.apart=S.apart.filter(x=>x!=='c52');S.comp.push('c52');
+    items.push({id:'c52',txt:ok?`¡Se cumplió! El jefe final tiene ${p} de 13 de progreso`:`No se cumplió: el jefe final tiene ${p} de 13 de progreso. Pasa a completados`});
+    if(ok)win=1}
+  if(items.length){SFB=1;
+    (async()=>{try{for(const it of items){const kd='Llegaste al fondo del mazo';sy('fx',{f:'efx',a:[it.id,kd,it.txt,'#ffd34d',2300]});
+        await presShow(it.id,kd,it.txt,'#ffd34d',2300);const pc=PRES&&PRES.querySelector('.pc'),r=pc&&pc.getBoundingClientRect();presHide();
+        if(r)await flyCard(it.id,r,rc('#pComp'),850,'#ffd34d',r.width,1);render()}}catch(e){}
+      SFB=0;render();
+      if(win){S.final=1;confetti();showVictory('Llegaste al fondo del mazo y se cumplió c52: el jefe final tiene 13 o más de progreso.')}})();
+    return}
+  SFB=1;const perm=(a=>{for(let i=3;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a})([1,2,3,4]),fp={j:BOSSES[Math.floor(Math.random()*3)],st:Math.floor(Math.random()*3),th0:Math.random()*6.28,perm};
   if(COOP&&MYT)sy('final',{fp});
   finalAnim(fp)
 }
 function finalAnim(fp){
-  const j=fp.j;SFB=1;
+  const j=fp.j,perm=fp.perm||[1,2,3,4];SFB=1;
   fxPlay(async L=>{try{
     /* 1) ruleta del jefe */
     const idx=BOSSES.indexOf(j),st=fp.st,N=21+(((idx-st)%3)+3)%3;
@@ -722,7 +729,7 @@ function finalAnim(fp){
     bs.forEach((e,i)=>{if(i!==idx)e.classList.add('dim')});bs[idx].classList.add('win');SFX.boss();vib([40,60,80,60,40]);await wait(1100);
     /* 2) el estado cambia y el tablero queda oculto bajo la animación */
     S.cross.slice(1).forEach(x=>{if(x&&x.id[0]==='c')S.disc.push(x.id)});
-    S.cross=[{id:j,p:S.cross[0].p},...[1,2,3,4].map(n=>({id:'g0'+n,p:0}))];S.final=1;
+    S.cross=[{id:j,p:S.cross[0].p},null,null,null,null];perm.forEach((pos,k)=>{S.cross[pos]={id:'g0'+(k+1),p:0}});S.final=1;
     HIDE=new Set([0,1,2,3,4]);render();
     L.classList.add('clear');T.style.opacity=0;bs.forEach((e,i)=>{if(i!==idx)e.style.opacity=0});await wait(350);
     /* 3) el jefe entra en su lugar */
@@ -736,7 +743,7 @@ function finalAnim(fp){
       gd.forEach((el,k)=>{const a=th+k*Math.PI/2,d=(Math.sin(a)+1)/2;el.style.transform=`translate(-50%,-50%) translate(${Rx*Math.cos(a)}px,${Ry*Math.sin(a)}px) scale(${.7+.4*d})`;el.style.zIndex=Math.round(d*10);el.style.opacity=.55+.45*d});
       u<1?requestAnimationFrame(f):res()};requestAnimationFrame(f)});
     await wait(250);
-    for(let k=0;k<4;k++){c=cellOf(k+1);await fly(gd[k],c,700);HIDE.delete(k+1);c.classList.remove('hid');c.classList.add('land');SFX.thud();vib(18);gd[k].remove();await wait(120)}
+    for(let k=0;k<4;k++){c=cellOf(perm[k]);await fly(gd[k],c,700);HIDE.delete(perm[k]);c.classList.remove('hid');c.classList.add('land');SFX.thud();vib(18);gd[k].remove();await wait(120)}
     await wait(700);
   }catch(e){}finally{SFB=0;HIDE.clear();render()}})
 }
