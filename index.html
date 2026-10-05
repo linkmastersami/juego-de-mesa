@@ -513,7 +513,7 @@ function fxPlay(job){FXQ.push(job);if(FXR)return;FXR=1;FXL.classList.add('on');(
 
 /* ---------- animaciones extra ---------- */
 const PEND={};
-let PV=[],PHP=null,PM=null,PMA=null,PT=null,PHAB=null,DFQ=[],NOFX=0,BR=0,TP=null,IDLE=0;const BQ=[];
+let SKIPG=new Set(),PV=[],PHP=null,PM=null,PMA=null,PT=null,PHAB=null,DFQ=[],NOFX=0,BR=0,TP=null,IDLE=0;const BQ=[];
 /* Fase de tablero: todo lo que se anima en el tablero espera a que se cierren la pantalla de
    efectos (#ov), la batalla (#bt) y los efectos a pantalla completa (FXR). Entonces se reproduce
    UNA A UNA (cola BQ), luego se rellena la cruz (autoFill) y SOLO AL FINAL empieza el turno. */
@@ -548,7 +548,7 @@ function fxDiff(){
   if(PT!==null&&S.turn<PT){PV=[];PHP=null;PM=null;PMA=null}
   if(!NOFX)for(let i=0;i<5;i++){const o=PV[i],n=nv[i];
     if(o&&n&&o.id===n.id&&o.p!==n.p&&n.r.width){const d=n.p-o.p,j=CPOS.indexOf(i),op=o.p,np=n.p;BQ.push(async()=>{const el=$('#cross').children[j];if(!el)return;const pg=el.querySelector('.pg');if(pg)pg.textContent=op;await wait(250);const r=el.getBoundingClientRect(),f=document.createElement('b');f.className='pgf';f.textContent=(d>0?'+':'')+d;f.style.cssText=`left:${r.left+r.width/2}px;top:${r.top+r.height/3}px;color:${d>0?'#ffd34d':'#7dffb0'}`;document.body.appendChild(f);setTimeout(()=>f.remove(),1200);if(pg){pg.textContent=np;pg.classList.remove('bump');void pg.offsetWidth;pg.classList.add('bump')}await wait(900)})}
-    else if(o&&i&&(!n||n.id!==o.id)&&S.cross.length){const k=S.comp[S.comp.length-1]===o.id?'gdone':'gout',j=CPOS.indexOf(i);if(!n){PEND[i]={h:o.h,p:o.p};const ce=ch[j];if(ce){ce.className='cell';ce.innerHTML=o.h+'<b class="pg">'+o.p+'</b>'}}BQ.push(async()=>{const e=$('#cross').children[j],r=e?e.getBoundingClientRect():null;if(PEND[i]){delete PEND[i];if(e&&!S.cross[i]){e.className='cell empty';e.innerHTML=''}}ghost(r&&r.width?r:o.r,o.h,k,950);await wait(1000)})}}
+    else if(o&&i&&(!n||n.id!==o.id)&&S.cross.length&&!SKIPG.delete(i)){const k=S.comp[S.comp.length-1]===o.id?'gdone':'gout',j=CPOS.indexOf(i);if(!n){PEND[i]={h:o.h,p:o.p};const ce=ch[j];if(ce){ce.className='cell';ce.innerHTML=o.h+'<b class="pg">'+o.p+'</b>'}}BQ.push(async()=>{const e=$('#cross').children[j],r=e?e.getBoundingClientRect():null;if(PEND[i]){delete PEND[i];if(e&&!S.cross[i]){e.className='cell empty';e.innerHTML=''}}ghost(r&&r.width?r:o.r,o.h,k,950);await wait(1000)})}}
   if(!NOFX&&PHP!==null&&S.hp>PHP&&S.turn>=PT&&!S.over)fxHeal(PHP,S.hp);
   if(!NOFX&&PM!==null&&S.mesa.length===PM+1){const ix=S.mesa.length-1;BQ.push(async()=>{const m=$('#mesa').children[ix];if(m){m.classList.add('land');await wait(750)}})}
   if(!NOFX&&PHAB!==null&&S.turn>=PT&&!S.over){const hid=(S.personaje||'m')+'20',on=S.hab?1:0;sy('fx',{f:'hab',a:[on,hid]});if(PHAB!==on)BQ.push(()=>habFx(on))}
@@ -564,6 +564,23 @@ async function flyCard(id,a,b,ms=850,col='#ffd34d'){try{if(RM)return;const w=64,
 const qFly=(id,fa,fb,col)=>{if(!NOFX)BQ.push(()=>flyCard(id,rc(fa),rc(fb),850,col))};
 /* descartes desde la mano: se juntan en una sola animación */
 function qDisc(id){if(NOFX)return;if(!DFQ.length)BQ.push(async()=>{const ids=DFQ.splice(0).slice(0,5);await Promise.all(ids.map((x,i)=>wait(i*140).then(()=>flyCard(x,null,rc('#pDm'),700,'#ff8a8a'))))});DFQ.push(id)}
+/* evento activado: la carta entra enorme con rayos y destello y luego vuela a donde termina (descarte / apartadas) */
+async function eventFx(id,toSel,col='#ffd34d',txt='¡EVENTO ACTIVADO!'){try{const W=innerWidth,H=innerHeight;
+  if(RM){await wait(500);return}
+  const dim=document.createElement('div');dim.className='cgh';dim.style.cssText='inset:0;background:radial-gradient(circle,#1a1020cc,#000d)';document.body.appendChild(dim);dim.animate([{opacity:0},{opacity:1}],{duration:260,fill:'forwards'});
+  const w=Math.min(W*.58,250),x=W/2,y=H*.44;
+  rays(x,y,col,1500);SFX.boom();vib([30,40,70]);
+  const c=document.createElement('div');c.className='cgh';c.style.cssText=`left:${x-w/2}px;top:${y-w*.7}px;width:${w}px;height:${w*1.4}px;border-radius:12px;z-index:42;box-shadow:0 0 50px 14px ${col},0 0 120px 40px ${col}66`;c.innerHTML=card(id);document.body.appendChild(c);
+  const tx=big(txt,x,H*.14,Math.min(34,W/11));tx.style.cssText+=`;color:${col};font-weight:800;text-align:center;width:90vw;text-shadow:0 0 18px ${col},0 3px 0 #000`;tx.style.fontFamily='Fredoka,sans-serif';
+  tx.animate([{transform:'translate(-50%,-50%) scale(.2)',opacity:0},{transform:'translate(-50%,-50%) scale(1.25)',opacity:1,offset:.4},{transform:'translate(-50%,-50%) scale(1)',opacity:1}],{duration:500,fill:'forwards',easing:'ease-out'});
+  await AN(c,[{transform:'scale(.1) rotate(25deg)',opacity:0},{transform:'scale(1.25) rotate(-4deg)',opacity:1,offset:.45},{transform:'scale(1) rotate(0)',opacity:1}],{duration:650,easing:'cubic-bezier(.2,.9,.3,1.2)'});
+  impact(x,y,col,26);shakeApp(12,500);ring(x,y,'#fff');setTimeout(()=>ring(x,y,col),140);SFX.combo(6);
+  await wait(900);
+  const t=rc(toSel),B=t?ctr(t):[W/2,H-40];
+  tx.animate([{opacity:1},{opacity:0}],{duration:300,fill:'forwards'});dim.animate([{opacity:1},{opacity:0}],{duration:500,fill:'forwards'});
+  await AN(c,[{transform:'none',opacity:1},{transform:`translate(${B[0]-x}px,${B[1]-y}px) scale(.12)`,opacity:.3}],{duration:620,easing:'ease-in'});
+  c.remove();dim.remove();tx.remove();ring(B[0],B[1],col);
+}catch(e){}}
 /* habilidad: entra la carta enorme con rayos, destello y temblor; luego vuela a Estado. Al gastarla se apaga con una onda gris */
 async function habFx(on,idp,amigo){try{const id=idp||(S.personaje||'m')+'20',W=innerWidth,H=innerHeight;
   if(RM){await wait(500);return}
@@ -899,10 +916,10 @@ function dropCh(i){const x=S.cross[i];if(i<0||!x)return;
   S.disc.push(x.id);S.cross[i]=null;
   if(x.id==='c57'){S.hp=0;S.why='Descartaste este desafío y perdiste.';S.whyC=['c57']}
   S.cross.forEach(y=>{if(y&&/^c1[456]$/.test(y.id))hurt(2)})}
-function evt(i){const id=S.cross[i].id;
-  if(id==='c50')return ov(id,[['Activar: recuperar 6 de salud y quitar 2 al jefe final',()=>{S.hp=Math.min(10,S.hp+6);S.cross[0].p=Math.max(0,S.cross[0].p-2);S.disc.push(id);S.cross[i]=null}]]);
-  if(id==='c52')return ov(id,[['Activar: +2 al jefe final y apartar la carta',()=>{S.cross[0].p+=2;S.apart.push(id);S.cross[i]=null}]]);
-  ov(id,[['Activar: descartar este + otro desafío',()=>{S.disc.push(id);S.cross[i]=null;render();pickCh('Elige el desafío a descartar',x=>{const mj=/^c4[0-8]$/.test(x.id);dropCh(S.cross.indexOf(x));if(mj){S.hand.forEach(h=>S.disc.push(h));S.hand=[];const pm=S.disc.filter(q=>q[0]===PC());S.disc=S.disc.filter(q=>q[0]!==PC());S.dM.push(...pm);shuf(S.dM);fxShufM();draw(hN())}render();close()},()=>close(),null);return 1}]])}
+function evt(i){const id=S.cross[i].id,ef=(sel,col)=>{sy('fx',{f:'evt',a:[id,sel,col]});fxPlay(async()=>{await eventFx(id,sel,col)});SKIPG.add(i)};
+  if(id==='c50')return ov(id,[['Activar: recuperar 6 de salud y quitar 2 al jefe final',()=>{ef('#pDisc','#7dffb0');S.hp=Math.min(10,S.hp+6);S.cross[0].p=Math.max(0,S.cross[0].p-2);S.disc.push(id);S.cross[i]=null}]]);
+  if(id==='c52')return ov(id,[['Activar: +2 al jefe final y apartar la carta',()=>{ef('#apart','#b06bff');S.cross[0].p+=2;S.apart.push(id);S.cross[i]=null}]]);
+  ov(id,[['Activar: descartar este + otro desafío',()=>{ef('#pDisc','#ff8a4d');S.disc.push(id);S.cross[i]=null;render();pickCh('Elige el desafío a descartar',x=>{const mj=/^c4[0-8]$/.test(x.id);dropCh(S.cross.indexOf(x));if(mj){S.hand.forEach(h=>S.disc.push(h));S.hand=[];const pm=S.disc.filter(q=>q[0]===PC());S.disc=S.disc.filter(q=>q[0]!==PC());S.dM.push(...pm);shuf(S.dM);fxShufM();draw(hN())}render();close()},()=>close(),null);return 1}]])}
 const unl=()=>[['a',6],['r',7],['v',8]].filter(([k,n])=>S.cross.some(x=>x&&x.id==='g0'+n));
 function openBat(i){const go=k=>{PICK=0;B={i,act:null,as:[],col:k,m18sh:0};$('#bt').classList.add('on');rb()};
   if(i)return go();
@@ -1693,6 +1710,7 @@ function syRecv(d){
     else if(a.f==='hurt')fxPlay(jHurt(...x));
     else if(a.f==='dd')fxPlay(jDd(...x));
     else if(a.f==='shuf')fxPlay(jShuf(...x));
+    else if(a.f==='evt')fxPlay(async()=>{await eventFx(...x)})
     else if(a.f==='hab')fxPlay(async()=>{await habFx(x[0],x[1],1)})
     else if(a.f==='draw')fxPlay(jDraw(Array(a.n).fill('back'),1,1))}
   else if(d.e==='bat')sbtRender(a);
