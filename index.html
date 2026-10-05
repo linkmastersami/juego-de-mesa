@@ -913,9 +913,11 @@ const l05on=()=>!!(B&&B.act&&B.act[0]==='l'&&swd(B.act)&&S.hand.includes('l05')&
 const sumB=()=>B.frz!==undefined?B.frz:B.act?baseV()+(B.act==='m03'||B.act==='m20'?fireDisc():0)+(B.act===p17()?B.v17||0:0)-(B.act===p16()&&ty()==='C'?2:0)+(B.act===p10()&&ty()==='T'?3:0)+B.as.reduce((t,x)=>t+av(x),0):0;
 const totB=()=>B.act?sumB()+(B.act===p06()?2*fireDisc():0):0;
 const blk=c=>S.cross.some(y=>y&&/^c1[123]$/.test(y.id))&&!/^c1[123]$/.test(c.id);
-function entry(i){const x=S.cross[i],n=+x.id.slice(1);if(x.id[0]!=='c')return;
-  if(n>=20&&n<=22)S.cross.forEach((y,k)=>{if(y&&k&&k!==i){x.p+=y.p;y.p=0}});
-  if(n>=40&&n<=48&&S.cross[0])S.cross[0].p=Math.max(0,S.cross[0].p-1)}
+/* efecto al entrar a la cruz (c20-c22 absorben progreso; los mini-jefes c40-c48 quitan 1 al jefe final): se muestra y luego se aplica */
+function entryFx(i){const x=S.cross[i];if(!x||x.id[0]!=='c')return null;const n=+x.id.slice(1);
+  if(n>=20&&n<=22){if(!S.cross.some((y,k)=>y&&k&&k!==i&&y.p>0))return null;return {txt:'Absorbe el progreso de los demás desafíos',fn:()=>{S.cross.forEach((y,k)=>{if(y&&k&&k!==i){x.p+=y.p;y.p=0}})}}}
+  if(n>=40&&n<=48&&S.cross[0])return {kind:'Mini-jefe',txt:'Elimina 1 de progreso del jefe final',fn:()=>{S.cross[0].p=Math.max(0,S.cross[0].p-1)}};
+  return null}
 function dropCh(i){const x=S.cross[i];if(i<0||!x)return;
   if(x.id[0]==='g'){const n=+x.id.slice(1);if(n<=4&&x.id!=='g03')S.cross[i]={id:'g'+pad(n+4),p:0};return}
   if(x.id==='c33'){x.p+=5;return}
@@ -1314,9 +1316,11 @@ async function autoFill(){
       ],{duration:1000,easing:'cubic-bezier(.3,.7,.3,1)',fill:'forwards'}).finished;
     }
   }catch(e){}
-  const id=S.dC.pop();S.cross[i]={id,p:S.apart.includes('c53')&&TY[id]&&TY[id]!=='C'?2:0};entry(i);checkEnd();render();SFX.place();vib(10);
+  const id=S.dC.pop();S.cross[i]={id,p:S.apart.includes('c53')&&TY[id]&&TY[id]!=='C'?2:0};const ef=entryFx(i);checkEnd();render();SFX.place();vib(10);
   try{const ce=cellOf(i);if(ce){ce.classList.add('land');if(!RM){const r=ce.getBoundingClientRect();ring(r.left+r.width/2,r.top+r.height/2,'#ffffff77')}}}catch(e){}
-  blk.remove();AFB=0;setTimeout(autoFill,150)
+  blk.remove();
+  if(ef){try{await wait(650);const col='#ff8a4d';const kd=ef.kind||'Efecto de carta';sy('fx',{f:'efx',a:[id,kd,ef.txt,col]});await presShow(id,kd,ef.txt,col,1700);presHide();ef.fn();render();await wait(300)}catch(e){ef.fn();render()}}
+  AFB=0;setTimeout(autoFill,150)
 }
 setInterval(autoFill,400);
 
