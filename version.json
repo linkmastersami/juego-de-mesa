@@ -82,6 +82,26 @@
   "k02.png": "0eb551aafe99",
   "manifest.json": "77a90e3f8df2",
   "package.json": "8fcadbba66bd",
+  "personajes/personaje 1/m01.png": "a27b823a949e",
+  "personajes/personaje 1/m02.png": "b2c91355ac83",
+  "personajes/personaje 1/m03.png": "20cade9a4814",
+  "personajes/personaje 1/m04.png": "47b26d00c73a",
+  "personajes/personaje 1/m05.png": "5fec015f6527",
+  "personajes/personaje 1/m06.png": "56cf04eb81fa",
+  "personajes/personaje 1/m07.png": "2b96c2bcd7df",
+  "personajes/personaje 1/m08.png": "0a21cce8adf0",
+  "personajes/personaje 1/m09.png": "2ceedf250953",
+  "personajes/personaje 1/m10.png": "b62cceb854a8",
+  "personajes/personaje 1/m11.png": "5a2ce4b8ba25",
+  "personajes/personaje 1/m12.png": "7f62cc43a0e1",
+  "personajes/personaje 1/m13.png": "2dd6e504496a",
+  "personajes/personaje 1/m14.png": "3be131860681",
+  "personajes/personaje 1/m15.png": "96f54ef31da2",
+  "personajes/personaje 1/m16.png": "f68b7c0292b4",
+  "personajes/personaje 1/m17.png": "cb9f00af79fb",
+  "personajes/personaje 1/m18.png": "b94398d467cf",
+  "personajes/personaje 1/m19.png": "e172533801f4",
+  "personajes/personaje 1/m20.png": "443ded2f62c2",
   "personajes/personaje 2/l01.webp": "a710800af7f8",
   "personajes/personaje 2/l02.webp": "9b82a6638e8b",
   "personajes/personaje 2/l03.webp": "66046b098a48",
@@ -105,5 +125,5 @@
   "personajes/personaje 2/l20.webp": "ec6233065035",
   "personajes/personaje 2/l20a.webp": "102be73e872a"
  },
- "version": "56225082e2b7"
+ "version": "6b8f32110c4b"
 }
