@@ -370,6 +370,7 @@ body.sbton #coopb span,body.incine #coopb span{display:none}
   <button class="lob-friend" id="lob-btn-friend" disabled>👥 Jugar con un amigo</button>
   <div class="lob-sep" id="lob-sep-resume" style="display:none">── o ──</div>
   <button class="lob-resume" id="lob-btn-resume" style="display:none">▶ Continuar partida guardada</button>
+  <button class="lob-resume" id="lob-modo">🌐 Jugando con Internet</button>
   <button class="lob-resume" id="lob-offline" style="display:none">⬇️ Guardar el juego para jugar sin conexión</button>
 </div>
 
@@ -453,11 +454,15 @@ const imgSrc=id=>id[0]==='m'?`personajes/personaje 1/${id}.webp`:id[0]==='l'?`pe
 const BACKH=c=>`<div class="card ${c}" data-id=""><div class="deck" style="width:100%;height:100%"></div></div>`;
 /* m19 y m20 tienen versión animada (m19a/m20a); la habilidad apagada y "reducir movimiento" usan la imagen fija */
 const ANIMC=new Set(['m19','m20','l19','l20']);
+/* modo de juego: con Internet (se actualiza solo) o sin Internet (no gasta datos; solo pregunta si hay actualización) */
+let MODO='on';try{MODO=localStorage.getItem('mesa-modo')==='off'?'off':'on'}catch(e){}
+const sinNet=()=>MODO==='off';
+const setCfg=m=>{try{return caches.open('lm-cfg').then(c=>c.put('modo',new Response(m)))}catch(e){return Promise.resolve()}};
 const card=(id,c='')=>{if(id==='back')return BACKH(c);const an=ANIMC.has(id)&&!RM&&!/\boff\b/.test(c),st=imgSrc(id);
   /* si la versión animada no está guardada (sin internet), se usa la imagen fija en vez de dejar la carta vacía */
   return `<div class="card ${c}" data-id="${id}"><img src="${an?st.replace('.webp','a.webp'):st}" alt="${id}" onerror="${an?`this.onerror=function(){this.remove()};this.src='${st}'`:'this.remove()'}"></div>`};
 /* con internet, deja guardadas las versiones animadas (el service worker las guarda al pedirlas) */
-setTimeout(()=>{if(navigator.onLine&&!RM)['m19','m20','l19','l20'].forEach(id=>fetch(imgSrc(id).replace('.webp','a.webp')).catch(()=>{}))},3000);
+setTimeout(()=>{if(navigator.onLine&&!RM&&!sinNet())['m19','m20','l19','l20'].forEach(id=>fetch(imgSrc(id).replace('.webp','a.webp')).catch(()=>{}))},3000);
 /* personaje activo: 'm' = personaje 1 (cartas m), 'l' = personaje 2 (cartas l) */
 let CHAR='m'; /* se elige en el lobby antes de startGame */
 const PC=()=>S.personaje||'m';
@@ -1459,7 +1464,7 @@ function mpRoom(){
   $('#mp-share').style.display=MP.role==='host'?'':'none';
   if(MP.role!=='host')$('#mp-alt').style.display='none';
 }
-$('#lob-btn-friend').addEventListener('click',()=>mpStart());
+$('#lob-btn-friend').addEventListener('click',()=>{if(sinNet()){alert('Jugar con un amigo necesita Internet. Toca "Jugando sin Internet" para volver a usarlo.');return}mpStart()});
 $('#mp-cancel').addEventListener('click',()=>{mpClose();mpEl.className=''});
 /* salir de la sala; si había una partida en marcha, también al menú */
 const mpExit=()=>{const enJuego=!lobbyOn();COOP=0;MYT=1;coopUi();mpClose();mpEl.className='';try{history.replaceState(null,'',location.pathname)}catch(e){}if(enJuego)toMenu(1)};
@@ -1758,6 +1763,7 @@ function updUI(st,n){
     b.className='ubtn ok';$('#uS').textContent='Reintentar';$('#uN').textContent='';g.style.display='';
     b.onclick=()=>{$('#upd').classList.remove('on');UPD.busy=0;updCheck()};
     g.onclick=()=>{$('#upd').classList.remove('on');UPD.busy=0}}}
+let UPDASK=0;
 async function updCheck(){
   if(OFF.busy||UPD.busy||!('caches' in window)||!navigator.onLine)return;
   let saved=null;try{saved=localStorage.getItem('mesa-offline')}catch(e){}
@@ -1767,7 +1773,11 @@ async function updCheck(){
   for(const [f,h] of Object.entries(V.files)){const has=!!await c.match(abU(f));if(has&&(first||map[f]===h))keep[f]=h;else todo.push(f)}
   const gone=Object.keys(map).filter(f=>!(f in V.files));
   if(!todo.length){gone.forEach(f=>c.delete(abU(f)));setMap(keep);return}
-  if(OFF.busy||UPD.busy)return;UPD.busy=OFF.busy=1;
+  /* sin Internet: no se descarga nada por su cuenta; se pregunta una vez por sesión */
+  if(sinNet()){if(UPDASK)return;UPDASK=1;
+    if(!confirm('Hay una actualización disponible del juego. ¿Quieres actualizar? Esto usará Internet (se vuelve a "sin Internet" al terminar).'))return;
+    await setCfg('on')}
+  if(OFF.busy||UPD.busy){if(sinNet())await setCfg('off');return}UPD.busy=OFF.busy=1;
   const MIN=5000,N=todo.length,t0=Date.now();let done=0,i=0,fail=0;
   updUI('run',N);
   const tk=setInterval(()=>{const pct=Math.round(Math.min(done/N,Math.min(1,(Date.now()-t0)/MIN))*100);$('#uF').style.width=pct+'%';$('#uS').textContent=`Actualizando… ${pct}%`},100);
@@ -1776,6 +1786,7 @@ async function updCheck(){
   gone.forEach(f=>c.delete(abU(f)));setMap(keep);OFF.busy=0;
   const rest=MIN-(Date.now()-t0);if(rest>0)await wait2(rest);
   clearInterval(tk);$('#uF').style.width='100%';$('#uS').textContent='Actualizando… 100%';await wait2(350);
+  if(sinNet())await setCfg('off');
   updUI(fail?'fail':'ok')}
 async function offInit(){
   if(!('caches' in window)||!('serviceWorker' in navigator))return;
@@ -1790,6 +1801,17 @@ async function offInit(){
     if(confirm('¿Guardar el juego en tu teléfono para jugar sin conexión? Se descargan las cartas y la música (mejor con Wi‑Fi).')){ok=1;offSave()}
     else{try{localStorage.setItem('mesa-offline-no','1')}catch(e){}}},2000)}
 offInit();
+function modoUI(){const b=$('#lob-modo');if(!b)return;b.textContent=sinNet()?'✈️ Jugando sin Internet · toca para cambiar':'🌐 Jugando con Internet · toca para cambiar';b.style.background=sinNet()?'#3b4a63':''}
+$('#lob-modo').onclick=async()=>{
+  if(!sinNet()){
+    let ok=0;try{ok=!!localStorage.getItem('mesa-offline')}catch(e){}
+    if(!ok){alert('Para jugar sin Internet primero guarda el juego en tu teléfono (botón "Guardar el juego", con Internet).');return}
+    if(!confirm('Jugar sin Internet: el juego no gastará datos. Solo te avisará si hay una actualización. El modo con amigos no estará disponible. ¿Activar?'))return;
+    MODO='off'}else MODO='on';
+  try{localStorage.setItem('mesa-modo',MODO)}catch(e){}
+  await setCfg(MODO);modoUI();
+  if(MODO==='on')setTimeout(updCheck,300)};
+setCfg(MODO);modoUI();
 setTimeout(updCheck,2500);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!$('#lobby').classList.contains('oculto'))setTimeout(updCheck,800)});
 /* ---------- PWA: instalación ---------- */

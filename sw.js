@@ -48,9 +48,11 @@ async function ranged(req, res) {
   });
 }
 
+/* modo sin Internet (lo guarda la página en la caché lm-cfg): no se pide nada a la red si ya hay copia */
+async function sinNet() { try { const r = await (await caches.open('lm-cfg')).match('modo'); return !!r && (await r.text()) === 'off'; } catch (_) { return false; } }
 const REFRESCADAS = new Set(); /* cada archivo se revisa en la red una sola vez por sesión del service worker */
 async function refresh(url) {
-  if (REFRESCADAS.has(url)) return;
+  if (REFRESCADAS.has(url) || await sinNet()) return;
   REFRESCADAS.add(url);
   try {
     const res = await fetch(url, { cache: 'no-cache' });
@@ -69,6 +71,12 @@ self.addEventListener('fetch', e => {
      (antes caches.match podía devolver una copia vieja que quedó en lm-assets al guardar el juego). */
   if (r.mode === 'navigate' || /\/(index\.html|manifest\.json|version\.json)$/.test(u.pathname)) {
     e.respondWith((async () => {
+      /* sin Internet: se abre la copia guardada sin tocar la red (version.json sí se revisa: pesa muy poco) */
+      if (!/\/version\.json$/.test(u.pathname) && await sinNet()) {
+        const sh0 = await caches.open(SHELL);
+        const hit = (await sh0.match(r, { ignoreSearch: true })) || (await sh0.match(new URL('index.html', BASE).href)) || (await sh0.match(BASE));
+        if (hit) return hit;
+      }
       try {
         const res = await fetch(r, { cache: 'no-cache' });
         if (res.ok) {
