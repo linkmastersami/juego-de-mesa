@@ -914,7 +914,22 @@ const sumB=()=>B.frz!==undefined?B.frz:B.act?baseV()+(B.act==='m03'||B.act==='m2
 const totB=()=>B.act?sumB()+(B.act===p06()?2*fireDisc():0):0;
 const blk=c=>S.cross.some(y=>y&&/^c1[123]$/.test(y.id))&&!/^c1[123]$/.test(c.id);
 /* efecto al entrar a la cruz (c20-c22 absorben progreso; los mini-jefes c40-c48 quitan 1 al jefe final): se muestra y luego se aplica */
+/* cartas con efecto continuo: al entrar a la cruz se muestran en grande avisando su efecto (el texto sale de la propia carta) */
+const CONT={};{const c=(a,b,t)=>{for(let k=a;k<=b;k++)CONT['c'+pad(k)]=t};
+  c(5,6,'Si obtienes cualquier carta de agotamiento, pierdes la partida');
+  c(9,10,'Cada vez que saques oscuridad en la tirada, debes descartar una carta');
+  c(11,13,'No se puede añadir progreso a ningún desafío que no sea un Caballero de Hierro');
+  c(14,16,'Este desafío no puede ser descartado. Cada vez que otro desafío sea descartado, sufres 2 de daño');
+  c(23,25,'Cada otra copia de Los Tres Stalchildren gana +7 de dificultad');
+  c(26,28,'Cada vez que se falla un desafío, se descarta');
+  c(29,32,'Todos los demás desafíos tienen −1 de dificultad. Si fallas otro desafío, sufres su penalización otra vez');
+  c(34,34,'No puedes intentar este desafío. Sufres 1 de daño por cada carta que descartes de tu mano');
+  c(37,37,'Cualquier daño que sufras de otras cartas se duplica');
+  c(38,38,'Si debes descartar más cartas de las que tienes en la mano, pierdes la partida');
+  c(39,39,'Añade 2 de progreso a este desafío al final de cada turno');
+  c(49,49,'Cada vez que falles otro desafío y saques oscuridad en el dado, sufres 1 de daño')}
 function entryFx(i){const x=S.cross[i];if(!x||x.id[0]!=='c')return null;const n=+x.id.slice(1);
+  if(CONT[x.id])return {kind:'Efecto continuo',txt:CONT[x.id],col:'#c58bff',ms:2300,fn:()=>{}};
   if(n>=20&&n<=22){if(!S.cross.some((y,k)=>y&&k&&k!==i&&y.p>0))return null;return {txt:'Absorbe el progreso de los demás desafíos',fn:()=>{S.cross.forEach((y,k)=>{if(y&&k&&k!==i){x.p+=y.p;y.p=0}})}}}
   if(n>=40&&n<=48&&S.cross[0])return {kind:'Mini-jefe',txt:'Elimina 1 de progreso del jefe final',fn:()=>{S.cross[0].p=Math.max(0,S.cross[0].p-1)}};
   return null}
@@ -1326,7 +1341,7 @@ async function autoFill(){
   const id=S.dC.pop();S.cross[i]={id,p:S.apart.includes('c53')&&TY[id]&&TY[id]!=='C'?2:0};const ef=entryFx(i);checkEnd();render();SFX.place();vib(10);
   try{const ce=cellOf(i);if(ce){ce.classList.add('land');if(!RM){const r=ce.getBoundingClientRect();ring(r.left+r.width/2,r.top+r.height/2,'#ffffff77')}}}catch(e){}
   blk.remove();
-  if(ef){try{await wait(650);const col='#ff8a4d';const kd=ef.kind||'Efecto de carta';sy('fx',{f:'efx',a:[id,kd,ef.txt,col]});await presShow(id,kd,ef.txt,col,1700);presHide();ef.fn();render();await wait(300)}catch(e){ef.fn();render()}}
+  if(ef){try{await wait(650);const col=ef.col||'#ff8a4d';const kd=ef.kind||'Efecto de carta';sy('fx',{f:'efx',a:[id,kd,ef.txt,col,ef.ms||1700]});await presShow(id,kd,ef.txt,col,ef.ms||1700);presHide();ef.fn();render();await wait(300)}catch(e){ef.fn();render()}}
   AFB=0;setTimeout(autoFill,150)
 }
 setInterval(autoFill,400);
@@ -1770,7 +1785,7 @@ function syRecv(d){
     else if(a.f==='hurt')fxPlay(jHurt(...x));
     else if(a.f==='dd')fxPlay(jDd(...x));
     else if(a.f==='shuf')fxPlay(jShuf(...x));
-    else if(a.f==='efx')presShow(...x,1700).then(()=>presHide())
+    else if(a.f==='efx')presShow(x[0],x[1],x[2],x[3],x[4]||1700).then(()=>presHide())
     else if(a.f==='evt')fxPlay(async()=>{await eventFx(...x)})
     else if(a.f==='hab')fxPlay(async()=>{await habFx(x[0],x[1],1)})
     else if(a.f==='draw')fxPlay(jDraw(Array(a.n).fill('back'),1,1))}
