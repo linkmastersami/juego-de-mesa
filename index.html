@@ -502,7 +502,7 @@ function fxPlay(job){FXQ.push(job);if(FXR)return;FXR=1;FXL.classList.add('on');(
 
 /* ---------- animaciones extra ---------- */
 const PEND={};
-let PV=[],PHP=null,PM=null,PT=null,PHAB=null,DFQ=[],NOFX=0,BR=0,TP=null,IDLE=0;const BQ=[];
+let PV=[],PHP=null,PM=null,PMA=null,PT=null,PHAB=null,DFQ=[],NOFX=0,BR=0,TP=null,IDLE=0;const BQ=[];
 /* Fase de tablero: todo lo que se anima en el tablero espera a que se cierren la pantalla de
    efectos (#ov), la batalla (#bt) y los efectos a pantalla completa (FXR). Entonces se reproduce
    UNA A UNA (cola BQ), luego se rellena la cruz (autoFill) y SOLO AL FINAL empieza el turno. */
@@ -534,14 +534,16 @@ function ghost(r,h,cls,ms){if(!r||!r.width)return;const g=document.createElement
 function fxDiff(){
   const ch=[...$('#cross').children],nv=[];
   CPOS.forEach((i,j)=>{if(i===null)return;const c=S.cross[i],el=ch[j];nv[i]=c&&el&&el.firstElementChild?{id:c.id,p:c.p,r:el.getBoundingClientRect(),h:el.firstElementChild.outerHTML,el}:null});
-  if(PT!==null&&S.turn<PT){PV=[];PHP=null;PM=null}
+  if(PT!==null&&S.turn<PT){PV=[];PHP=null;PM=null;PMA=null}
   if(!NOFX)for(let i=0;i<5;i++){const o=PV[i],n=nv[i];
     if(o&&n&&o.id===n.id&&o.p!==n.p&&n.r.width){const d=n.p-o.p,j=CPOS.indexOf(i),op=o.p,np=n.p;BQ.push(async()=>{const el=$('#cross').children[j];if(!el)return;const pg=el.querySelector('.pg');if(pg)pg.textContent=op;await wait(250);const r=el.getBoundingClientRect(),f=document.createElement('b');f.className='pgf';f.textContent=(d>0?'+':'')+d;f.style.cssText=`left:${r.left+r.width/2}px;top:${r.top+r.height/3}px;color:${d>0?'#ffd34d':'#7dffb0'}`;document.body.appendChild(f);setTimeout(()=>f.remove(),1200);if(pg){pg.textContent=np;pg.classList.remove('bump');void pg.offsetWidth;pg.classList.add('bump')}await wait(900)})}
     else if(o&&i&&(!n||n.id!==o.id)&&S.cross.length){const k=S.comp[S.comp.length-1]===o.id?'gdone':'gout',j=CPOS.indexOf(i);if(!n){PEND[i]={h:o.h,p:o.p};const ce=ch[j];if(ce){ce.className='cell';ce.innerHTML=o.h+'<b class="pg">'+o.p+'</b>'}}BQ.push(async()=>{const e=$('#cross').children[j],r=e?e.getBoundingClientRect():null;if(PEND[i]){delete PEND[i];if(e&&!S.cross[i]){e.className='cell empty';e.innerHTML=''}}ghost(r&&r.width?r:o.r,o.h,k,950);await wait(1000)})}}
   if(!NOFX&&PHP!==null&&S.hp>PHP&&S.turn>=PT&&!S.over)fxHeal(PHP,S.hp);
   if(!NOFX&&PM!==null&&S.mesa.length===PM+1){const ix=S.mesa.length-1;BQ.push(async()=>{const m=$('#mesa').children[ix];if(m){m.classList.add('land');await wait(750)}})}
-  if(!NOFX&&PHAB!==null&&S.turn>=PT&&!S.over){if(!PHAB&&S.hab)BQ.push(()=>habFx(1));else if(PHAB&&!S.hab)BQ.push(()=>habFx(0))}
-  PHAB=S.hab;PV=nv;PHP=S.hp;PM=S.mesa.length;PT=S.turn}
+  if(!NOFX&&PHAB!==null&&S.turn>=PT&&!S.over){const hid=(S.personaje||'m')+'20',on=S.hab?1:0;sy('fx',{f:'hab',a:[on,hid]});if(PHAB!==on)BQ.push(()=>habFx(on))}
+  /* agotamiento (u otra carta) que sale de la mesa: vuela de la mesa al mazo de agotamiento */
+  if(!NOFX&&PMA&&S.mesa.length<PMA.length&&S.turn>=PT&&!S.over){const left=PMA.slice();S.mesa.forEach(x=>{const k=left.indexOf(x);if(k>=0)left.splice(k,1)});if(left.length)BQ.push(async()=>{await Promise.all(left.slice(0,4).map((x,i)=>wait(i*160).then(()=>flyCard(x,rc('#mesa'),rc('#dK'),800,'#7dffb0'))))})}
+  PMA=S.mesa.slice();PHAB=S.hab?1:0;PV=nv;PHP=S.hp;PM=S.mesa.length;PT=S.turn}
 const rc=sel=>{const e=document.querySelector(sel),r=e&&e.getBoundingClientRect();return r&&r.width?r:null};
 /* una carta vuela de un punto a otro con brillo (si no hay punto visible, sale del centro / llega abajo) */
 async function flyCard(id,a,b,ms=850,col='#ffd34d'){try{if(RM)return;const w=64,h=w*1.4,A=a?ctr(a):[innerWidth/2,innerHeight*.45],B=b?ctr(b):[innerWidth/2,innerHeight-60];
@@ -552,7 +554,7 @@ const qFly=(id,fa,fb,col)=>{if(!NOFX)BQ.push(()=>flyCard(id,rc(fa),rc(fb),850,co
 /* descartes desde la mano: se juntan en una sola animación */
 function qDisc(id){if(NOFX)return;if(!DFQ.length)BQ.push(async()=>{const ids=DFQ.splice(0).slice(0,5);await Promise.all(ids.map((x,i)=>wait(i*140).then(()=>flyCard(x,null,rc('#pDm'),700,'#ff8a8a'))))});DFQ.push(id)}
 /* habilidad: entra la carta enorme con rayos, destello y temblor; luego vuela a Estado. Al gastarla se apaga con una onda gris */
-async function habFx(on){try{const id=(S.personaje||'m')+'20',W=innerWidth,H=innerHeight;
+async function habFx(on,idp,amigo){try{const id=idp||(S.personaje||'m')+'20',W=innerWidth,H=innerHeight;
   if(RM){await wait(500);return}
   const t=document.querySelector('#tSt'),tr=t&&t.getBoundingClientRect();
   if(!on){SFX.thud();const e=document.createElement('div');e.className='cgh';const w=Math.min(W*.4,170);e.style.cssText=`left:${W/2-w/2}px;top:${H*.42-w*.7}px;width:${w}px;height:${w*1.4}px;border-radius:10px`;e.innerHTML=card(id,'off');document.body.appendChild(e);
@@ -561,7 +563,7 @@ async function habFx(on){try{const id=(S.personaje||'m')+'20',W=innerWidth,H=inn
   const w=Math.min(W*.58,250),x=W/2,y=H*.44;
   rays(x,y,'#ffd34d',1500);SFX.boom();vib([30,40,70]);
   const c=document.createElement('div');c.className='cgh';c.style.cssText=`left:${x-w/2}px;top:${y-w*.7}px;width:${w}px;height:${w*1.4}px;border-radius:12px;z-index:42;box-shadow:0 0 50px 14px #ffd34d,0 0 120px 40px #ff9a2e88`;c.innerHTML=card(id);document.body.appendChild(c);
-  const tx=big('¡HABILIDAD ACTIVADA!',x,H*.14,Math.min(34,W/11));tx.style.cssText+=';color:#ffd34d;font-weight:800;text-align:center;width:90vw;text-shadow:0 0 18px #ff9a2e,0 3px 0 #000';tx.style.fontFamily='Fredoka,sans-serif';
+  const tx=big(amigo?'¡TU AMIGO ACTIVÓ SU HABILIDAD!':'¡HABILIDAD ACTIVADA!',x,H*.14,Math.min(34,W/(amigo?14:11)));tx.style.cssText+=';color:#ffd34d;font-weight:800;text-align:center;width:90vw;text-shadow:0 0 18px #ff9a2e,0 3px 0 #000';tx.style.fontFamily='Fredoka,sans-serif';
   tx.animate([{transform:'translate(-50%,-50%) scale(.2)',opacity:0},{transform:'translate(-50%,-50%) scale(1.25)',opacity:1,offset:.4},{transform:'translate(-50%,-50%) scale(1)',opacity:1}],{duration:500,fill:'forwards',easing:'ease-out'});
   await AN(c,[{transform:'scale(.1) rotate(-25deg)',opacity:0},{transform:'scale(1.25) rotate(4deg)',opacity:1,offset:.45},{transform:'scale(1) rotate(0)',opacity:1}],{duration:650,easing:'cubic-bezier(.2,.9,.3,1.2)'});
   impact(x,y,'#ffd34d',26);shakeApp(12,500);ring(x,y,'#fff');setTimeout(()=>ring(x,y,'#ffb347'),140);SFX.combo(7);
@@ -1245,7 +1247,7 @@ setInterval(autoFill,400);
 function startGame(){
   closeSheets();close();
   /* CHAR ya fue fijado por el lobby antes de llamar a startGame */
-  SYON=0;SYQ=null;SYLAST='';SYSENT=0;OWNER='a';COOPFX=0;CMQ.length=0;S=fresh0();if(COOPDC){S.dC=COOPDC;COOPDC=null}if(COOPDK){S.dK=COOPDK;COOPDK=null}BQ.length=0;DFQ.length=0;PHAB=null;for(const k in PEND)delete PEND[k];FXQ.length=0;TP=null;PV=[];PHP=null;PM=null;PT=null;PICK=1;B=null;PH=0;ENDQ=0;SHF=0;M18=0;HIDE.clear();
+  SYON=0;SYQ=null;SYLAST='';SYSENT=0;OWNER='a';COOPFX=0;CMQ.length=0;S=fresh0();if(COOPDC){S.dC=COOPDC;COOPDC=null}if(COOPDK){S.dK=COOPDK;COOPDK=null}BQ.length=0;DFQ.length=0;PHAB=null;PMA=null;for(const k in PEND)delete PEND[k];FXQ.length=0;TP=null;PV=[];PHP=null;PM=null;PT=null;PICK=1;B=null;PH=0;ENDQ=0;SHF=0;M18=0;HIDE.clear();
   $('#bt').classList.remove('on');$('#sh-st').classList.remove('on');$('#tTurn').textContent='Turno';hits.textContent='';
   SL=1;INTRO=1;render();
   fxPlay(async L=>{try{
@@ -1680,6 +1682,7 @@ function syRecv(d){
     else if(a.f==='hurt')fxPlay(jHurt(...x));
     else if(a.f==='dd')fxPlay(jDd(...x));
     else if(a.f==='shuf')fxPlay(jShuf(...x));
+    else if(a.f==='hab')fxPlay(async()=>{await habFx(x[0],x[1],1)})
     else if(a.f==='draw')fxPlay(jDraw(Array(a.n).fill('back'),1,1))}
   else if(d.e==='bat')sbtRender(a);
   else if(d.e==='batx')sbtHide();
