@@ -381,6 +381,30 @@ body.sbton #coopb span,body.incine #coopb span{display:none}
 #cdlg button{border:0;border-radius:14px;background:#4a4555;color:var(--ink);font:700 1.05rem Fredoka,sans-serif;padding:12px}
 #cdlg button.main{background:var(--gold);color:#2b2208}
 body.waitp #sh-st.on{z-index:46}
+
+/* ===== ambiente de calabozo ===== */
+body{background:radial-gradient(130% 85% at 50% 38%,#3b3247 0%,#241e2d 55%,#120f17 100%)}
+#amb{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+#amb::before{content:'';position:absolute;inset:0;opacity:.07;background:
+  repeating-linear-gradient(0deg,#000 0 2px,transparent 2px 46px),
+  repeating-linear-gradient(90deg,#000 0 2px,transparent 2px 92px);
+  -webkit-mask:radial-gradient(120% 90% at 50% 45%,#000 30%,transparent 85%);mask:radial-gradient(120% 90% at 50% 45%,#000 30%,transparent 85%)}
+#amb i{position:absolute;top:-12vh;width:70vw;height:55vh;border-radius:50%;background:radial-gradient(closest-side,#ff9a3c33,#ff6a0011 55%,transparent);animation:torch 2.8s ease-in-out infinite alternate;transition:background 1.2s}
+#amb i:nth-child(1){left:-30vw}#amb i:nth-child(2){right:-30vw;animation-delay:-1.3s;animation-duration:3.3s}
+#amb b{position:absolute;bottom:-4vh;width:6px;height:6px;border-radius:50%;background:#ffb35c;box-shadow:0 0 8px #ff8a2a;opacity:0;animation:ember linear infinite}
+@keyframes torch{0%{opacity:.75;transform:scale(1)}40%{opacity:1;transform:scale(1.05)}70%{opacity:.82}100%{opacity:.95;transform:scale(.97)}}
+@keyframes ember{0%{transform:translate(0,0);opacity:0}10%{opacity:.8}100%{transform:translate(var(--x),-105vh);opacity:0}}
+body.finalph{background:radial-gradient(130% 85% at 50% 38%,#4a1f2c 0%,#2a1219 55%,#12080b 100%)}
+body.finalph #amb i{background:radial-gradient(closest-side,#ff2a4a40,#a0102a18 55%,transparent);animation-duration:1.6s}
+body.finalph #amb b{background:#ff5470;box-shadow:0 0 10px #ff1f3a}
+body.finalph::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:2;box-shadow:inset 0 0 90px 10px #b0102a55;animation:hb 2.4s ease-in-out infinite}
+/* ===== pantalla de inicio ===== */
+#lobby .lob-title{text-shadow:0 4px 0 #0008,0 0 28px #ffd34d55}
+.lob-char .card-wrap{transition:box-shadow .3s}
+.lob-char.sel .card-wrap{box-shadow:0 10px 30px #0009,0 0 26px #ffd34d88}
+#lob-info{width:100%;max-width:420px;min-height:64px;margin:-6px 0 14px;display:flex;align-items:center;gap:12px;background:#00000040;border:1px solid #ffd34d44;border-radius:16px;padding:10px 14px;box-sizing:border-box;opacity:0;transform:translateY(6px);transition:opacity .3s,transform .3s}
+#lob-info.on{opacity:1;transform:none}
+#lob-info .li{font-size:2rem;flex:none}#lob-info b{display:block;font:700 1.1rem Fredoka,sans-serif;color:var(--gold)}#lob-info span{font-size:.86rem;color:var(--ink);line-height:1.25;display:block}#lob-info small{color:var(--mute);font-size:.75rem}
 </style>
 </head>
 <body>
@@ -424,6 +448,7 @@ body.waitp #sh-st.on{z-index:46}
 <div id="coopb"><span>⏳ Turno de tu amigo</span></div>
 <div id="coopw"><div><i></i><b id="coopw-t"></b></div></div>
 <div id="coopfeed"></div>
+<div id="amb"><i></i><i></i><b style="left:8%;--x:30px;animation-duration:11s;animation-delay:-2s"></b><b style="left:22%;--x:-20px;animation-duration:14s;animation-delay:-7s"></b><b style="left:37%;--x:25px;animation-duration:12s;animation-delay:-4s"></b><b style="left:55%;--x:-35px;animation-duration:15s;animation-delay:-9s"></b><b style="left:70%;--x:20px;animation-duration:13s;animation-delay:-1s"></b><b style="left:84%;--x:-25px;animation-duration:16s;animation-delay:-11s"></b><b style="left:93%;--x:15px;animation-duration:12s;animation-delay:-6s"></b></div>
 <!-- LOBBY -->
 <div id="lobby" class="oculto">
   <div class="lob-title">⚔️ Link Master</div>
@@ -431,17 +456,18 @@ body.waitp #sh-st.on{z-index:46}
   <div class="lob-chars">
     <div class="lob-char" id="lob-p1" data-char="m">
       <div class="card-wrap"><div class="card" data-id="m19"><img src="personajes/personaje 1/m19.webp" alt="Personaje 1" onerror="this.remove()"></div></div>
-      <div class="char-name">Personaje 1</div>
+      <div class="char-name">Mario</div>
     </div>
     <div class="lob-char" id="lob-p2" data-char="l">
       <div class="card-wrap"><div class="card" data-id="l19"><img src="personajes/personaje 2/l19.webp" alt="Personaje 2" onerror="this.remove()"></div></div>
-      <div class="char-name">Personaje 2</div>
+      <div class="char-name">Link</div>
     </div>
     <div class="lob-char" id="lob-p3" data-char="p">
       <div class="card-wrap"><div class="card" data-id="p19"><img src="personajes/personaje 3/p19.webp" alt="Personaje 3" onerror="this.remove()"></div></div>
-      <div class="char-name">Personaje 3</div>
+      <div class="char-name">Pikachu</div>
     </div>
   </div>
+  <div id="lob-info"></div>
   <button class="lob-start" id="lob-btn-start" disabled>Entrar al calabozo →</button>
   <button class="lob-friend" id="lob-btn-friend" disabled>👥 Jugar con un amigo</button>
   <button class="lob-friend lob-quick" id="lob-btn-quick">⚡ Partida rápida<b id="lob-q" class="lob-qb" style="display:none"></b></button>
@@ -596,6 +622,7 @@ function render(){
   {const hp=Math.max(0,S.hp),pb=$('#hpb');[...pb.children].forEach((e,k)=>e.classList.toggle('on',k<hp));pb.classList.toggle('low',hp>0&&hp<=3);$('#hpn').textContent=hp;
    $('#hfire').textContent=ICO()+' '+fireDisc();$('#hturn').textContent='Turno '+S.turn;
    if(HUDHP!==null&&hp!==HUDHP){const h=$('#hud');h.classList.remove('hit','heal');void h.offsetWidth;h.classList.add(hp<HUDHP?'hit':'heal')}HUDHP=hp}
+  document.body.classList.toggle('finalph',!!S.final&&!S.over&&document.getElementById('lobby').classList.contains('oculto'));
   document.body.classList.toggle('lowhp',!S.over&&S.hp>0&&S.hp<=3&&document.getElementById('lobby').classList.contains('oculto'));
   if(!SL&&!COOP)try{localStorage.setItem('mesa-juego',JSON.stringify(S))}catch(e){}
   try{fxDiff()}catch(e){}
@@ -1612,7 +1639,7 @@ function toMenu(del){
   if(del){try{localStorage.removeItem('mesa-juego')}catch(e){}NEWG=1;GAMEON=0}
   showLobby();
 }
-function showLobby(){
+function showLobby(){document.body.classList.remove('finalph');
   const wasCoop=COOP;COOP=0;MYT=1;OWNER='a';COOPFX=0;try{coopUi()}catch(e){}
   STARTARM=0;$('#lob-btn-start').textContent='Entrar al calabozo →';
   const lob=$('#lobby');
@@ -1626,7 +1653,7 @@ function showLobby(){
   /* marcar el personaje de la partida guardada si hay una */
   if(hasSave){
     const saved=S.personaje||'m';
-    document.querySelectorAll('.lob-char').forEach(el=>el.classList.toggle('sel',el.dataset.char===saved));
+    document.querySelectorAll('.lob-char').forEach(el=>el.classList.toggle('sel',el.dataset.char===saved));lobInfo(saved);
     $('#lob-btn-start').disabled=false;$('#lob-btn-friend').disabled=false;
     CHAR=saved;
   }
@@ -1635,12 +1662,18 @@ function hideLobby(){
   setBadge(0);$('#lobby').classList.add('oculto');
   document.querySelector('.app').style.display='';
 }
+/* ficha del personaje elegido: su carta se anima y se explica cómo juega */
+const PJD={m:['🔥','Juega cartas de fuego: cada 🔥 que usas te hace robar cartas al final del turno para armar combos.'],
+  l:['🗡️','Juega cartas de espada: cada ⚔️ reparte progreso extra a los desafíos que no estás intentando.'],
+  p:['⚡','Juega cartas de rayo: cada ⚡ le deja relanzar un dado para no fallar la tirada.']};
+function lobInfo(c){try{document.querySelectorAll('.lob-char').forEach(el=>{const k=el.dataset.char,w=el.querySelector('.card-wrap');if(w)w.innerHTML=card(k+'19',k===c?'':'still')});
+  const o=stLoad(),p=(o.pj||{})[c]||{},d=PJD[c];$('#lob-info').innerHTML=`<div class="li">${d[0]}</div><div><b>${PJN[c]}</b><span>${d[1]}</span><small>${p.g?`🏆 ${p.w||0} victorias en ${p.g} partidas${p.bt?` · récord: ${p.bt} turnos`:''}`:'Aún no has jugado con este personaje'}</small></div>`;$('#lob-info').classList.add('on')}catch(e){}}
 /* selección de personaje */
 document.querySelectorAll('.lob-char').forEach(el=>{
   el.addEventListener('click',()=>{
     document.querySelectorAll('.lob-char').forEach(x=>x.classList.remove('sel'));
     el.classList.add('sel');STARTARM=0;$('#lob-btn-start').textContent='Entrar al calabozo →';
-    CHAR=el.dataset.char;
+    CHAR=el.dataset.char;lobInfo(CHAR);
     $('#lob-btn-start').disabled=false;$('#lob-btn-friend').disabled=false;
   });
 });
@@ -1664,7 +1697,7 @@ const MP={ws:null,code:null,role:null,peer:null,join:null,cancel:0,tm:null,hb:nu
 /* mensajes numerados: si se corta la conexión, al volver cada lado reenvía lo que el otro no recibió */
 const OUTB=[];let SEQ=0,LASTIN=0;
 const mpReset=()=>{OUTB.length=0;SEQ=0;LASTIN=0};
-const mpEl=$('#mp'),mpNm=c=>c==='l'?'Personaje 2':c==='p'?'Personaje 3':'Personaje 1';
+const mpEl=$('#mp'),mpNm=c=>c==='l'?'Link':c==='p'?'Pikachu':'Mario';
 const mpShow=v=>{mpEl.className='on '+v};
 const mpLink=()=>location.origin+location.pathname+'?sala='+MP.code;
 const MP_TIPS=['Despertando al servidor…','Encendiendo las antorchas del calabozo…','Afilando las espadas…','Barajando el mazo…','Casi listo, aventurero…'];
