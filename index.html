@@ -474,13 +474,16 @@ const imgSrc=id=>id[0]==='m'?`personajes/personaje 1/${id}.webp`:id[0]==='l'?`pe
 const BACKH=c=>`<div class="card ${c}" data-id=""><div class="deck" style="width:100%;height:100%"></div></div>`;
 /* m19 y m20 tienen versión animada (m19a/m20a); la habilidad apagada y "reducir movimiento" usan la imagen fija */
 const ANIMC=new Set(['m19','m20','l19','l20','p19','p20']);
+/* cartas de calabozo animadas (cartas/animaciones/cXX.webp): todas las copias de una carta usan la animación de la primera (c39 no tiene) */
+const ANCAL={};Object.entries({'c01':'c01|c02','c03':'c03|c04','c05':'c05|c06','c07':'c07|c08','c09':'c09|c10','c11':'c11|c12|c13','c14':'c14|c15|c16','c17':'c17|c18|c19','c20':'c20|c21|c22','c23':'c23|c24|c25','c26':'c26|c27|c28','c29':'c29|c30|c31|c32','c33':'c33','c34':'c34','c35':'c35','c36':'c36','c37':'c37','c38':'c38','c40':'c40|c41|c42','c43':'c43|c44|c45','c46':'c46|c47|c48','c49':'c49','c50':'c50','c51':'c51','c52':'c52','c53':'c53','c54':'c54','c55':'c55','c56':'c56','c57':'c57'}).forEach(([a,l])=>l.split('|').forEach(x=>ANCAL[x]=a));
+const animSrc=id=>ANIMC.has(id)?imgSrc(id).replace('.webp','a.webp'):ANCAL[id]?`cartas/animaciones/${ANCAL[id]}.webp`:null;
 /* modo de juego: con Internet (se actualiza solo) o sin Internet (no gasta datos; solo pregunta si hay actualización) */
 let MODO='on';try{MODO=localStorage.getItem('mesa-modo')==='off'?'off':'on'}catch(e){}
 const sinNet=()=>MODO==='off';
 const setCfg=m=>{try{return caches.open('lm-cfg').then(c=>c.put('modo',new Response(m)))}catch(e){return Promise.resolve()}};
-const card=(id,c='')=>{if(id==='back')return BACKH(c);const an=ANIMC.has(id)&&!RM&&!/\boff\b/.test(c),st=imgSrc(id);
+const card=(id,c='')=>{if(id==='back')return BACKH(c);const an=!!animSrc(id)&&!RM&&!/\boff\b/.test(c),st=imgSrc(id);
   /* si la versión animada no está guardada (sin internet), se usa la imagen fija en vez de dejar la carta vacía */
-  return `<div class="card ${c}" data-id="${id}"><img src="${an?st.replace('.webp','a.webp'):st}" alt="${id}" onerror="${an?`this.onerror=function(){this.remove()};this.src='${st}'`:'this.remove()'}"></div>`};
+  return `<div class="card ${c}" data-id="${id}"><img src="${an?animSrc(id):st}" alt="${id}" onerror="${an?`this.onerror=function(){this.remove()};this.src='${st}'`:'this.remove()'}"></div>`};
 /* con internet, deja guardadas las versiones animadas (el service worker las guarda al pedirlas) */
 setTimeout(()=>{if(navigator.onLine&&!RM&&!sinNet())[...ANIMC].forEach(id=>fetch(imgSrc(id).replace('.webp','a.webp')).catch(()=>{}))},3000);
 /* personaje activo: 'm' = personaje 1 (cartas m), 'l' = personaje 2 (cartas l) */
