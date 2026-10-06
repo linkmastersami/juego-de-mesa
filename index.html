@@ -304,7 +304,7 @@ body.sbton #coopb span,body.incine #coopb span{display:none}
 
 .lob-title{font:700 clamp(2rem,10vw,3.2rem) Fredoka,sans-serif;color:var(--gold);letter-spacing:.1em;text-align:center;text-shadow:0 4px 0 #0008;margin-bottom:4px;animation:pop .5s cubic-bezier(.2,.9,.3,1.2)}
 .lob-sub{color:var(--mute);font-size:.95rem;text-align:center;margin-bottom:20px}
-.lob-chars{display:flex;gap:14px;justify-content:center;width:100%;max-width:420px;margin-bottom:20px}
+.lob-chars{display:flex;gap:10px;justify-content:center;width:100%;max-width:560px;padding:0 8px;box-sizing:border-box;margin-bottom:20px}
 .lob-char{flex:1;max-width:180px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;border-radius:18px;padding:10px;background:#ffffff08;border:3px solid transparent;transition:border-color .18s,transform .18s,background .18s}
 .lob-char:active{transform:scale(.96)}
 .lob-char.sel{border-color:var(--gold);background:#ffd34d18;transform:scale(1.04)}
@@ -372,6 +372,10 @@ body.sbton #coopb span,body.incine #coopb span{display:none}
     <div class="lob-char" id="lob-p2" data-char="l">
       <div class="card-wrap"><div class="card" data-id="l19"><img src="personajes/personaje 2/l19.webp" alt="Personaje 2" onerror="this.remove()"></div></div>
       <div class="char-name">Personaje 2</div>
+    </div>
+    <div class="lob-char" id="lob-p3" data-char="p">
+      <div class="card-wrap"><div class="card" data-id="p19"><img src="personajes/personaje 3/p19.webp" alt="Personaje 3" onerror="this.remove()"></div></div>
+      <div class="char-name">Personaje 3</div>
     </div>
   </div>
   <button class="lob-start" id="lob-btn-start" disabled>Entrar al calabozo →</button>
@@ -458,7 +462,7 @@ const SFX={
 const rng=(p,a,b)=>Array.from({length:b-a+1},(_,i)=>p+pad(a+i));
 const shuf=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 /* ruta de imagen según el prefijo: m→personaje 1, l→personaje 2, resto→cartas/ */
-const imgSrc=id=>id[0]==='m'?`personajes/personaje 1/${id}.webp`:id[0]==='l'?`personajes/personaje 2/${id}.webp`:`cartas/${id}.webp`;
+const imgSrc=id=>id[0]==='m'?`personajes/personaje 1/${id}.webp`:id[0]==='l'?`personajes/personaje 2/${id}.webp`:id[0]==='p'?`personajes/personaje 3/${id}.webp`:`cartas/${id}.webp`;
 const BACKH=c=>`<div class="card ${c}" data-id=""><div class="deck" style="width:100%;height:100%"></div></div>`;
 /* m19 y m20 tienen versión animada (m19a/m20a); la habilidad apagada y "reducir movimiento" usan la imagen fija */
 const ANIMC=new Set(['m19','m20','l19','l20']);
@@ -473,6 +477,8 @@ const card=(id,c='')=>{if(id==='back')return BACKH(c);const an=ANIMC.has(id)&&!R
 setTimeout(()=>{if(navigator.onLine&&!RM&&!sinNet())['m19','m20','l19','l20'].forEach(id=>fetch(imgSrc(id).replace('.webp','a.webp')).catch(()=>{}))},3000);
 /* personaje activo: 'm' = personaje 1 (cartas m), 'l' = personaje 2 (cartas l) */
 let CHAR='m'; /* se elige en el lobby antes de startGame */
+const ICO=()=>S.personaje==='l'?'⚔️':S.personaje==='p'?'⚡':'🔥'; /* icono propio de cada personaje (hace el papel del fuego) */
+const HSP=(p,id)=>p==='l'?id==='l17':p==='p'?id==='p10':(id==='m08'||id==='m14'); /* cartas que se pueden descartar al inicio del turno */
 const PC=()=>S.personaje||'m';
 let COOP=0,MYT=1,COOPDC=null,COOPDK=null,COOPBUSY=0,COOPCONT=null,COOPL11=null,COOPEND=0;
 /* dueño del control de la fase: 'a' = jugador activo, 'f' = el amigo. COOPFX = el amigo está aplicando los efectos de su asistencia. NOSY = no reflejar la ventana al espectador. CMQ = mensajes de la cinemática. */
@@ -498,15 +504,15 @@ function render(){
     if(i===null)return'<div></div>';const c=S.cross[i];
     return c?`<div class="cell${PICK&&(i||S.final&&unl().length)&&CH[c.id]&&!blk(c)?' blink':''}${HIDE.has(i)?' hid':''}" data-s="${i}">${card(c.id)}<b class="pg">${PGOLD[i]!==undefined?PGOLD[i]:c.p}</b></div>`:PEND[i]?`<div class="cell">${PEND[i].h}<b class="pg">${PEND[i].p}</b></div>`:'<div class="cell empty"></div>'}).join('');
   $('#mesa').innerHTML=S.mesa.map((id,i)=>`<div data-m="${i}">${card(id)}</div>`).join('');
-  {const pfxH=S.personaje||'m';$('#hand').innerHTML=S.hand.length?S.hand.map((id,i)=>`<div data-h="${i}"${(pfxH==='l'?id==='l17':id==='m08'||id==='m14')?' class="blink"':''}>${card(id)}</div>`).join(''):'';
+  {const pfxH=S.personaje||'m';$('#hand').innerHTML=S.hand.length?S.hand.map((id,i)=>`<div data-h="${i}"${HSP(pfxH,id)?' class="blink"':''}>${card(id)}</div>`).join(''):'';
   if(!S.hand.length)$('#hand').innerHTML='<div class="empt" style="grid-column:1/-1;aspect-ratio:auto">Sin cartas en la mano</div>';
-  $('#tHand').textContent='Mano ('+S.hand.length+')';$('#tHand').classList.toggle('blink',S.hand.some(x=>pfxH==='l'?x==='l17':(x==='m08'||x==='m14')));}
+  $('#tHand').textContent='Mano ('+S.hand.length+')';$('#tHand').classList.toggle('blink',S.hand.some(x=>HSP(pfxH,x)));}
   {const p=S.personaje||'m';$('#m19').innerHTML=card(p+'19');$('#m19').dataset.pj=p+'19';$('#m20').innerHTML=card(p+'20',S.hab?'':'off');$('#m20').dataset.hab=1;}
   $('#dM').innerHTML=`<span>Personaje<b>${S.dM.length}</b></span>`;
   $('#dK').innerHTML=`<span>Agotamiento<b>${S.dK.length}</b></span>`;$('#dK').classList.toggle('blink',!!(PICK&&!S.hand.length&&S.dK.length));
   $('#dC').innerHTML=`<span>Calabozo<b>${S.dC.length}</b></span>`;
   $('#pDisc').innerHTML=`<span><b>${S.disc.filter(x=>x[0]==='c').length}</b></span>`;
-  {const pfxR=S.personaje||'m';const dm=S.disc.filter(x=>x[0]===pfxR);$('#pDm').innerHTML=(dm.length?card(dm[dm.length-1]):'<div class="card" style="opacity:.4"></div>')+`<span class="cn">${dm.length}</span>`;$('#pFire').textContent=(S.personaje==='l'?'⚔️ ':'🔥 ')+fireDisc()}
+  {const pfxR=S.personaje||'m';const dm=S.disc.filter(x=>x[0]===pfxR);$('#pDm').innerHTML=(dm.length?card(dm[dm.length-1]):'<div class="card" style="opacity:.4"></div>')+`<span class="cn">${dm.length}</span>`;$('#pFire').textContent=ICO()+' '+fireDisc()}
   $('#pComp').innerHTML=S.comp.length?card(S.comp[S.comp.length-1]):'<div class="card" style="opacity:.4"></div>';
   $('#turn').textContent=S.turn;$('#hp').textContent=S.hp;
   document.body.classList.toggle('lowhp',!S.over&&S.hp>0&&S.hp<=3&&document.getElementById('lobby').classList.contains('oculto'));
@@ -679,6 +685,7 @@ const gridOf=(ids,attr)=>`<div class="grid">${ids.map((id,i)=>`<div ${attr}="${i
 function openCross(i){const c=S.cross[i],id=c.id;if(/^c(07|08|50|52)$/.test(id))return evt(i);ov(id,[],`<div class="pv">Progreso: ${c.p}</div>`)}
 function openHand(i){const id=S.hand[i];const ex=[];const pfx=S.personaje||'m';
   if(id==='m08')ex.push(['Descartar al inicio del turno: +1 progreso por fuego a un desafío',()=>{discCard(id);const go=()=>pickCh('Elige el desafío',x=>{x.p+=fireDisc()},()=>sweep(()=>close()),null,1);if(S.mesa.includes('k04')&&S.hand.length)pickHand(1,go,1);else go();return 1}]);
+  if(id==='p10')ex.push(['Descartar al inicio del turno: +1 progreso por ⚡ a un desafío',()=>{discCard(id);const go=()=>pickCh('Elige el desafío',x=>{x.p+=fireDisc()},()=>sweep(()=>close()),null,1);if(S.mesa.includes('k04')&&S.hand.length)pickHand(1,go,1);else go();return 1}]);
   if(id==='m14')ex.push(['Descartar al inicio del turno: buscar en el mazo',()=>{discCard(id);const go=()=>{SHF=1;ov(null,[],'<p>Toca una carta</p>'+gridOf(S.dM,'data-sc'))};if(S.mesa.includes('k04')&&S.hand.length)pickHand(1,go,1);else go();return 1}]);
   if(id==='l17')ex.push(['Descartar al inicio del turno: descartar un desafío sin progreso',()=>{discCard(id);const go=()=>pickCh('Elige un desafío sin progreso',x=>dropCh(S.cross.indexOf(x)),()=>sweep(()=>close()),null,0,x=>!x.p);if(S.mesa.includes('k04')&&S.hand.length)pickHand(1,go,1);else go();return 1},![1,2,3,4].some(k=>S.cross[k]&&!S.cross[k].p)]);
   ov(id,PICK?ex:[]);
@@ -768,7 +775,7 @@ async function shareVictory(st){
     x.textAlign='center';x.fillStyle='#ffd34d';x.font='800 110px Fredoka,system-ui,sans-serif';x.fillText('¡VICTORIA!',W/2,150);
     let y=210;
     try{
-      const im=await new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=no;i.src=imgSrc(S.personaje==='l'?'l19':'m19')});
+      const im=await new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=no;i.src=imgSrc((S.personaje||'m')+'19')});
       const ch=640,cw=ch*im.width/im.height,cx=(W-cw)/2;
       x.save();x.beginPath();x.roundRect(cx,y,cw,ch,28);x.clip();x.drawImage(im,cx,y,cw,ch);x.restore();
       y+=ch+60;
@@ -801,7 +808,7 @@ function openDeck(k){
 /* ---------- pilas ---------- */
 function openPile(p){
   if(p==='disc')ov(null,[],`<p>Descartes de calabozo (boca abajo): ${S.disc.filter(x=>x[0]==='c').length}</p>`);
-  else if(p==='dm'){const pfxP=S.personaje||'m';const dm=S.disc.filter(x=>x[0]===pfxP);ov(null,[],`<p>Descartes de personaje: ${dm.length} · ${S.personaje==='l'?'⚔️':'🔥'} ${fireDisc()}</p>`+(dm.length?gridOf(dm,'data-dp'):''))}
+  else if(p==='dm'){const pfxP=S.personaje||'m';const dm=S.disc.filter(x=>x[0]===pfxP);ov(null,[],`<p>Descartes de personaje: ${dm.length} · ${ICO()} ${fireDisc()}</p>`+(dm.length?gridOf(dm,'data-dp'):''))}
   else ov(null,[],S.comp.length?`<p>Completados: ${S.comp.length}</p>`+gridOf(S.comp,'data-cp'):'<p>Aún no hay completados</p>');
 }
 
@@ -848,10 +855,11 @@ function showRes(color){
   if(color){const n=dice.slice(0,3).filter(d=>d.f[d.face]===color).length,bw=dice[3].f[dice[3].face]==='blanco'?1:0;hits.textContent='Aciertos: '+(n+bw)+(bw?' (incluye el blanco)':'');return n+bw}
 }
 showRes();
-function roll(color,cb,faces){
+function roll(color,cb,faces,only){
   btn.disabled=true;res.innerHTML='';hits.textContent='';
   const s=dice[0].slot.offsetWidth,dur=2000;
   const anims=dice.map((d,i)=>{
+    if(only!==undefined&&i!==only)return Promise.resolve();
     d.face=faces&&faces[i]!==undefined?faces[i]:Math.floor(Math.random()*6);
     const [tx,ty]=ROT[d.face],dir=Math.random()<.5?-1:1;
     const mx=d.x+dir*R(500,800),my=d.y+dir*R(500,800);
@@ -885,6 +893,9 @@ MC.m20=['w',5,0];
 /* Personaje 2 (espada en lugar de fuego): datos reales de l01-l18
    Formato: [colores, valor acción, valor asistencia] */
 'w11,vr21,va21,rv21,v22,w54,rv52,ra21,w53,w21,w11,w04,av32,r62,w11,ra01,v32,w21'.split(',').forEach((t,i)=>{const m=t.match(/^([a-z]+)(\d)(\d)$/);MC['l'+pad(i+1)]=[m[1],+m[2],+m[3]]});
+/* Personaje 3 (Pikachu, rayo ⚡): p01-p18 */
+'r52,a21,v31,ra21,av32,v11,w21,w01,w63,r21,w12,rv31,w21,w21,w42,w22,w11,w21'.split(',').forEach((t,i)=>{const m=t.match(/^([a-z]+)(\d)(\d)$/);MC['p'+pad(i+1)]=[m[1],+m[2],+m[3]]});
+MC.p20=['w',0,0]; /* Trueno Máximo: su valor es igual a los ⚡ en descartes (sin límite) */
 MC.l20=['w',0,0]; /* l20: valor 0 a 7 a elección (ver baseV); l12: valor X, no se juega como acción */
 Object.assign(CH,{j02:{c:'n',l:20},j03:{c:'n',l:30},j04:{c:'n',l:25}});
 const LV0=c=>c.id==='j02'?20+5*S.cross.filter(x=>x&&/^g0[1-4]$/.test(x.id)).length:c.id==='j03'?30+5*S.mesa.filter(k=>k[0]==='k').length:CH[c.id].l;
@@ -897,27 +908,27 @@ const col=()=>B.col||CH[S.cross[B.i].id].c;
 const okc=id=>{const c=MC[id][0];return c==='w'||c.includes(col())};
 /* color de la asistencia: personaje 1 = todas blancas (asisten a cualquier desafío); personaje 2 = según su carta */
 const ASC={l01:'w',l02:'v',l03:'v',l04:'rv',l05:'w',l06:'w',l07:'rv',l08:'ar',l09:'w',l10:'w',l11:'w',l12:'w',l13:'av',l14:'w',l15:'w',l16:'ra',l17:'v',l18:'w'};
-const oka=id=>{if(id==='m20'||id==='l20')return false;const c=ASC[id];return !c||c==='w'||c.includes(col())};
+const oka=id=>{if(/^[mlp]20$/.test(id))return false;const c=ASC[id];return !c||c==='w'||c.includes(col())};
 const ty=()=>TY[S.cross[B.i].id];
 /* equivalentes del personaje 2 a las cartas con bonificación de tipo */
-const BONUS_TY={m09:'O',m10:'T',m12:'P',m18:'C',l01:'O',l10:'C',l11:'P',l15:'T'}; /* cada personaje tiene 4 cartas blancas: +3 contra Obstáculo, Trampa, Puzle y Combate (como acción y como asistencia) */
+const BONUS_TY={m09:'O',m10:'T',m12:'P',m18:'C',l01:'O',l10:'C',l11:'P',l15:'T',p16:'O',p11:'T',p14:'C',p08:'P'}; /* cada personaje tiene 4 cartas blancas: +3 contra Obstáculo, Trampa, Puzle y Combate (como acción y como asistencia) */
 const av=x=>(BONUS_TY[x]&&BONUS_TY[x]===ty()?3:MC[x][2]);
-const p20=()=>S.personaje==='l'?'l20':'m20';
+const p20=()=>(S.personaje||'m')+'20';
 const p06=()=>'m06'; /* efecto exclusivo del personaje 1 */
 const p16=()=>'m16'; /* efecto exclusivo del personaje 1 */
 const p10=()=>'m10'; /* efecto exclusivo del personaje 1 */
 const p17=()=>'m17'; /* efecto exclusivo del personaje 1 */
 const swd=x=>((getFI()[+x.slice(1)-1]||'00')[0]==='1'); /* ¿la carta lleva icono de espada? */
 const nSw=()=>S.hand.filter(x=>x!==B.act&&!B.as.includes(x)&&swd(x)).length; /* espadas que siguen en tu mano */
-const noDice=a=>a==='m03'||a==='l04'||a==='l20';
+const noDice=a=>a==='m03'||a==='l04'||a==='l20'||a==='p08'||a==='p20';
 const baseV=()=>{const a=B.act;if(!a)return 0;let v=MC[a][1];
   if(a==='l20')v=B.v20===undefined?7:B.v20;
-  if(a==='l08')v+=nSw();
+  if(a==='l08'||a==='p08')v+=nSw();
   if(a==='l14'&&(B.p0!==undefined?B.p0:S.cross[B.i].p)>0)v-=4;
   if(l05on())v+=1;
   return v};
 const l05on=()=>!!(B&&B.act&&B.act[0]==='l'&&swd(B.act)&&S.hand.includes('l05')&&!B.as.includes('l05'));
-const sumB=()=>B.frz!==undefined?B.frz:B.act?baseV()+(B.act==='m03'||B.act==='m20'?fireDisc():0)+(B.act===p17()?B.v17||0:0)-(B.act===p16()&&ty()==='C'?2:0)+(BONUS_TY[B.act]&&BONUS_TY[B.act]===ty()?3:0)+B.as.reduce((t,x)=>t+av(x),0):0;
+const sumB=()=>B.frz!==undefined?B.frz:B.act?baseV()+(B.act==='m03'||B.act==='m20'||B.act==='p20'?fireDisc():0)+(B.act==='p04'?B.as.filter(x=>ico(x,1)).length:0)+(B.act===p17()?B.v17||0:0)-((B.act===p16()||B.act==='p15')&&ty()==='C'?2:0)+(BONUS_TY[B.act]&&BONUS_TY[B.act]===ty()?3:0)+B.as.reduce((t,x)=>t+av(x),0):0;
 const totB=()=>B.act?sumB()+(B.act===p06()?2*fireDisc():0):0;
 const blk=c=>S.cross.some(y=>y&&/^c1[123]$/.test(y.id))&&!/^c1[123]$/.test(c.id);
 /* efecto al entrar a la cruz (c20-c22 absorben progreso; los mini-jefes c40-c48 quitan 1 al jefe final): se muestra y luego se aplica */
@@ -990,7 +1001,10 @@ $('#bt').onclick=e=>{
 const FI_M='11,11,00,11,11,11,00,11,00,00,11,00,00,11,11,00,00,00,00,00'.split(',');
 /* Personaje 2: icono de ESPADA (hace el papel del fuego): carta / asistencia */
 const FI_L='11,11,11,11,00,01,11,11,11,11,11,01,00,00,00,00,00,00,00,00'.split(',');
-const FI_MAP={'m':FI_M,'l':FI_L};
+/* Personaje 3: icono de RAYO ⚡ */
+const FI_P='11,11,00,11,11,11,00,11,11,11,00,11,00,11,11,00,00,00,00,00'.split(',');
+const FI_MAP={'m':FI_M,'l':FI_L,'p':FI_P};
+const ico=(x,k)=>{const f=FI_MAP[x[0]];return !!f&&(f[+x.slice(1)-1]||'00')[k]==='1'}; /* ¿la carta lleva icono propio en acción (0) o asistencia (1)? */
 const getFI=()=>FI_MAP[S.personaje||'m']||FI_M;
 const FI=new Proxy({},{get:(_,k)=>{const fi=getFI();return Number.isInteger(+k)?fi[+k]:fi[k]}});
 const fireDisc=()=>{const pfx=S.personaje||'m',fi=getFI();return S.disc.filter(x=>x[0]===pfx&&fi[+x.slice(1)-1]&&fi[+x.slice(1)-1][0]==='1').length};
@@ -998,8 +1012,8 @@ const draw=n=>{const g=[];for(let k=0;k<n;k++){if(!S.dM.length){const pm=S.disc.
 /* etiqueta de efecto: miniatura de la carta que lo origina + texto, sin mostrar el código */
 function fxInfo(t){
   let id=null,txt=t,m;
-  if(m=txt.match(/\s*\(([lm]\d\d)\)$/)){id=m[1];txt=txt.slice(0,m.index)}
-  if(m=txt.match(/^(trampa|[lmckjg]\d\d)(?:[-–]([lmckjg]?\d\d))?(?: \(([^)]*)\))?:\s*([\s\S]*)$/)){
+  if(m=txt.match(/\s*\(([lmp]\d\d)\)$/)){id=m[1];txt=txt.slice(0,m.index)}
+  if(m=txt.match(/^(trampa|[lmpckjg]\d\d)(?:[-–]([lmpckjg]?\d\d))?(?: \(([^)]*)\))?:\s*([\s\S]*)$/)){
     const a=m[1],b=m[2];let rest=m[4];
     if(m[3])rest=m[3].charAt(0).toUpperCase()+m[3].slice(1)+': '+rest;
     if(a==='trampa'){const x=S.cross.find(y=>y&&/^c(09|10)$/.test(y.id));id=x?x.id:'c09'}
@@ -1103,6 +1117,7 @@ function resolve(h,nd){
   if(act==='m13'&&S.hand.length)fx.push([`m13: devolverla a tu mano`,()=>{S.disc.splice(S.disc.lastIndexOf('m13'),1);S.hand.push('m13');qFly('m13','#pDm','#tHand','#7dffb0')}]);
   if(act==='m18')M18=1;
   if(act==='l15'&&TY[id]==='T')M18=1;
+  if(act==='p11')M18=1;
   if(pfx==='l'){
     if(act==='l01')fx.push(['l01: colocar 2 de progreso en un desafío a tu elección',b=>{pickCh('Elige el desafío (+2 de progreso)',x=>{x.p+=2},b,null,1);return 2}]);
     if(act==='l02'&&S.hand.some(swd))fx.push(['l02: devolverla a tu mano (te queda una espada en la mano)',()=>{if(!S.hand.some(swd))return;const k=S.disc.lastIndexOf('l02');if(k<0)return;S.disc.splice(k,1);S.hand.push('l02');qFly('l02','#pDm','#tHand','#7dffb0')}]);
@@ -1112,11 +1127,22 @@ function resolve(h,nd){
     if(act==='l13')fx.push(['l13 (elige): buscar 1 carta en tu mazo o avanzar 2 de progreso',b=>{ov('l13',[...(S.dM.length?[['Buscar 1 carta en tu mazo',()=>{ov(null,[...S.dM].sort().map(x=>[x,()=>{S.dM.splice(S.dM.indexOf(x),1);S.hand.push(x);shuf(S.dM);fxShufM();render();b();return 1},0,'',x]),'<p>Elige la carta (luego se baraja el mazo)</p>',1);return 1}]]:[]),['Avanzar 2 de progreso en un desafío',()=>{pickCh('Elige el desafío (+2 de progreso)',x=>{x.p+=2},b,null,1);return 1}]],'<p>Elige el efecto</p>',1);return 2}]);
     if(nf)fx.push([`l19: añadir 1 de progreso por espada (${nf}) a desafíos que no intentaste este turno`,b=>{const go=n=>{if(!n)return b();pickCh(`l19: elige el desafío (+1 de progreso) · quedan ${n}`,x=>{x.p+=1},()=>go(n-1),c,1)};go(nf);return 2}]);
   }
+  if(pfx==='p'){
+    if(act==='p01')fx.push(['p01: sufrir 1 de daño',()=>hurt(1)]);
+    if(act==='p02')fx.push(['p02: robar 1 carta',()=>draw(1)]);
+    if(act==='p06')fx.push(['p06: añadir 1 de progreso a otro desafío',b=>{pickCh('p06: elige otro desafío (+1 de progreso)',x=>{x.p+=1},b,c,1);return 2}]);
+    if(act==='p07'&&S.dM.length)fx.push(['p07: buscar 1 carta en tu mazo y añadirla a tu mano',b=>{ov(null,[...S.dM].sort().map(x=>[x,()=>{S.dM.splice(S.dM.indexOf(x),1);S.hand.push(x);shuf(S.dM);fxShufM();render();b();return 1},0,'',x]),'<p>Elige la carta (luego se baraja el mazo)</p>',1);return 2}]);
+    if(act==='p09')fx.push(['p09: sufrir 2 de daño',()=>hurt(2)]);
+    if(act==='p13')fx.push(['p13: recuperar 2 corazones',()=>{S.hp=Math.min(10,S.hp+2)}]);
+    if(act==='p17')fx.push(['p17 (elige): activar tu habilidad o regresar un agotamiento activo al mazo',b=>{const km=S.mesa.filter(x=>/^k0[245]$/.test(x));ov('p17',[['Activar la carta de habilidad',()=>{S.hab=1;render();b();return 1}],...(km.length?[['Quitar un agotamiento activo (regresa al mazo)',()=>{ov(null,km.map(x=>[x,()=>{S.mesa.splice(S.mesa.indexOf(x),1);S.dK.push(x);shuf(S.dK);render();fxShufK();b();return 1},0,'',x]),'<p>Elige el agotamiento a quitar</p>',1);return 1}]]:[])],'<p>Elige el efecto</p>',1);return 2}]);
+    if(act==='p20')fx.push(['p20: sufrir 1 de daño',()=>hurt(1)]);
+  }
   const w0=c.p+add>=lv;
   if(S.mesa.includes('k02'))fx.push(['k02: elegir entre 1 de daño o quitar 1 de progreso al jefe final',b=>{ov('k02',[['Sufrir 1 de daño',()=>{hurt(1);render();b();return 1}],['Quitar 1 al jefe final',()=>{S.cross[0].p=Math.max(0,S.cross[0].p-1);render();b();return 1}]],'<p>Elige el efecto</p>',1);return 2}]);
   if(act==='m02')fx.push([`m02: elegir otro desafío y añadirle 1 progreso por fuego en descartes`,b=>{pickCh('Elige el otro desafío',x=>{x.p+=fireDisc()},b,c,1);return 2}]);
   if(act==='m07'&&as.length)fx.push([`m07: alguien asistió, puedes descartar cartas (o ninguna) y el que asistió roba igual número`,b=>{COOP?discDraw(b,1,n=>{if(n)mpSend({k:'draw',n})}):discDraw(b);return 2}]);
   if(act==='m10'&&S.hand.length)fx.push([`m10: poner una carta de tu mano encima del mazo`,b=>{ov(null,S.hand.map(x=>[x,()=>{S.hand.splice(S.hand.indexOf(x),1);S.dM.push(x);qFly(x,'#tHand','#dM','#8ab4ff');render();b();return 1},0,'',x]),'<p>Elige la carta</p>',1);return 2}]);
+  if(act==='p12'&&!w0)fx.push([`p12: descartar el desafío sin sufrir penalización`,()=>dropCh(S.cross.indexOf(c))]);
   if(act==='m15'&&!w0)fx.push([`m15: descartar el desafío sin sufrir penalización`,()=>dropCh(S.cross.indexOf(c))]);
   c.p+=add;const win=c.p>=lv&&id!=='g04'&&!(id[0]==='j'&&S.cross.some(x=>x&&x.id==='g01'));
   {const L=[...(spec[id]||[[],[]])[win?0:1]];
@@ -1130,13 +1156,16 @@ function resolve(h,nd){
   if(dk&&S.cross.some(y=>y&&/^c(09|10)$/.test(y.id)))L.push(['trampa: descartar 1 carta por oscuridad',b=>{pickHand(1,b);return 2}]);
   if(dk&&!win&&id!=='c49'&&S.cross.some(y=>y&&y.id==='c49'))L.push(['c49: sufrir 1 de daño por oscuridad',()=>hurt(1)]);
   if(dk&&!win&&id==='j04'&&S.hand.length)L.push(['j04: descartar una carta al azar y sufrir daño igual a su valor',()=>{const x=S.hand[Math.floor(Math.random()*S.hand.length)];S.hand.splice(S.hand.indexOf(x),1);S.disc.push(x);hurt(MC[x][1])}]);
-  let L2=(act==='m11'||act==='m15'||(act==='l10'&&TY[id]==='C'))&&!win?[]:L;
+  let L2=(act==='m11'||act==='m15'||act==='p12'||(act==='l10'&&TY[id]==='C')||(act==='p03'&&TY[id]==='C'))&&!win?[]:L;
   if(act==='l16'&&win&&TY[id]==='C')L2=[...L2,...[...(spec[id]||[[],[]])[0]].map(q=>['l16 (duplicar recompensa): '+q[0],q[1]])];
   fx.unshift(...L2)}
+  if(act==='p18'&&win)fx.push(['p18: superaste el desafío, robar 1 carta',()=>draw(1)]);
   /* efectos que ignoran penalización o daño: antes pasaban en silencio, ahora se muestran como los demás */
   {const ig=[];
    if(!win&&act==='m11')ig.push(['m11: si fallas un desafío, ignora su penalización',()=>{}]);
    if(!win&&act==='l10'&&TY[id]==='C')ig.push(['l10: si fallas un combate, ignora la penalización',()=>{}]);
+   if(!win&&act==='p03'&&TY[id]==='C')ig.push(['p03: si fallas un combate, ignora la penalización',()=>{}]);
+   if(act==='p11')ig.push(['p11: ignora 1 de daño que sufras este turno',()=>{}]);
    if(act==='m18')ig.push(['m18: ignora 1 de daño que sufras este turno',()=>{}]);
    if(act==='l15'&&TY[id]==='T')ig.push(['l15: si intentas superar una trampa, ignora 1 de daño',()=>{}]);
    fx.unshift(...ig)}
@@ -1205,7 +1234,7 @@ async function cine(color,nd,SP){
   else{
     c=S.cross[B.i];lv=LV(c);act=B.act;
     const pfx2=S.personaje||'m',fi2=getFI();
-    const fireOn=['m03','m06','m20'].includes(act);unit=act==='m06'?2:1;
+    const fireOn=['m03','m06','m20','p20'].includes(act);unit=act==='m06'?2:1;
     fires=fireOn?S.disc.filter(x=>x[0]===pfx2&&fi2[+x.slice(1)-1]&&fi2[+x.slice(1)-1][0]==='1'):[];
     tot=act?sumB()+(act==='m06'?2*fireDisc():0):0;b05=act&&l05on();
     asv=[...(act?B.as:[]).map(av),...(b05?[1]:[])];ascd=[...B.as,...(b05?['l05']:[])];
@@ -1229,11 +1258,22 @@ async function cine(color,nd,SP){
       const ca=[...$('#cA').children];
       for(let i=0;i<ca.length;i++){const e=ca[i],r=e.getBoundingClientRect();e.style.visibility='hidden';SFX.pop();await cfly(r,e.innerHTML,Ro.getBoundingClientRect(),550);v+=asv[i];popV(Ro,v);const [rx,ry]=ctr(Ro.getBoundingClientRect()),f=big('+'+asv[i],rx,ry-50,30);f.style.color='#fff';f.style.textShadow='0 2px 6px #000';f.style.fontWeight=700;f.animate([{opacity:1,transform:'translate(-50%,-50%)'},{opacity:0,transform:'translate(-50%,-140%)'}],{duration:700,fill:'forwards'}).finished.then(()=>f.remove());await wait(150)}
       if(ca.length)await wait(300)}
+    /* Pikachu (p19): una vez por turno, si juegas o asistes con una carta ⚡, relanzas 1 dado (p05: 1 relanzamiento extra) */
+    const askDie=n=>new Promise(ok=>{const d=document.createElement('div');d.style.cssText='position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 20px);z-index:43;width:min(92vw,360px);display:flex;flex-direction:column;gap:10px;background:#2f2b37;border-radius:18px;padding:14px;text-align:center;box-shadow:0 10px 40px #000a';
+      d.innerHTML=`<div>⚡ Pikachu: ¿relanzar un dado? (${n} disponible${n>1?'s':''})</div><div class="btns">${dice.map((q,i)=>{const f=q.f[q.face];return `<button data-y="${i}" style="background:${COL[f]};color:${f==='blanco'||f==='verde'?'#111':'#fff'}">${i<3?'Dado '+(i+1):'Dado blanco/negro'} · ${f}</button>`}).join('')}<button class="ghost" data-y="-1">No relanzar</button></div>`;
+      d.onclick=e=>{const b=e.target.closest('[data-y]');if(!b)return;d.remove();ok(+b.dataset.y)};document.body.appendChild(d)});
+    let RRN=(!SP&&PC()==='p'&&act)?((ico(act,0)||B.as.some(x=>ico(x,1)))?1:0)+(act==='p05'?1:0):0;
+    const rrDo=async()=>{
+      if(SP){for(;;){const m=await cmWait('rr');if(!m||m.stop)return;await roll(color,null,m.faces,m.i);await wait(500)}}
+      while(RRN>0){const i=await askDie(RRN);if(i<0)break;RRN--;
+        const F=dice.map(d=>d.face);F[i]=Math.floor(Math.random()*6);cmSend({t:'rr',i,faces:F});
+        const tk=setInterval(()=>SFX.tick(),130);try{await roll(color,null,F,i)}finally{clearInterval(tk)}await wait(500)}
+      cmSend({t:'rr',stop:1})};
     const doRoll=async()=>{let F;if(SP){const m=await cmWait('roll');F=m&&m.faces}else{F=dice.map(()=>Math.floor(Math.random()*6));cmSend({t:'roll',faces:F})}
       const tk=setInterval(()=>SFX.tick(),130);try{await roll(color,null,F)}finally{clearInterval(tk)}await wait(500)};
     if(!nd){
       spins.forEach(x=>x.cancel());
-      await doRoll();
+      await doRoll();await rrDo();
       const tg=R?Ro:Lo;let v=+tg.textContent,dcd=0;
       const tally=async()=>{for(let i=0;i<4;i++){const d=dice[i],f=d.f[d.face];if(!(i<3?f===color:f==='blanco'))continue;h++;const dec=!dcd&&c.p+tot+h>=lv;if(dec)dcd=1;
         const r=d.slot.getBoundingClientRect(),[sx,sy]=ctr(r),[tx,ty]=ctr(tg.getBoundingClientRect()),sp=document.createElement('div');
@@ -1265,7 +1305,7 @@ async function cine(color,nd,SP){
       await wait(400);
       /* l18: contra un OBSTÁCULO, una tirada extra gratis cuyos aciertos se suman */
       if(act==='l18'&&TY[c.id]==='O'&&await (SP?cmWait('l18').then(m=>!!(m&&m.go)):askC('l18: ¿volver a lanzar los dados una vez más, gratis? Los nuevos aciertos se suman.','Volver a lanzar','No').then(g=>{cmSend({t:'l18',go:g?1:0});return g}))){
-        await doRoll();
+        await doRoll();await rrDo();
         rolls++;if(await l11())skips++;else await tally();
         await wait(400)}}
     /* golpe */
@@ -1451,7 +1491,7 @@ const MP={ws:null,code:null,role:null,peer:null,join:null,cancel:0,tm:null,hb:nu
 /* mensajes numerados: si se corta la conexión, al volver cada lado reenvía lo que el otro no recibió */
 const OUTB=[];let SEQ=0,LASTIN=0;
 const mpReset=()=>{OUTB.length=0;SEQ=0;LASTIN=0};
-const mpEl=$('#mp'),mpNm=c=>c==='l'?'Personaje 2':'Personaje 1';
+const mpEl=$('#mp'),mpNm=c=>c==='l'?'Personaje 2':c==='p'?'Personaje 3':'Personaje 1';
 const mpShow=v=>{mpEl.className='on '+v};
 const mpLink=()=>location.origin+location.pathname+'?sala='+MP.code;
 const MP_TIPS=['Despertando al servidor…','Encendiendo las antorchas del calabozo…','Afilando las espadas…','Barajando el mazo…','Casi listo, aventurero…'];
@@ -1619,7 +1659,7 @@ function coopAsk(){
   coopWait('Tu amigo está eligiendo cartas para asistirte…');
 }
 /* amigo: solo cartas del color del desafío (la blanca sirve para cualquiera) */
-const okaC=(id,c)=>{if(id==='m20'||id==='l20')return false;const a=ASC[id];return !a||a==='w'||a.includes(c)};
+const okaC=(id,c)=>{if(/^[mlp]20$/.test(id))return false;const a=ASC[id];return !a||a==='w'||a.includes(c)};
 const avF=(x,cid)=>(BONUS_TY[x]&&BONUS_TY[x]===TY[cid]?3:MC[x][2]);
 let CAD=null; /* datos de la petición de asistencia activa */
 /* amigo: pantalla normal de batalla con la acción bloqueada; el círculo azul sube con cada asistencia que elige */
@@ -1820,6 +1860,7 @@ const offList=async()=>{
   const L=[...rng('c',1,57),...rng('g',1,8),...rng('j',1,4),...rng('k',1,6)].map(id=>abU(`cartas/${id}.webp`));
   rng('m',1,20).forEach(id=>L.push(abU(`personajes/personaje 1/${id}.webp`)));
   rng('l',1,20).forEach(id=>L.push(abU(`personajes/personaje 2/${id}.webp`)));
+  rng('p',1,20).forEach(id=>L.push(abU(`personajes/personaje 3/${id}.webp`)));
   L.push(abU('Yugioh pro music.mp3'),abU('index.html'),abU('manifest.json'),location.origin+location.pathname);
   try{const mu=new URL('manifest.json',location.href),m=await (await fetch(mu,{cache:'no-cache'})).json();(m.icons||[]).forEach(i=>L.push(new URL(i.src,mu).href))}catch(e){}
   return [...new Set(L)].map(u=>({u}))};

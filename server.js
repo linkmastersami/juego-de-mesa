@@ -20,7 +20,7 @@ const newCode = () => { let c; do { c = Array.from({ length: 5 }, () => ABC[Math
 const newTok = () => crypto.randomBytes(12).toString('hex');
 const send = (ws, o) => { if (ws && ws.readyState === 1) ws.send(JSON.stringify(o)); };
 const other = role => role === 'host' ? 'guest' : 'host';
-const guestChar = r => r.hostChar === 'm' ? 'l' : 'm';
+const guestChar = r => r.hostChar === 'm' ? 'l' : 'm'; /* Pikachu ('p') como anfitrión: el invitado juega con 'm' */
 
 /* quita definitivamente a un jugador (salida voluntaria o fin de la gracia) */
 function drop(code, role) {
@@ -45,7 +45,7 @@ wss.on('connection', ws => {
 
     if (m.t === 'create') {
       if (ws.room) return;
-      const char = m.char === 'l' ? 'l' : 'm', code = newCode(), tok = newTok();
+      const char = m.char === 'l' ? 'l' : m.char === 'p' ? 'p' : 'm', code = newCode(), tok = newTok();
       rooms.set(code, { host: ws, guest: null, hostChar: char, tok: { host: tok, guest: null }, v2: { host: !!m.v, guest: false }, gone: { host: null, guest: null } });
       ws.room = code; ws.role = 'host';
       return send(ws, { t: 'created', code, char, tok });

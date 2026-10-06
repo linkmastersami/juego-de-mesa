@@ -78,7 +78,7 @@
   "cartas/k06.webp": "9d25324938e4",
   "icon-192.png": "1832840b96ab",
   "icon-512.png": "c42de4552324",
-  "index.html": "058a241ecc04",
+  "index.html": "c3f314c2b8ae",
   "k02.png": "0eb551aafe99",
   "manifest.json": "77a90e3f8df2",
   "package.json": "8fcadbba66bd",
@@ -147,5 +147,5 @@
   "personajes/personaje 3/p19.webp": "b89127da1d08",
   "personajes/personaje 3/p20.webp": "eebc4056974d"
  },
- "version": "d8cc89b90cb5"
+ "version": "25d36e26f04a"
 }
