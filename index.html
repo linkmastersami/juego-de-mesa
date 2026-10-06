@@ -32,6 +32,8 @@ button{font-family:inherit}
 .lbl{font-size:.75rem;color:var(--mute);margin:0 4px}
 .strip{display:flex;gap:6px;overflow-x:auto;height:11dvh;min-height:70px;align-items:stretch}
 .strip>div{aspect-ratio:5/7;flex:none}
+.hgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.hgrid.c4{grid-template-columns:repeat(4,1fr)}.hgrid>div{aspect-ratio:5/7;min-width:0;cursor:pointer}
+#bt>.btns{position:sticky;bottom:-12px;background:#1d1a24;margin:0 -12px -12px;padding:10px 12px 12px;box-shadow:0 -8px 14px #1d1a24}
 .decks{display:flex;gap:6px;justify-content:space-between;height:12dvh;min-height:78px}
 .decks>div{aspect-ratio:5/7;flex:none}
 .deck{border-radius:8px;background:repeating-linear-gradient(45deg,#4d3f6b,#4d3f6b 8px,#5a4a7c 8px,#5a4a7c 16px);border:2px solid #fff3;display:grid;place-items:center;text-align:center;font-size:.72rem;line-height:1.1;padding:2px}
@@ -976,7 +978,7 @@ function openBat(i){const go=k=>{PICK=0;B={i,act:null,as:[],col:k,m18sh:0};$('#b
 function rb(){
   const c=S.cross[B.i],h=CH[c.id],sl=(id,t,a)=>`<div data-bp="${a}">${id?card(id):t}</div>`;
   $('#bt').innerHTML=`<div class="vs"><div class="side"><div class="cell">${card(c.id)}</div><div class="orb">${Math.max(0,LV(c)-c.p)}</div><small>falta</small></div><b class="vsx">VS</b><div class="side"><div class="pl">${sl(B.act,'Acción','a')}${sl(B.as[0],'Asist.','s0')}${sl(B.as[1],'Asist.','s1')}</div><div class="orb p">${totB()}</div><small>tu progreso${l05on()?' · l05: +1':''}</small></div></div>
-  <span class="lbl">Tu mano: toca una carta</span><div class="strip">${[...S.hand,...(S.hab?[p20()]:[])].filter(x=>x!==B.act&&!B.as.includes(x)).map(id=>`<div data-bh="${id}" class="${(B.act?oka(id):okc(id)&&id!=='l12')?'':'dim'}">${card(id)}</div>`).join('')}</div>
+  <span class="lbl">Tu mano: toca una carta</span>${(()=>{const L=[...S.hand,...(S.hab?[p20()]:[])].filter(x=>x!==B.act&&!B.as.includes(x));return `<div class="${hgc(L.length)}">${L.map(id=>`<div data-bh="${id}" class="${(B.act?oka(id):okc(id)&&id!=='l12')?'':'dim'}">${card(id)}</div>`).join('')}</div>`})()}
   ${B.act==='m20'?'<div class="btns"><button id="m20disc">m20: Descartar cartas antes de actuar</button></div>':''}${B.act==='l20'?`<div class="btns" style="flex-direction:row"><button id="l20m" style="flex:1">−</button><div style="flex:3;display:grid;place-items:center;font-weight:700">l20: valor ${B.v20===undefined?7:B.v20} (0 a 7)</div><button id="l20p" style="flex:1">+</button></div>`:''}<div class="btns"><button id="go">${noDice(B.act)?'Aplicar (sin dados)':S.cross[B?.i]?.id==='g02'?'Resolver (sin dados · g02)':'Tirar dados'}</button><button id="nogo" class="ghost">Cancelar</button></div>`;
   try{syBat()}catch(e){}
 }
@@ -986,7 +988,7 @@ $('#bt').onclick=e=>{
   /* ---- MODO ASISTENCIA COOPERATIVA ---- */
   if(CAD){
     const g=k=>{const n=e.target.closest(`[data-${k}]`);return n?n.dataset[k]:null};let v;
-    if((v=g('cah'))!==null){const sel=CAD._sel;if(sel.has(v))sel.delete(v);else if(sel.size<2&&okaC(v,CAD.col))sel.add(v);rbC();return}
+    if((v=g('cah'))!==null){const sel=CAD._sel,ok=sel.size<2&&okaC(v,CAD.col);NOSY=1;ov(v,[['Usar como asistencia',()=>{if(CAD&&CAD._sel.size<2&&okaC(v,CAD.col))CAD._sel.add(v);rbC()},!ok],['Cancelar',()=>{},0,'ghost']],ok?'':`<p>${sel.size>=2?'Ya elegiste 2 asistencias.':'Esta carta no puede asistir en este desafío (color).'}</p>`,1);NOSY=0;return}
     if((v=g('cap'))!==null){CAD._sel.delete(v);rbC();return}
     if(e.target.id==='cas-cancel'){CAD._sel.clear();rbC();return}
     if(e.target.id==='cas-go'){const as=[...CAD._sel],d=CAD;CAD=null;COOPBUSY=0;OWNER='a';$('#bt').classList.remove('on');coopUi();SBTL=null;sbtRender({cid:d.cid,falta:d.falta,act:d.act,as,tot:(d.tot||0)+as.reduce((t,x)=>t+avF(x,d.cid),0),n:0,ph:'dice'});mpSend({k:'assistRes',as});return}
@@ -1706,6 +1708,7 @@ function coopAsk(){
 /* amigo: solo cartas del color del desafío (la blanca sirve para cualquiera) */
 const okaC=(id,c)=>{if(/^[mlp]20$/.test(id))return false;const a=ASC[id];return !a||a==='w'||a.includes(c)};
 const avF=(x,cid)=>(BONUS_TY[x]&&BONUS_TY[x]===TY[cid]?3:MC[x][2]);
+const hgc=n=>'hgrid'+(n>9?' c4':'');
 let CAD=null; /* datos de la petición de asistencia activa */
 /* amigo: pantalla normal de batalla con la acción bloqueada; el círculo azul sube con cada asistencia que elige */
 function rbC(){
@@ -1732,8 +1735,8 @@ function rbC(){
         <small>progreso · acción ${d.tot||0}${sumAs?` + asistencia ${sumAs}`:''}</small>
       </div>
     </div>
-    <span class="lbl">Tus cartas — toca para asistir (máx. 2)</span>
-    <div class="strip">${[...S.hand,...(S.hab?[p20()]:[])].filter(x=>!sel.has(x)).map(id=>`<div data-cah="${id}" class="${(sel.size<2&&okaC(id,d.col))?'':'dim'}">${card(id)}</div>`).join('')}</div>
+    <span class="lbl">Tus cartas — toca una para verla (máx. 2 asistencias)</span>
+    ${(()=>{const L=[...S.hand,...(S.hab?[p20()]:[])].filter(x=>!sel.has(x));return `<div class="${hgc(L.length)}">${L.map(id=>`<div data-cah="${id}" class="${(sel.size<2&&okaC(id,d.col))?'':'dim'}">${card(id)}</div>`).join('')}</div>`})()}
     <div class="btns">
       <button id="cas-go">${sel.size?`Asistir con ${sel.size} carta${sel.size>1?'s':''}`:'No asistir'}</button>
       ${sel.size?`<button id="cas-cancel" class="ghost">Cancelar selección</button>`:''}
@@ -1753,7 +1756,7 @@ function sbtRender(a){
       <b class="vsx">VS</b>
       <div class="side"><div class="pl">${slot(a.act,'Acción')}${slot(as[0],'Asist.')}${slot(as[1],'Asist.')}</div><div class="orb p" id="sbt-o">${a.tot}</div><small>progreso</small></div>
     </div>
-    ${a.n?`<span class="lbl">Su mano</span><div class="strip">${Array(a.n).fill(0).map(()=>`<div>${BACKH('')}</div>`).join('')}</div>`:''}`;
+    ${a.n?`<span class="lbl">Su mano</span><div class="${hgc(a.n)}">${Array(a.n).fill(0).map(()=>`<div>${BACKH('')}</div>`).join('')}</div>`:''}`;
   const o=$('#sbt-o');if(o&&SBTL!==null&&SBTL!==a.tot)o.animate([{transform:'scale(1.45)'},{transform:'scale(1)'}],{duration:280});
   SBTL=a.tot;e.classList.add('on');document.body.classList.add('sbton');
 }
