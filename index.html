@@ -1849,8 +1849,9 @@ $('#mp-copy').addEventListener('click',async()=>{
 
 
 /* ===== cooperativo: reloj de espera (90 s), salir y avisos ===== */
-const CTMAX=90;let CTEND=Date.now()+CTMAX*1000,CTKEY='',CTLAST=-1,CTACT=0,CDROP=0,CDT=null;
-const ctReset=()=>{CTEND=Date.now()+CTMAX*1000};
+const CTMAX=90,CTAS=30;let CTREM=CTMAX*1000,CTT=Date.now(),CTKEY='',CTLAST=-1,CTSYNC=0,ASEND=0,CDROP=0,CDT=null;
+const ctReset=()=>{CTREM=CTMAX*1000};
+const ctKey=()=>S.turn+'|'+(MYT?MP.role:MP.role==='host'?'guest':'host');
 function cDlg(ic,t,p,btns,extra){const b=$('#cdlg-b');b.innerHTML=`<div class="ci">${ic}</div><h2>${t}</h2><p>${p}</p>${extra||''}`;
   btns.forEach(([tx,fn,cl])=>{const e=document.createElement('button');e.textContent=tx;if(cl)e.className=cl;e.onclick=fn;b.appendChild(e)});$('#cdlg').classList.add('on')}
 function cDlgOff(){$('#cdlg').classList.remove('on');CDROP=0;clearInterval(CDT);CDT=null}
@@ -1860,28 +1861,36 @@ function cDrop(secs){CDROP=1;const t0=Date.now();
   cDlg('📡','Tu amigo perdió la conexión','Esperando a que vuelva a entrar a la partida…',[],`<div class="cs" id="cdlg-s">${secs} s</div>`);
   const b=$('#cdlg-b'),x=document.createElement('button');x.textContent='Salir al menú';x.onclick=()=>{cDlgOff();toMenu(1)};b.appendChild(x);
   clearInterval(CDT);CDT=setInterval(()=>{const e=$('#cdlg-s');if(e)e.textContent=Math.max(0,secs-Math.floor((Date.now()-t0)/1000))+' s'},500)}
-/* se acabó el tiempo de espera: pierden los dos */
+/* se acabó el tiempo del turno: pierden los dos */
 function ctTimeout(){if(!COOP||COOPEND||S.over)return;
   try{close();presHide(1);$('#bt').classList.remove('on');B=null;sbtHide();coopWait(null)}catch(e){}
-  S.why='⏱️ Se acabó el tiempo de espera de 90 segundos: perdieron la partida por tiempo.';S.whyC=[];endGame();coopUi()}
+  S.why='⏱️ Se acabaron los 90 segundos del turno: perdieron la partida por tiempo.';S.whyC=[];endGame();coopUi()}
+/* reloj: 90 s fijos por turno para el jugador en turno (se pausa mientras el amigo elige y aplica sus asistencias
+   y durante las animaciones); el amigo tiene 30 s para elegir asistencias (si se acaban, se envía lo que haya elegido) */
 setInterval(()=>{
-  const el=$('#ctime'),on=COOP&&!COOPEND&&!S.over&&!lobbyOn()&&GAMEON!==0;
-  el.classList.toggle('on',!!on);if(!on){ctReset();CTLAST=-1;return}
-  /* debajo del letrero de Turno */
+  const now=Date.now(),dt=Math.min(1000,now-CTT);CTT=now;
+  const el=$('#ctime'),on=COOP&&!COOPEND&&!S.over&&!lobbyOn();
+  el.classList.toggle('on',!!on);if(!on){ctReset();ASEND=0;CTLAST=-1;return}
   const r=$('#hturn').getBoundingClientRect();if(r.width){el.style.top=(r.bottom+6)+'px';el.style.right=Math.max(8,innerWidth-r.right)+'px';el.style.left='auto'}
-  /* cambia quién tiene el control → el reloj empieza de nuevo */
-  const k=(MYT?1:0)+OWNER+(COOPFX?1:0)+(COOPBUSY?1:0)+S.turn;if(k!==CTKEY){CTKEY=k;ctReset()}
-  const ct=$('#ctv');
-  /* en pausa: animaciones, ventanas de efecto o el amigo desconectado */
-  const ovOn=$('#ov').classList.contains('on');
-  if(CDROP||!MP.ws||BR||FXR||SFB||(typeof AFB!=='undefined'&&AFB)||CINE||PRES&&!ovOn){ctReset();ct.className='ct pause';ct.textContent='⏱ '+CTMAX;CTLAST=-1;return}
-  const left=Math.max(0,Math.ceil((CTEND-Date.now())/1000));
-  ct.className='ct'+(left<=10?' low':left<=30?' mid':'');ct.textContent='⏱ '+left;
-  if(left!==CTLAST&&left<=10&&left>0){try{SFX.tick()}catch(e){}}
-  CTLAST=left;if(left<=0)ctTimeout();
+  const k=ctKey();if(k!==CTKEY){CTKEY=k;ctReset()}
+  const ct=$('#ctv'),ovOn=$('#ov').classList.contains('on');
+  /* fase de asistencia: 30 s */
+  if(CAD||(MYT&&B&&B.coopWait)){
+    if(!ASEND)ASEND=now+CTAS*1000;const l=Math.max(0,Math.ceil((ASEND-now)/1000));
+    ct.className='ct'+(l<=5?' low':l<=15?' mid':'');ct.textContent='🤝 '+l;const t=$('#cas-t');if(t)t.textContent='⏱ '+l+' s';
+    if(l!==CTLAST&&l<=5&&l>0&&CAD){try{SFX.tick()}catch(e){}}CTLAST=l;
+    if(l<=0&&CAD){try{if(ovOn)close()}catch(e){}const g=$('#cas-go');if(g)g.click()}
+    return}
+  ASEND=0;
+  const pausa=CDROP||!MP.ws||OWNER==='f'||COOPFX||COOPBUSY||BR||FXR||SFB||(typeof AFB!=='undefined'&&AFB)||CINE||(PRES&&!ovOn);
+  if(!pausa)CTREM=Math.max(0,CTREM-dt);
+  const left=Math.ceil(CTREM/1000);
+  ct.className='ct'+(pausa?' pause':left<=10?' low':left<=30?' mid':'');ct.textContent=(pausa?'⏸ ':'⏱ ')+left;
+  if(!pausa&&left!==CTLAST&&left<=10&&left>0){try{SFX.tick()}catch(e){}}CTLAST=left;
+  /* el jugador en turno manda su tiempo al amigo para que los dos vean lo mismo */
+  if(MYT&&now-CTSYNC>2500){CTSYNC=now;mpRaw({t:'msg',data:{k:'ct',v:CTREM,key:k}})}
+  if(MYT&&!pausa&&CTREM<=0)ctTimeout();
 },250);
-/* tocar la pantalla cuando tienes el control también cuenta como actividad (se avisa al amigo) */
-document.addEventListener('pointerdown',()=>{if(!COOP||COOPEND||!ctl())return;ctReset();const n=Date.now();if(n-CTACT>2000){CTACT=n;mpRaw({t:'msg',data:{k:'act'}})}},{capture:true,passive:true});
 /* salir cuando quieras (el amigo recibe el aviso y su partida termina) */
 $('#ctx').onclick=()=>cDlg('🚪','¿Salir de la partida?','La partida terminará también para tu amigo.',[['Sí, salir al menú',()=>{cDlgOff();toMenu(1)},'main'],['Seguir jugando',()=>cDlgOff()]]);
 
@@ -1932,7 +1941,7 @@ function rbC(){
     ?`<div data-cap="${id}" style="cursor:pointer">${card(id)}</div>`
     :`<div>Asist.</div>`;
   $('#bt').innerHTML=`
-    <p class="sbt-t">Tu amigo te pide asistencia · elige hasta 2 cartas o pasa</p>
+    <p class="sbt-t">Tu amigo te pide asistencia · elige hasta 2 cartas o pasa <b id="cas-t" style="color:#ffd34d;white-space:nowrap"></b></p>
     <div class="vs">
       <div class="side">
         <div class="cell">${card(d.cid)}</div>
@@ -2026,7 +2035,7 @@ function coopEv(d){
 /* ---- victoria / derrota compartidas ---- */
 function coopOver(kind,msg){if(!COOP||COOPEND)return;COOPEND=1;mpSend({k:'over',kind,msg,cards:S.whyC||[],sh:coopShared()});MYT=1;coopUi()}
 function mpOnMsg(d){
-  if(!d)return;if(d.k!=='rs')ctReset();if(d.k==='act')return;
+  if(!d)return;if(d.k==='ct'){if(d.key===CTKEY&&!MYT)CTREM=d.v;return}
   if(d.k==='rs'){const g=d.got||0;for(let i=OUTB.length-1;i>=0;i--)if(OUTB[i].n<=g)OUTB.splice(i,1);OUTB.forEach(x=>mpRaw({t:'msg',n:x.n,data:x.data}));return}
   if(d.k==='start')coopBegin(d.first,d.dC,d.dK);
   else if(d.k==='assistReq'&&COOP)coopAssistAsk(d);
