@@ -364,6 +364,23 @@ body.sbton #coopb span,body.incine #coopb span{display:none}
 .rag i{font-style:normal;font-size:1.6rem;flex:none}.rag b{display:block;font-size:.85rem}
 .rag.no{opacity:.4;filter:grayscale(1)}
 #recs .rclose{border:0;border-radius:14px;background:#4a4555;color:var(--ink);font:700 1.05rem Fredoka,sans-serif;padding:12px}
+
+/* ===== cooperativo: reloj de espera, salir y avisos ===== */
+#ctime{position:fixed;z-index:50;display:none;flex-direction:column;align-items:stretch;gap:5px;pointer-events:none}
+#ctime.on{display:flex}
+#ctime .ct{pointer-events:none;display:flex;align-items:center;justify-content:center;gap:5px;background:#0000008c;border:2px solid #2fae5a;border-radius:99px;padding:3px 10px;font:700 .95rem Fredoka,sans-serif;color:#fff;box-shadow:0 2px 10px #0008;transition:border-color .3s}
+#ctime .ct.mid{border-color:var(--gold)}#ctime .ct.low{border-color:#ff3b55;color:#ffb3bd;animation:ctp .5s ease-in-out infinite alternate}
+#ctime .ct.pause{border-color:#777;color:#bbb}
+@keyframes ctp{to{transform:scale(1.12);box-shadow:0 0 16px #ff3b55aa}}
+#ctime .cx{pointer-events:auto;border:0;border-radius:99px;background:#4a2630e6;color:#ffb3bd;font:700 .78rem Fredoka,sans-serif;padding:5px 10px}
+#cdlg{position:fixed;inset:0;z-index:75;display:none;place-items:center;background:#0d0a14d9;padding:18px}
+#cdlg.on{display:grid}
+#cdlg .cb{width:min(100%,360px);background:#2f2b37;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:10px;text-align:center;box-shadow:0 0 0 2px #f2c14e66,0 10px 40px #000c}
+#cdlg .ci{font-size:2.6rem;line-height:1}#cdlg h2{margin:0;font:700 1.3rem Fredoka,sans-serif;color:#ffd34d}#cdlg p{margin:0;color:var(--ink)}
+#cdlg .cs{font:700 1.6rem Fredoka,sans-serif;color:#fff}
+#cdlg button{border:0;border-radius:14px;background:#4a4555;color:var(--ink);font:700 1.05rem Fredoka,sans-serif;padding:12px}
+#cdlg button.main{background:var(--gold);color:#2b2208}
+body.waitp #sh-st.on{z-index:46}
 </style>
 </head>
 <body>
@@ -469,6 +486,8 @@ body.sbton #coopb span,body.incine #coopb span{display:none}
   </div>
 </div>
 <div id="apart"></div>
+<div id="ctime"><div class="ct" id="ctv">⏱ 90</div><button class="cx" id="ctx">🚪 Salir</button></div>
+<div id="cdlg"><div class="cb" id="cdlg-b"></div></div>
 <div id="recs"></div>
 <div id="bt"></div>
 <div id="sbt"></div>
@@ -1734,10 +1753,11 @@ function mpOn(m){
   else if(m.t==='pchar'){if(MP.peer){MP.peer.char=m.char;mpRoom()}}
   else if(m.t==='resumed'){MP.role=m.role;MP.peer=m.peer?{char:m.peerChar}:null;mpDropBanner(null);mpResync();if(!COOP||COOPEND)mpRoom()}
   else if(m.t==='peer'){
-    if(m.on){MP.peer={char:m.char};mpDropBanner(null);if(m.back){mpResync();return}mpReset()}
-    else if(m.wait){mpDropBanner('⏳ Tu amigo perdió la conexión · esperándolo',m.wait);return}
+    if(m.on){MP.peer={char:m.char};mpDropBanner(null);if(CDROP)cDlgOff();if(m.back){mpResync();if(COOP&&!COOPEND)cToast('✅ Tu amigo volvió');return}mpReset()}
+    else if(m.wait){if(COOP&&!COOPEND)cDrop(m.wait);else mpDropBanner('⏳ Tu amigo perdió la conexión · esperándolo',m.wait);return}
     else{MP.peer=null;mpDropBanner(null);
-      if(COOP&&!COOPEND){mpOnMsg({k:'left'});return}
+      if(COOP&&!COOPEND){mpOnMsg({k:'left',lost:CDROP?1:0});return}
+      if(COOP&&COOPEND)return;
       if(MP.role==='guest'&&!m.on){mpErr('Tu amigo cerró la sala.');return}}
     mpRoom()}
   else if(m.t==='err'){mpErr(m.msg||'Error en la sala.')}
@@ -1827,13 +1847,51 @@ $('#mp-copy').addEventListener('click',async()=>{
 /* si abren un enlace ?sala=CODIGO entran directo a esa sala */
 {const c=(new URLSearchParams(location.search).get('sala')||'').toUpperCase().replace(/[^A-Z0-9]/g,'');if(c)setTimeout(()=>mpStart(c),300)}
 
+
+/* ===== cooperativo: reloj de espera (90 s), salir y avisos ===== */
+const CTMAX=90;let CTEND=Date.now()+CTMAX*1000,CTKEY='',CTLAST=-1,CTACT=0,CDROP=0,CDT=null;
+const ctReset=()=>{CTEND=Date.now()+CTMAX*1000};
+function cDlg(ic,t,p,btns,extra){const b=$('#cdlg-b');b.innerHTML=`<div class="ci">${ic}</div><h2>${t}</h2><p>${p}</p>${extra||''}`;
+  btns.forEach(([tx,fn,cl])=>{const e=document.createElement('button');e.textContent=tx;if(cl)e.className=cl;e.onclick=fn;b.appendChild(e)});$('#cdlg').classList.add('on')}
+function cDlgOff(){$('#cdlg').classList.remove('on');CDROP=0;clearInterval(CDT);CDT=null}
+function cToast(t){const e=document.createElement('div');e.className='atoast';e.innerHTML=`<div class="ai">🤝</div><div><b>${t}</b></div>`;document.body.appendChild(e);void e.offsetWidth;e.classList.add('in');setTimeout(()=>{e.classList.add('out');setTimeout(()=>e.remove(),450)},2200)}
+/* el amigo perdió la conexión: se espera lo que guarda el servidor, pero se puede salir cuando quieras */
+function cDrop(secs){CDROP=1;const t0=Date.now();
+  cDlg('📡','Tu amigo perdió la conexión','Esperando a que vuelva a entrar a la partida…',[],`<div class="cs" id="cdlg-s">${secs} s</div>`);
+  const b=$('#cdlg-b'),x=document.createElement('button');x.textContent='Salir al menú';x.onclick=()=>{cDlgOff();toMenu(1)};b.appendChild(x);
+  clearInterval(CDT);CDT=setInterval(()=>{const e=$('#cdlg-s');if(e)e.textContent=Math.max(0,secs-Math.floor((Date.now()-t0)/1000))+' s'},500)}
+/* se acabó el tiempo de espera: pierden los dos */
+function ctTimeout(){if(!COOP||COOPEND||S.over)return;
+  try{close();presHide(1);$('#bt').classList.remove('on');B=null;sbtHide();coopWait(null)}catch(e){}
+  S.why='⏱️ Se acabó el tiempo de espera de 90 segundos: perdieron la partida por tiempo.';S.whyC=[];endGame();coopUi()}
+setInterval(()=>{
+  const el=$('#ctime'),on=COOP&&!COOPEND&&!S.over&&!lobbyOn()&&GAMEON!==0;
+  el.classList.toggle('on',!!on);if(!on){ctReset();CTLAST=-1;return}
+  /* debajo del letrero de Turno */
+  const r=$('#hturn').getBoundingClientRect();if(r.width){el.style.top=(r.bottom+6)+'px';el.style.right=Math.max(8,innerWidth-r.right)+'px';el.style.left='auto'}
+  /* cambia quién tiene el control → el reloj empieza de nuevo */
+  const k=(MYT?1:0)+OWNER+(COOPFX?1:0)+(COOPBUSY?1:0)+S.turn;if(k!==CTKEY){CTKEY=k;ctReset()}
+  const ct=$('#ctv');
+  /* en pausa: animaciones, ventanas de efecto o el amigo desconectado */
+  const ovOn=$('#ov').classList.contains('on');
+  if(CDROP||!MP.ws||BR||FXR||SFB||(typeof AFB!=='undefined'&&AFB)||CINE||PRES&&!ovOn){ctReset();ct.className='ct pause';ct.textContent='⏱ '+CTMAX;CTLAST=-1;return}
+  const left=Math.max(0,Math.ceil((CTEND-Date.now())/1000));
+  ct.className='ct'+(left<=10?' low':left<=30?' mid':'');ct.textContent='⏱ '+left;
+  if(left!==CTLAST&&left<=10&&left>0){try{SFX.tick()}catch(e){}}
+  CTLAST=left;if(left<=0)ctTimeout();
+},250);
+/* tocar la pantalla cuando tienes el control también cuenta como actividad (se avisa al amigo) */
+document.addEventListener('pointerdown',()=>{if(!COOP||COOPEND||!ctl())return;ctReset();const n=Date.now();if(n-CTACT>2000){CTACT=n;mpRaw({t:'msg',data:{k:'act'}})}},{capture:true,passive:true});
+/* salir cuando quieras (el amigo recibe el aviso y su partida termina) */
+$('#ctx').onclick=()=>cDlg('🚪','¿Salir de la partida?','La partida terminará también para tu amigo.',[['Sí, salir al menú',()=>{cDlgOff();toMenu(1)},'main'],['Seguir jugando',()=>cDlgOff()]]);
+
 /* ===== MODO COOPERATIVO (2 jugadores) ===== */
 /* Compartido: corazones, turno, mazos de calabozo y agotamiento, cartas en mesa, cruz, completados, contadores y descarte de calabozo/agotamiento. Lo demás (mano, mazo, descarte y habilidad del personaje) es de cada jugador. */
 const SHK=['hp','turn','dC','dK','mesa','cross','comp','apart','nc','vk','final'];
 const isSh=x=>x[0]==='c'||x[0]==='k';
 const coopShared=()=>{const o={};SHK.forEach(k=>o[k]=S[k]);o.dcd=S.disc.filter(isSh);return JSON.parse(JSON.stringify(o))};
 function coopApply(o){SHK.forEach(k=>{if(o[k]!==undefined)S[k]=o[k]});S.disc=S.disc.filter(x=>!isSh(x)).concat(o.dcd||[])}
-function coopUi(){document.body.classList.toggle('waitp',!!(COOP&&!ctl()&&!COOPBUSY));const sp=$('#coopb span');if(sp)sp.textContent=MYT?'⏳ Tu amigo está aplicando su asistencia':'⏳ Turno de tu amigo';if(!COOP){const e=$('#sbt');if(e)e.classList.remove('on');document.body.classList.remove('sbton')}}
+function coopUi(){document.body.classList.toggle('waitp',!!(COOP&&!COOPEND&&!ctl()&&!COOPBUSY));const sp=$('#coopb span');if(sp)sp.textContent=MYT?'⏳ Tu amigo está aplicando su asistencia':'⏳ Turno de tu amigo';if(!COOP){const e=$('#sbt');if(e)e.classList.remove('on');document.body.classList.remove('sbton')}}
 function coopWait(t){const w=$('#coopw');if(t){$('#coopw-t').textContent=t;w.classList.add('on')}else w.classList.remove('on')}
 function coopPass(){SYON=0;OWNER='a';COOPFX=0;mpSend({k:'pass',sh:coopShared()});coopUi();fxTurnB(S.turn-1)}
 function coopBegin(first,dC,dK){
@@ -1968,7 +2026,7 @@ function coopEv(d){
 /* ---- victoria / derrota compartidas ---- */
 function coopOver(kind,msg){if(!COOP||COOPEND)return;COOPEND=1;mpSend({k:'over',kind,msg,cards:S.whyC||[],sh:coopShared()});MYT=1;coopUi()}
 function mpOnMsg(d){
-  if(!d)return;
+  if(!d)return;if(d.k!=='rs')ctReset();if(d.k==='act')return;
   if(d.k==='rs'){const g=d.got||0;for(let i=OUTB.length-1;i>=0;i--)if(OUTB[i].n<=g)OUTB.splice(i,1);OUTB.forEach(x=>mpRaw({t:'msg',n:x.n,data:x.data}));return}
   if(d.k==='start')coopBegin(d.first,d.dC,d.dK);
   else if(d.k==='assistReq'&&COOP)coopAssistAsk(d);
@@ -1982,7 +2040,8 @@ function mpOnMsg(d){
   else if(d.k==='draw'&&COOP){coopFeed(`🎴 Robas ${d.n} carta(s) por m07 de tu amigo`);draw(d.n);render()}
   else if(d.k==='ev'&&COOP)coopEv(d)
   else if(d.k==='over'&&COOP&&!COOPEND){COOPEND=1;SYQ=null;sbtHide();coopWait(null);COOPBUSY=0;MYT=1;coopUi();close();coopApply(d.sh);if(d.kind==='win')showVictory(d.msg);else{S.why=d.msg;S.whyC=d.cards||[];endGame()}}
-  else if(d.k==='left'&&COOP&&!COOPEND){COOPEND=1;SYQ=null;sbtHide();coopWait(null);COOPBUSY=0;close();ov(null,[['Volver al menú',()=>{toMenu(1);return 1}]],'<h2>Tu amigo salió</h2><p>La partida cooperativa terminó.</p>',1)}
+  else if(d.k==='left'&&COOP&&!COOPEND){COOPEND=1;SYQ=null;sbtHide();coopWait(null);COOPBUSY=0;close();presHide(1);$('#bt').classList.remove('on');coopUi();
+    cDlg(d.lost?'📡':'🚪',d.lost?'Tu amigo se desconectó':'Tu amigo salió de la partida',d.lost?'Perdió la conexión y no volvió a tiempo. La partida cooperativa terminó.':'Tu amigo salió al menú. La partida cooperativa terminó.',[['Volver al menú',()=>{cDlgOff();toMenu(1)},'main']])}
   else if(d.k==='sy'&&syR())syRecv(d)
   else if(d.k==='pass'&&COOP){SYQ=null;syOvHide();SYLAST='';coopApply(d.sh);MYT=1;OWNER='a';COOPFX=0;sbtHide();PICK=1;coopUi();render();fxTurn(d.sh.turn-1)}
 }
