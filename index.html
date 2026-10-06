@@ -208,6 +208,7 @@ button{font-family:inherit}
 
 /* ===== MULTIJUGADOR ===== */
 .lob-friend{margin-top:10px;width:min(86vw,320px);border:0;border-radius:16px;padding:14px;font:700 1.1rem Fredoka,sans-serif;color:#fff;background:linear-gradient(180deg,#4b7cf0,#2f55c4);box-shadow:0 5px 0 #1d3a8a,0 0 22px #4b7cf055;cursor:pointer}
+.lob-quick{background:linear-gradient(180deg,#3fcf72,#1f9a4a);box-shadow:0 5px 0 #136a30,0 0 22px #3fcf7255}.lob-quick:not(:disabled):active{box-shadow:0 1px 0 #136a30}.lob-quick.hot{animation:qpulse 1.2s ease-in-out infinite}@keyframes qpulse{50%{transform:scale(1.05)}}.lob-qb{background:#ff4d4d;border-radius:99px;padding:2px 9px;font-size:.8rem;margin-left:8px;font-weight:700}
 .lob-friend:disabled{opacity:.4;box-shadow:none;cursor:default}
 .lob-friend:not(:disabled):active{transform:translateY(4px);box-shadow:0 1px 0 #1d3a8a}
 #mp{position:fixed;inset:0;z-index:70;display:none;place-items:center;background:radial-gradient(120% 80% at 50% 30%,#2a1f45f2,#0d0a14f7);padding:16px;overflow-y:auto}
@@ -382,6 +383,8 @@ body.sbton #coopb span,body.incine #coopb span{display:none}
   </div>
   <button class="lob-start" id="lob-btn-start" disabled>Entrar al calabozo →</button>
   <button class="lob-friend" id="lob-btn-friend" disabled>👥 Jugar con un amigo</button>
+  <button class="lob-friend lob-quick" id="lob-btn-quick">⚡ Partida rápida<b id="lob-q" class="lob-qb" style="display:none"></b></button>
+  <button class="lob-resume" id="lob-btn-notif" style="display:none;margin-top:10px">🔔 Avisarme de partidas y actualizaciones</button>
   <div class="lob-sep" id="lob-sep-resume" style="display:none">── o ──</div>
   <button class="lob-resume" id="lob-btn-resume" style="display:none">▶ Continuar partida guardada</button>
   <button class="lob-resume" id="lob-modo">🌐 Jugando con Internet</button>
@@ -1461,7 +1464,7 @@ function showLobby(){
   }
 }
 function hideLobby(){
-  $('#lobby').classList.add('oculto');
+  setBadge(0);$('#lobby').classList.add('oculto');
   document.querySelector('.app').style.display='';
 }
 /* selección de personaje */
@@ -1510,9 +1513,9 @@ async function mpWake(){
   }
   return false;
 }
-async function mpStart(join){
-  mpClose();MP.cancel=0;MP.join=join||null;
-  $('#mp-ct').textContent=join?'Entrando a la sala…':'Conectando…';
+async function mpStart(join,quick){
+  mpClose();MP.cancel=0;MP.join=join||null;MP.quick=quick?1:0;MP.pub=0;
+  $('#mp-ct').textContent=join?'Entrando a la sala…':quick?'Buscando partida…':'Conectando…';
   mpShow('con');
   const t0=Date.now();let i=0;
   const tick=()=>{const s=(Date.now()-t0)/1000;$('#mp-bar').style.width=(92*(1-Math.exp(-s/20)))+'%';$('#mp-sec').textContent=Math.floor(s)+' s'+(s>8?' · el servidor gratis tarda un poco en despertar':'');};
@@ -1529,7 +1532,7 @@ async function mpStart(join){
 function mpOpen(){
   let ws;try{ws=new WebSocket(MP_URL.replace(/^http/,'ws'))}catch(e){mpErr('No se pudo abrir la conexión.');return}
   MP.ws=ws;MP.last=Date.now();
-  ws.onopen=()=>{MP.last=Date.now();ws.send(JSON.stringify(MP.join?{t:'join',code:MP.join,v:2}:{t:'create',char:CHAR,v:2}))};
+  ws.onopen=()=>{MP.last=Date.now();ws.send(JSON.stringify(MP.join?{t:'join',code:MP.join,v:2}:MP.quick?{t:'quick',char:CHAR,v:2,ep:(()=>{try{return localStorage.getItem('mesa-pushep')||''}catch(e){return ''}})()}:{t:'create',char:CHAR,v:2}))};
   mpBind(ws);
 }
 /* mensajes del servidor + latido: si pasan 22 s sin oír nada, se da la conexión por perdida */
@@ -1577,7 +1580,7 @@ function mpDropBanner(t,secs){
 /* pide al otro lado lo que no recibí y le reenvío lo que no recibió */
 const mpResync=()=>mpRaw({t:'msg',data:{k:'rs',got:LASTIN}});
 function mpOn(m){
-  if(m.t==='created'){MP.role='host';MP.code=m.code;MP.tok=m.tok;MP.peer=null;mpReset();mpStop2();mpRoom()}
+  if(m.t==='created'){MP.role='host';MP.pub=m.pub?1:0;MP.code=m.code;MP.tok=m.tok;MP.peer=null;mpReset();mpStop2();mpRoom()}
   else if(m.t==='joined'){MP.role='guest';MP.code=m.code;MP.tok=m.tok;CHAR=m.char;MP.peer={char:m.hostChar};mpReset();mpStop2();mpRoom()}
   else if(m.t==='pchar'){if(MP.peer){MP.peer.char=m.char;mpRoom()}}
   else if(m.t==='resumed'){MP.role=m.role;MP.peer=m.peer?{char:m.peerChar}:null;mpDropBanner(null);mpResync();if(!COOP||COOPEND)mpRoom()}
@@ -1602,19 +1605,56 @@ function mpRoom(){
   const p=MP.peer;
   $('#mp-fr').textContent=p?mpNm(p.char):'Esperando…';
   const st=$('#mp-frst');st.className='mst '+(p?'ok':'wait');st.textContent=p?'✓ Conectado':'⏳';
-  $('#mp-msg').textContent=p?(MP.role==='host'?'¡Los dos están en la sala! Empieza cuando quieras.':'Esperando a que el anfitrión empiece la partida…'):(MP.role==='host'?'Invita a tu amigo para que entre.':'Conectado a la sala.');
+  $('#mp-msg').textContent=p?(MP.role==='host'?'¡Los dos están en la sala! Empieza cuando quieras.':'Esperando a que el anfitrión empiece la partida…'):(MP.role==='host'?(MP.pub?'🔎 Buscando jugador… en cuanto alguien toque “Partida rápida” entrará contigo. También puedes invitar a un amigo.':'Invita a tu amigo para que entre.'):'Conectado a la sala.');
   {const g=$('#mp-go');g.style.display=MP.role==='host'?'':'none';g.disabled=!p}
   $('#mp-share').style.display=MP.role==='host'?'':'none';
   if(MP.role!=='host')$('#mp-alt').style.display='none';
 }
 $('#lob-btn-friend').addEventListener('click',()=>{if(sinNet()){alert('Jugar con un amigo necesita Internet. Toca "Jugando sin Internet" para volver a usarlo.');return}mpStart()});
 $('#mp-pick').addEventListener('click',e=>{const b=e.target.closest('button[data-c]');if(!b||COOP)return;CHAR=b.dataset.c;mpRaw({t:'char',char:CHAR});mpRoom()});
+/* ===== PARTIDA RÁPIDA + AVISOS ===== */
+let QN=0,QPUSH=0,QKEY='',NREF=0;
+function setBadge(n){try{if(n>0&&navigator.setAppBadge)navigator.setAppBadge(n);else if(!n&&navigator.clearAppBadge)navigator.clearAppBadge()}catch(e){}}
+function qUi(){const b=$('#lob-q');b.style.display=QN>0?'':'none';b.textContent=QN>0?(QN===1?'1 buscando':QN+' buscando'):'';$('#lob-btn-quick').classList.toggle('hot',QN>0);setBadge(QN)}
+async function qPoll(){
+  if(!lobbyOn()||sinNet()||document.hidden||MP.code||!navigator.onLine)return;
+  try{const c=new AbortController(),to=setTimeout(()=>c.abort(),6000);const r=await fetch(MP_URL+'/quick',{cache:'no-store',signal:c.signal});clearTimeout(to);if(!r.ok)return;
+    const j=await r.json();QN=j.n|0;QPUSH=!!j.push;QKEY=j.key||'';qUi();notifUi()}catch(e){}}
+setInterval(qPoll,6000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)qPoll()});setTimeout(qPoll,1500);
+try{navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.t==='quick')qPoll()})}catch(e){}
+$('#lob-btn-quick').addEventListener('click',()=>{
+  if(sinNet()){alert('La partida rápida necesita Internet. Toca "Jugando sin Internet" para volver a usarlo.');return}
+  if(!document.querySelector('.lob-char.sel')){alert('Primero elige tu personaje.');return}
+  mpStart(null,1)});
+const b64u=s=>{const r=(s+'='.repeat((4-s.length%4)%4)).replace(/-/g,'+').replace(/_/g,'/'),a=atob(r);return Uint8Array.from([...a].map(c=>c.charCodeAt(0)))};
+async function pushSub(ask){
+  if(!('serviceWorker' in navigator)||!('PushManager' in window)||!('Notification' in window))return false;
+  if(Notification.permission==='denied')return false;
+  if(Notification.permission!=='granted'){if(!ask)return false;if(await Notification.requestPermission()!=='granted')return false}
+  const reg=await navigator.serviceWorker.ready;let sub=await reg.pushManager.getSubscription();
+  if(!sub){if(!QKEY)return false;sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(QKEY)})}
+  const r=await fetch(MP_URL+'/push/sub',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({sub:sub.toJSON()})});
+  if(!r.ok)return false;
+  try{localStorage.setItem('mesa-push','1');localStorage.setItem('mesa-pushep',sub.endpoint)}catch(e){}
+  return true}
+function notifUi(){
+  const b=$('#lob-btn-notif'),can=QPUSH&&('PushManager' in window)&&('Notification' in window)&&Notification.permission!=='denied';
+  b.style.display=can?'':'none';let on=0;try{on=localStorage.getItem('mesa-push')==='1'&&Notification.permission==='granted'}catch(e){}
+  b.textContent=on?'🔔 Avisos activados · toca para desactivar':'🔔 Avisarme de partidas y actualizaciones';
+  if(on&&!NREF){NREF=1;pushSub(0).catch(()=>{})}} /* una vez por sesión: renueva la suscripción en el servidor */
+$('#lob-btn-notif').addEventListener('click',async()=>{
+  let on=0;try{on=localStorage.getItem('mesa-push')==='1'}catch(e){}
+  if(on){try{const reg=await navigator.serviceWorker.ready,sb=await reg.pushManager.getSubscription();if(sb){fetch(MP_URL+'/push/unsub',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({endpoint:sb.endpoint})}).catch(()=>{});await sb.unsubscribe()}}catch(e){}
+    try{localStorage.removeItem('mesa-push');localStorage.removeItem('mesa-pushep')}catch(e){}notifUi();return}
+  let ok=false;try{ok=await pushSub(1)}catch(e){}
+  if(!ok)alert('No se pudieron activar los avisos. Revisa que el navegador permita notificaciones (en iPhone, primero instala el juego en la pantalla de inicio).');
+  notifUi()});
 $('#mp-cancel').addEventListener('click',()=>{mpClose();mpEl.className=''});
 /* salir de la sala; si había una partida en marcha, también al menú */
 const mpExit=()=>{const enJuego=!lobbyOn();COOP=0;MYT=1;coopUi();mpClose();mpEl.className='';try{history.replaceState(null,'',location.pathname)}catch(e){}if(enJuego)toMenu(1)};
 $('#mp-back').addEventListener('click',mpExit);
 $('#mp-leave').addEventListener('click',mpExit);
-$('#mp-retry').addEventListener('click',()=>mpStart(MP.join));
+$('#mp-retry').addEventListener('click',()=>mpStart(MP.join,MP.quick));
 $('#mp-share').addEventListener('click',async()=>{
   const url=mpLink(),text='¡Juega conmigo en Link Master! Entra a mi sala '+MP.code+':';
   if(navigator.share){try{await navigator.share({title:'Link Master',text,url});return}catch(e){if(e&&e.name==='AbortError')return}}
@@ -1896,11 +1936,11 @@ function updUI(st,n){
   box.querySelectorAll('.ust').forEach(e=>e.remove());
   g.style.display='none';b.onclick=null;g.onclick=null;
   if(st==='run'){
-    $('#uI').textContent='🆙';$('#uT').textContent='¡Actualización disponible!';$('#uP').textContent='Actualizando el juego…';
+    setBadge(1);$('#uI').textContent='🆙';$('#uT').textContent='¡Actualización disponible!';$('#uP').textContent='Actualizando el juego…';
     b.className='ubtn run';$('#uF').style.width='0';$('#uS').textContent='Actualizando… 0%';
     $('#uN').textContent=`${n} archivo${n===1?'':'s'} por actualizar · no cierres el juego`}
   else if(st==='ok'){
-    $('#uI').textContent='🏆';$('#uT').textContent='¡Listo!';$('#uP').textContent='Tu juego ya está al día con las actualizaciones.';
+    setBadge(0);$('#uI').textContent='🏆';$('#uT').textContent='¡Listo!';$('#uP').textContent='Tu juego ya está al día con las actualizaciones.';
     b.className='ubtn ok';$('#uS').textContent='Aceptar';$('#uN').textContent='';
     for(let k=0;k<12;k++){const e=document.createElement('div');e.className='ust';e.textContent=k%3?'⭐':'✨';const a=k/12*6.283,d=90+Math.random()*60;e.style.cssText+=`;--dx:${Math.cos(a)*d}px;--dy:${Math.sin(a)*d-40}px;animation-delay:${Math.random()*.2}s`;box.appendChild(e)}
     try{SFX.pop()}catch(e){}

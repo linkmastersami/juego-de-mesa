@@ -22,4 +22,11 @@ jobs:
             git add version.json
             git commit -m "Actualizar version.json"
             git push
+            # aviso push de actualización a los jugadores (solo si están configurados los secretos)
+            if [ -n "$NOTIFY_KEY" ] && [ -n "$MP_URL" ]; then
+              curl -s -m 20 -X POST -H "x-key: $NOTIFY_KEY" "$MP_URL/push/update" || true
+            fi
           fi
+        env:
+          NOTIFY_KEY: ${{ secrets.NOTIFY_KEY }}
+          MP_URL: ${{ secrets.MP_URL }}

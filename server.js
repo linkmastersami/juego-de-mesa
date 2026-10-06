@@ -5,10 +5,63 @@ const http = require('http');
 const crypto = require('crypto');
 const { WebSocketServer } = require('ws');
 
+const fs = require('fs');
+const path = require('path');
+let webpush = null; try { webpush = require('web-push'); } catch {}
+
 const GRACIA = (+process.env.GRACIA_MS) || 90 * 1000;
+
+/* ---- avisos push (opcionales): se activan con las variables VAPID_PRIVATE (y NOTIFY_KEY para avisar de actualizaciones) ---- */
+const VAPID_PUBLIC = process.env.VAPID_PUBLIC || 'BIyNaaaLkcqYomZkvKt6Rp1u9Oy3lx725RtEJ-DoNOdT6uBddUBY8G_ian368mrIVy8pgpk2BDQtSl1a21XW9uU';
+const VAPID_PRIVATE = process.env.VAPID_PRIVATE || '';
+const pushOn = !!(webpush && VAPID_PRIVATE);
+if (pushOn) webpush.setVapidDetails(process.env.VAPID_SUBJECT || 'https://linkmastersami.github.io/juego-de-mesa/', VAPID_PUBLIC, VAPID_PRIVATE);
+const SUBS_FILE = path.join(__dirname, 'subs.json');
+const SUBS = new Map(); /* endpoint -> suscripción */
+try { JSON.parse(fs.readFileSync(SUBS_FILE, 'utf8')).forEach(s => s && s.endpoint && SUBS.set(s.endpoint, s)); } catch {}
+const saveSubs = () => { try { fs.writeFileSync(SUBS_FILE, JSON.stringify([...SUBS.values()])); } catch {} };
+async function pushAll(payload, skip) {
+  if (!pushOn) return 0;
+  let n = 0;
+  await Promise.all([...SUBS.values()].filter(s => s.endpoint !== skip).map(async s => {
+    try { await webpush.sendNotification(s, JSON.stringify(payload), { TTL: 3600 }); n++; }
+    catch (e) { if (e && (e.statusCode === 404 || e.statusCode === 410)) { SUBS.delete(s.endpoint); saveSubs(); } }
+  }));
+  return n;
+}
+let lastQuickPush = 0, lastUpdPush = 0;
+const readBody = (req, cb) => { let b = ''; req.on('data', d => { b += d; if (b.length > 4096) req.destroy(); }); req.on('end', () => { try { cb(JSON.parse(b || '{}')); } catch { cb(null); } }); };
+const waiting = () => [...rooms.entries()].filter(([, r]) => r.pub && !r.guest && !r.gone.guest && r.host && r.host.readyState === 1);
+
 const server = http.createServer((req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  if (req.url === '/health') { res.writeHead(200, { 'Content-Type': 'text/plain' }); return res.end('ok'); }
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'content-type, x-key');
+  const url = (req.url || '').split('?')[0];
+  if (req.method === 'OPTIONS') { res.writeHead(204); return res.end(); }
+  if (url === '/health') { res.writeHead(200, { 'Content-Type': 'text/plain' }); return res.end('ok'); }
+  /* cuántas salas rápidas están esperando jugador */
+  if (url === '/quick') { res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }); return res.end(JSON.stringify({ n: waiting().length, push: pushOn, key: VAPID_PUBLIC })); }
+  if (req.method === 'POST' && url === '/push/sub') {
+    return readBody(req, b => {
+      const s = b && b.sub;
+      if (!pushOn || !s || typeof s.endpoint !== 'string' || !/^https:\/\//.test(s.endpoint) || !s.keys || !s.keys.p256dh || !s.keys.auth) { res.writeHead(400); return res.end(); }
+      if (SUBS.size > 5000 && !SUBS.has(s.endpoint)) { res.writeHead(503); return res.end(); }
+      SUBS.set(s.endpoint, { endpoint: s.endpoint, keys: { p256dh: s.keys.p256dh, auth: s.keys.auth } }); saveSubs();
+      res.writeHead(204); res.end();
+    });
+  }
+  if (req.method === 'POST' && url === '/push/unsub') {
+    return readBody(req, b => { if (b && b.endpoint && SUBS.delete(b.endpoint)) saveSubs(); res.writeHead(204); res.end(); });
+  }
+  /* aviso de actualización: lo llama GitHub Actions con la clave NOTIFY_KEY (máx. 1 cada 20 min) */
+  if (req.method === 'POST' && url === '/push/update') {
+    const k = process.env.NOTIFY_KEY;
+    if (!pushOn || !k || req.headers['x-key'] !== k) { res.writeHead(403); return res.end(); }
+    if (Date.now() - lastUpdPush < 20 * 60 * 1000) { res.writeHead(429); return res.end(); }
+    lastUpdPush = Date.now();
+    return pushAll({ kind: 'update', title: 'Link Master Dungeon', body: '¡Hay una actualización nueva del juego!', badge: 1 }).then(n => { res.writeHead(200); res.end(String(n)); });
+  }
   res.writeHead(404); res.end();
 });
 
@@ -51,16 +104,34 @@ wss.on('connection', ws => {
       return send(ws, { t: 'created', code, char, tok });
     }
 
+    const doJoin = (code, r) => {
+      const tok = newTok();
+      r.gc = (m.t === 'quick' && ['m', 'l', 'p'].includes(m.char)) ? m.char : (r.hostChar === 'm' ? 'l' : 'm'); r.pub = false; /* en partida rápida el invitado entra con el personaje que eligió */
+      r.guest = ws; r.tok.guest = tok; r.v2.guest = !!m.v; ws.room = code; ws.role = 'guest';
+      send(ws, { t: 'joined', code, char: guestChar(r), hostChar: r.hostChar, tok });
+      send(r.host, { t: 'peer', on: true, char: guestChar(r) });
+    };
     if (m.t === 'join') {
       const code = String(m.code || '').toUpperCase().trim(), r = rooms.get(code);
       if (!r) return send(ws, { t: 'err', msg: 'Esa sala no existe o ya se cerró.' });
       if (r.guest && r.guest.readyState === 1) return send(ws, { t: 'err', msg: 'La sala ya está llena.' });
       if (r.gone.guest) return send(ws, { t: 'err', msg: 'La sala ya está llena.' }); /* su lugar está reservado un momento */
-      const tok = newTok();
-      r.gc = r.hostChar === 'm' ? 'l' : 'm';
-      r.guest = ws; r.tok.guest = tok; r.v2.guest = !!m.v; ws.room = code; ws.role = 'guest';
-      send(ws, { t: 'joined', code, char: guestChar(r), hostChar: r.hostChar, tok });
-      send(r.host, { t: 'peer', on: true, char: guestChar(r) });
+      return doJoin(code, r);
+    }
+
+    /* partida rápida: si alguien ya espera, te une con el que lleva más tiempo; si no, abre una sala pública y espera */
+    if (m.t === 'quick') {
+      if (ws.room) return;
+      const w = waiting().sort((a, b) => a[1].t0 - b[1].t0)[0];
+      if (w) return doJoin(w[0], w[1]);
+      const char = m.char === 'l' ? 'l' : m.char === 'p' ? 'p' : 'm', code = newCode(), tok = newTok();
+      rooms.set(code, { host: ws, guest: null, hostChar: char, pub: true, t0: Date.now(), tok: { host: tok, guest: null }, v2: { host: !!m.v, guest: false }, gone: { host: null, guest: null } });
+      ws.room = code; ws.role = 'host';
+      send(ws, { t: 'created', code, char, tok, pub: 1 });
+      if (pushOn && Date.now() - lastQuickPush > 2 * 60 * 1000) { /* máx. 1 aviso cada 2 min */
+        lastQuickPush = Date.now();
+        pushAll({ kind: 'quick', title: 'Link Master Dungeon', body: '⚔️ ¡Alguien está buscando jugador! Entra a partida rápida.', badge: 1 }, typeof m.ep === 'string' ? m.ep : null);
+      }
       return;
     }
 
