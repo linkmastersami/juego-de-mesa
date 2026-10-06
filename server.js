@@ -20,7 +20,7 @@ const newCode = () => { let c; do { c = Array.from({ length: 5 }, () => ABC[Math
 const newTok = () => crypto.randomBytes(12).toString('hex');
 const send = (ws, o) => { if (ws && ws.readyState === 1) ws.send(JSON.stringify(o)); };
 const other = role => role === 'host' ? 'guest' : 'host';
-const guestChar = r => r.hostChar === 'm' ? 'l' : 'm'; /* Pikachu ('p') como anfitrión: el invitado juega con 'm' */
+const guestChar = r => r.gc || (r.hostChar === 'm' ? 'l' : 'm'); /* el invitado puede cambiarlo con {t:'char'}; por defecto, uno distinto al anfitrión */
 
 /* quita definitivamente a un jugador (salida voluntaria o fin de la gracia) */
 function drop(code, role) {
@@ -31,7 +31,7 @@ function drop(code, role) {
     clearTimeout(r.gone.guest);
     rooms.delete(code);
   } else {
-    r.guest = null; r.tok.guest = null;
+    r.guest = null; r.tok.guest = null; r.gc = null;
     send(r.host, { t: 'peer', on: false });
   }
 }
@@ -57,10 +57,19 @@ wss.on('connection', ws => {
       if (r.guest && r.guest.readyState === 1) return send(ws, { t: 'err', msg: 'La sala ya está llena.' });
       if (r.gone.guest) return send(ws, { t: 'err', msg: 'La sala ya está llena.' }); /* su lugar está reservado un momento */
       const tok = newTok();
+      r.gc = r.hostChar === 'm' ? 'l' : 'm';
       r.guest = ws; r.tok.guest = tok; r.v2.guest = !!m.v; ws.room = code; ws.role = 'guest';
       send(ws, { t: 'joined', code, char: guestChar(r), hostChar: r.hostChar, tok });
       send(r.host, { t: 'peer', on: true, char: guestChar(r) });
       return;
+    }
+
+    /* cambiar de personaje en la sala (antes de empezar): se avisa al otro jugador */
+    if (m.t === 'char') {
+      const r = rooms.get(ws.room); if (!r || r[ws.role] !== ws) return;
+      const c = ['m', 'l', 'p'].includes(m.char) ? m.char : null; if (!c) return;
+      if (ws.role === 'host') r.hostChar = c; else r.gc = c;
+      return send(r[other(ws.role)], { t: 'pchar', char: c });
     }
 
     /* volver a entrar a una sala después de perder la conexión */

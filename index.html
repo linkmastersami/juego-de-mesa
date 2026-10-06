@@ -227,6 +227,7 @@ button{font-family:inherit}
 #mp small{display:block;color:var(--mute);font-size:.85rem;min-height:1.2em}
 #mp .mcode{margin:6px 0 14px;font:700 2.6rem Fredoka,sans-serif;letter-spacing:.35em;padding-left:.35em;color:#fff;text-shadow:0 0 18px #f2c14e}
 #mp .mslot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 8px;padding:12px 14px;border-radius:14px;background:#1d1a24;box-shadow:inset 0 0 0 2px #ffffff22;text-align:left}
+#mp .mpick{margin:0 0 10px;text-align:left}#mp .mpick small{color:var(--mute);font-size:.8rem;display:block;margin:0 0 6px 4px}#mp .mpick div{display:flex;gap:6px}#mp .mpick button{flex:1;padding:9px 4px;border-radius:12px;border:2px solid #ffffff22;background:#1d1a24;color:var(--ink);font:600 .8rem Fredoka,system-ui,sans-serif}#mp .mpick button.sel{border-color:var(--gold);background:#ffd34d22;color:var(--gold)}
 #mp .mslot em{font-style:normal;color:var(--mute);font-size:.8rem;display:block}
 #mp .mst.wait{animation:mpulse 1.2s ease-in-out infinite}
 #mp .mst.ok{color:#5bdc8a;font-weight:700}
@@ -337,6 +338,7 @@ body.sbton #coopb span,body.incine #coopb span{display:none}
     <p id="mp-msg"></p>
     <div class="mcode" id="mp-code">-----</div>
     <div class="mslot"><div>Tú<em id="mp-me"></em></div><div class="mst ok">✓ Listo</div></div>
+    <div class="mpick" id="mp-pick"><small>Elige tu personaje</small><div><button data-c="m">Personaje 1</button><button data-c="l">Personaje 2</button><button data-c="p">Personaje 3</button></div></div>
     <div class="mslot"><div>Amigo<em id="mp-fr"></em></div><div class="mst wait" id="mp-frst">⏳</div></div>
     <button class="mbtn" id="mp-go" style="display:none">⚔️ Empezar partida</button>
     <button class="mbtn" id="mp-share">📨 Invitar a un amigo</button>
@@ -1577,6 +1579,7 @@ const mpResync=()=>mpRaw({t:'msg',data:{k:'rs',got:LASTIN}});
 function mpOn(m){
   if(m.t==='created'){MP.role='host';MP.code=m.code;MP.tok=m.tok;MP.peer=null;mpReset();mpStop2();mpRoom()}
   else if(m.t==='joined'){MP.role='guest';MP.code=m.code;MP.tok=m.tok;CHAR=m.char;MP.peer={char:m.hostChar};mpReset();mpStop2();mpRoom()}
+  else if(m.t==='pchar'){if(MP.peer){MP.peer.char=m.char;mpRoom()}}
   else if(m.t==='resumed'){MP.role=m.role;MP.peer=m.peer?{char:m.peerChar}:null;mpDropBanner(null);mpResync();if(!COOP||COOPEND)mpRoom()}
   else if(m.t==='peer'){
     if(m.on){MP.peer={char:m.char};mpDropBanner(null);if(m.back){mpResync();return}mpReset()}
@@ -1595,6 +1598,7 @@ function mpRoom(){
   mpShow('room');
   $('#mp-code').textContent=MP.code;
   $('#mp-me').textContent=mpNm(CHAR);
+  document.querySelectorAll('#mp-pick button').forEach(b=>b.classList.toggle('sel',b.dataset.c===CHAR));
   const p=MP.peer;
   $('#mp-fr').textContent=p?mpNm(p.char):'Esperando…';
   const st=$('#mp-frst');st.className='mst '+(p?'ok':'wait');st.textContent=p?'✓ Conectado':'⏳';
@@ -1604,6 +1608,7 @@ function mpRoom(){
   if(MP.role!=='host')$('#mp-alt').style.display='none';
 }
 $('#lob-btn-friend').addEventListener('click',()=>{if(sinNet()){alert('Jugar con un amigo necesita Internet. Toca "Jugando sin Internet" para volver a usarlo.');return}mpStart()});
+$('#mp-pick').addEventListener('click',e=>{const b=e.target.closest('button[data-c]');if(!b||COOP)return;CHAR=b.dataset.c;mpRaw({t:'char',char:CHAR});mpRoom()});
 $('#mp-cancel').addEventListener('click',()=>{mpClose();mpEl.className=''});
 /* salir de la sala; si había una partida en marcha, también al menú */
 const mpExit=()=>{const enJuego=!lobbyOn();COOP=0;MYT=1;coopUi();mpClose();mpEl.className='';try{history.replaceState(null,'',location.pathname)}catch(e){}if(enJuego)toMenu(1)};
