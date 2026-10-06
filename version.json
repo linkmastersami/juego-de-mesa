@@ -109,7 +109,7 @@
   "cartas/reverso.webp": "7a486fb28f28",
   "icon-192.png": "1832840b96ab",
   "icon-512.png": "c42de4552324",
-  "index.html": "225d47065f25",
+  "index.html": "8c29843a2e8e",
   "k02.png": "0eb551aafe99",
   "manifest.json": "77a90e3f8df2",
   "package.json": "abdc4950432e",
@@ -180,5 +180,5 @@
   "personajes/personaje 3/p20.webp": "eebc4056974d",
   "personajes/personaje 3/p20a.webp": "1f135e22276f"
  },
- "version": "f983d57d2afd"
+ "version": "0bc90b27cd08"
 }
