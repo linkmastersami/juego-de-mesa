@@ -79,7 +79,7 @@
   "cartas/reverso.webp": "7a486fb28f28",
   "icon-192.png": "1832840b96ab",
   "icon-512.png": "c42de4552324",
-  "index.html": "44937dfbf339",
+  "index.html": "f59d128d7e3b",
   "k02.png": "0eb551aafe99",
   "manifest.json": "77a90e3f8df2",
   "package.json": "abdc4950432e",
@@ -146,7 +146,9 @@
   "personajes/personaje 3/p17.webp": "f6d101d54e0d",
   "personajes/personaje 3/p18.webp": "b35d6d12f3f8",
   "personajes/personaje 3/p19.webp": "b89127da1d08",
-  "personajes/personaje 3/p20.webp": "eebc4056974d"
+  "personajes/personaje 3/p19a.webp": "668183484e23",
+  "personajes/personaje 3/p20.webp": "eebc4056974d",
+  "personajes/personaje 3/p20a.webp": "1f135e22276f"
  },
- "version": "e25020e2ede1"
+ "version": "79654c7e6ab1"
 }
