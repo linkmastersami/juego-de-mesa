@@ -1,6 +1,6 @@
 /* Link Master Dungeon · service worker
    - index.html y manifest: primero la red (así siempre llegan las actualizaciones);
-     si no hay internet se usa la copia guardada.
+     si no hay internet, o la red tarda más de 4 s, se usa la copia guardada y se avisa cuando llega la nueva.
    - cartas, música y demás archivos: primero la copia guardada en el teléfono
      (se refrescan en segundo plano cuando hay internet).
    - la música se entrega por rangos (Range) para que suene sin conexión.
@@ -77,25 +77,39 @@ self.addEventListener('fetch', e => {
         const hit = (await sh0.match(r, { ignoreSearch: true })) || (await sh0.match(new URL('index.html', BASE).href)) || (await sh0.match(BASE));
         if (hit) return hit;
       }
-      try {
-        const res = await fetch(r, { cache: 'no-cache' });
-        if (res.ok) {
-          const sh = await caches.open(SHELL), as = await caches.open(ASSETS), idx = new URL('index.html', BASE).href;
-          await sh.put(r, res.clone());
-          if (r.mode === 'navigate') await sh.put(idx, res.clone());
-          /* si lm-assets ya tiene una copia de este archivo, se actualiza para que no quede vieja */
-          for (const k of [r.url, ...(r.mode === 'navigate' ? [idx, BASE] : [])]) if (await as.match(k)) await as.put(k, res.clone());
-        }
+      const sh = await caches.open(SHELL), idx = new URL('index.html', BASE).href;
+      const guardar = async res => {
+        if (!res.ok) return res;
+        const as = await caches.open(ASSETS);
+        await sh.put(r, res.clone());
+        if (r.mode === 'navigate') { await sh.put(idx, res.clone()); await sh.put(BASE, res.clone()); }
+        /* si lm-assets ya tiene una copia de este archivo, se actualiza para que no quede vieja */
+        for (const k of [r.url, ...(r.mode === 'navigate' ? [idx, BASE] : [])]) if (await as.match(k)) await as.put(k, res.clone());
         return res;
-      } catch (_) {
-        const sh = await caches.open(SHELL);
-        return (await sh.match(r, { ignoreSearch: true })) ||
-               (await sh.match(new URL('index.html', BASE).href)) ||
-               (await sh.match(BASE)) ||
-               (await caches.match(r, { ignoreSearch: true })) ||
-               (await caches.match(new URL('index.html', BASE).href)) ||
-               Response.error();
+      };
+      const copia = async () => (await sh.match(r, { ignoreSearch: true })) || (await sh.match(idx)) || (await sh.match(BASE)) ||
+        (await caches.match(r, { ignoreSearch: true })) || (await caches.match(idx));
+      const red = fetch(r, { cache: 'no-cache' }).then(guardar);
+      /* señal débil: si la red tarda más de 4 s se abre la copia guardada en ese momento
+         y la versión nueva se termina de bajar por detrás; al llegar se avisa a la página */
+      const vieja = r.mode === 'navigate' ? await copia() : null;
+      if (vieja) {
+        const res = await Promise.race([red.catch(() => null), new Promise(ok => setTimeout(() => ok('lento'), 4000))]);
+        if (res && res !== 'lento') return res;
+        if (res === 'lento') {
+          const tag = h => (vieja.headers.get(h) || '');
+          e.waitUntil(red.then(async nueva => {
+            if (!nueva || !nueva.ok) return;
+            const cambio = (tag('etag') && nueva.headers.get('etag') !== tag('etag')) || (tag('last-modified') && nueva.headers.get('last-modified') !== tag('last-modified')) || (!tag('etag') && !tag('last-modified'));
+            if (!cambio) return;
+            try { await (await caches.open('lm-cfg')).put('nueva', new Response('1')); } catch (_) {}
+            for (const ms of [0, 2500, 7000]) { await new Promise(ok => setTimeout(ok, ms)); for (const c of await self.clients.matchAll({ type: 'window' })) c.postMessage({ t: 'nueva' }); }
+          }).catch(() => {}));
+        }
+        return vieja;
       }
+      try { return await red; }
+      catch (_) { return (await copia()) || Response.error(); }
     })());
     return;
   }

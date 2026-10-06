@@ -1770,7 +1770,16 @@ async function qPoll(){
   try{const c=new AbortController(),to=setTimeout(()=>c.abort(),6000);const r=await fetch(MP_URL+'/quick',{cache:'no-store',signal:c.signal});clearTimeout(to);if(!r.ok)return;
     const j=await r.json();QN=j.n|0;QPUSH=!!j.push;QKEY=j.key||'';qUi();notifUi()}catch(e){}}
 setInterval(qPoll,6000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)qPoll()});setTimeout(qPoll,1500);
-try{navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.t==='quick')qPoll()})}catch(e){}
+try{navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.t==='quick')qPoll();if(e.data&&e.data.t==='nueva')nuevaVer()})}catch(e){}
+/* llegó una versión nueva mientras se abría la copia guardada (señal lenta): en el menú se recarga sola; en partida se pregunta */
+let NVER=0;
+function nuevaVer(){if(NVER)return;NVER=1;try{caches.open('lm-cfg').then(c=>c.delete('nueva'))}catch(e){}
+  const go=()=>{try{if(!COOP)localStorage.setItem('mesa-juego',JSON.stringify(S))}catch(e){}location.reload()};
+  if(lobbyOn()&&!(typeof MP!=='undefined'&&MP.ws)){go();return}
+  const b=document.createElement('button');b.textContent='🆕 Hay una versión nueva del juego · toca para actualizar';
+  b.style.cssText='position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 8px);z-index:90;border:2px solid var(--gold);border-radius:999px;background:#2f2b37f2;color:var(--ink);font:700 .9rem Fredoka,sans-serif;padding:9px 16px;max-width:92vw';
+  b.onclick=()=>{if(COOP&&!confirm('Si actualizas ahora se corta la partida con tu amigo. ¿Actualizar?'))return;go()};document.body.appendChild(b)}
+try{caches.open('lm-cfg').then(c=>c.match('nueva')).then(r=>{if(r)setTimeout(nuevaVer,1500)})}catch(e){}
 $('#lob-btn-quick').addEventListener('click',()=>{
   if(sinNet()){alert('La partida rápida necesita Internet. Toca "Jugando sin Internet" para volver a usarlo.');return}
   if(!document.querySelector('.lob-char.sel')){alert('Primero elige tu personaje.');return}
@@ -2118,13 +2127,13 @@ async function updCheck(){
   const MIN=5000,N=todo.length,t0=Date.now();let done=0,i=0,fail=0;
   updUI('run',N);
   const tk=setInterval(()=>{const pct=Math.round(Math.min(done/N,Math.min(1,(Date.now()-t0)/MIN))*100);$('#uF').style.width=pct+'%';$('#uS').textContent=`Actualizando… ${pct}%`},100);
-  const w=async()=>{while(i<N){const f=todo[i++],u=abU(f);try{const r=await fetch(u,{cache:'reload'});if(!r.ok)throw 0;await c.put(u,r);keep[f]=V.files[f]}catch(e){fail++}done++}};
+  let idxN=0;const w=async()=>{while(i<N){const f=todo[i++],u=abU(f);try{const r=await fetch(u,{cache:'reload'});if(!r.ok)throw 0;if(f==='index.html'){idxN=1;try{const sh=await caches.open('lm-shell-v7');await sh.put(u,r.clone());await sh.put(abU(''),r.clone())}catch(e){}}await c.put(u,r);keep[f]=V.files[f]}catch(e){fail++}done++}};
   await Promise.all([w(),w(),w(),w()]);
   gone.forEach(f=>c.delete(abU(f)));setMap(keep);OFF.busy=0;
   const rest=MIN-(Date.now()-t0);if(rest>0)await wait2(rest);
   clearInterval(tk);$('#uF').style.width='100%';$('#uS').textContent='Actualizando… 100%';await wait2(350);
   if(sinNet())await setCfg('off');
-  updUI(fail?'fail':'ok')}
+  updUI(fail?'fail':'ok');if(!fail&&idxN){const b=$('#uB'),f0=b.onclick;b.onclick=()=>{f0&&f0();try{if(!COOP)localStorage.setItem('mesa-juego',JSON.stringify(S))}catch(e){}location.reload()}}}
 async function offInit(){
   if(!('caches' in window)||!('serviceWorker' in navigator))return;
   let ok=0;try{ok=!!localStorage.getItem('mesa-offline')&&!!await caches.match(new URL(encodeURI('Yugioh pro music.mp3'),location.href).href)}catch(e){}
