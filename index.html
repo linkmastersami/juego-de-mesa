@@ -22,7 +22,7 @@ button{font-family:inherit}
 .bar{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
 .tab{border:0;border-radius:14px;background:var(--panel);color:var(--ink);font:700 1.05rem Fredoka,sans-serif;padding:11px}
 .tab.on{background:var(--gold);color:#2b2208}
-#cross{flex:1;min-height:0;display:grid;grid-template-columns:repeat(3,var(--cw));grid-template-rows:repeat(3,auto);justify-content:center;align-content:center;gap:6px;--cw:min(29vw,calc((100dvh - 310px)*5/21))}
+#cross{flex:1;min-height:0;display:grid;grid-template-columns:repeat(3,var(--cw));grid-template-rows:repeat(3,auto);justify-content:center;align-content:center;gap:6px;--cw:min(29vw,calc((100dvh - 348px)*5/21))}
 .cell{position:relative;aspect-ratio:696/1015;border-radius:10px}
 .cell.empty{border:2px dashed #fff3}
 .pg{position:absolute;right:-4px;bottom:-4px;min-width:30px;height:30px;border-radius:15px;background:var(--gold);color:#2b2208;display:grid;place-items:center;font-weight:700;padding:0 6px;box-shadow:0 2px 6px #0008;z-index:2}
@@ -323,6 +323,39 @@ body.sbton #coopb span,body.incine #coopb span{display:none}
 .lob-resume{border:0;border-radius:18px;background:#4a4555;color:var(--ink);font:700 1.1rem Fredoka,sans-serif;padding:14px;width:100%;max-width:420px;cursor:pointer;margin-top:8px;transition:transform .1s}
 .lob-resume:active{transform:scale(.97)}
 .lob-sep{color:var(--mute);font-size:.8rem;margin:6px 0;text-align:center}
+
+/* ===== barra de estado en el tablero ===== */
+#hud{display:flex;align-items:center;gap:6px;flex:none}
+#hud .hhp{flex:1;display:flex;align-items:center;gap:7px;background:#0000004d;border:1px solid #ffffff14;border-radius:99px;padding:5px 11px;min-width:0}
+#hud .hhp>span{font-size:.95rem;line-height:1}
+#hud .hpb{flex:1;display:grid;grid-template-columns:repeat(10,1fr);gap:3px;min-width:0}
+#hud .hpb i{height:9px;border-radius:3px;background:#ffffff17;transition:background .3s,box-shadow .3s}
+#hud .hpb i.on{background:linear-gradient(#ff8a9a,#e0283f);box-shadow:0 0 6px #ff3b5566}
+#hud .hpb.low i.on{animation:hb 1.15s ease-in-out infinite}
+#hud .hhp>b{font:700 1rem Fredoka,sans-serif;color:#fff;min-width:1.3em;text-align:right}
+#hud .hch{background:#0000004d;border:1px solid #ffffff14;border-radius:99px;padding:5px 10px;font:700 .85rem Fredoka,sans-serif;color:var(--ink);white-space:nowrap}
+#hud.hit .hhp{animation:hudHit .45s ease-in-out}#hud.heal .hhp{animation:hudHeal .7s ease-out}
+@keyframes hudHit{20%,60%{transform:translateX(-5px);background:#ff1f3a55}40%,80%{transform:translateX(5px)}}
+@keyframes hudHeal{30%{background:#2fae5a66;box-shadow:0 0 16px #7dffb0aa}}
+/* ===== récords y logros ===== */
+.vst .vnote{justify-content:center;background:#ffd34d1f;color:#ffe9a8;font-weight:600}
+.achs{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;width:100%}
+.achn{display:flex;align-items:center;gap:8px;background:linear-gradient(90deg,#ffd34d33,#ffd34d14);border:1px solid #ffd34d77;border-radius:12px;padding:7px 11px;width:100%;text-align:left;font-size:.88rem;animation:pop .5s cubic-bezier(.2,.9,.3,1.3) both}
+.achn i{font-style:normal;font-size:1.5rem}.achn b{display:block;color:#ffd34d}
+#recs{position:fixed;inset:0;z-index:60;background:#000c;display:none;overflow-y:auto;padding:calc(env(safe-area-inset-top,0px) + 16px) 14px 24px}
+#recs.on{display:block}
+#recs .rbox{max-width:440px;margin:0 auto;background:#2f2b37;border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:12px}
+#recs h2{margin:0;text-align:center;font:700 1.4rem Fredoka,sans-serif;color:#ffd34d}
+#recs h3{margin:4px 0 0;font:700 1rem Fredoka,sans-serif;color:var(--mute)}
+.rtot{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.rtot div{background:#ffffff12;border-radius:12px;padding:8px 4px;text-align:center;font-size:.72rem;color:var(--mute)}.rtot b{display:block;font:700 1.35rem Fredoka,sans-serif;color:#fff}
+.rpj{display:grid;grid-template-columns:auto 1fr 1fr 1fr;gap:4px 10px;align-items:center;font-size:.85rem;background:#ffffff0d;border-radius:12px;padding:10px}
+.rpj b{font-family:Fredoka,sans-serif}.rpj span{text-align:center}.rpj .h{color:var(--mute);font-size:.72rem}
+.ragl{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+.rag{display:flex;gap:8px;align-items:center;background:#ffffff0d;border-radius:12px;padding:8px;font-size:.78rem;line-height:1.2}
+.rag i{font-style:normal;font-size:1.6rem;flex:none}.rag b{display:block;font-size:.85rem}
+.rag.no{opacity:.4;filter:grayscale(1)}
+#recs .rclose{border:0;border-radius:14px;background:#4a4555;color:var(--ink);font:700 1.05rem Fredoka,sans-serif;padding:12px}
 </style>
 </head>
 <body>
@@ -390,12 +423,14 @@ body.sbton #coopb span,body.incine #coopb span{display:none}
   <button class="lob-resume" id="lob-btn-notif" style="display:none;margin-top:10px">🔔 Avisarme de partidas y actualizaciones</button>
   <div class="lob-sep" id="lob-sep-resume" style="display:none">── o ──</div>
   <button class="lob-resume" id="lob-btn-resume" style="display:none">▶ Continuar partida guardada</button>
+  <button class="lob-resume" id="lob-recs">🏆 Récords y logros</button>
   <button class="lob-resume" id="lob-modo">🌐 Jugando con Internet</button>
   <button class="lob-resume" id="lob-offline" style="display:none">⬇️ Guardar el juego para jugar sin conexión</button>
 </div>
 
 <div class="app">
   <div class="bar"><button class="tab" id="tTurn">Turno</button><button class="tab" data-sh="hand" id="tHand">Mano</button><button class="tab" data-sh="st" id="tSt">Estado</button></div>
+  <div id="hud"><div class="hhp"><span>❤️</span><div class="hpb" id="hpb"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><b id="hpn">10</b></div><div class="hch" id="hfire">🔥 0</div><div class="hch" id="hturn">T1</div></div>
   <div id="cross"></div>
   <div><span class="lbl">En mesa</span><div class="strip" id="mesa"></div></div>
   <div class="decks">
@@ -426,6 +461,7 @@ body.sbton #coopb span,body.incine #coopb span{display:none}
   </div>
 </div>
 <div id="apart"></div>
+<div id="recs"></div>
 <div id="bt"></div>
 <div id="sbt"></div>
 <div id="ov"></div>
@@ -506,6 +542,7 @@ try{const v=JSON.parse(localStorage.getItem('mesa-juego')||'null');if(v&&v.cross
 if(S.over){S=fresh();NEWG=1}
 
 const filling=()=>!S.final&&S.dC.length>0&&[1,2,3,4].some(k=>!S.cross[k]);
+let HUDHP=null;
 let ENDQ=0;const lost=()=>S.hp<=0||(S.cross[0]&&S.cross[0].id==='j01'&&S.cross[0].p<=0);
 /* ---------- pintar ---------- */
 function dedupeM(){const v=new Set();const pfx=S.personaje||'m';[S.hand,S.disc,S.dM].forEach(a=>{for(let i=a.length-1;i>=0;i--){const x=a[i];if(x[0]!==pfx)continue;if(v.has(x))a.splice(i,1);else v.add(x)}})}
@@ -529,6 +566,9 @@ function render(){
   {const pfxR=S.personaje||'m';const dm=S.disc.filter(x=>x[0]===pfxR);$('#pDm').innerHTML=(dm.length?card(dm[dm.length-1]):'<div class="card" style="opacity:.4"></div>')+`<span class="cn">${dm.length}</span>`;$('#pFire').textContent=ICO()+' '+fireDisc()}
   $('#pComp').innerHTML=S.comp.length?card(S.comp[S.comp.length-1]):'<div class="card" style="opacity:.4"></div>';
   $('#turn').textContent=S.turn;$('#hp').textContent=S.hp;
+  {const hp=Math.max(0,S.hp),pb=$('#hpb');[...pb.children].forEach((e,k)=>e.classList.toggle('on',k<hp));pb.classList.toggle('low',hp>0&&hp<=3);$('#hpn').textContent=hp;
+   $('#hfire').textContent=ICO()+' '+fireDisc();$('#hturn').textContent='Turno '+S.turn;
+   if(HUDHP!==null&&hp!==HUDHP){const h=$('#hud');h.classList.remove('hit','heal');void h.offsetWidth;h.classList.add(hp<HUDHP?'hit':'heal')}HUDHP=hp}
   document.body.classList.toggle('lowhp',!S.over&&S.hp>0&&S.hp<=3&&document.getElementById('lobby').classList.contains('oculto'));
   if(!SL&&!COOP)try{localStorage.setItem('mesa-juego',JSON.stringify(S))}catch(e){}
   try{fxDiff()}catch(e){}
@@ -769,11 +809,65 @@ function finalAnim(fp){
   }catch(e){}finally{SFB=0;HIDE.clear();render()}})
 }
 
+/* ---------- récords y logros (se guardan en el teléfono) ---------- */
+const PJN={m:'Mario',l:'Link',p:'Pikachu'},PJI={m:'🍄',l:'🗡️',p:'⚡'};
+const stLoad=()=>{try{return JSON.parse(localStorage.getItem('mesa-stats')||'{}')||{}}catch(e){return {}}};
+const stSave=o=>{try{localStorage.setItem('mesa-stats',JSON.stringify(o))}catch(e){}};
+/* [id, icono, nombre, cómo se consigue, prueba(estadísticas, partida)] */
+const ACH=[
+  ['w1','🗝️','Primera victoria','Gana una partida',(o,g)=>g.win],
+  ['wm','🍄','Héroe de los hongos','Gana con Mario',(o,g)=>g.win&&g.pj==='m'],
+  ['wl','🗡️','Héroe del tiempo','Gana con Link',(o,g)=>g.win&&g.pj==='l'],
+  ['wp','⚡','Ratón eléctrico','Gana con Pikachu',(o,g)=>g.win&&g.pj==='p'],
+  ['w3p','👑','Maestro de los tres','Gana con los 3 personajes',o=>['m','l','p'].every(k=>o.pj&&o.pj[k]&&o.pj[k].w)],
+  ['jf3','👹','Cazajefes','Vence a los 3 jefes finales distintos',o=>o.boss&&['j02','j03','j04'].every(k=>o.boss[k])],
+  ['nok','💪','Incansable','Gana sin robar ningún agotamiento',(o,g)=>g.win&&!g.vk],
+  ['hp10','💖','Intocable','Gana con los 10 corazones',(o,g)=>g.win&&g.hp>=10],
+  ['hp1','🩸','Al límite','Gana con 1 solo corazón',(o,g)=>g.win&&g.hp===1],
+  ['fast','⏱️','Relámpago','Gana en 12 turnos o menos',(o,g)=>g.win&&g.turn<=12],
+  ['nc15','🎯','Imparable','Completa 15 desafíos en una partida',(o,g)=>g.nc>=15],
+  ['st3','🔥','En racha','Gana 3 partidas seguidas',o=>(o.st||0)>=3],
+  ['coop','🤝','Mejores amigos','Gana una partida con un amigo',(o,g)=>g.win&&g.coop],
+  ['w10','🏆','Leyenda del calabozo','Gana 10 partidas',o=>(o.w||0)>=10],
+  ['g10','🛡️','Perseverante','Juega 10 partidas',o=>(o.g||0)>=10],
+  ['fin','🚪','Hasta el fondo','Llega a la batalla final',(o,g)=>g.final]
+];
+/* guarda el resultado una sola vez por partida; devuelve logros nuevos y récords */
+function stRecord(win){
+  if(S.rec)return null;S.rec=1;
+  const g={win:!!win,pj:S.personaje||'m',hp:Math.max(0,S.hp),turn:S.turn,vk:S.vk||0,nc:S.nc||0,coop:!!COOP,final:!!S.final,boss:S.cross[0]&&/^j0[2-4]$/.test(S.cross[0].id)?S.cross[0].id:null};
+  const o=stLoad();o.g=(o.g||0)+1;if(win)o.w=(o.w||0)+1;
+  o.pj=o.pj||{};const p=o.pj[g.pj]=o.pj[g.pj]||{g:0,w:0};p.g++;
+  let best=0;if(win){p.w++;if(!p.bt||g.turn<p.bt){best=p.bt?1:0;p.bt=g.turn}}
+  o.st=win?(o.st||0)+1:0;o.bs=Math.max(o.bs||0,o.st);o.nc=Math.max(o.nc||0,g.nc);
+  if(win&&g.boss){o.boss=o.boss||{};o.boss[g.boss]=1}
+  o.ach=o.ach||{};const nw=ACH.filter(a=>!o.ach[a[0]]&&a[4](o,g));nw.forEach(a=>o.ach[a[0]]=Date.now());
+  stSave(o);return {nw,best,o}}
+const stHtml=r=>{if(!r)return'';let h='';
+  if(r.best)h+=`<div class="vst"><div class="vnote">⭐ ¡Nuevo récord: ganaste en menos turnos que nunca!</div></div>`;
+  if(r.o.st>=2&&r.o.st===r.o.bs)h+=`<div class="vst"><div class="vnote">🔥 Racha de ${r.o.st} victorias seguidas</div></div>`;
+  if(r.nw.length)h+=`<div class="achs">${r.nw.map(a=>`<div class="achn"><i>${a[1]}</i><div><b>¡Logro desbloqueado! ${a[2]}</b>${a[3]}</div></div>`).join('')}</div>`;
+  return h};
+function showRecs(){
+  const o=stLoad(),A=o.ach||{},n=ACH.filter(a=>A[a[0]]).length,pj=o.pj||{};
+  $('#recs').innerHTML=`<div class="rbox"><h2>🏆 Récords y logros</h2>
+    <div class="rtot"><div><b>${o.g||0}</b>Partidas</div><div><b>${o.w||0}</b>Victorias</div><div><b>${o.g?Math.round((o.w||0)/o.g*100):0}%</b>Ganadas</div>
+    <div><b>${o.st||0}</b>Racha actual</div><div><b>${o.bs||0}</b>Mejor racha</div><div><b>${o.nc||0}</b>Más desafíos</div></div>
+    <h3>Por personaje</h3>
+    <div class="rpj"><span></span><span class="h">Partidas</span><span class="h">Victorias</span><span class="h">Menos turnos</span>
+    ${['m','l','p'].map(k=>{const p=pj[k]||{};return `<b>${PJI[k]} ${PJN[k]}</b><span>${p.g||0}</span><span>${p.w||0}</span><span>${p.bt||'—'}</span>`}).join('')}</div>
+    <h3>Logros · ${n} de ${ACH.length}</h3>
+    <div class="ragl">${ACH.map(a=>`<div class="rag${A[a[0]]?'':' no'}"><i>${a[1]}</i><div><b>${a[2]}</b>${a[3]}</div></div>`).join('')}</div>
+    <button class="rclose" id="recs-x">Cerrar</button></div>`;
+  $('#recs').classList.add('on')}
+$('#recs').addEventListener('click',e=>{if(e.target.id==='recs-x'||e.target.id==='recs')$('#recs').classList.remove('on')});
+$('#lob-recs').addEventListener('click',showRecs);
+
 /* ---------- victoria ---------- */
 function showVictory(msg){
-  coopOver('win',msg);S.over=1;S.final=1;render();
+  coopOver('win',msg);S.over=1;S.final=1;const rr=stRecord(1);render();
   const st={hp:S.hp,turn:S.turn,vk:S.vk||0,nc:S.nc||0};
-  const html=`<h2>¡Victoria!</h2>${msg?`<p>${msg}</p>`:''}<div class="vst"><div><span>❤️ Vida al finalizar</span><b>${st.hp}</b></div><div><span>🕒 Turnos usados</span><b>${st.turn}</b></div><div><span>😮‍💨 Veces que te tuviste que agotar</span><b>${st.vk}</b></div><div><span>🏆 Desafíos completados</span><b>${st.nc}</b></div></div>`;
+  const html=`<h2>¡Victoria!</h2>${msg?`<p>${msg}</p>`:''}<div class="vst"><div><span>❤️ Vida al finalizar</span><b>${st.hp}</b></div><div><span>🕒 Turnos usados</span><b>${st.turn}</b></div><div><span>😮‍💨 Veces que te tuviste que agotar</span><b>${st.vk}</b></div><div><span>🏆 Desafíos completados</span><b>${st.nc}</b></div></div>${stHtml(rr)}`;
   ov((S.personaje||'m')+'19',[
     ['📤 Compartir victoria',()=>{shareVictory(st);return 1}],
     ['Iniciar partida nueva',()=>{newGame()}],
@@ -804,10 +898,12 @@ async function shareVictory(st){
     const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='victoria.png';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
   }catch(e){}
 }
-function endGame(){coopOver('lose',S.why);S.over=1;fxStamp('DERROTA','ko');
+function endGame(){coopOver('lose',S.why);S.over=1;const rr=stRecord(0);fxStamp('DERROTA','ko');
+  const bj=S.cross[0],near=S.final?`👹 ¡Llegaste a la batalla final!${bj&&/^j0[2-4]$/.test(bj.id)?` Al jefe le faltaban ${Math.max(0,LV(bj)-bj.p)} de progreso`:''}`:`🚪 Te faltaban ${S.dC.length} cartas del calabozo para llegar al jefe final`;
+  const dst=`<div class="vst"><div class="vnote">${near}</div><div><span>🕒 Turnos jugados</span><b>${S.turn}</b></div><div><span>🏆 Desafíos completados</span><b>${S.nc||0}</b></div><div><span>😮‍💨 Veces que te agotaste</span><b>${S.vk||0}</b></div>${bj&&bj.id==='j01'?`<div><span>👹 Progreso del jefe final</span><b>${Math.max(0,bj.p)}</b></div>`:''}</div>${stHtml(rr)}`;
   const cs=(S.whyC||[]).filter(Boolean),cards=cs.length?`<div class="grid" style="grid-template-columns:repeat(${Math.min(cs.length,2)},1fr);max-width:${Math.min(cs.length,2)*110}px;margin:8px auto">${cs.map(id=>`<div>${card(id)}</div>`).join('')}</div>`:'';
   /* ventana fija (sin "Cerrar"): siempre hay una salida, nunca queda el tablero trabado */
-  ov(null,[['Nueva partida',()=>newGame()],['Menú principal',()=>{toMenu(1);return 1}]],`<h2>Derrota</h2>${cards}<p>${S.why||(S.hp<=0?'Te quedaste sin corazones.':'El jefe final se quedó sin progreso.')}</p>`,1)}
+  ov(null,[['Nueva partida',()=>newGame()],['Menú principal',()=>{toMenu(1);return 1}]],`<h2>Derrota</h2>${cards}<p>${S.why||(S.hp<=0?'Te quedaste sin corazones.':'El jefe final se quedó sin progreso.')}</p>${dst}`,1)}
 const newGame=()=>{RES2=null;RUNFX=0;presHide(1);close();try{localStorage.removeItem('mesa-juego')}catch(e){}const inRoom=COOP&&MP.code&&MP.ws;NEWG=1;showLobby();if(inRoom)mpRoom()};
 
 /* ---------- mazos ---------- */
