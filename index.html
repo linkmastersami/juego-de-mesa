@@ -567,7 +567,7 @@ function fxDiff(){
     else if(o&&i&&(!n||n.id!==o.id)&&S.cross.length&&!SKIPG.delete(i)){const k=S.comp[S.comp.length-1]===o.id?'gdone':'gout',j=CPOS.indexOf(i);if(!n){PEND[i]={h:o.h,p:o.p};const ce=ch[j];if(ce){ce.className='cell';ce.innerHTML=o.h+'<b class="pg">'+o.p+'</b>'}}BQ.push(async()=>{const e=$('#cross').children[j],r=e?e.getBoundingClientRect():null;if(PEND[i]){delete PEND[i];if(e&&!S.cross[i]){e.className='cell empty';e.innerHTML=''}}ghost(r&&r.width?r:o.r,o.h,k,950);await wait(1000)})}}
   if(!NOFX&&PHP!==null&&S.hp>PHP&&S.turn>=PT&&!S.over)fxHeal(PHP,S.hp);
   if(!NOFX&&PM!==null&&S.mesa.length===PM+1){const ix=S.mesa.length-1;BQ.push(async()=>{const m=$('#mesa').children[ix];if(m){m.classList.add('land');await wait(750)}})}
-  if(!NOFX&&PHAB!==null&&S.turn>=PT&&!S.over){const hid=(S.personaje||'m')+'20',on=S.hab?1:0;sy('fx',{f:'hab',a:[on,hid]});if(PHAB!==on)BQ.push(()=>habFx(on))}
+  if(!NOFX&&PHAB!==null&&S.turn>=PT&&!S.over){const hid=(S.personaje||'m')+'20',on=S.hab?1:0;if(PHAB!==on){sy('fx',{f:'hab',a:[on,hid]});BQ.push(()=>habFx(on))}}
   /* agotamiento (u otra carta) que sale de la mesa: vuela de la mesa al mazo de agotamiento */
   if(!NOFX&&PMA&&S.mesa.length<PMA.length&&S.turn>=PT&&!S.over){const left=PMA.slice();S.mesa.forEach(x=>{const k=left.indexOf(x);if(k>=0)left.splice(k,1)});if(left.length)BQ.push(async()=>{await Promise.all(left.slice(0,4).map((x,i)=>wait(i*160).then(()=>flyCard(x,rc('#mesa'),rc('#dK'),800,'#7dffb0'))))})}
   PMA=S.mesa.slice();PHAB=S.hab?1:0;PV=nv;PHP=S.hp;PM=S.mesa.length;PT=S.turn}
