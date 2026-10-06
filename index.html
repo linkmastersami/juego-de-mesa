@@ -473,7 +473,7 @@ const shuf=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i
 const imgSrc=id=>id[0]==='m'?`personajes/personaje 1/${id}.webp`:id[0]==='l'?`personajes/personaje 2/${id}.webp`:id[0]==='p'?`personajes/personaje 3/${id}.webp`:`cartas/${id}.webp`;
 const BACKH=c=>`<div class="card ${c}" data-id=""><div class="deck" style="width:100%;height:100%"></div></div>`;
 /* m19 y m20 tienen versión animada (m19a/m20a); la habilidad apagada y "reducir movimiento" usan la imagen fija */
-const ANIMC=new Set(['m19','m20','l19','l20']);
+const ANIMC=new Set(['m19','m20','l19','l20','p19','p20']);
 /* modo de juego: con Internet (se actualiza solo) o sin Internet (no gasta datos; solo pregunta si hay actualización) */
 let MODO='on';try{MODO=localStorage.getItem('mesa-modo')==='off'?'off':'on'}catch(e){}
 const sinNet=()=>MODO==='off';
@@ -482,7 +482,7 @@ const card=(id,c='')=>{if(id==='back')return BACKH(c);const an=ANIMC.has(id)&&!R
   /* si la versión animada no está guardada (sin internet), se usa la imagen fija en vez de dejar la carta vacía */
   return `<div class="card ${c}" data-id="${id}"><img src="${an?st.replace('.webp','a.webp'):st}" alt="${id}" onerror="${an?`this.onerror=function(){this.remove()};this.src='${st}'`:'this.remove()'}"></div>`};
 /* con internet, deja guardadas las versiones animadas (el service worker las guarda al pedirlas) */
-setTimeout(()=>{if(navigator.onLine&&!RM&&!sinNet())['m19','m20','l19','l20'].forEach(id=>fetch(imgSrc(id).replace('.webp','a.webp')).catch(()=>{}))},3000);
+setTimeout(()=>{if(navigator.onLine&&!RM&&!sinNet())[...ANIMC].forEach(id=>fetch(imgSrc(id).replace('.webp','a.webp')).catch(()=>{}))},3000);
 /* personaje activo: 'm' = personaje 1 (cartas m), 'l' = personaje 2 (cartas l) */
 let CHAR='m'; /* se elige en el lobby antes de startGame */
 const ICO=()=>S.personaje==='l'?'⚔️':S.personaje==='p'?'⚡':'🔥'; /* icono propio de cada personaje (hace el papel del fuego) */
