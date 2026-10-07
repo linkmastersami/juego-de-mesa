@@ -107,12 +107,12 @@
   "cartas/k05.webp": "5541a05e488f",
   "cartas/k06.webp": "9d25324938e4",
   "cartas/reverso.webp": "7a486fb28f28",
-  "fondos/derrota.jpg": "c0df791be756",
-  "fondos/menu..jpg": "59baf1c12fa2",
-  "fondos/victoria.jpg": "bacdf6e90f9d",
+  "fondos/derrota.webp": "898296b1038f",
+  "fondos/menu.webp": "fbac4e5b0cad",
+  "fondos/victoria.webp": "04d1b27a2897",
   "icon-192.png": "1832840b96ab",
   "icon-512.png": "c42de4552324",
-  "index.html": "c879f1402ba3",
+  "index.html": "750bfe9e4a1e",
   "k02.png": "0eb551aafe99",
   "logo.webp": "c79c21426a47",
   "manifest.json": "77a90e3f8df2",
@@ -192,5 +192,5 @@
   "tableros/t07.webp": "d13add3a6534",
   "tableros/t08.webp": "df272cca3775"
  },
- "version": "b73fa85cd8e0"
+ "version": "812325fd7984"
 }
