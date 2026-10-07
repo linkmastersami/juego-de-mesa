@@ -569,6 +569,14 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
 .atoast.alb .ai{background:radial-gradient(circle,#f6ead0,#c9ae7c);border-radius:10px}
 .comm{max-width:420px;text-align:center;display:flex;flex-direction:column;gap:12px;align-items:center;margin-top:40px}
 .comm .cbig{font-size:4rem;height:90px;display:grid;place-items:center;overflow:visible}.comm p{margin:0;color:var(--ink);font-size:1rem;background:#0d0a14b3;border-radius:16px;padding:14px}
+#mp .mpg{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:8px;max-height:46vh;overflow-y:auto;padding:4px}
+#mp .mpg button{position:relative;padding:0;border:3px solid transparent;border-radius:12px;background:#1d1a24;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;color:var(--ink);font:700 .78rem Fredoka,sans-serif}
+#mp .mpg button .card{width:100%;height:auto;aspect-ratio:696/1015;border-radius:0}#mp .mpg button span{padding:4px 2px}
+#mp .mpg button.sel{border-color:var(--gold);box-shadow:0 0 14px #ffd34d88}
+#mp .mpg button.tk{filter:grayscale(1) brightness(.45);cursor:not-allowed}
+#mp .mpg button.tk::after{content:attr(data-who);position:absolute;left:0;right:0;top:38%;background:#000c;color:#ffb3bd;font:800 .7rem Fredoka,sans-serif;padding:4px 2px;text-align:center}
+#mp-rdy.on{background:linear-gradient(180deg,#5bdc8a,#2f9e57);color:#fff}
+#mp-rdy:disabled{opacity:.45}
 </style>
 </head>
 <body>
@@ -587,9 +595,10 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
     <h2>Sala de juego</h2>
     <p id="mp-msg"></p>
     <div class="mcode" id="mp-code">-----</div>
-    <div class="mslot"><div>Tú<em id="mp-me"></em></div><div class="mst ok">✓ Listo</div></div>
-    <div class="mpick" id="mp-pick"><small>Elige tu personaje</small><div><button data-c="m">Personaje 1</button><button data-c="l">Personaje 2</button><button data-c="p">Personaje 3</button></div></div>
-    <div class="mslot"><div>Amigo<em id="mp-fr"></em></div><div class="mst wait" id="mp-frst">⏳</div></div>
+    <div class="mslot"><div><span id="mp-myn">Tú</span><em id="mp-me"></em></div><div class="mst wait" id="mp-myst">⏳ Eligiendo</div></div>
+    <div class="mslot"><div><span id="mp-frn">Amigo</span><em id="mp-fr"></em></div><div class="mst wait" id="mp-frst">⏳</div></div>
+    <div class="mpick" id="mp-pick"><small>Elige tu personaje (no puede ser el mismo que el de tu amigo)</small><div class="mpg" id="mp-pg"></div></div>
+    <button class="mbtn" id="mp-rdy">✅ ¡Listo!</button>
     <button class="mbtn" id="mp-go" style="display:none">⚔️ Empezar partida</button>
     <button class="mbtn" id="mp-share">📨 Invitar a un amigo</button>
     <div class="malt" id="mp-alt">
@@ -2164,14 +2173,15 @@ function mpDropBanner(t,secs){
 /* pide al otro lado lo que no recibí y le reenvío lo que no recibió */
 const mpResync=()=>mpRaw({t:'msg',data:{k:'rs',got:LASTIN}});
 function mpOn(m){
-  if(m.t==='created'){MP.role='host';MP.pub=m.pub?1:0;MP.code=m.code;MP.tok=m.tok;MP.peer=null;mpReset();mpStop2();mpRoom()}
-  else if(m.t==='joined'){MP.role='guest';MP.code=m.code;MP.tok=m.tok;CHAR=m.char;MP.peer={char:m.hostChar};mpReset();mpStop2();mpRoom()}
-  else if(m.t==='pchar'){if(MP.peer){MP.peer.char=m.char;mpRoom()}}
+  if(m.t==='created'){MP.rdy=0;MP.prdy=0;MP.pn='';MP.role='host';MP.pub=m.pub?1:0;MP.code=m.code;MP.tok=m.tok;MP.peer=null;mpReset();mpStop2();mpRoom()}
+  else if(m.t==='joined'){MP.rdy=0;MP.prdy=0;MP.pn='';MP.role='guest';MP.code=m.code;MP.tok=m.tok;CHAR=m.char;MP.peer={char:m.hostChar};setTimeout(mpHi,50);mpReset();mpStop2();mpRoom()}
+  else if(m.t==='pchar'){if(MP.peer){MP.peer.char=m.char;if(!COOP)mpRoom()}}
+  else if(m.t==='charno'){CHAR=m.char;MP.rdy=0;if(!COOP)mpRoom()}
   else if(m.t==='resumed'){MP.role=m.role;MP.peer=m.peer?{char:m.peerChar}:null;mpDropBanner(null);mpResync();if(!COOP||COOPEND)mpRoom()}
   else if(m.t==='peer'){
-    if(m.on){MP.peer={char:m.char};mpDropBanner(null);if(CDROP)cDlgOff();if(m.back){mpResync();if(COOP&&!COOPEND)cToast('✅ Tu amigo volvió');return}mpReset()}
+    if(m.on){MP.peer={char:m.char};mpDropBanner(null);if(CDROP)cDlgOff();if(m.back){mpResync();if(COOP&&!COOPEND)cToast('✅ Tu amigo volvió');return}mpReset();MP.prdy=0;MP.rdy=0;setTimeout(mpHi,50)}
     else if(m.wait){if(COOP&&!COOPEND)cDrop(m.wait);else mpDropBanner('⏳ Tu amigo perdió la conexión · esperándolo',m.wait);return}
-    else{MP.peer=null;mpDropBanner(null);
+    else{MP.peer=null;MP.prdy=0;MP.pn='';mpDropBanner(null);
       if(COOP&&!COOPEND){mpOnMsg({k:'left',lost:CDROP?1:0});return}
       if(COOP&&COOPEND)return;
       if(MP.role==='guest'&&!m.on){mpErr('Tu amigo cerró la sala.');return}}
@@ -2185,18 +2195,29 @@ function mpSend(data){const n=++SEQ;OUTB.push({n,data});if(OUTB.length>400)OUTB.
 function mpRoom(){
   mpShow('room');
   $('#mp-code').textContent=MP.code;
-  $('#mp-me').textContent=mpNm(CHAR);
-  document.querySelectorAll('#mp-pick button').forEach(b=>b.classList.toggle('sel',b.dataset.c===CHAR));
-  const p=MP.peer;
-  $('#mp-fr').textContent=p?mpNm(p.char):'Esperando…';
-  const st=$('#mp-frst');st.className='mst '+(p?'ok':'wait');st.textContent=p?'✓ Conectado':'⏳';
-  $('#mp-msg').textContent=p?(MP.role==='host'?'¡Los dos están en la sala! Empieza cuando quieras.':'Esperando a que el anfitrión empiece la partida…'):(MP.role==='host'?(MP.pub?'🔎 Buscando jugador… en cuanto alguien toque “Partida rápida” entrará contigo. También puedes invitar a un amigo.':'Invita a tu amigo para que entre.'):'Conectado a la sala.');
-  {const g=$('#mp-go');g.style.display=MP.role==='host'?'':'none';g.disabled=!p}
-  $('#mp-share').style.display=MP.role==='host'?'':'none';
-  if(MP.role!=='host')$('#mp-alt').style.display='none';
+  const p=MP.peer,pc=p&&p.char,same=pc&&pc===CHAR;
+  if(same&&MP.rdy){MP.rdy=0}
+  $('#mp-myn').textContent=YO?YO.n:'Tú';$('#mp-me').textContent=PJN[CHAR]||mpNm(CHAR);
+  {const st=$('#mp-myst');st.className='mst '+(MP.rdy?'ok':'wait');st.textContent=MP.rdy?'✓ Listo':'⏳ Eligiendo'}
+  $('#mp-frn').textContent=p?(MP.pn||'Amigo'):'Amigo';$('#mp-fr').textContent=p?(PJN[pc]||mpNm(pc)):'Esperando…';
+  {const st=$('#mp-frst');st.className='mst '+(p&&MP.prdy?'ok':'wait');st.textContent=!p?'⏳':MP.prdy?'✓ Listo':'⏳ Eligiendo'}
+  $('#mp-pg').innerHTML=PJO.map(k=>{const tk=pc===k;return `<button data-c="${k}" class="${k===CHAR?'sel':''}${tk?' tk':''}" data-who="🔒 ${MP.pn||'Amigo'}">${card(k+'19','still')}<span>${PJN[k]}</span></button>`}).join('');
+  const r=$('#mp-rdy');r.disabled=!p||same;r.classList.toggle('on',!!MP.rdy);r.textContent=MP.rdy?'✅ ¡Listo! · toca para cambiar':same?'⚠️ Elige otro personaje':'✅ ¡Listo!';
+  $('#mp-msg').textContent=p?(MP.rdy&&MP.prdy?'⚔️ ¡Los dos están listos! Empezando…':MP.rdy?'Esperando a que tu amigo esté listo…':'Elige tu personaje y toca ¡Listo!'):(MP.role==='host'?(MP.pub?'🔎 Buscando jugador… en cuanto alguien toque “Partida rápida” entrará contigo. También puedes invitar a un amigo. Mientras, elige tu personaje.':'Invita a tu amigo para que entre. Mientras, elige tu personaje.'):'Conectado a la sala.');
+  $('#mp-go').style.display='none';
+  $('#mp-share').style.display=MP.role==='host'&&!p?'':'none';
+  if(MP.role!=='host'||p)$('#mp-alt').style.display='none';
+  mpTryStart();
 }
+/* saludo al entrar el amigo: nombre, personaje y si está listo */
+const mpHi=()=>mpSend({k:'hi',n:YO?YO.n:'',c:CHAR,r:MP.rdy?1:0});
+let MPSTART=0;
+function mpTryStart(){if(MP.role!=='host'||!MP.peer||!MP.rdy||!MP.prdy||MP.peer.char===CHAR||COOP||MPSTART)return;MPSTART=1;
+  setTimeout(()=>{MPSTART=0;if(MP.role!=='host'||!MP.peer||!MP.rdy||!MP.prdy||COOP)return;$('#mp-go').click()},900)}
 $('#lob-btn-friend').addEventListener('click',()=>{if(sinNet()){alert('Jugar con un amigo necesita Internet. Toca "Jugando sin Internet" para volver a usarlo.');return}mpStart()});
-$('#mp-pick').addEventListener('click',e=>{const b=e.target.closest('button[data-c]');if(!b||COOP)return;CHAR=b.dataset.c;mpRaw({t:'char',char:CHAR});mpRoom()});
+$('#mp-pick').addEventListener('click',e=>{const b=e.target.closest('button[data-c]');if(!b||COOP)return;if(b.classList.contains('tk')){try{SFX.fail()}catch(_){}return}
+  if(b.dataset.c===CHAR)return;CHAR=b.dataset.c;try{localStorage.setItem('mesa-pj',CHAR)}catch(_){}MP.rdy=0;mpRaw({t:'char',char:CHAR});if(MP.peer)mpSend({k:'rdy',v:0,c:CHAR});try{SFX.pop()}catch(_){}mpRoom()});
+$('#mp-rdy').addEventListener('click',()=>{if(!MP.peer||MP.peer.char===CHAR)return;MP.rdy=MP.rdy?0:1;mpSend({k:'rdy',v:MP.rdy,c:CHAR});try{MP.rdy?SFX.bell():SFX.tap()}catch(_){}mpRoom()});
 /* ===== PARTIDA RÁPIDA + AVISOS ===== */
 let QN=0,QPUSH=0,QKEY='',NREF=0;
 function setBadge(n){try{if(n>0&&navigator.setAppBadge)navigator.setAppBadge(n);else if(!n&&navigator.clearAppBadge)navigator.clearAppBadge()}catch(e){}}
@@ -2453,6 +2474,8 @@ function coopOver(kind,msg){if(!COOP||COOPEND)return;COOPEND=1;mpSend({k:'over',
 function mpOnMsg(d){
   if(!d)return;if(d.k==='ct'){if(d.key===CTKEY&&!MYT)CTREM=d.v;return}
   if(d.k==='rs'){const g=d.got||0;for(let i=OUTB.length-1;i>=0;i--)if(OUTB[i].n<=g)OUTB.splice(i,1);OUTB.forEach(x=>mpRaw({t:'msg',n:x.n,data:x.data}));return}
+  if(d.k==='hi'){MP.pn=d.n||'';if(MP.peer&&d.c)MP.peer.char=d.c;MP.prdy=d.r?1:0;if(!COOP)mpRoom();return}
+  if(d.k==='rdy'){MP.prdy=d.v?1:0;if(MP.peer&&d.c)MP.peer.char=d.c;if(!COOP)mpRoom();return}
   if(d.k==='start')coopBegin(d.first,d.dC,d.dK);
   else if(d.k==='assistReq'&&COOP)coopAssistAsk(d);
   else if(d.k==='l11Ask'&&COOP)coopL11Ask(d);

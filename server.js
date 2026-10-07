@@ -167,7 +167,7 @@ wss.on('connection', ws => {
 
     if (m.t === 'create') {
       if (ws.room) return;
-      const char = m.char === 'l' ? 'l' : m.char === 'p' ? 'p' : 'm', code = newCode(), tok = newTok();
+      const char = /^[a-z]$/.test(m.char || '') ? m.char : 'm', code = newCode(), tok = newTok();
       rooms.set(code, { host: ws, guest: null, hostChar: char, tok: { host: tok, guest: null }, v2: { host: !!m.v, guest: false }, gone: { host: null, guest: null } });
       ws.room = code; ws.role = 'host';
       return send(ws, { t: 'created', code, char, tok });
@@ -175,7 +175,7 @@ wss.on('connection', ws => {
 
     const doJoin = (code, r) => {
       const tok = newTok();
-      r.gc = (m.t === 'quick' && ['m', 'l', 'p'].includes(m.char)) ? m.char : (r.hostChar === 'm' ? 'l' : 'm'); r.pub = false; /* en partida rápida el invitado entra con el personaje que eligió */
+      r.gc = (m.t === 'quick' && /^[a-z]$/.test(m.char || '') && m.char !== r.hostChar) ? m.char : (r.hostChar === 'm' ? 'l' : 'm'); /* nunca el mismo personaje que el anfitrión */ r.pub = false; /* en partida rápida el invitado entra con el personaje que eligió */
       r.guest = ws; r.tok.guest = tok; r.v2.guest = !!m.v; ws.room = code; ws.role = 'guest';
       send(ws, { t: 'joined', code, char: guestChar(r), hostChar: r.hostChar, tok });
       send(r.host, { t: 'peer', on: true, char: guestChar(r) });
@@ -193,7 +193,7 @@ wss.on('connection', ws => {
       if (ws.room) return;
       const w = waiting().sort((a, b) => a[1].t0 - b[1].t0)[0];
       if (w) return doJoin(w[0], w[1]);
-      const char = m.char === 'l' ? 'l' : m.char === 'p' ? 'p' : 'm', code = newCode(), tok = newTok();
+      const char = /^[a-z]$/.test(m.char || '') ? m.char : 'm', code = newCode(), tok = newTok();
       rooms.set(code, { host: ws, guest: null, hostChar: char, pub: true, t0: Date.now(), tok: { host: tok, guest: null }, v2: { host: !!m.v, guest: false }, gone: { host: null, guest: null } });
       ws.room = code; ws.role = 'host';
       send(ws, { t: 'created', code, char, tok, pub: 1 });
@@ -207,7 +207,9 @@ wss.on('connection', ws => {
     /* cambiar de personaje en la sala (antes de empezar): se avisa al otro jugador */
     if (m.t === 'char') {
       const r = rooms.get(ws.room); if (!r || r[ws.role] !== ws) return;
-      const c = ['m', 'l', 'p'].includes(m.char) ? m.char : null; if (!c) return;
+      const c = /^[a-z]$/.test(m.char || '') ? m.char : null; if (!c) return;
+      const otro = ws.role === 'host' ? (r.guest ? guestChar(r) : null) : r.hostChar;
+      if (c === otro) return send(ws, { t: 'charno', char: ws.role === 'host' ? r.hostChar : guestChar(r) }); /* ya lo tiene el otro jugador */
       if (ws.role === 'host') r.hostChar = c; else r.gc = c;
       return send(r[other(ws.role)], { t: 'pchar', char: c });
     }
