@@ -16,10 +16,54 @@ const VAPID_PUBLIC = process.env.VAPID_PUBLIC || 'BIyNaaaLkcqYomZkvKt6Rp1u9Oy3lx
 const VAPID_PRIVATE = process.env.VAPID_PRIVATE || '';
 const pushOn = !!(webpush && VAPID_PRIVATE);
 if (pushOn) webpush.setVapidDetails(process.env.VAPID_SUBJECT || 'https://linkmastersami.github.io/juego-de-mesa/', VAPID_PUBLIC, VAPID_PRIVATE);
+/* ---- respaldo en GitHub (rama "datos" del repositorio): nombres de jugadores y suscripciones de avisos.
+   Render borra su disco en cada reinicio; con GH_TOKEN los datos se recuperan al arrancar. ---- */
+const GH_TOKEN = process.env.GH_TOKEN || '', GH_REPO = process.env.GH_REPO || 'linkmastersami/juego-de-mesa', GH_BRANCH = process.env.GH_BRANCH || 'datos';
+const GH_SHA = {};
+async function ghGet(file) {
+  if (!GH_TOKEN) return null;
+  try {
+    const r = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/${file}?ref=${GH_BRANCH}`, { headers: { Authorization: 'Bearer ' + GH_TOKEN, 'User-Agent': 'link-master', Accept: 'application/vnd.github+json' } });
+    if (!r.ok) return null;
+    const j = await r.json(); GH_SHA[file] = j.sha;
+    return JSON.parse(Buffer.from(j.content || '', 'base64').toString('utf8'));
+  } catch { return null; }
+}
+const GH_T = {};
+function ghPut(file, getData) { /* agrupa cambios: se sube como máximo cada 15 s */
+  if (!GH_TOKEN || GH_T[file]) return;
+  GH_T[file] = setTimeout(async () => {
+    GH_T[file] = null;
+    for (let i = 0; i < 2; i++) {
+      try {
+        const body = { message: 'datos: ' + file, branch: GH_BRANCH, content: Buffer.from(JSON.stringify(getData())).toString('base64') };
+        if (GH_SHA[file]) body.sha = GH_SHA[file];
+        const r = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/${file}`, { method: 'PUT', headers: { Authorization: 'Bearer ' + GH_TOKEN, 'User-Agent': 'link-master', Accept: 'application/vnd.github+json', 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        if (r.ok) { GH_SHA[file] = (await r.json()).content.sha; return; }
+        if (r.status === 409 || r.status === 422) { await ghGet(file); continue; } /* la copia cambió: se toma su sha y se reintenta */
+        return;
+      } catch { return; }
+    }
+  }, 15000);
+}
 const SUBS_FILE = path.join(__dirname, 'subs.json');
 const SUBS = new Map(); /* endpoint -> suscripción */
 try { JSON.parse(fs.readFileSync(SUBS_FILE, 'utf8')).forEach(s => s && s.endpoint && SUBS.set(s.endpoint, s)); } catch {}
-const saveSubs = () => { try { fs.writeFileSync(SUBS_FILE, JSON.stringify([...SUBS.values()])); } catch {} };
+const saveSubs = () => { try { fs.writeFileSync(SUBS_FILE, JSON.stringify([...SUBS.values()])); } catch {} ghPut('subs.json', () => [...SUBS.values()]); };
+/* ---- nombres de jugadores: únicos, 3 a 8 letras o números, en mayúsculas ----
+   El teléfono guarda su nombre y una clave secreta; aquí solo se guarda el hash de la clave. */
+const NAMES = new Map(); /* NOMBRE -> { h: hash de la clave, t: fecha de registro } */
+const hashK = k => crypto.createHash('sha256').update(String(k)).digest('hex');
+const okName = n => typeof n === 'string' && /^[A-Z0-9Ñ]{3,8}$/.test(n);
+const BAD = ['PUTO','PUTA','PUTI','PENDEJ','PENDJ','PNDJ','PENDE','VERGA','VRGA','CULO','CULER','PINCHE','CHINGA','CHNGA','MAMON','MAMADA','JOTO','PANOCH','PITO','CABRON','CBRN','COJER','COGER','ZORRA','PERRA','NAZI','HITLER','FUCK','SHIT','BITCH','DICK','PUSSY','CUNT','NIGG','NIGA','SEX','XXX','PORN','PORNO','ANAL','TETA','TETAS','MIERDA','MRDA','VIOLA','PEDO','KK','CACA','IDIOTA','ESTUPID','IMBECIL','MARICA','MARICO','PUTAZO','CHUPA','POLLA','COÑO','CONO','HDP','PTM','ALV','NMMS','VTV'];
+const norm = n => n.replace(/0/g, 'O').replace(/1/g, 'I').replace(/3/g, 'E').replace(/4/g, 'A').replace(/5/g, 'S').replace(/7/g, 'T').replace(/8/g, 'B').replace(/Ñ/g, 'N');
+const badName = n => { const a = norm(n); return BAD.some(w => a.includes(norm(w)) || n.includes(w)); };
+const saveNames = () => ghPut('nombres.json', () => Object.fromEntries(NAMES));
+(async () => {
+  const nm = await ghGet('nombres.json'); if (nm && typeof nm === 'object') Object.entries(nm).forEach(([n, v]) => { if (okName(n) && v && v.h) NAMES.set(n, v); });
+  const sb = await ghGet('subs.json'); if (Array.isArray(sb)) { sb.forEach(s => s && s.endpoint && !SUBS.has(s.endpoint) && SUBS.set(s.endpoint, s)); try { fs.writeFileSync(SUBS_FILE, JSON.stringify([...SUBS.values()])); } catch {} }
+  console.log('Datos cargados:', NAMES.size, 'nombres,', SUBS.size, 'suscripciones', GH_TOKEN ? '(respaldo en GitHub activo)' : '(sin GH_TOKEN: solo memoria)');
+})();
 async function pushAll(payload, skip) {
   if (!pushOn) return 0;
   let n = 0;
@@ -39,6 +83,31 @@ const server = http.createServer((req, res) => {
   res.setHeader('Access-Control-Allow-Headers', 'content-type, x-key');
   const url = (req.url || '').split('?')[0];
   if (req.method === 'OPTIONS') { res.writeHead(204); return res.end(); }
+  /* registrar un nombre nuevo (respuesta: ok | taken | bad) */
+  if (req.method === 'POST' && url === '/name/claim') {
+    return readBody(req, b => {
+      const n = b && String(b.n || '').toUpperCase(), k = b && String(b.k || '');
+      const out = o => { res.writeHead(200, { 'Content-Type': 'application/json' }); res.end(JSON.stringify(o)); };
+      if (!okName(n) || k.length < 16) return out({ r: 'bad' });
+      if (badName(n)) return out({ r: 'rude' });
+      const cur = NAMES.get(n), h = hashK(k);
+      if (cur && cur.h !== h) return out({ r: 'taken' });
+      if (!cur) { if (NAMES.size > 20000) return out({ r: 'full' }); NAMES.set(n, { h, t: Date.now() }); saveNames(); }
+      out({ r: 'ok' });
+    });
+  }
+  /* al abrir el juego: el teléfono confirma su nombre (si el servidor lo había olvidado, se vuelve a registrar) */
+  if (req.method === 'POST' && url === '/name/hello') {
+    return readBody(req, b => {
+      const n = b && String(b.n || '').toUpperCase(), k = b && String(b.k || '');
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      if (!okName(n) || k.length < 16) return res.end(JSON.stringify({ r: 'bad' }));
+      const cur = NAMES.get(n), h = hashK(k);
+      if (cur && cur.h !== h) return res.end(JSON.stringify({ r: 'taken' }));
+      if (!cur) { NAMES.set(n, { h, t: Date.now() }); saveNames(); }
+      res.end(JSON.stringify({ r: 'ok' }));
+    });
+  }
   if (url === '/health') { res.writeHead(200, { 'Content-Type': 'text/plain' }); return res.end('ok'); }
   /* cuántas salas rápidas están esperando jugador */
   if (url === '/quick') { res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }); return res.end(JSON.stringify({ n: waiting().length, push: pushOn, key: VAPID_PUBLIC })); }

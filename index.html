@@ -462,6 +462,7 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
 #ov.vic .box,#ov.der .box{background:#2f2b37e6;backdrop-filter:blur(4px)}
 
 /* ===== menú de opciones ===== */
+#lobby #lob-yo{position:absolute}
 #lobby #lob-menu{position:absolute;top:calc(env(safe-area-inset-top,0px) + 12px);right:14px;z-index:5;width:46px;height:46px;border-radius:14px;border:2px solid #ffffff2a;background:#0d0a14b3;color:#fff;font-size:1.5rem;line-height:1;cursor:pointer;box-shadow:0 4px 12px #0008}
 #lob-menu:active{transform:scale(.92)}
 #opts{position:fixed;inset:0;z-index:62;background:#000c;display:none;overflow-y:auto;padding:calc(env(safe-area-inset-top,0px) + 16px) 14px 24px}
@@ -476,6 +477,25 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
 .obtn:disabled{opacity:.6;cursor:default}
 #opts .rclose{border:0;border-radius:14px;background:#4a4555;color:var(--ink);font:700 1.05rem Fredoka,sans-serif;padding:12px;margin-top:4px}
 #optBtn{background:#3b3550;border:0;border-radius:14px;color:var(--ink);font:700 1rem Fredoka,sans-serif;padding:12px 18px;width:100%}
+
+/* ===== registro de nombre ===== */
+#reg{position:fixed;inset:0;z-index:96;display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:calc(env(safe-area-inset-top,0px) + 20px) 20px 24px;overflow-y:auto;
+  background:linear-gradient(180deg,#0d0a14d9,#0d0a1499 40%,#0d0a14e6),url("fondos/nombre.webp") center/cover no-repeat,radial-gradient(120% 80% at 50% 30%,#3a2a55,#1a1520)}
+#reg.on{display:flex}
+#reg .rlogo{width:min(34vw,140px);filter:drop-shadow(0 0 16px #4fc3ff66)}
+#reg .rcard{width:min(100%,380px);background:#2b2236ee;border:2px solid #ffd34d88;border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:12px;text-align:center;box-shadow:0 12px 40px #000c}
+#reg h2{margin:0;font:800 1.45rem Fredoka,sans-serif;color:#ffd34d}
+#reg p{margin:0;color:var(--ink);font-size:.95rem;line-height:1.35}
+#reg .warn{background:#ff3b5522;border:1px solid #ff3b5566;border-radius:12px;padding:8px 10px;font-size:.85rem;color:#ffd0d6}
+#reg-in{width:100%;box-sizing:border-box;text-align:center;font:800 2rem Fredoka,sans-serif;letter-spacing:.14em;text-transform:uppercase;padding:10px;border-radius:14px;border:3px solid #ffd34d;background:#140f1c;color:#fff;outline:none}
+#reg-in::placeholder{color:#ffffff33;letter-spacing:.08em}
+#reg .hint{font-size:.82rem;color:var(--mute);min-height:1.1em}#reg .hint.bad{color:#ff8a9a}#reg .hint.ok{color:#7dffb0}
+#reg button{border:0;border-radius:16px;font:800 1.15rem Fredoka,sans-serif;padding:14px;cursor:pointer}
+#reg .rgo{background:linear-gradient(180deg,#ffe07a,#f2b632);color:#2b2208;box-shadow:0 5px 0 #a8740f}#reg .rgo:disabled{opacity:.45}
+#reg .rsec{background:#4a4555;color:var(--ink);font-size:1rem}
+#reg .rbig{font:800 2.4rem Fredoka,sans-serif;color:#fff;letter-spacing:.12em;text-shadow:0 0 18px #ffd34d88}
+#reg .spin{width:34px;height:34px;margin:6px auto;border-radius:50%;border:4px dashed #ffd34d;animation:mspin 1.4s linear infinite}
+#lob-yo{position:absolute;top:calc(env(safe-area-inset-top,0px) + 14px);left:14px;z-index:5;background:#0d0a14b3;border:2px solid #ffd34d55;border-radius:14px;padding:8px 12px;font:800 .95rem Fredoka,sans-serif;color:#ffd34d;letter-spacing:.06em;display:none}
 </style>
 </head>
 <body>
@@ -523,6 +543,7 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
 <!-- LOBBY -->
 <div id="lobby" class="oculto">
   <button id="lob-menu" aria-label="Opciones">☰</button>
+  <div id="lob-yo"></div>
   <div class="lob-amb"><b style="left:6%;--x:30px;animation-duration:10s;animation-delay:-2s"></b><b style="left:18%;--x:-20px;animation-duration:13s;animation-delay:-7s"></b><b style="left:31%;--x:25px;animation-duration:11s;animation-delay:-4s"></b><b style="left:46%;--x:-35px;animation-duration:14s;animation-delay:-9s"></b><b style="left:60%;--x:20px;animation-duration:12s;animation-delay:-1s"></b><b style="left:74%;--x:-25px;animation-duration:15s;animation-delay:-11s"></b><b style="left:88%;--x:15px;animation-duration:11s;animation-delay:-6s"></b><b style="left:95%;--x:-10px;animation-duration:13s;animation-delay:-3s"></b></div>
   <img class="lob-logo" src="logo.webp" alt="LinkMaster Sami Games">
   <div class="lob-sub">⚔️ Dungeon Edition ⚔️</div>
@@ -595,6 +616,7 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
 <div id="ctime"><div class="ct" id="ctv">⏱ 90</div><button class="cx" id="ctx">🚪 Salir</button></div>
 <div id="cdlg"><div class="cb" id="cdlg-b"></div></div>
 <div id="recs"></div>
+<div id="reg"><img class="rlogo" src="logo.webp" alt=""><div class="rcard" id="reg-c"></div></div>
 <div id="opts"><div class="rbox">
   <h2>☰ Opciones</h2>
   <h3>Sonido</h3>
@@ -963,6 +985,52 @@ function finalAnim(fp){
   }catch(e){}finally{SFB=0;HIDE.clear();render()}})
 }
 
+
+/* ---------- nombre del jugador (único, 3 a 8 letras o números; no se puede cambiar) ---------- */
+let YO=null;try{YO=JSON.parse(localStorage.getItem('mesa-yo')||'null')}catch(e){}
+const BADW=['PUTO','PUTA','PUTI','PENDEJ','PENDJ','PNDJ','PENDE','VERGA','VRGA','CULO','CULER','PINCHE','CHINGA','CHNGA','MAMON','MAMADA','JOTO','PANOCH','PITO','CABRON','CBRN','COJER','COGER','ZORRA','PERRA','NAZI','HITLER','FUCK','SHIT','BITCH','DICK','PUSSY','CUNT','NIGG','NIGA','SEX','XXX','PORN','PORNO','ANAL','TETA','TETAS','MIERDA','MRDA','VIOLA','PEDO','KK','CACA','IDIOTA','ESTUPID','IMBECIL','MARICA','MARICO','PUTAZO','CHUPA','POLLA','COÑO','CONO','HDP','PTM','ALV','NMMS','VTV'];
+const nNorm=n=>n.replace(/0/g,'O').replace(/1/g,'I').replace(/3/g,'E').replace(/4/g,'A').replace(/5/g,'S').replace(/7/g,'T').replace(/8/g,'B').replace(/Ñ/g,'N');
+const nBad=n=>{const a=nNorm(n);return BADW.some(w=>a.includes(nNorm(w))||n.includes(w))};
+const nClean=v=>v.toUpperCase().replace(/[^A-Z0-9Ñ]/g,'').slice(0,8);
+function yoUi(){const e=$('#lob-yo');if(!e)return;e.style.display=YO?'block':'none';if(YO)e.textContent='👤 '+YO.n}
+async function nPost(path,body){const c=new AbortController(),to=setTimeout(()=>c.abort(),12000);try{const r=await fetch(MP_URL+path,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body),signal:c.signal});clearTimeout(to);return r.ok?await r.json():null}catch(e){clearTimeout(to);return null}}
+async function nWake(){const t0=Date.now();while(Date.now()-t0<90000){try{const c=new AbortController(),to=setTimeout(()=>c.abort(),8000);const r=await fetch(MP_URL+'/health',{cache:'no-store',signal:c.signal});clearTimeout(to);if(r.ok)return true}catch(e){}await new Promise(r=>setTimeout(r,1500))}return false}
+function regShow(msg){
+  const c=$('#reg-c');$('#reg').classList.add('on');
+  c.innerHTML=`<h2>📜 Registro de aventurero</h2>
+    <p>Escribe tu <b>nombre de aventurero</b>. Así te verán los demás jugadores y aparecerá en los logros que compartas.</p>
+    <div class="warn">⚠️ Una vez elegido, <b>no se puede cambiar</b>.</div>
+    <input id="reg-in" maxlength="8" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="TU NOMBRE">
+    <div class="hint${msg?' bad':''}" id="reg-h">${msg||'De 3 a 8 letras o números'}</div>
+    <button class="rgo" id="reg-go" disabled>Continuar</button>`;
+  const inp=$('#reg-in'),h=$('#reg-h'),go=$('#reg-go');
+  inp.addEventListener('input',()=>{const v=nClean(inp.value);if(inp.value!==v)inp.value=v;
+    let t='',ok=false;if(v.length<3)t=`${v.length}/8 · mínimo 3`;else if(nBad(v))t='❌ Ese nombre no está permitido';else{t=`✅ ${v.length}/8`;ok=true}
+    h.textContent=t;h.className='hint'+(ok?' ok':v.length>=3?' bad':'');go.disabled=!ok});
+  go.onclick=()=>regConfirm(inp.value);setTimeout(()=>inp.focus(),300)}
+function regConfirm(n){const c=$('#reg-c');
+  c.innerHTML=`<h2>¿Seguro?</h2><p>Tu nombre será:</p><div class="rbig">${n}</div><div class="warn">No se podrá cambiar después.</div>
+    <button class="rgo" id="reg-ok">Sí, ese es mi nombre</button><button class="rsec" id="reg-back">Cambiar</button>`;
+  $('#reg-back').onclick=()=>{regShow();$('#reg-in').value=n;$('#reg-in').dispatchEvent(new Event('input'))};
+  $('#reg-ok').onclick=()=>regSend(n)}
+async function regSend(n){const c=$('#reg-c');
+  c.innerHTML=`<h2>Registrando…</h2><div class="spin"></div><p id="reg-w">Conectando con el calabozo…</p>`;
+  const slow=setTimeout(()=>{const w=$('#reg-w');if(w)w.textContent='Despertando el servidor, puede tardar hasta un minuto…'},4000);
+  const k=[...crypto.getRandomValues(new Uint8Array(16))].map(b=>b.toString(16).padStart(2,'0')).join('');
+  const up=navigator.onLine&&await nWake();const r=up?await nPost('/name/claim',{n,k}):null;clearTimeout(slow);
+  if(r&&r.r==='ok'){YO={n,k,t:Date.now()};try{localStorage.setItem('mesa-yo',JSON.stringify(YO))}catch(e){}
+    c.innerHTML=`<h2>¡Bienvenido!</h2><div class="rbig">${n}</div><p>Tu aventura comienza ahora.</p><button class="rgo" id="reg-fin">⚔️ Entrar</button>`;
+    try{SFX.fanfare()}catch(e){}$('#reg-fin').onclick=()=>{$('#reg').classList.remove('on');yoUi()};return}
+  if(r&&r.r==='taken')return regShow(`❌ ${n} ya lo tiene otro aventurero. Elige otro.`);
+  if(r&&r.r==='rude')return regShow('❌ Ese nombre no está permitido. Elige otro.');
+  c.innerHTML=`<h2>Sin conexión</h2><p>No se pudo conectar con el servidor para registrar tu nombre. Revisa tu internet e inténtalo de nuevo.</p>
+    <button class="rgo" id="reg-re">Reintentar</button><button class="rsec" id="reg-skip">Jugar sin nombre por ahora</button>`;
+  $('#reg-re').onclick=()=>regSend(n);$('#reg-skip').onclick=()=>$('#reg').classList.remove('on')}
+/* al abrir: si no tienes nombre se pide; si ya lo tienes, se confirma con el servidor */
+setTimeout(async()=>{yoUi();if(!YO){regShow();return}
+  if(!navigator.onLine||sinNet())return;const r=await nPost('/name/hello',{n:YO.n,k:YO.k});
+  if(r&&r.r==='taken'){try{localStorage.removeItem('mesa-yo')}catch(e){}const old=YO.n;YO=null;yoUi();regShow(`Tu nombre ${old} ya no está disponible. Elige otro.`)}},1200);
+
 /* ---------- récords y logros (se guardan en el teléfono) ---------- */
 const PJN={m:'Mario',l:'Link',p:'Pikachu'},PJI={m:'🍄',l:'🗡️',p:'⚡'};
 const stLoad=()=>{try{return JSON.parse(localStorage.getItem('mesa-stats')||'{}')||{}}catch(e){return {}}};
@@ -1038,7 +1106,7 @@ const stHtml=r=>{if(!r)return'';let h='';
   return h};
 function showRecs(){
   const o=stLoad(),A=o.ach||{},n=ACH.filter(a=>A[a[0]]).length,pj=o.pj||{};
-  $('#recs').innerHTML=`<div class="rbox"><h2>🏆 Récords y logros</h2>
+  $('#recs').innerHTML=`<div class="rbox"><h2>🏆 Récords${YO?' de '+YO.n:' y logros'}</h2>
     <div class="rtot"><div><b>${o.g||0}</b>Partidas</div><div><b>${o.w||0}</b>Victorias</div><div><b>${o.g?Math.round((o.w||0)/o.g*100):0}%</b>Ganadas</div>
     <div><b>${o.st||0}</b>Racha actual</div><div><b>${o.bs||0}</b>Mejor racha</div><div><b>${o.nc||0}</b>Más desafíos</div></div>
     <h3>Por personaje</h3>
@@ -1112,7 +1180,7 @@ async function shareVictory(st){
     x.textAlign='center';x.textBaseline='alphabetic';
     x.font=F(800,150);x.lineJoin='round';x.lineWidth=18;x.strokeStyle='#2b1802';x.strokeText('¡VICTORIA!',W/2,425);
     {const g=x.createLinearGradient(0,330,0,460);g.addColorStop(0,'#fff6c2');g.addColorStop(.5,'#ffd34d');g.addColorStop(1,'#c47f0a');x.save();x.shadowColor='#ffb300';x.shadowBlur=40;x.fillStyle=g;x.fillText('¡VICTORIA!',W/2,425);x.restore()}
-    x.font=F(600,44);x.fillStyle='#f3eefc';x.fillText(boss?`${PJN[pj]} venció a ${BNM[boss]}`:`${PJN[pj]} conquistó el calabozo`,W/2,500);
+    {const t=boss?`${YO?YO.n+' con ':''}${PJN[pj]} venció a ${BNM[boss]}`:`${YO?YO.n+' con ':''}${PJN[pj]} conquistó el calabozo`;let fz=44;x.font=F(600,fz);while(x.measureText(t).width>W-80&&fz>26){fz-=2;x.font=F(600,fz)}x.fillStyle='#f3eefc';x.fillText(t,W/2,500)}
     x.font=F(500,34);x.fillStyle='#ffd34dcc';x.fillText(`en ${st.turn} turnos`,W/2,548);
     /* cartas: personaje vs jefe derrotado */
     const card=(im,cx,cy,h,rot,glow)=>{if(!im)return;const w=h*im.width/im.height;x.save();x.translate(cx,cy);x.rotate(rot);
@@ -1144,7 +1212,7 @@ async function shareVictory(st){
     x.font=F(500,26);x.fillStyle='#ffffff99';x.fillText('Link Master · Dungeon Edition · '+new Date().toLocaleDateString('es-MX'),W/2,H-20);
     const blob=await new Promise(r=>cv.toBlob(r,'image/png'));
     const f=new File([blob],'victoria.png',{type:'image/png'});
-    const LINK='https://linkmastersami.github.io/juego-de-mesa/',TXT=`¡Gané en Link Master con ${PJN[pj]} en ${st.turn} turnos! ⚔️ ¿Puedes superarme? Juega gratis aquí: ${LINK}`;
+    const LINK='https://linkmastersami.github.io/juego-de-mesa/',TXT=`${YO?YO.n+': ':''}¡Gané en Link Master con ${PJN[pj]} en ${st.turn} turnos! ⚔️ ¿Puedes superarme? Juega gratis aquí: ${LINK}`;
     /* algunas apps (como WhatsApp) quitan el texto al compartir una imagen: el enlace también se copia para pegarlo */
     try{await navigator.clipboard.writeText(TXT);cToast('🔗 Enlace del juego copiado · pégalo en tu mensaje')}catch(e){}
     if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:'¡Victoria en Link Master!',text:TXT});return}

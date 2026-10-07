@@ -2,6 +2,7 @@
 name: Actualizar version.json
 on:
   push:
+    branches: [main]
     paths-ignore:
       - 'version.json'
   workflow_dispatch:
