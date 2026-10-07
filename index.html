@@ -207,7 +207,7 @@ button{font-family:inherit}
 .vol input[type=range]{flex:1;-webkit-appearance:none;appearance:none;height:6px;border-radius:3px;background:linear-gradient(to right,var(--gold) calc(var(--pct,100%)),#5a5168 calc(var(--pct,100%)));outline:none;cursor:pointer}
 .vol input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--gold);box-shadow:0 2px 6px #0008;cursor:pointer}
 .vol input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--gold);border:none;box-shadow:0 2px 6px #0008;cursor:pointer}
-@media (prefers-reduced-motion:reduce){*:not(.blink),*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+body.noanim *:not(.blink),body.noanim *::before,body.noanim *::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 
 /* ===== MULTIJUGADOR ===== */
 .lob-friend{margin-top:10px;width:min(86vw,320px);border:0;border-radius:16px;padding:14px;font:700 1.1rem Fredoka,sans-serif;color:#fff;background:linear-gradient(180deg,#4b7cf0,#2f55c4);box-shadow:0 5px 0 #1d3a8a,0 0 22px #4b7cf055;cursor:pointer}
@@ -460,6 +460,22 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
 #ov.vic{background:linear-gradient(180deg,#0d0a1499,#0d0a1455 40%,#0d0a14bb),url("fondos/victoria.webp") center/cover no-repeat}
 #ov.der{background:linear-gradient(180deg,#0d0a14aa,#0d0a1466 40%,#0d0a14cc),url("fondos/derrota.webp") center/cover no-repeat}
 #ov.vic .box,#ov.der .box{background:#2f2b37e6;backdrop-filter:blur(4px)}
+
+/* ===== menú de opciones ===== */
+#lobby #lob-menu{position:absolute;top:calc(env(safe-area-inset-top,0px) + 12px);right:14px;z-index:5;width:46px;height:46px;border-radius:14px;border:2px solid #ffffff2a;background:#0d0a14b3;color:#fff;font-size:1.5rem;line-height:1;cursor:pointer;box-shadow:0 4px 12px #0008}
+#lob-menu:active{transform:scale(.92)}
+#opts{position:fixed;inset:0;z-index:62;background:#000c;display:none;overflow-y:auto;padding:calc(env(safe-area-inset-top,0px) + 16px) 14px 24px}
+#opts.on{display:block}
+#opts .rbox{max-width:440px;margin:0 auto;background:#2f2b37;border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:10px}
+#opts h2{margin:0;text-align:center;font:700 1.4rem Fredoka,sans-serif;color:#ffd34d}#opts h3{margin:6px 0 0;font:700 .95rem Fredoka,sans-serif;color:var(--mute)}
+#opts .vol{display:flex;align-items:center;gap:10px}
+.oanim input{width:100%;accent-color:var(--gold)}.oal{display:flex;justify-content:space-between;font:600 .8rem Fredoka,sans-serif;color:var(--mute)}.oal span.on{color:var(--gold)}
+.orow{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#ffffff0d;border-radius:12px;padding:10px 12px;font:600 .95rem Fredoka,sans-serif;cursor:pointer}
+.sw{position:relative;width:50px;height:28px;flex:none}.sw input{opacity:0;position:absolute;inset:0;margin:0}.sw i{position:absolute;inset:0;border-radius:99px;background:#4a4555;transition:background .2s}.sw i::after{content:'';position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:transform .2s}.sw input:checked+i{background:#2fae5a}.sw input:checked+i::after{transform:translateX(22px)}
+.obtn{border:0;border-radius:14px;background:#4a4555;color:var(--ink);font:700 .98rem Fredoka,sans-serif;padding:12px;text-align:left;cursor:pointer}
+.obtn:disabled{opacity:.6;cursor:default}
+#opts .rclose{border:0;border-radius:14px;background:#4a4555;color:var(--ink);font:700 1.05rem Fredoka,sans-serif;padding:12px;margin-top:4px}
+#optBtn{background:#3b3550;border:0;border-radius:14px;color:var(--ink);font:700 1rem Fredoka,sans-serif;padding:12px 18px;width:100%}
 </style>
 </head>
 <body>
@@ -506,6 +522,7 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
 <div id="amb"><i></i><i></i><b style="left:8%;--x:30px;animation-duration:11s;animation-delay:-2s"></b><b style="left:22%;--x:-20px;animation-duration:14s;animation-delay:-7s"></b><b style="left:37%;--x:25px;animation-duration:12s;animation-delay:-4s"></b><b style="left:55%;--x:-35px;animation-duration:15s;animation-delay:-9s"></b><b style="left:70%;--x:20px;animation-duration:13s;animation-delay:-1s"></b><b style="left:84%;--x:-25px;animation-duration:16s;animation-delay:-11s"></b><b style="left:93%;--x:15px;animation-duration:12s;animation-delay:-6s"></b></div>
 <!-- LOBBY -->
 <div id="lobby" class="oculto">
+  <button id="lob-menu" aria-label="Opciones">☰</button>
   <div class="lob-amb"><b style="left:6%;--x:30px;animation-duration:10s;animation-delay:-2s"></b><b style="left:18%;--x:-20px;animation-duration:13s;animation-delay:-7s"></b><b style="left:31%;--x:25px;animation-duration:11s;animation-delay:-4s"></b><b style="left:46%;--x:-35px;animation-duration:14s;animation-delay:-9s"></b><b style="left:60%;--x:20px;animation-duration:12s;animation-delay:-1s"></b><b style="left:74%;--x:-25px;animation-duration:15s;animation-delay:-11s"></b><b style="left:88%;--x:15px;animation-duration:11s;animation-delay:-6s"></b><b style="left:95%;--x:-10px;animation-duration:13s;animation-delay:-3s"></b></div>
   <img class="lob-logo" src="logo.webp" alt="LinkMaster Sami Games">
   <div class="lob-sub">⚔️ Dungeon Edition ⚔️</div>
@@ -534,12 +551,10 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
     <button class="lob-friend" id="lob-btn-friend" disabled>👥 Con un amigo</button>
     <button class="lob-friend lob-quick" id="lob-btn-quick">⚡ Partida rápida<b id="lob-q" class="lob-qb" style="display:none"></b></button>
   </div>
-  <button class="lob-resume" id="lob-btn-notif" style="display:none;margin-top:10px">🔔 Avisarme de partidas y actualizaciones</button>
+  <button class="lob-resume lob-hid" id="lob-btn-notif" style="display:none;margin-top:10px">🔔 Avisarme de partidas y actualizaciones</button>
   <div class="lob-icons">
     <button id="lob-recs"><i>🏆</i><span>Récords</span></button>
     <button id="lob-tabs"><i>🎨</i><span>Tableros</span></button>
-    <button id="li-modo"><i>🌐</i><span>Internet</span></button>
-    <button id="li-off"><i>⬇️</i><span>Descargar</span></button>
   </div>
   <button class="lob-resume lob-hid" id="lob-modo">🌐 Jugando con Internet</button>
   <button class="lob-resume lob-hid" id="lob-offline" style="display:none">⬇️ Guardar el juego para jugar sin conexión</button>
@@ -570,17 +585,31 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
     <div data-pile="dm">Descartes personaje<div id="pDm"></div><div class="fire" id="pFire"></div></div>
   </div>
   <div class="foot">
-    <div class="vol"><span id="volIcon">🔊</span><input type="range" id="snd" min="0" max="10" step="1" value="10"><label id="volNum">10</label></div>
-    <div class="vol"><span id="musIcon">🎵</span><input type="range" id="mus" min="0" max="10" step="1" value="5"><label id="musNum">5</label></div>
+    <button id="optBtn">☰ Opciones</button>
     <button id="menuBtn">🏠 Menú principal</button>
     <button id="reset">Reiniciar toda la partida</button>
-    <button id="install">📲 Instalar juego</button>
+    <button id="install" class="lob-hid">📲 Instalar juego</button>
   </div>
 </div>
 <div id="apart"></div>
 <div id="ctime"><div class="ct" id="ctv">⏱ 90</div><button class="cx" id="ctx">🚪 Salir</button></div>
 <div id="cdlg"><div class="cb" id="cdlg-b"></div></div>
 <div id="recs"></div>
+<div id="opts"><div class="rbox">
+  <h2>☰ Opciones</h2>
+  <h3>Sonido</h3>
+    <div class="vol"><span id="volIcon">🔊</span><input type="range" id="snd" min="0" max="10" step="1" value="10"><label id="volNum">10</label></div>
+    <div class="vol"><span id="musIcon">🎵</span><input type="range" id="mus" min="0" max="10" step="1" value="5"><label id="musNum">5</label></div>
+  <h3>Animaciones</h3>
+  <div class="oanim"><input type="range" id="o-anim" min="0" max="2" step="1"><div class="oal"><span data-v="0">Apagadas</span><span data-v="1">Encendidas</span><span data-v="2">Rápidas</span></div></div>
+  <label class="orow">🃏 Animación en cartas<span class="sw"><input type="checkbox" id="o-canim"><i></i></span></label>
+  <h3>Juego</h3>
+  <button class="obtn" id="o-modo"></button>
+  <button class="obtn" id="o-off"></button>
+  <button class="obtn" id="o-notif"></button>
+  <button class="obtn" id="o-inst"></button>
+  <button class="rclose" id="opts-x">Cerrar</button>
+</div></div>
 <div id="bt"></div>
 <div id="sbt"></div>
 <div id="ov"></div>
@@ -588,7 +617,12 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
 
 <script>
 const $=s=>document.querySelector(s),pad=n=>String(n).padStart(2,'0');
-const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;let SND=10,AC=null;try{const sv=localStorage.getItem('mesa-snd');SND=sv===null?10:+sv}catch(e){}
+/* animaciones: 0 apagadas, 1 normales, 2 rápidas · animación de cartas: encendida/apagada (se guardan en el teléfono) */
+let ANIM=matchMedia('(prefers-reduced-motion: reduce)').matches?0:1,CANIM=1;try{const a=localStorage.getItem('mesa-anim');if(a!==null)ANIM=+a;CANIM=localStorage.getItem('mesa-canim')==='0'?0:1}catch(e){}
+let RM=ANIM===0,SPD=ANIM===2?.5:ANIM===0?.3:1;
+{const _an=Element.prototype.animate;Element.prototype.animate=function(k,o){if(SPD!==1){if(typeof o==='number')o=o*SPD;else if(o&&typeof o==='object'){o=Object.assign({},o);['duration','delay','endDelay'].forEach(p=>{if(typeof o[p]==='number')o[p]*=SPD})}}return _an.call(this,k,o)}}
+/* rápidas: las animaciones de CSS que no se repiten también van al doble */
+setInterval(()=>{if(SPD===1||!document.getAnimations)return;for(const a of document.getAnimations()){try{if(typeof CSSAnimation!=='undefined'&&a instanceof CSSAnimation&&a.effect&&a.effect.getTiming().iterations!==Infinity&&a.playbackRate!==1/SPD)a.playbackRate=1/SPD}catch(e){}}},120);let SND=10,AC=null;try{const sv=localStorage.getItem('mesa-snd');SND=sv===null?10:+sv}catch(e){}
 const ac=()=>AC=AC||new(window.AudioContext||window.webkitAudioContext)();
 const vib=p=>{if(SND>0&&!RM)try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}};
 let SK=1;const VOL=()=>SND/10,SGAIN=2; /* ganancia general de efectos (x2) */
@@ -638,11 +672,11 @@ const animSrc=id=>ANIMC.has(id)?imgSrc(id).replace('.webp','a.webp'):ANCAL[id]?`
 let MODO='on';try{MODO=localStorage.getItem('mesa-modo')==='off'?'off':'on'}catch(e){}
 const sinNet=()=>MODO==='off';
 const setCfg=m=>{try{return caches.open('lm-cfg').then(c=>c.put('modo',new Response(m)))}catch(e){return Promise.resolve()}};
-const card=(id,c='')=>{if(id==='back')return BACKH(c);const an=!!animSrc(id)&&!RM&&!/\b(off|still)\b/.test(c),st=imgSrc(id);
+const card=(id,c='')=>{if(id==='back')return BACKH(c);const an=!!animSrc(id)&&CANIM&&!/\b(off|still)\b/.test(c),st=imgSrc(id);
   /* si la versión animada no está guardada (sin internet), se usa la imagen fija en vez de dejar la carta vacía */
   return `<div class="card ${c}" data-id="${id}"><img src="${an?animSrc(id):st}" alt="${id}" onerror="${an?`this.onerror=function(){this.remove()};this.src='${st}'`:'this.remove()'}"></div>`};
 /* con internet, deja guardadas las versiones animadas (el service worker las guarda al pedirlas) */
-setTimeout(()=>{if(navigator.onLine&&!RM&&!sinNet())[...ANIMC].forEach(id=>fetch(imgSrc(id).replace('.webp','a.webp')).catch(()=>{}))},3000);
+setTimeout(()=>{if(navigator.onLine&&CANIM&&!sinNet())[...ANIMC].forEach(id=>fetch(imgSrc(id).replace('.webp','a.webp')).catch(()=>{}))},3000);
 /* personaje activo: 'm' = personaje 1 (cartas m), 'l' = personaje 2 (cartas l) */
 let CHAR='m'; /* se elige en el lobby antes de startGame */
 const ICO=()=>S.personaje==='l'?'⚔️':S.personaje==='p'?'⚡':'🔥'; /* icono propio de cada personaje (hace el papel del fuego) */
@@ -696,7 +730,7 @@ function render(){
 }
 
 /* ---------- animaciones ---------- */
-let SL=0,INTRO=0,FXR=0,HIDE=new Set();const FXQ=[],wait=ms=>new Promise(r=>setTimeout(r,ms)),FXL=document.body.appendChild(Object.assign(document.createElement('div'),{id:'fxl'}));
+let SL=0,INTRO=0,FXR=0,HIDE=new Set();const FXQ=[],wait=ms=>new Promise(r=>setTimeout(r,ms*SPD)),FXL=document.body.appendChild(Object.assign(document.createElement('div'),{id:'fxl'}));
 function fxPlay(job){FXQ.push(job);if(FXR)return;FXR=1;FXL.classList.add('on');(async()=>{while(FXQ.length){try{await FXQ.shift()(FXL)}catch(e){}if(!FXQ.length){FXL.classList.add('fo');await wait(250)}}FXL.classList.remove('on','fo','clear');FXL.innerHTML='';FXR=0})()}
 
 /* ---------- animaciones extra ---------- */
@@ -1800,11 +1834,8 @@ document.querySelectorAll('.lob-dots i').forEach(d=>d.addEventListener('click',(
 {let x0=null;const z=$('.lob-chars');z.addEventListener('touchstart',e=>{x0=e.touches[0].clientX},{passive:true});
  z.addEventListener('touchend',e=>{if(x0===null)return;const dx=e.changedTouches[0].clientX-x0;x0=null;if(Math.abs(dx)<40)return;const i=PJO.indexOf(CHAR||'m');lobPick(PJO[(i+(dx<0?1:2))%3])},{passive:true})}
 /* botones redondos: reflejan el estado de Internet y de la descarga */
-$('#li-modo').onclick=()=>$('#lob-modo').click();$('#li-off').onclick=()=>$('#lob-offline').click();
-setInterval(()=>{if(!lobbyOn())return;const m=$('#li-modo');m.querySelector('i').textContent=sinNet()?'✈️':'🌐';m.querySelector('span').textContent=sinNet()?'Sin internet':'Con internet';
-  const o=$('#lob-offline'),lo=$('#li-off'),t=o.textContent||'';lo.style.display=o.style.display==='none'?'none':'';
-  const [ic,lb]=t.includes('✅')?['✅','Guardado']:t.includes('⏳')?['⏳',(t.match(/(\d+)\/(\d+)/)?Math.round(+RegExp.$1/+RegExp.$2*100)+'%':'Guardando')]:t.includes('⚠️')?['⚠️','Reintentar']:['⬇️','Descargar'];
-  lo.querySelector('i').textContent=ic;lo.querySelector('span').textContent=lb;lo.classList.toggle('busy',ic==='⏳')},500);
+
+
 $('#lob-btn-start').addEventListener('click',()=>{
   const b=$('#lob-btn-start');
   if($('#lob-btn-resume').style.display!=='none'&&!STARTARM){STARTARM=1;b.innerHTML='<span style="font-size:.82rem;letter-spacing:0;line-height:1.15;display:block">¿Nueva partida?<br>Toca otra vez (se borra la guardada)</span>';setTimeout(()=>{if(STARTARM){STARTARM=0;b.textContent='⚔️ JUGAR'}},3000);return}
@@ -2403,6 +2434,30 @@ $('#install').onclick=async()=>{
   if(outcome==='accepted')$('#install').classList.remove('on');
   _installPrompt=null;
 };
+
+/* ---------- menú de opciones (☰) ---------- */
+function animSet(v){ANIM=v;RM=v===0;SPD=v===2?.5:v===0?.3:1;document.body.classList.toggle('noanim',v===0);try{localStorage.setItem('mesa-anim',v)}catch(e){}
+  $('#o-anim').value=v;document.querySelectorAll('.oal span').forEach(e=>e.classList.toggle('on',+e.dataset.v===v))}
+function canimSet(v){CANIM=v?1:0;try{localStorage.setItem('mesa-canim',CANIM)}catch(e){}$('#o-canim').checked=!!CANIM;try{if(lobbyOn())lobInfo(CHAR||'m');else render()}catch(e){}}
+animSet(ANIM);$('#o-canim').checked=!!CANIM;
+$('#o-anim').addEventListener('input',e=>animSet(+e.target.value));
+document.querySelectorAll('.oal span').forEach(e=>e.addEventListener('click',()=>animSet(+e.dataset.v)));
+$('#o-canim').addEventListener('change',e=>canimSet(e.target.checked));
+function optSync(){
+  $('#o-modo').textContent=sinNet()?'✈️ Jugando sin Internet · toca para cambiar':'🌐 Jugando con Internet · toca para cambiar';
+  const of=$('#lob-offline');$('#o-off').style.display=of.style.display==='none'?'none':'';$('#o-off').textContent=of.textContent;$('#o-off').style.background=of.style.background||'';
+  const nb=$('#lob-btn-notif'),nOk=nb.style.display!=='none';$('#o-notif').disabled=!nOk;$('#o-notif').textContent=nOk?nb.textContent:'🔔 Avisos no disponibles en este navegador';
+  const st=matchMedia('(display-mode: standalone)').matches||navigator.standalone,ib=$('#o-inst');
+  ib.disabled=!_installPrompt;ib.textContent=_installPrompt?'📲 Instalar la aplicación':st?'✅ La aplicación ya está instalada':'📲 Para instalar: menú del navegador → "Agregar a pantalla principal"'}
+let OPTT=null;
+function showOpts(){try{notifUi()}catch(e){}optSync();$('#opts').classList.add('on');clearInterval(OPTT);OPTT=setInterval(optSync,500)}
+const hideOpts=()=>{$('#opts').classList.remove('on');clearInterval(OPTT)};
+$('#lob-menu').addEventListener('click',showOpts);$('#optBtn').addEventListener('click',()=>{closeSheets();showOpts()});
+$('#opts-x').addEventListener('click',hideOpts);$('#opts').addEventListener('click',e=>{if(e.target.id==='opts')hideOpts()});
+$('#o-modo').addEventListener('click',()=>{$('#lob-modo').click();setTimeout(optSync,300)});
+$('#o-off').addEventListener('click',()=>$('#lob-offline').click());
+$('#o-notif').addEventListener('click',()=>{$('#lob-btn-notif').click();setTimeout(optSync,800)});
+$('#o-inst').addEventListener('click',()=>$('#install').click());
 window.addEventListener('appinstalled',()=>$('#install').classList.remove('on'));
 if('serviceWorker' in navigator){
   let recargado=false;
