@@ -421,7 +421,7 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
 .atoast .ai img{width:100%;height:100%;object-fit:cover}
 
 /* ===== pantalla de inicio (rediseño) ===== */
-#lobby{background:linear-gradient(180deg,#0d0a14cc,#1a1424aa 35%,#0d0a14ee),url("fondos/menu.webp") center/cover no-repeat,radial-gradient(120% 80% at 50% 30%,#3a2a55,#1a1520);justify-content:flex-start;gap:0}
+#lobby{background:linear-gradient(180deg,#0d0a14b3,#0d0a1426 30%,#0d0a1440 55%,#0d0a14e6),url("fondos/menu.webp") center/cover no-repeat,radial-gradient(120% 80% at 50% 30%,#3a2a55,#1a1520);justify-content:flex-start;gap:0}
 .lob-amb{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}
 .lob-amb b{position:absolute;bottom:-4vh;width:5px;height:5px;border-radius:50%;background:#7fd6ff;box-shadow:0 0 8px #4fc3ff;opacity:0;animation:ember linear infinite}
 #lobby>*:not(.lob-amb){position:relative;z-index:1;flex-shrink:0}
@@ -453,6 +453,9 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
 .lob-icons button:active i{transform:scale(.9);border-color:var(--gold)}
 .lob-icons button.busy i{border-color:#2fae5a}
 .lob-hid{display:none!important}
+#ov.vic{background:linear-gradient(180deg,#0d0a1499,#0d0a1455 40%,#0d0a14bb),url("fondos/victoria.webp") center/cover no-repeat}
+#ov.der{background:linear-gradient(180deg,#0d0a14aa,#0d0a1466 40%,#0d0a14cc),url("fondos/derrota.webp") center/cover no-repeat}
+#ov.vic .box,#ov.der .box{background:#2f2b37e6;backdrop-filter:blur(4px)}
 </style>
 </head>
 <body>
@@ -836,13 +839,13 @@ const jHurt=(from,to)=>async L=>{
 /* ---------- ventana emergente ---------- */
 let OV=[],OVL=0;
 function ov(id,btns,extra='',lock=0){
-  OV=btns;OVL=lock;
+  OV=btns;OVL=lock;$('#ov').classList.remove('vic','der');
   const pk=btns.map((b,i)=>b[4]?`<div data-b="${i}" class="pk ${b[3]||''}">${card(b[4])}${b[5]?`<small>${b[5]}</small>`:''}</div>`:'').join('');
   $('#ov').innerHTML=`<div class="box">${id?card(id,'big'):''}${extra}${pk?`<div class="grid pks" style="--pc:${(n=>n<=3?3:n===4?4:n<=6?3:n<=8?4:5)(btns.filter(b=>b[4]).length)}">${pk}</div>`:''}<div class="btns">${btns.map((b,i)=>b[4]?'':`<button data-b="${i}" class="${b[3]||''}" ${b[2]?'disabled':''}>${b[0]}</button>`).join('')}${lock?'':'<button data-b="x" class="ghost">Cerrar</button>'}</div></div>`;
   $('#ov').classList.add('on');
   syOv();
 }
-const close=()=>{$('#ov').classList.remove('on');SYSHOW=0;syOvx()};
+const close=()=>{$('#ov').classList.remove('on','vic','der');SYSHOW=0;syOvx()};
 const msg=t=>{ov(null,[],`<p>${t}</p>`);return 1};
 const gridOf=(ids,attr)=>`<div class="grid">${ids.map((id,i)=>`<div ${attr}="${i}">${card(id)}</div>`).join('')}</div>`;
 
@@ -1039,11 +1042,11 @@ function showVictory(msg){
     ['📤 Compartir victoria',()=>{shareVictory(st);return 1}],
     ['Iniciar partida nueva',()=>{newGame()}],
     ['Salir',()=>{exitGame();return 1}]
-  ],html,1);
+  ],html,1);$('#ov').classList.add('vic');
 }
 function exitGame(){toMenu(1)}
 /* póster de victoria para compartir (1080×1920, tamaño de estados) */
-const BNM={j02:"Latigos de Majora's",j03:"Máscara de Majora's",j04:"Encarnación de Majora's"};
+const BNM={j02:"Látigos de Majora's",j03:"Máscara de Majora's",j04:"Encarnación de Majora's"};
 async function shareVictory(st){
   try{
     try{await document.fonts.ready}catch(e){}
@@ -1051,7 +1054,7 @@ async function shareVictory(st){
     const load=src=>new Promise(ok=>{const i=new Image();const t=setTimeout(()=>ok(null),5000);i.onload=()=>{clearTimeout(t);ok(i)};i.onerror=()=>{clearTimeout(t);ok(null)};i.src=src});
     const pj=S.personaje||'m',boss=S.cross[0]&&/^j0[2-4]$/.test(S.cross[0].id)?S.cross[0].id:null;
     let tab='t00';try{tab=localStorage.getItem('mesa-tab')||'t00'}catch(e){}if(!tabOk(tab))tab='t00';
-    const [bg,ci,bi,lg]=await Promise.all([tab!=='t00'?load(tabUrl(tab)):null,load(imgSrc(pj+'19')),boss?load(imgSrc(boss)):null,load('logo.webp')]);
+    const [bg,ci,bi,lg]=await Promise.all([load('fondos/victoria.webp').then(i=>i||(tab!=='t00'?load(tabUrl(tab)):null)),load(imgSrc(pj+'19')),boss?load(imgSrc(boss)):null,load('logo.webp')]);
     const F=(w,px)=>`${w} ${px}px Fredoka,system-ui,sans-serif`;
     /* fondo: el tablero que usas, oscurecido */
     if(bg){const r=Math.max(W/bg.width,H/bg.height),bw=bg.width*r,bh=bg.height*r;x.drawImage(bg,(W-bw)/2,(H-bh)/2,bw,bh)}
@@ -1110,7 +1113,7 @@ function endGame(){coopOver('lose',S.why);S.over=1;const rr=stRecord(0);fxStamp(
   const dst=`<div class="vst"><div class="vnote">${near}</div><div><span>🕒 Turnos jugados</span><b>${S.turn}</b></div><div><span>🏆 Desafíos completados</span><b>${S.nc||0}</b></div><div><span>😮‍💨 Veces que te agotaste</span><b>${S.vk||0}</b></div>${bj&&bj.id==='j01'?`<div><span>👹 Progreso del jefe final</span><b>${Math.max(0,bj.p)}</b></div>`:''}</div>${stHtml(rr)}`;
   const cs=(S.whyC||[]).filter(Boolean),cards=cs.length?`<div class="grid" style="grid-template-columns:repeat(${Math.min(cs.length,2)},1fr);max-width:${Math.min(cs.length,2)*110}px;margin:8px auto">${cs.map(id=>`<div>${card(id)}</div>`).join('')}</div>`:'';
   /* ventana fija (sin "Cerrar"): siempre hay una salida, nunca queda el tablero trabado */
-  ov(null,[['Nueva partida',()=>newGame()],['Menú principal',()=>{toMenu(1);return 1}]],`<h2>Derrota</h2>${cards}<p>${S.why||(S.hp<=0?'Te quedaste sin corazones.':'El jefe final se quedó sin progreso.')}</p>${dst}`,1)}
+  ov(null,[['Nueva partida',()=>newGame()],['Menú principal',()=>{toMenu(1);return 1}]],`<h2>Derrota</h2>${cards}<p>${S.why||(S.hp<=0?'Te quedaste sin corazones.':'El jefe final se quedó sin progreso.')}</p>${dst}`,1);$('#ov').classList.add('der')}
 const newGame=()=>{RES2=null;RUNFX=0;presHide(1);close();try{localStorage.removeItem('mesa-juego')}catch(e){}const inRoom=COOP&&MP.code&&MP.ws;NEWG=1;showLobby();if(inRoom)mpRoom()};
 
 /* ---------- mazos ---------- */
