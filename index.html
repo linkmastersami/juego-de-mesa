@@ -444,7 +444,11 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
 .lob-start::after{content:'';position:absolute;top:0;bottom:0;width:40%;left:-60%;background:linear-gradient(100deg,transparent,#ffffff88,transparent);transform:skewX(-20deg);animation:shine 3.2s ease-in-out infinite}
 @keyframes shine{0%,60%{left:-60%}100%{left:130%}}
 .lob-start:active{transform:translateY(4px);box-shadow:0 2px 0 #a8740f}
-.lob-cont{background:#0d0a14b3;border:2px solid var(--gold);color:var(--gold);margin:0 0 10px}
+.lob-play{display:flex;width:100%;max-width:420px;border-radius:18px;box-shadow:0 6px 0 #00000055,0 0 30px #ffd34d44;margin-top:2px}
+.lob-play .lob-start{flex:2;width:auto;max-width:none;margin:0;box-shadow:inset 0 -6px 0 #a8740f}
+.lob-play .lob-cont:not([style*="none"])~*,.lob-play:has(.lob-cont:not([style*="none"])) .lob-start{border-radius:18px 0 0 18px;font-size:1.3rem}
+.lob-cont{flex:1;border:0;border-radius:0 18px 18px 0;background:linear-gradient(180deg,#5fa8ff,#2f6fe0);color:#fff;font:800 1.05rem Fredoka,sans-serif;padding:0 6px;cursor:pointer;box-shadow:inset 0 -6px 0 #1d4aa3,inset 2px 0 0 #00000033;white-space:nowrap;animation:pop .4s cubic-bezier(.2,.9,.3,1.3)}
+.lob-cont:active{transform:translateY(3px);box-shadow:inset 0 -2px 0 #1d4aa3}
 .lob-row{display:flex;gap:10px;width:100%;max-width:420px;margin-top:12px}
 .lob-row .lob-friend{flex:1;width:auto;margin:0;font-size:1rem;padding:13px 6px;white-space:nowrap}
 .lob-icons{display:flex;justify-content:space-around;width:100%;max-width:420px;margin-top:18px;gap:6px}
@@ -521,9 +525,11 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
   </div>
   <div class="lob-dots"><i data-d="m"></i><i data-d="l"></i><i data-d="p"></i></div>
   <div id="lob-info"></div>
-  <button class="lob-resume lob-cont" id="lob-btn-resume" style="display:none">▶ Continuar partida guardada</button>
   <div class="lob-sep" id="lob-sep-resume" style="display:none"></div>
-  <button class="lob-start" id="lob-btn-start" disabled>⚔️ JUGAR</button>
+  <div class="lob-play">
+    <button class="lob-start" id="lob-btn-start" disabled>⚔️ JUGAR</button>
+    <button class="lob-cont" id="lob-btn-resume" style="display:none">▶ Continuar</button>
+  </div>
   <div class="lob-row">
     <button class="lob-friend" id="lob-btn-friend" disabled>👥 Con un amigo</button>
     <button class="lob-friend lob-quick" id="lob-btn-quick">⚡ Partida rápida<b id="lob-q" class="lob-qb" style="display:none"></b></button>
@@ -1801,7 +1807,7 @@ setInterval(()=>{if(!lobbyOn())return;const m=$('#li-modo');m.querySelector('i')
   lo.querySelector('i').textContent=ic;lo.querySelector('span').textContent=lb;lo.classList.toggle('busy',ic==='⏳')},500);
 $('#lob-btn-start').addEventListener('click',()=>{
   const b=$('#lob-btn-start');
-  if($('#lob-btn-resume').style.display!=='none'&&!STARTARM){STARTARM=1;b.textContent='Toca otra vez: se borrará tu partida guardada';setTimeout(()=>{if(STARTARM){STARTARM=0;b.textContent='⚔️ JUGAR'}},3000);return}
+  if($('#lob-btn-resume').style.display!=='none'&&!STARTARM){STARTARM=1;b.innerHTML='<span style="font-size:.82rem;letter-spacing:0;line-height:1.15;display:block">¿Nueva partida?<br>Toca otra vez (se borra la guardada)</span>';setTimeout(()=>{if(STARTARM){STARTARM=0;b.textContent='⚔️ JUGAR'}},3000);return}
   STARTARM=0;b.textContent='⚔️ JUGAR';GAMEON=1;
   COOP=0;MYT=1;coopUi();hideLobby();
   startGame();
