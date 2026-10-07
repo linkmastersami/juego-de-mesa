@@ -1,6 +1,12 @@
 {
  "files": {
   "Yugioh pro music.mp3": "fa6cc95c4727",
+  "album/hoja.jpg": "8ff6a50e75be",
+  "album/libro-calabozo.jpg": "21e803eed7fc",
+  "album/libro-espada.jpg": "cf249991e0cd",
+  "album/libro-fuego.jpg": "2803a6bac0d8",
+  "album/libro-jefe.jpg": "585e5de73c8e",
+  "album/libro-rayo.jpg": "afdd880f7006",
   "cartas/animaciones/c01.webp": "4f48910175ce",
   "cartas/animaciones/c03.webp": "91fcf76dc2e9",
   "cartas/animaciones/c05.webp": "2444b308e3bc",
@@ -192,5 +198,5 @@
   "tableros/t07.webp": "d13add3a6534",
   "tableros/t08.webp": "df272cca3775"
  },
- "version": "5477e7d09d49"
+ "version": "07896e9e4ef3"
 }
