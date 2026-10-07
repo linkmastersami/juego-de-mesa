@@ -1052,6 +1052,9 @@ function showRecs(){
   $('#recs').classList.add('on')}
 $('#recs').addEventListener('click',e=>{if(e.target.id==='recs-x'||e.target.id==='recs')$('#recs').classList.remove('on')});
 $('#lob-recs').addEventListener('click',showRecs);
+/* cartas apartadas (c52, c53): siempre debajo de la barra de estado y del reloj del cooperativo */
+setInterval(()=>{const ap=$('#apart');if(!ap||!ap.children.length)return;const h=$('#hud').getBoundingClientRect(),ct=$('#ctime');
+  let y=h.bottom;if(ct.classList.contains('on')){const r=ct.getBoundingClientRect();if(r.height)y=Math.max(y,r.bottom)}ap.style.top=Math.round(y+8)+'px'},300);
 
 /* ---------- tableros desbloqueables (carpeta tableros/) ---------- */
 const TABS=[['t00','Calabozo','',null],['t01','Cripta de huesos','w1'],['t02','Fragua de lava','wm'],['t03','Ruinas del bosque','wl'],['t04','Templo de la tormenta','wp'],
