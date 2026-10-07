@@ -342,7 +342,7 @@ body.sbton #coopb span,body.incine #coopb span{display:none}
 .achs{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;width:100%}
 .achn{display:flex;align-items:center;gap:8px;background:linear-gradient(90deg,#ffd34d33,#ffd34d14);border:1px solid #ffd34d77;border-radius:12px;padding:7px 11px;width:100%;text-align:left;font-size:.88rem;animation:pop .5s cubic-bezier(.2,.9,.3,1.3) both}
 .achn i{font-style:normal;font-size:1.5rem;flex:none;width:34px;text-align:center}.achn i .card{width:34px;height:auto;aspect-ratio:696/1015;border-radius:4px}.achn b{display:block;color:#ffd34d}
-.atoast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 22px);z-index:80;pointer-events:none;display:flex;align-items:center;gap:12px;width:min(92vw,380px);padding:8px 16px 8px 8px;border-radius:999px;background:linear-gradient(90deg,#141217f2,#2a2433f2);border:1px solid #ffd34d88;box-shadow:0 10px 30px #000c,0 0 24px #ffd34d33;color:#fff;transform:translate(-50%,160%);transition:transform .5s cubic-bezier(.2,.9,.3,1.15),opacity .4s}
+.atoast{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 12px);z-index:80;pointer-events:none;display:flex;align-items:center;gap:12px;width:min(92vw,380px);padding:8px 16px 8px 8px;border-radius:999px;background:linear-gradient(90deg,#141217f2,#2a2433f2);border:1px solid #ffd34d88;box-shadow:0 10px 30px #000c,0 0 24px #ffd34d33;color:#fff;transform:translate(-50%,-170%);transition:transform .5s cubic-bezier(.2,.9,.3,1.15),opacity .4s}
 .atoast.in{transform:translate(-50%,0)}.atoast.out{transform:translate(-50%,0) scale(.9);opacity:0}
 .atoast .ai{flex:none;width:52px;height:52px;border-radius:50%;background:radial-gradient(circle,#ffd34d,#b8860b);display:grid;place-items:center;font-size:1.7rem;overflow:hidden;box-shadow:0 0 0 3px #ffd34d55}
 .atoast .ai .card{width:100%;height:100%;border-radius:0}.atoast .ai .card img{object-fit:cover;object-position:50% 22%}
@@ -2461,6 +2461,10 @@ $('#o-modo').addEventListener('click',()=>{$('#lob-modo').click();setTimeout(opt
 $('#o-off').addEventListener('click',()=>$('#lob-offline').click());
 $('#o-notif').addEventListener('click',()=>{$('#lob-btn-notif').click();setTimeout(optSync,800)});
 $('#o-inst').addEventListener('click',()=>$('#install').click());
+/* app instalada: pantalla completa (sin barra de estado ni botones del teléfono); el navegador lo permite al primer toque */
+{const inst=()=>matchMedia('(display-mode: fullscreen)').matches||matchMedia('(display-mode: standalone)').matches||navigator.standalone;
+ const fs=()=>{if(!inst()||document.fullscreenElement||!document.documentElement.requestFullscreen)return;document.documentElement.requestFullscreen({navigationUI:'hide'}).catch(()=>{})};
+ document.addEventListener('pointerup',fs,{passive:true});document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(()=>document.addEventListener('pointerup',fs,{once:true,passive:true}),0)})}
 window.addEventListener('appinstalled',()=>$('#install').classList.remove('on'));
 if('serviceWorker' in navigator){
   let recargado=false;
