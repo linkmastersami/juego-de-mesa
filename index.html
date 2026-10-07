@@ -577,6 +577,46 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
 #mp .mpg button.tk::after{content:attr(data-who);position:absolute;left:0;right:0;top:38%;background:#000c;color:#ffb3bd;font:800 .7rem Fredoka,sans-serif;padding:4px 2px;text-align:center}
 #mp-rdy.on{background:linear-gradient(180deg,#5bdc8a,#2f9e57);color:#fff}
 #mp-rdy:disabled{opacity:.45}
+
+/* ===== Sala de Trofeos ===== */
+.trh{width:100%;max-width:440px;display:flex;flex-direction:column;align-items:center;gap:14px}
+.ban{position:relative;width:min(86%,320px);padding:16px 18px 34px;text-align:center;color:#fff;
+  background:url("fondos/estandarte.webp") center/100% 100% no-repeat,linear-gradient(180deg,#9b1c25,#6a0f17);
+  clip-path:polygon(0 0,100% 0,100% 82%,50% 100%,0 82%);box-shadow:inset 0 0 0 4px #ffd34d88;filter:drop-shadow(0 8px 14px #000c)}
+.ban::before{content:'';position:absolute;left:-10px;right:-10px;top:-6px;height:10px;border-radius:6px;background:linear-gradient(#8a5a2b,#4a2e12)}
+.ban .bn1{font:800 1.7rem Fredoka,sans-serif;letter-spacing:.1em;text-shadow:0 2px 6px #000}
+.ban .bn2{font:700 1rem Fredoka,sans-serif;color:#ffe08a;margin-top:2px}
+.ban .bnb{margin:10px auto 0;width:84%;height:10px;border-radius:99px;background:#0007;overflow:hidden}.ban .bnb i{display:block;height:100%;background:linear-gradient(90deg,#ffd34d,#fff3b0)}
+.ban small{display:block;margin-top:5px;font:600 .72rem Fredoka,sans-serif;color:#ffe9c4}
+.plq{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%}
+.plq div{position:relative;border-radius:10px;padding:10px 4px 8px;text-align:center;font:700 .7rem Fredoka,sans-serif;color:#d7d0c4;
+  background:linear-gradient(160deg,#6d6a72,#46434c 60%,#35323a);box-shadow:inset 0 2px 0 #ffffff22,inset 0 -3px 0 #0006,0 4px 10px #0008}
+.plq b{display:block;font:800 1.6rem Fredoka,sans-serif;color:#ffd34d;text-shadow:0 2px 0 #6b4a00,0 0 10px #ffd34d55}
+.plq .fire{position:absolute;top:-10px;right:6px;font-size:1.2rem;animation:fl 1s ease-in-out infinite alternate}@keyframes fl{to{transform:scale(1.2) rotate(6deg)}}
+.trt{font:800 1.05rem Fredoka,sans-serif;color:var(--gold);text-shadow:0 2px 6px #000;align-self:flex-start;margin:6px 0 -4px}
+.peds{display:flex;gap:10px;overflow-x:auto;width:100%;padding:16px 4px 6px;scroll-snap-type:x mandatory}
+.ped{flex:0 0 31%;min-width:100px;scroll-snap-align:start;display:flex;flex-direction:column;align-items:center;position:relative}
+.ped .card{width:78%;height:auto;aspect-ratio:696/1015;border-radius:8px;box-shadow:0 6px 12px #000a;position:relative;z-index:1}
+.ped.top .card{box-shadow:0 0 0 2px #ffd34d,0 0 18px #ffd34daa}
+.ped.no .card{filter:grayscale(1) brightness(.6)}
+.ped .crown{position:absolute;top:-16px;z-index:2;font-size:1.5rem;animation:fl 1.4s ease-in-out infinite alternate}
+.ped .base{width:100%;margin-top:-6px;padding:10px 4px 8px;border-radius:6px 6px 10px 10px;text-align:center;color:#3a2a10;font:700 .68rem Fredoka,sans-serif;
+  background:url("fondos/pedestal.webp") center/100% 100% no-repeat,linear-gradient(180deg,#f4efe6,#cfc6b6 70%,#a99e8a);box-shadow:inset 0 3px 0 #d4af37,0 6px 10px #0009}
+.ped .base b{display:block;font:800 .9rem Fredoka,sans-serif;color:#2b1d08}
+.shelf{width:100%;position:relative;padding:8px 6px 18px;margin-bottom:6px}
+.shelf h4{margin:0 0 6px 4px;font:800 .85rem Fredoka,sans-serif;color:#ffe9c4;text-shadow:0 1px 4px #000}
+.shelf .row{display:flex;flex-wrap:wrap;gap:10px 8px;justify-content:flex-start;position:relative;z-index:1}
+.shelf::after{content:'';position:absolute;left:0;right:0;bottom:4px;height:16px;border-radius:4px;background:url("fondos/repisa.webp") center/100% 100% no-repeat,linear-gradient(180deg,#9a6a3c,#5b3a1a);box-shadow:0 6px 10px #000a}
+.mdl{position:relative;width:58px;height:58px;border-radius:50%;display:grid;place-items:center;font-size:1.6rem;cursor:pointer;
+  background:radial-gradient(circle at 35% 30%,#fff6c2,#ffd34d 45%,#b8860b);box-shadow:0 0 0 3px #7a5200,0 4px 8px #000a;overflow:hidden}
+.mdl.ok::after{content:'';position:absolute;top:-20%;bottom:-20%;width:30%;left:-60%;background:linear-gradient(100deg,transparent,#ffffffcc,transparent);transform:skewX(-20deg);animation:mshine 4s ease-in-out infinite;animation-delay:var(--d)}
+@keyframes mshine{0%,75%{left:-60%}100%{left:140%}}
+.mdl.lk{background:radial-gradient(circle,#1a1622,#2c2636);box-shadow:inset 0 3px 8px #000,0 0 0 3px #4a4555;font-size:1.1rem;filter:grayscale(1);opacity:.75}
+.mdl .nw{position:absolute;top:-2px;right:-2px;width:14px;height:14px;border-radius:50%;background:#ff3b55;box-shadow:0 0 0 2px #120e19;z-index:2}
+#alb-view .bigm{width:150px;height:150px;border-radius:50%;display:grid;place-items:center;font-size:4.6rem;background:radial-gradient(circle at 35% 30%,#fff6c2,#ffd34d 45%,#b8860b);box-shadow:0 0 0 6px #7a5200,0 0 50px #ffd34d88;animation:mspin .9s cubic-bezier(.2,.9,.3,1.2)}
+#alb-view .bigm.lk{background:radial-gradient(circle,#1a1622,#2c2636);box-shadow:0 0 0 6px #4a4555;filter:grayscale(1);animation:none}
+#alb-view h3{margin:0;font:800 1.3rem Fredoka,sans-serif;color:var(--gold);text-align:center}
+@keyframes mspin{from{transform:rotateY(540deg) scale(.4)}to{transform:none}}
 </style>
 </head>
 <body>
@@ -1177,7 +1217,7 @@ async function achNext(){const a=ATQ.shift();if(!a){ATB=0;return}ATB=1;
   await wait(3600);e.classList.add('out');await wait(450);e.remove();await wait(250);achNext()}
 /* desbloquea en el momento (se guarda en el teléfono y sale la notificación) */
 function achGive(list){if(!list.length)return;const o=stLoad();o.ach=o.ach||{};S.newAch=S.newAch||[];
-  list.forEach(a=>{if(o.ach[a[0]])return;o.ach[a[0]]=Date.now();S.newAch.push(a[0]);achToast(a);
+  setTimeout(()=>{try{recDot()}catch(e){}},300);list.forEach(a=>{if(o.ach[a[0]])return;o.ach[a[0]]=Date.now();S.newAch.push(a[0]);achToast(a);
     try{TABS.filter(x=>x[2]===a[0]).forEach(x=>achToast(['tab:'+x[0],'🎨','Nuevo tablero: '+x[1],'Elígelo en 🎨 Tableros, en el menú',null,null,tabUrl(x[0])]))}catch(e){}});stSave(o)}
 function achScan(win){try{const o=stLoad(),A=o.ach||{},g=liveG(win);achGive(ACH.filter(a=>!A[a[0]]&&a[4](o,g)))}catch(e){}}
 /* se vence una carta: logro de esa carta (si es la primera vez) y revisión de los demás */
@@ -1259,11 +1299,39 @@ $('#pn-alb').addEventListener('click',e=>{
 /* deslizar dentro del libro abierto = pasar página */
 {let x0=null,y0=0;const P=$('#pn-alb');P.addEventListener('touchstart',e=>{if(!ALB.b)return;x0=e.touches[0].clientX;y0=e.touches[0].clientY},{passive:true});
  P.addEventListener('touchend',e=>{if(x0===null)return;const dx=e.changedTouches[0].clientX-x0,dy=e.changedTouches[0].clientY-y0;x0=null;if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)*1.3)albFlip(dx<0?1:-1)},{passive:true})}
-albDot();
+albDot();setTimeout(recDot,500);
+
+/* ---------- Sala de Trofeos (pantalla Récords) ---------- */
+const TITLES=[[0,'🪵','Novato'],[3,'🗡️','Aventurero'],[10,'🛡️','Guerrero'],[25,'⚔️','Héroe'],[50,'👑','Leyenda']];
+const titleOf=w=>{let t=TITLES[0];TITLES.forEach(x=>{if(w>=x[0])t=x});return t};
+const SHELVES=[['Primeros pasos',['g1','c1','w1','fin']],['Héroes',['wm','wl','wp','w3p','jf3','coop']],['Retos',['nok','hp10','hp1','fast','nc15','mini3','c52w','nb5','dbl']],['Leyenda',['w5','g10','w10','st3','allc']]];
+function recRender(){const P=$('#pn-rec'),o=stLoad(),A=o.ach||{},seen=o.achSeen||{},w=o.w||0,t=titleOf(w),nx=TITLES.find(x=>x[0]>w),pj=o.pj||{};
+  const prev=t[0],pct=nx?Math.round((w-prev)/(nx[0]-prev)*100):100;
+  const best=Math.max(0,...PJO.map(k=>(pj[k]||{}).w||0));
+  const inShelf=new Set(SHELVES.flatMap(x=>x[1])),extra=ACH.filter(a=>!inShelf.has(a[0])).map(a=>a[0]);
+  const sh=extra.length?[...SHELVES.slice(0,3),[SHELVES[3][0],[...SHELVES[3][1],...extra]]]:SHELVES;
+  const got=ACH.filter(a=>A[a[0]]).length;
+  P.innerHTML=`<div class="trh">
+    <div class="ban"><div class="bn1">${YO?YO.n:'AVENTURERO'}</div><div class="bn2">${t[1]} ${t[2]}</div><div class="bnb"><i style="width:${pct}%"></i></div><small>${nx?`${nx[0]-w} victoria${nx[0]-w>1?'s':''} más para ser ${nx[2]} ${nx[1]}`:'¡Eres una leyenda del calabozo!'}</small></div>
+    <div class="plq"><div><b>${o.g||0}</b>Partidas</div><div><b>${w}</b>Victorias</div><div><b>${o.g?Math.round(w/o.g*100):0}%</b>Ganadas</div>
+      <div>${(o.st||0)>=2?'<span class="fire">🔥</span>':''}<b>${o.st||0}</b>Racha</div><div><b>${o.bs||0}</b>Mejor racha</div><div><b>${o.nc||0}</b>Más desafíos</div></div>
+    <div class="trt">🏛️ Héroes del calabozo</div>
+    <div class="peds">${PJO.map(k=>{const p=pj[k]||{},top=best>0&&(p.w||0)===best;return `<div class="ped${top?' top':''}${p.g?'':' no'}">${top?'<span class="crown">👑</span>':''}${card(k+'19','still')}<div class="base"><b>${PJN[k]}</b>🏆 ${p.w||0} · ⏱️ ${p.bt||'—'}</div></div>`}).join('')}</div>
+    <div class="trt">🏅 Medallas · ${got} de ${ACH.length}</div>
+    ${sh.map(([nm,ids])=>`<div class="shelf"><h4>${nm}</h4><div class="row">${ids.map((id,i)=>{const a=ACH.find(x=>x[0]===id);if(!a)return'';const ok=!!A[id];
+      return `<div class="mdl ${ok?'ok':'lk'}" data-mdl="${id}" style="--d:${(i*0.7)%4}s">${ok?(a[5]?'🌙':a[1]):'🔒'}${ok&&!seen[id]?'<i class="nw"></i>':''}</div>`}).join('')}</div></div>`).join('')}
+  </div>`;
+  /* las medallas nuevas ya se vieron (el punto rojo se apaga al visitar la sala) */
+  let ch=0;o.achSeen=o.achSeen||{};ACH.forEach(x=>{if(A[x[0]]&&!o.achSeen[x[0]]){o.achSeen[x[0]]=1;ch=1}});if(ch){stSave(o);setTimeout(recDot,50)}}
+function recDot(){try{const o=stLoad(),A=o.ach||{},s2=o.achSeen||{};const b=document.querySelector('#lob-nav [data-go="0"]');if(!b)return;let d=b.querySelector('.ndot');if(!d){d=document.createElement('b');d.className='ndot';b.appendChild(d)}d.classList.toggle('on',ACH.some(a=>A[a[0]]&&!s2[a[0]]))}catch(e){}}
+$('#pn-rec').addEventListener('click',e=>{const m=e.target.closest('[data-mdl]');if(!m)return;const id=m.dataset.mdl,a=ACH.find(x=>x[0]===id),o=stLoad(),ok=!!(o.ach||{})[id];
+  if(ok){o.achSeen=o.achSeen||{};if(!o.achSeen[id]){o.achSeen[id]=1;stSave(o);m.querySelector('.nw')?.remove();recDot()}}
+  const v=$('#alb-view');v.innerHTML=`<div class="bigm${ok?'':' lk'}">${ok?a[1]:'🔒'}</div><h3>${a[2]}</h3><div class="av"><div><span>${a[3]}</span></div><div><span>${ok?'✅ Conseguida':'Aún no la tienes'}</span></div></div><button id="alb-vx">Cerrar</button>`;
+  v.classList.add('on');try{ok?SFX.combo(5):SFX.tap()}catch(_){}});
 /* ---------- pantallas del menú: Récords · Álbum · Calabozo · Comunidad · Tableros ---------- */
 let LP=2;
 function paneFill(i){try{
-  if(i===0){showRecs();const h=$('#recs').innerHTML;$('#recs').classList.remove('on');$('#pn-rec').innerHTML=h.replace(/<button class="rclose" id="recs-x">Cerrar<\/button>/,'')}
+  if(i===0)recRender();
   if(i===1)albRender();
   if(i===3)$('#pn-com').innerHTML=`<h2 class="ph">🛡️ Comunidad</h2><div class="comm"><p><span style="font-size:3rem;display:block;line-height:1.3">🏰</span><b>La plaza de aventureros</b><br>Muy pronto aquí verás a los demás jugadores, podrás mandar solicitudes de amistad e invitar a tus amigos a jugar.${YO?`<br><br>Tu nombre: <b style="color:var(--gold)">${YO.n}</b>`:''}</p></div>`;
   if(i===4){showTabs();const h=$('#recs').innerHTML;$('#recs').classList.remove('on');$('#pn-tab').innerHTML=h.replace(/<button class="rclose" id="recs-x">Cerrar<\/button>/,'')}
