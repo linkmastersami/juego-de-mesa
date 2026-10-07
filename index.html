@@ -1098,7 +1098,10 @@ async function shareVictory(st){
     x.font=F(500,26);x.fillStyle='#ffffff99';x.fillText('Link Master · Dungeon Edition · '+new Date().toLocaleDateString('es-MX'),W/2,H-20);
     const blob=await new Promise(r=>cv.toBlob(r,'image/png'));
     const f=new File([blob],'victoria.png',{type:'image/png'});
-    if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:'¡Victoria!',text:'¡Gané en Link Master! ⚔️ https://linkmastersami.github.io/juego-de-mesa/'});return}
+    const LINK='https://linkmastersami.github.io/juego-de-mesa/',TXT=`¡Gané en Link Master con ${PJN[pj]} en ${st.turn} turnos! ⚔️ ¿Puedes superarme? Juega gratis aquí: ${LINK}`;
+    /* algunas apps (como WhatsApp) quitan el texto al compartir una imagen: el enlace también se copia para pegarlo */
+    try{await navigator.clipboard.writeText(TXT);cToast('🔗 Enlace del juego copiado · pégalo en tu mensaje')}catch(e){}
+    if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:'¡Victoria en Link Master!',text:TXT});return}
     const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='victoria.png';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
   }catch(e){}
 }
