@@ -1174,7 +1174,7 @@ function achScan(win){try{const o=stLoad(),A=o.ach||{},g=liveG(win);achGive(ACH.
 /* se vence una carta: logro de esa carta (si es la primera vez) y revisión de los demás */
 function achCard(id){try{if(COOP&&!MYT)return;const r=CREP[id];if(!r)return;const o=stLoad();o.cards=o.cards||{};
   if(/^c4[0-8]$/.test(id)){S.minis=S.minis||[];S.minis.push(id)}
-  if(!o.cards[r]){o.cards[r]=1;stSave(o)}albGet(r,'v');if(/^g0[1-4]$/.test(id))albGet('g0'+(+id[2]+4));achScan(0)}catch(e){}}
+  albGet(r,'v');{const o2=stLoad();o2.cards=o2.cards||{};if(!o2.cards[r]){o2.cards[r]=1;stSave(o2)}}if(/^g0[1-4]$/.test(id))albGet('g0'+(+id[2]+4));achScan(0)}catch(e){}}
 /* guarda el resultado una sola vez por partida; devuelve logros nuevos y récords */
 function stRecord(win){
   if(S.rec)return null;S.rec=1;
@@ -1184,7 +1184,7 @@ function stRecord(win){
   let best=0;if(win){p.w++;if(!p.bt||g.turn<p.bt){best=p.bt?1:0;p.bt=g.turn}}
   o.st=win?(o.st||0)+1:0;o.bs=Math.max(o.bs||0,o.st);o.nc=Math.max(o.nc||0,g.nc);
   if(win&&g.boss){o.boss=o.boss||{};o.boss[g.boss]=1}
-  if(win&&g.boss){o.cards=o.cards||{};o.cards[g.boss]=1;stSave(o);albGet(g.boss,'v')}else stSave(o);
+  stSave(o);if(win&&g.boss){albGet(g.boss,'v');const o2=stLoad();o2.cards=o2.cards||{};o2.cards[g.boss]=1;stSave(o2)}
   achScan(win);const o2=stLoad(),all=[...ACH,...CGRP.map(x=>CACH(x[0]))],nw=(S.newAch||[]).map(k=>all.find(a=>a[0]===k)).filter(Boolean);
   return {nw,best,o:o2}}
 const stHtml=r=>{if(!r)return'';let h='';
