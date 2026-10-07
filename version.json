@@ -113,8 +113,13 @@
   "cartas/k05.webp": "5541a05e488f",
   "cartas/k06.webp": "9d25324938e4",
   "cartas/reverso.webp": "7a486fb28f28",
+  "fondos/album.jpg": "122962c32eca",
+  "fondos/comunidad.jpg": "f6f514a09b93",
   "fondos/derrota.webp": "898296b1038f",
   "fondos/menu.webp": "fbac4e5b0cad",
+  "fondos/nombre.jpg": "feb70dcfe308",
+  "fondos/records.jpg": "b9503651a10a",
+  "fondos/tableros.jpg": "538c5524aa16",
   "fondos/victoria.webp": "04d1b27a2897",
   "icon-192.png": "1832840b96ab",
   "icon-512.png": "c42de4552324",
@@ -198,5 +203,5 @@
   "tableros/t07.webp": "d13add3a6534",
   "tableros/t08.webp": "df272cca3775"
  },
- "version": "07896e9e4ef3"
+ "version": "270f671c7359"
 }
