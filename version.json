@@ -109,8 +109,9 @@
   "cartas/reverso.webp": "7a486fb28f28",
   "icon-192.png": "1832840b96ab",
   "icon-512.png": "c42de4552324",
-  "index.html": "78943d30d271",
+  "index.html": "9ce753b4c0d7",
   "k02.png": "0eb551aafe99",
+  "logo.webp": "c79c21426a47",
   "manifest.json": "77a90e3f8df2",
   "package.json": "abdc4950432e",
   "personajes/personaje 1/m01.webp": "f131de040483",
@@ -188,5 +189,5 @@
   "tableros/t07.webp": "d13add3a6534",
   "tableros/t08.webp": "df272cca3775"
  },
- "version": "3dc5da5beac6"
+ "version": "ebd0de1e788d"
 }
