@@ -405,6 +405,20 @@ body.finalph::before{content:'';position:fixed;inset:0;pointer-events:none;z-ind
 #lob-info{width:100%;max-width:420px;min-height:64px;margin:-6px 0 14px;display:flex;align-items:center;gap:12px;background:#00000040;border:1px solid #ffd34d44;border-radius:16px;padding:10px 14px;box-sizing:border-box;opacity:0;transform:translateY(6px);transition:opacity .3s,transform .3s}
 #lob-info.on{opacity:1;transform:none}
 #lob-info .li{font-size:2rem;flex:none}#lob-info b{display:block;font:700 1.1rem Fredoka,sans-serif;color:var(--gold)}#lob-info span{font-size:.86rem;color:var(--ink);line-height:1.25;display:block}#lob-info small{color:var(--mute);font-size:.75rem}
+
+/* ===== tableros desbloqueables ===== */
+#amb.img{background:#120f17 var(--tab) center/cover no-repeat}
+#amb.img::before,#amb.img i{display:none}
+body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightness(.75)}
+.tabg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.tabc{position:relative;border-radius:12px;overflow:hidden;aspect-ratio:768/1376;background:#241e2d center/cover no-repeat;border:3px solid transparent;cursor:pointer}
+.tabc.sel{border-color:var(--gold);box-shadow:0 0 16px #ffd34d88}
+.tabc.lock{filter:grayscale(1) brightness(.35);cursor:default}
+.tabc b{position:absolute;left:0;right:0;bottom:0;padding:16px 4px 5px;background:linear-gradient(transparent,#000d);font:700 .72rem Fredoka,sans-serif;text-align:center;color:#fff}
+.tabc i{position:absolute;inset:0;display:grid;place-items:center;font-style:normal;font-size:1.6rem}
+.tabl{font-size:.68rem;color:var(--mute);text-align:center;margin-top:3px;line-height:1.15}
+.tabw{display:flex;flex-direction:column}
+.atoast .ai img{width:100%;height:100%;object-fit:cover}
 </style>
 </head>
 <body>
@@ -475,6 +489,7 @@ body.finalph::before{content:'';position:fixed;inset:0;pointer-events:none;z-ind
   <div class="lob-sep" id="lob-sep-resume" style="display:none">── o ──</div>
   <button class="lob-resume" id="lob-btn-resume" style="display:none">▶ Continuar partida guardada</button>
   <button class="lob-resume" id="lob-recs">🏆 Récords y logros</button>
+  <button class="lob-resume" id="lob-tabs">🎨 Tableros</button>
   <button class="lob-resume" id="lob-modo">🌐 Jugando con Internet</button>
   <button class="lob-resume" id="lob-offline" style="display:none">⬇️ Guardar el juego para jugar sin conexión</button>
 </div>
@@ -905,14 +920,15 @@ const ATQ=[];let ATB=0;
 function achToast(a){ATQ.push(a);if(!ATB)achNext()}
 async function achNext(){const a=ATQ.shift();if(!a){ATB=0;return}ATB=1;
   const e=document.createElement('div');e.className='atoast';
-  e.innerHTML=`<div class="ai">${a[5]?card(a[5]):a[1]}</div><div><small>🏆 Logro desbloqueado</small><b>${a[2]}</b><span>${a[3]}</span></div>`;
+  e.innerHTML=`<div class="ai">${a[6]?`<img src="${a[6]}">`:a[5]?card(a[5]):a[1]}</div><div><small>${a[6]?'🎨 Desbloqueado':'🏆 Logro desbloqueado'}</small><b>${a[2]}</b><span>${a[3]}</span></div>`;
   document.body.appendChild(e);void e.offsetWidth;e.classList.add('in');
   try{tone(784,.14,'sine',.12);tone(1175,.32,'sine',.12,.12);tone(1568,.4,'triangle',.07,.24);vib([20,40,20])}catch(_){}
   setTimeout(()=>{const i=e.querySelector('.ai');if(i)i.classList.add('go')},120);
   await wait(3600);e.classList.add('out');await wait(450);e.remove();await wait(250);achNext()}
 /* desbloquea en el momento (se guarda en el teléfono y sale la notificación) */
 function achGive(list){if(!list.length)return;const o=stLoad();o.ach=o.ach||{};S.newAch=S.newAch||[];
-  list.forEach(a=>{if(o.ach[a[0]])return;o.ach[a[0]]=Date.now();S.newAch.push(a[0]);achToast(a)});stSave(o)}
+  list.forEach(a=>{if(o.ach[a[0]])return;o.ach[a[0]]=Date.now();S.newAch.push(a[0]);achToast(a);
+    try{TABS.filter(x=>x[2]===a[0]).forEach(x=>achToast(['tab:'+x[0],'🎨','Nuevo tablero: '+x[1],'Elígelo en 🎨 Tableros, en el menú',null,null,tabUrl(x[0])]))}catch(e){}});stSave(o)}
 function achScan(win){try{const o=stLoad(),A=o.ach||{},g=liveG(win);achGive(ACH.filter(a=>!A[a[0]]&&a[4](o,g)))}catch(e){}}
 /* se vence una carta: logro de esa carta (si es la primera vez) y revisión de los demás */
 function achCard(id){try{if(COOP&&!MYT)return;const r=CREP[id];if(!r)return;const o=stLoad();o.cards=o.cards||{};
@@ -951,6 +967,26 @@ function showRecs(){
   $('#recs').classList.add('on')}
 $('#recs').addEventListener('click',e=>{if(e.target.id==='recs-x'||e.target.id==='recs')$('#recs').classList.remove('on')});
 $('#lob-recs').addEventListener('click',showRecs);
+
+/* ---------- tableros desbloqueables (carpeta tableros/) ---------- */
+const TABS=[['t00','Calabozo','',null],['t01','Cripta de huesos','w1'],['t02','Fragua de lava','wm'],['t03','Ruinas del bosque','wl'],['t04','Templo de la tormenta','wp'],
+  ['t05','Caverna de cristal','nc15'],['t06','Biblioteca arcana','fin'],['t07','Sala del trono oscuro','jf3'],['t08','Santuario celestial','w10']];
+const tabUrl=t=>`tableros/${t}.webp`;
+const tabOk=(t,A)=>{const x=TABS.find(y=>y[0]===t);return !!x&&(!x[2]||!!(A||stLoad().ach||{})[x[2]])};
+function tabApply(){let t='t00';try{t=localStorage.getItem('mesa-tab')||'t00'}catch(e){}if(!tabOk(t))t='t00';
+  const a=$('#amb');a.classList.toggle('img',t!=='t00');a.style.setProperty('--tab',t!=='t00'?`url("${tabUrl(t)}")`:'none')}
+function showTabs(){
+  let cur='t00';try{cur=localStorage.getItem('mesa-tab')||'t00'}catch(e){}
+  const A=stLoad().ach||{};
+  $('#recs').innerHTML=`<div class="rbox"><h2>🎨 Tableros</h2><p style="margin:0;text-align:center;color:var(--mute);font-size:.88rem">Gana logros para desbloquear tableros nuevos. Toca uno para jugar con él.</p>
+    <div class="tabg">${TABS.map(([t,n,a])=>{const ok=tabOk(t,A),ach=a&&ACH.find(x=>x[0]===a);
+      return `<div class="tabw"><div class="tabc${ok?'':' lock'}${t===cur?' sel':''}" data-tab="${ok?t:''}" style="${t==='t00'?'background-image:radial-gradient(130% 85% at 50% 38%,#3b3247,#241e2d 55%,#120f17)':`background-image:url('${tabUrl(t)}')`}">${ok?'':'<i>🔒</i>'}<b>${n}</b></div>${ok?'':`<div class="tabl">${ach?ach[1]+' '+ach[3]:''}</div>`}</div>`}).join('')}</div>
+    <button class="rclose" id="recs-x">Cerrar</button></div>`;
+  $('#recs').classList.add('on')}
+$('#recs').addEventListener('click',e=>{const c=e.target.closest('[data-tab]');if(!c||!c.dataset.tab)return;try{localStorage.setItem('mesa-tab',c.dataset.tab)}catch(_){}tabApply();try{SFX.pop()}catch(_){}showTabs()});
+$('#lob-tabs').addEventListener('click',showTabs);
+tabApply();
+
 
 /* ---------- victoria ---------- */
 function showVictory(msg){
