@@ -109,7 +109,7 @@
   "cartas/reverso.webp": "7a486fb28f28",
   "icon-192.png": "1832840b96ab",
   "icon-512.png": "c42de4552324",
-  "index.html": "0093f23dc746",
+  "index.html": "78943d30d271",
   "k02.png": "0eb551aafe99",
   "manifest.json": "77a90e3f8df2",
   "package.json": "abdc4950432e",
@@ -179,14 +179,14 @@
   "personajes/personaje 3/p19a.webp": "668183484e23",
   "personajes/personaje 3/p20.webp": "eebc4056974d",
   "personajes/personaje 3/p20a.webp": "1f135e22276f",
-  "tableros/tablero (1).jpg": "8c257971c66c",
-  "tableros/tablero (2).jpg": "0268490bfdde",
-  "tableros/tablero (3).jpg": "f7f3597e513b",
-  "tableros/tablero (4).jpg": "2a834d9acae8",
-  "tableros/tablero (5).jpg": "5d1161719ac6",
-  "tableros/tablero (6).jpg": "1890bd75e161",
-  "tableros/tablero (7).jpg": "5b0b31bb5634",
-  "tableros/tablero (8).jpg": "6587366eca14"
+  "tableros/t01.webp": "2c4477bdcd87",
+  "tableros/t02.webp": "513dae1464e2",
+  "tableros/t03.webp": "7312f7623e55",
+  "tableros/t04.webp": "8dc112f35568",
+  "tableros/t05.webp": "83f9feec7d13",
+  "tableros/t06.webp": "4639a0983b0b",
+  "tableros/t07.webp": "d13add3a6534",
+  "tableros/t08.webp": "df272cca3775"
  },
- "version": "cbfd9822928a"
+ "version": "3dc5da5beac6"
 }
