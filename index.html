@@ -419,6 +419,40 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
 .tabl{font-size:.68rem;color:var(--mute);text-align:center;margin-top:3px;line-height:1.15}
 .tabw{display:flex;flex-direction:column}
 .atoast .ai img{width:100%;height:100%;object-fit:cover}
+
+/* ===== pantalla de inicio (rediseño) ===== */
+#lobby{background:linear-gradient(180deg,#0d0a14cc,#1a1424aa 35%,#0d0a14ee),url("fondos/menu.webp") center/cover no-repeat,radial-gradient(120% 80% at 50% 30%,#3a2a55,#1a1520);justify-content:flex-start;gap:0}
+.lob-amb{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+.lob-amb b{position:absolute;bottom:-4vh;width:5px;height:5px;border-radius:50%;background:#7fd6ff;box-shadow:0 0 8px #4fc3ff;opacity:0;animation:ember linear infinite}
+#lobby>*:not(.lob-amb){position:relative;z-index:1;flex-shrink:0}
+.lob-logo{width:min(40vw,170px,22dvh);height:auto;margin-top:0;filter:drop-shadow(0 0 18px #4fc3ff66);animation:lfloat 4s ease-in-out infinite}
+@keyframes lfloat{50%{transform:translateY(-6px);filter:drop-shadow(0 0 28px #4fc3ffaa)}}
+#lobby .lob-sub{margin:2px 0 10px;font:700 .85rem Fredoka,sans-serif;letter-spacing:.32em;text-transform:uppercase;color:var(--gold);text-shadow:0 0 12px #ffd34d66}
+.lob-chars{--cw:min(42vw,190px,25dvh);position:relative;display:block;width:100%;max-width:520px;height:calc(var(--cw)*1.458 + 34px);margin:0 0 4px;padding:0;touch-action:pan-y}
+.lob-char{position:absolute;left:50%;top:0;width:var(--cw);max-width:none;padding:0;background:none;border:0;gap:6px;transition:transform .4s cubic-bezier(.2,.9,.3,1.1),opacity .4s,filter .4s;transform:translateX(-50%) scale(.7);opacity:0}
+.lob-char.sel{transform:translateX(-50%) scale(1);opacity:1;z-index:3;background:none}
+.lob-char.pl{transform:translateX(calc(-50% - 78%)) scale(.68) rotate(-6deg);opacity:.55;filter:brightness(.6);z-index:1}
+.lob-char.pr{transform:translateX(calc(-50% + 78%)) scale(.68) rotate(6deg);opacity:.55;filter:brightness(.6);z-index:1}
+.lob-char:active{transform:translateX(-50%) scale(.97)}
+.lob-char .card-wrap{border-radius:14px}
+.lob-char.sel .card-wrap{box-shadow:0 14px 40px #000c,0 0 0 3px #ffd34d,0 0 34px #ffd34daa}
+.lob-char .char-name{font-size:1.15rem;text-shadow:0 2px 6px #000}
+.lob-char.pl .char-name,.lob-char.pr .char-name{opacity:0}
+.lob-dots{display:flex;gap:8px;justify-content:center;margin:0 0 10px}.lob-dots i{width:8px;height:8px;border-radius:50%;background:#ffffff40;transition:background .3s,transform .3s}.lob-dots i.on{background:var(--gold);transform:scale(1.3)}
+#lob-info{margin:0 0 12px;background:#0d0a14b3;backdrop-filter:blur(4px)}
+.lob-start{position:relative;overflow:hidden;font:800 1.5rem Fredoka,sans-serif;letter-spacing:.08em;padding:16px;background:linear-gradient(180deg,#ffe07a,#f2b632);box-shadow:0 6px 0 #a8740f,0 0 30px #ffd34d55;margin-top:2px}
+.lob-start::after{content:'';position:absolute;top:0;bottom:0;width:40%;left:-60%;background:linear-gradient(100deg,transparent,#ffffff88,transparent);transform:skewX(-20deg);animation:shine 3.2s ease-in-out infinite}
+@keyframes shine{0%,60%{left:-60%}100%{left:130%}}
+.lob-start:active{transform:translateY(4px);box-shadow:0 2px 0 #a8740f}
+.lob-cont{background:#0d0a14b3;border:2px solid var(--gold);color:var(--gold);margin:0 0 10px}
+.lob-row{display:flex;gap:10px;width:100%;max-width:420px;margin-top:12px}
+.lob-row .lob-friend{flex:1;width:auto;margin:0;font-size:1rem;padding:13px 6px;white-space:nowrap}
+.lob-icons{display:flex;justify-content:space-around;width:100%;max-width:420px;margin-top:18px;gap:6px}
+.lob-icons button{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;border:0;background:none;color:var(--ink);font:600 .74rem Fredoka,sans-serif;cursor:pointer;padding:0}
+.lob-icons i{font-style:normal;width:54px;height:54px;border-radius:50%;display:grid;place-items:center;font-size:1.5rem;background:#0d0a14b3;border:2px solid #ffffff22;box-shadow:0 4px 12px #0008;transition:transform .15s,border-color .2s}
+.lob-icons button:active i{transform:scale(.9);border-color:var(--gold)}
+.lob-icons button.busy i{border-color:#2fae5a}
+.lob-hid{display:none!important}
 </style>
 </head>
 <body>
@@ -465,33 +499,41 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
 <div id="amb"><i></i><i></i><b style="left:8%;--x:30px;animation-duration:11s;animation-delay:-2s"></b><b style="left:22%;--x:-20px;animation-duration:14s;animation-delay:-7s"></b><b style="left:37%;--x:25px;animation-duration:12s;animation-delay:-4s"></b><b style="left:55%;--x:-35px;animation-duration:15s;animation-delay:-9s"></b><b style="left:70%;--x:20px;animation-duration:13s;animation-delay:-1s"></b><b style="left:84%;--x:-25px;animation-duration:16s;animation-delay:-11s"></b><b style="left:93%;--x:15px;animation-duration:12s;animation-delay:-6s"></b></div>
 <!-- LOBBY -->
 <div id="lobby" class="oculto">
-  <div class="lob-title">⚔️ Link Master</div>
-  <div class="lob-sub">Dungeon Edition · Elige tu personaje</div>
+  <div class="lob-amb"><b style="left:6%;--x:30px;animation-duration:10s;animation-delay:-2s"></b><b style="left:18%;--x:-20px;animation-duration:13s;animation-delay:-7s"></b><b style="left:31%;--x:25px;animation-duration:11s;animation-delay:-4s"></b><b style="left:46%;--x:-35px;animation-duration:14s;animation-delay:-9s"></b><b style="left:60%;--x:20px;animation-duration:12s;animation-delay:-1s"></b><b style="left:74%;--x:-25px;animation-duration:15s;animation-delay:-11s"></b><b style="left:88%;--x:15px;animation-duration:11s;animation-delay:-6s"></b><b style="left:95%;--x:-10px;animation-duration:13s;animation-delay:-3s"></b></div>
+  <img class="lob-logo" src="logo.webp" alt="LinkMaster Sami Games">
+  <div class="lob-sub">⚔️ Dungeon Edition ⚔️</div>
   <div class="lob-chars">
     <div class="lob-char" id="lob-p1" data-char="m">
-      <div class="card-wrap"><div class="card" data-id="m19"><img src="personajes/personaje 1/m19.webp" alt="Personaje 1" onerror="this.remove()"></div></div>
+      <div class="card-wrap"><div class="card" data-id="m19"><img src="personajes/personaje 1/m19.webp" alt="Mario" onerror="this.remove()"></div></div>
       <div class="char-name">Mario</div>
     </div>
     <div class="lob-char" id="lob-p2" data-char="l">
-      <div class="card-wrap"><div class="card" data-id="l19"><img src="personajes/personaje 2/l19.webp" alt="Personaje 2" onerror="this.remove()"></div></div>
+      <div class="card-wrap"><div class="card" data-id="l19"><img src="personajes/personaje 2/l19.webp" alt="Link" onerror="this.remove()"></div></div>
       <div class="char-name">Link</div>
     </div>
     <div class="lob-char" id="lob-p3" data-char="p">
-      <div class="card-wrap"><div class="card" data-id="p19"><img src="personajes/personaje 3/p19.webp" alt="Personaje 3" onerror="this.remove()"></div></div>
+      <div class="card-wrap"><div class="card" data-id="p19"><img src="personajes/personaje 3/p19.webp" alt="Pikachu" onerror="this.remove()"></div></div>
       <div class="char-name">Pikachu</div>
     </div>
   </div>
+  <div class="lob-dots"><i data-d="m"></i><i data-d="l"></i><i data-d="p"></i></div>
   <div id="lob-info"></div>
-  <button class="lob-start" id="lob-btn-start" disabled>Entrar al calabozo →</button>
-  <button class="lob-friend" id="lob-btn-friend" disabled>👥 Jugar con un amigo</button>
-  <button class="lob-friend lob-quick" id="lob-btn-quick">⚡ Partida rápida<b id="lob-q" class="lob-qb" style="display:none"></b></button>
+  <button class="lob-resume lob-cont" id="lob-btn-resume" style="display:none">▶ Continuar partida guardada</button>
+  <div class="lob-sep" id="lob-sep-resume" style="display:none"></div>
+  <button class="lob-start" id="lob-btn-start" disabled>⚔️ JUGAR</button>
+  <div class="lob-row">
+    <button class="lob-friend" id="lob-btn-friend" disabled>👥 Con un amigo</button>
+    <button class="lob-friend lob-quick" id="lob-btn-quick">⚡ Partida rápida<b id="lob-q" class="lob-qb" style="display:none"></b></button>
+  </div>
   <button class="lob-resume" id="lob-btn-notif" style="display:none;margin-top:10px">🔔 Avisarme de partidas y actualizaciones</button>
-  <div class="lob-sep" id="lob-sep-resume" style="display:none">── o ──</div>
-  <button class="lob-resume" id="lob-btn-resume" style="display:none">▶ Continuar partida guardada</button>
-  <button class="lob-resume" id="lob-recs">🏆 Récords y logros</button>
-  <button class="lob-resume" id="lob-tabs">🎨 Tableros</button>
-  <button class="lob-resume" id="lob-modo">🌐 Jugando con Internet</button>
-  <button class="lob-resume" id="lob-offline" style="display:none">⬇️ Guardar el juego para jugar sin conexión</button>
+  <div class="lob-icons">
+    <button id="lob-recs"><i>🏆</i><span>Récords</span></button>
+    <button id="lob-tabs"><i>🎨</i><span>Tableros</span></button>
+    <button id="li-modo"><i>🌐</i><span>Internet</span></button>
+    <button id="li-off"><i>⬇️</i><span>Descargar</span></button>
+  </div>
+  <button class="lob-resume lob-hid" id="lob-modo">🌐 Jugando con Internet</button>
+  <button class="lob-resume lob-hid" id="lob-offline" style="display:none">⬇️ Guardar el juego para jugar sin conexión</button>
 </div>
 
 <div class="app">
@@ -991,7 +1033,7 @@ tabApply();
 /* ---------- victoria ---------- */
 function showVictory(msg){
   coopOver('win',msg);S.over=1;S.final=1;const rr=stRecord(1);render();
-  const st={hp:S.hp,turn:S.turn,vk:S.vk||0,nc:S.nc||0};
+  const st={hp:S.hp,turn:S.turn,vk:S.vk||0,nc:S.nc||0,rr};
   const html=`<h2>¡Victoria!</h2>${msg?`<p>${msg}</p>`:''}<div class="vst"><div><span>❤️ Vida al finalizar</span><b>${st.hp}</b></div><div><span>🕒 Turnos usados</span><b>${st.turn}</b></div><div><span>😮‍💨 Veces que te tuviste que agotar</span><b>${st.vk}</b></div><div><span>🏆 Desafíos completados</span><b>${st.nc}</b></div></div>${stHtml(rr)}`;
   ov((S.personaje||'m')+'19',[
     ['📤 Compartir victoria',()=>{shareVictory(st);return 1}],
@@ -1000,26 +1042,63 @@ function showVictory(msg){
   ],html,1);
 }
 function exitGame(){toMenu(1)}
+/* póster de victoria para compartir (1080×1920, tamaño de estados) */
+const BNM={j02:"Latigos de Majora's",j03:"Máscara de Majora's",j04:"Encarnación de Majora's"};
 async function shareVictory(st){
   try{
     try{await document.fonts.ready}catch(e){}
-    const W=1080,H=1500,cv=document.createElement('canvas');cv.width=W;cv.height=H;const x=cv.getContext('2d');
-    const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'#3a3544');g.addColorStop(1,'#15131a');x.fillStyle=g;x.fillRect(0,0,W,H);
-    x.textAlign='center';x.fillStyle='#ffd34d';x.font='800 110px Fredoka,system-ui,sans-serif';x.fillText('¡VICTORIA!',W/2,150);
-    let y=210;
-    try{
-      const im=await new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=no;i.src=imgSrc((S.personaje||'m')+'19')});
-      const ch=640,cw=ch*im.width/im.height,cx=(W-cw)/2;
-      x.save();x.beginPath();x.roundRect(cx,y,cw,ch,28);x.clip();x.drawImage(im,cx,y,cw,ch);x.restore();
-      y+=ch+60;
-    }catch(e){y+=20}
-    const rows=[['❤️ Vida al finalizar',st.hp],['🕒 Turnos usados',st.turn],['😮‍💨 Veces que te tuviste que agotar',st.vk],['🏆 Desafíos completados',st.nc]];
-    rows.forEach(([t,v],i)=>{const yy=y+i*110;x.fillStyle='#ffffff14';x.beginPath();x.roundRect(90,yy-62,W-180,92,24);x.fill();
-      x.textAlign='left';x.fillStyle='#f3eefc';x.font='600 40px Fredoka,system-ui,sans-serif';x.fillText(t,125,yy);
-      x.textAlign='right';x.fillStyle='#ffd34d';x.font='800 52px Fredoka,system-ui,sans-serif';x.fillText(String(v),W-125,yy+2)});
+    const W=1080,H=1920,cv=document.createElement('canvas');cv.width=W;cv.height=H;const x=cv.getContext('2d');
+    const load=src=>new Promise(ok=>{const i=new Image();const t=setTimeout(()=>ok(null),5000);i.onload=()=>{clearTimeout(t);ok(i)};i.onerror=()=>{clearTimeout(t);ok(null)};i.src=src});
+    const pj=S.personaje||'m',boss=S.cross[0]&&/^j0[2-4]$/.test(S.cross[0].id)?S.cross[0].id:null;
+    let tab='t00';try{tab=localStorage.getItem('mesa-tab')||'t00'}catch(e){}if(!tabOk(tab))tab='t00';
+    const [bg,ci,bi,lg]=await Promise.all([tab!=='t00'?load(tabUrl(tab)):null,load(imgSrc(pj+'19')),boss?load(imgSrc(boss)):null,load('logo.webp')]);
+    const F=(w,px)=>`${w} ${px}px Fredoka,system-ui,sans-serif`;
+    /* fondo: el tablero que usas, oscurecido */
+    if(bg){const r=Math.max(W/bg.width,H/bg.height),bw=bg.width*r,bh=bg.height*r;x.drawImage(bg,(W-bw)/2,(H-bh)/2,bw,bh)}
+    else{const g=x.createRadialGradient(W/2,H*.4,50,W/2,H*.45,H*.8);g.addColorStop(0,'#3b3247');g.addColorStop(.6,'#241e2d');g.addColorStop(1,'#120f17');x.fillStyle=g;x.fillRect(0,0,W,H)}
+    {const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'#0d0a14e6');g.addColorStop(.3,'#0d0a1480');g.addColorStop(.62,'#0d0a1466');g.addColorStop(1,'#0d0a14f2');x.fillStyle=g;x.fillRect(0,0,W,H)}
+    /* rayos dorados */
+    {const cx=W/2,cy=1000;x.save();x.translate(cx,cy);for(let k=0;k<24;k++){x.rotate(Math.PI*2/24);x.beginPath();x.moveTo(0,0);x.lineTo(-70,-1300);x.lineTo(70,-1300);x.closePath();x.fillStyle=k%2?'#ffd34d14':'#ffd34d08';x.fill()}x.restore();
+     const g=x.createRadialGradient(cx,cy,0,cx,cy,620);g.addColorStop(0,'#ffd34d55');g.addColorStop(1,'#ffd34d00');x.fillStyle=g;x.fillRect(0,0,W,H)}
+    /* logo */
+    if(lg){const lw=230,lh=lw*lg.height/lg.width;x.save();x.shadowColor='#4fc3ff';x.shadowBlur=30;x.drawImage(lg,(W-lw)/2,40,lw,lh);x.restore()}
+    /* título */
+    x.textAlign='center';x.textBaseline='alphabetic';
+    x.font=F(800,150);x.lineJoin='round';x.lineWidth=18;x.strokeStyle='#2b1802';x.strokeText('¡VICTORIA!',W/2,425);
+    {const g=x.createLinearGradient(0,330,0,460);g.addColorStop(0,'#fff6c2');g.addColorStop(.5,'#ffd34d');g.addColorStop(1,'#c47f0a');x.save();x.shadowColor='#ffb300';x.shadowBlur=40;x.fillStyle=g;x.fillText('¡VICTORIA!',W/2,425);x.restore()}
+    x.font=F(600,44);x.fillStyle='#f3eefc';x.fillText(boss?`${PJN[pj]} venció a ${BNM[boss]}`:`${PJN[pj]} conquistó el calabozo`,W/2,500);
+    x.font=F(500,34);x.fillStyle='#ffd34dcc';x.fillText(`en ${st.turn} turnos`,W/2,548);
+    /* cartas: personaje vs jefe derrotado */
+    const card=(im,cx,cy,h,rot,glow)=>{if(!im)return;const w=h*im.width/im.height;x.save();x.translate(cx,cy);x.rotate(rot);
+      x.shadowColor=glow;x.shadowBlur=60;x.fillStyle=glow;x.beginPath();x.roundRect(-w/2-8,-h/2-8,w+16,h+16,30);x.fill();x.shadowBlur=0;
+      x.beginPath();x.roundRect(-w/2,-h/2,w,h,24);x.clip();x.drawImage(im,-w/2,-h/2,w,h);x.restore();return w};
+    if(bi){
+      x.save();x.filter='grayscale(.7) brightness(.6)';card(bi,810,1015,530,.12,'#7a0d1f');x.restore();
+      card(ci,350,985,720,-.07,'#ffd34d');
+      x.save();x.translate(840,1160);x.rotate(-.3);x.font=F(800,62);x.lineWidth=8;x.strokeStyle='#ff2a4a';x.fillStyle='#ff2a4aee';
+      const tw=x.measureText('DERROTADO').width;x.fillStyle='#1a0006aa';x.fillRect(-tw/2-22,-58,tw+44,82);x.strokeRect(-tw/2-22,-58,tw+44,82);x.fillStyle='#ff4060';x.fillText('DERROTADO',0,6);x.restore();
+    }else card(ci,W/2,960,760,0,'#ffd34d');
+    /* estadísticas */
+    const tiles=[['❤️',st.hp,'Vida'],['🕒',st.turn,'Turnos'],['🏆',st.nc,'Desafíos'],['😮‍💨',st.vk,'Agotado']];
+    const tw=212,gap=18,x0=(W-(4*tw+3*gap))/2,ty=1385;
+    tiles.forEach(([ic,v,l],k)=>{const tx=x0+k*(tw+gap);x.fillStyle='#0d0a14cc';x.strokeStyle='#ffd34d66';x.lineWidth=3;x.beginPath();x.roundRect(tx,ty,tw,190,28);x.fill();x.stroke();
+      x.font=F(400,46);x.fillStyle='#fff';x.fillText(ic,tx+tw/2,ty+58);x.font=F(800,66);x.fillStyle='#ffd34d';x.fillText(String(v),tx+tw/2,ty+130);x.font=F(600,28);x.fillStyle='#cfc8da';x.fillText(l,tx+tw/2,ty+172)});
+    /* récord y logros de la partida */
+    let ay=1640;const rr=st.rr;
+    if(rr&&rr.best){x.font=F(800,40);x.fillStyle='#ffd34d';x.fillText('⭐ ¡NUEVO RÉCORD DE TURNOS! ⭐',W/2,ay);ay+=58}
+    const nw=(rr&&rr.nw||[]).slice(0,7);
+    if(nw.length){x.font=F(600,30);x.fillStyle='#f3eefc';x.fillText(`🏅 ${rr.nw.length} logro${rr.nw.length>1?'s':''} desbloqueado${rr.nw.length>1?'s':''}`,W/2,ay);ay+=22;
+      const cw=86,cg=14,cx0=(W-(nw.length*cw+(nw.length-1)*cg))/2;
+      for(let k=0;k<nw.length;k++){const a=nw[k],bx=cx0+k*(cw+cg);x.fillStyle='#ffd34d';x.beginPath();x.arc(bx+cw/2,ay+cw/2,cw/2,0,7);x.fill();x.fillStyle='#2a2433';x.beginPath();x.arc(bx+cw/2,ay+cw/2,cw/2-5,0,7);x.fill();
+        if(a[5]){const im=await load(imgSrc(a[5]));if(im){x.save();x.beginPath();x.arc(bx+cw/2,ay+cw/2,cw/2-6,0,7);x.clip();x.drawImage(im,bx,ay-10,cw,cw*im.height/im.width);x.restore()}}
+        else{x.font=F(400,46);x.fillStyle='#fff';x.fillText(a[1]||'🏆',bx+cw/2,ay+cw/2+16)}}
+      ay+=cw}
+    /* pie */
+    x.font=F(700,34);x.fillStyle='#ffffff';x.fillText('¡Juega gratis! linkmastersami.github.io/juego-de-mesa',W/2,H-58);
+    x.font=F(500,26);x.fillStyle='#ffffff99';x.fillText('Link Master · Dungeon Edition · '+new Date().toLocaleDateString('es-MX'),W/2,H-20);
     const blob=await new Promise(r=>cv.toBlob(r,'image/png'));
     const f=new File([blob],'victoria.png',{type:'image/png'});
-    if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:'¡Victoria!',text:'¡Gané la partida!'});return}
+    if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:'¡Victoria!',text:'¡Gané en Link Master! ⚔️ https://linkmastersami.github.io/juego-de-mesa/'});return}
     const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='victoria.png';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
   }catch(e){}
 }
@@ -1677,7 +1756,7 @@ function toMenu(del){
 }
 function showLobby(){document.body.classList.remove('finalph');
   const wasCoop=COOP;COOP=0;MYT=1;OWNER='a';COOPFX=0;try{coopUi()}catch(e){}
-  STARTARM=0;$('#lob-btn-start').textContent='Entrar al calabozo →';
+  STARTARM=0;$('#lob-btn-start').textContent='⚔️ JUGAR';
   const lob=$('#lobby');
   lob.classList.remove('oculto');
   /* ocultar la app mientras está el lobby */
@@ -1687,12 +1766,8 @@ function showLobby(){document.body.classList.remove('finalph');
   $('#lob-sep-resume').style.display=hasSave?'':'none';
   $('#lob-btn-resume').style.display=hasSave?'':'none';
   /* marcar el personaje de la partida guardada si hay una */
-  if(hasSave){
-    const saved=S.personaje||'m';
-    document.querySelectorAll('.lob-char').forEach(el=>el.classList.toggle('sel',el.dataset.char===saved));lobInfo(saved);
-    $('#lob-btn-start').disabled=false;$('#lob-btn-friend').disabled=false;
-    CHAR=saved;
-  }
+  {let c='m';try{c=localStorage.getItem('mesa-pj')||'m'}catch(e){}if(hasSave)c=S.personaje||c;if(!PJO.includes(c))c='m';
+   lobPos(c);lobInfo(c);CHAR=c;$('#lob-btn-start').disabled=false;$('#lob-btn-friend').disabled=false}
 }
 function hideLobby(){
   setBadge(0);$('#lobby').classList.add('oculto');
@@ -1702,21 +1777,26 @@ function hideLobby(){
 const PJD={m:['🔥','Juega cartas de fuego: cada 🔥 que usas te hace robar cartas al final del turno para armar combos.'],
   l:['🗡️','Juega cartas de espada: cada ⚔️ reparte progreso extra a los desafíos que no estás intentando.'],
   p:['⚡','Juega cartas de rayo: cada ⚡ le deja relanzar un dado para no fallar la tirada.']};
+var PJO=['m','l','p'];
+function lobPos(c){const i=PJO.indexOf(c);document.querySelectorAll('.lob-char').forEach(el=>{const k=PJO.indexOf(el.dataset.char);el.classList.remove('pl','pr');el.classList.toggle('sel',k===i);if(k===(i+2)%3)el.classList.add('pl');if(k===(i+1)%3)el.classList.add('pr')});document.querySelectorAll('.lob-dots i').forEach(d=>d.classList.toggle('on',d.dataset.d===c))}
+function lobPick(c){CHAR=c;try{localStorage.setItem('mesa-pj',c)}catch(e){}lobPos(c);lobInfo(c);STARTARM=0;$('#lob-btn-start').textContent='⚔️ JUGAR';$('#lob-btn-start').disabled=false;$('#lob-btn-friend').disabled=false;try{SFX.swoosh()}catch(e){}}
 function lobInfo(c){try{document.querySelectorAll('.lob-char').forEach(el=>{const k=el.dataset.char,w=el.querySelector('.card-wrap');if(w)w.innerHTML=card(k+'19',k===c?'':'still')});
   const o=stLoad(),p=(o.pj||{})[c]||{},d=PJD[c];$('#lob-info').innerHTML=`<div class="li">${d[0]}</div><div><b>${PJN[c]}</b><span>${d[1]}</span><small>${p.g?`🏆 ${p.w||0} victorias en ${p.g} partidas${p.bt?` · récord: ${p.bt} turnos`:''}`:'Aún no has jugado con este personaje'}</small></div>`;$('#lob-info').classList.add('on')}catch(e){}}
 /* selección de personaje */
-document.querySelectorAll('.lob-char').forEach(el=>{
-  el.addEventListener('click',()=>{
-    document.querySelectorAll('.lob-char').forEach(x=>x.classList.remove('sel'));
-    el.classList.add('sel');STARTARM=0;$('#lob-btn-start').textContent='Entrar al calabozo →';
-    CHAR=el.dataset.char;lobInfo(CHAR);
-    $('#lob-btn-start').disabled=false;$('#lob-btn-friend').disabled=false;
-  });
-});
+document.querySelectorAll('.lob-char').forEach(el=>el.addEventListener('click',()=>lobPick(el.dataset.char)));
+document.querySelectorAll('.lob-dots i').forEach(d=>d.addEventListener('click',()=>lobPick(d.dataset.d)));
+{let x0=null;const z=$('.lob-chars');z.addEventListener('touchstart',e=>{x0=e.touches[0].clientX},{passive:true});
+ z.addEventListener('touchend',e=>{if(x0===null)return;const dx=e.changedTouches[0].clientX-x0;x0=null;if(Math.abs(dx)<40)return;const i=PJO.indexOf(CHAR||'m');lobPick(PJO[(i+(dx<0?1:2))%3])},{passive:true})}
+/* botones redondos: reflejan el estado de Internet y de la descarga */
+$('#li-modo').onclick=()=>$('#lob-modo').click();$('#li-off').onclick=()=>$('#lob-offline').click();
+setInterval(()=>{if(!lobbyOn())return;const m=$('#li-modo');m.querySelector('i').textContent=sinNet()?'✈️':'🌐';m.querySelector('span').textContent=sinNet()?'Sin internet':'Con internet';
+  const o=$('#lob-offline'),lo=$('#li-off'),t=o.textContent||'';lo.style.display=o.style.display==='none'?'none':'';
+  const [ic,lb]=t.includes('✅')?['✅','Guardado']:t.includes('⏳')?['⏳',(t.match(/(\d+)\/(\d+)/)?Math.round(+RegExp.$1/+RegExp.$2*100)+'%':'Guardando')]:t.includes('⚠️')?['⚠️','Reintentar']:['⬇️','Descargar'];
+  lo.querySelector('i').textContent=ic;lo.querySelector('span').textContent=lb;lo.classList.toggle('busy',ic==='⏳')},500);
 $('#lob-btn-start').addEventListener('click',()=>{
   const b=$('#lob-btn-start');
-  if($('#lob-btn-resume').style.display!=='none'&&!STARTARM){STARTARM=1;b.textContent='Toca otra vez: se borrará tu partida guardada';setTimeout(()=>{if(STARTARM){STARTARM=0;b.textContent='Entrar al calabozo →'}},3000);return}
-  STARTARM=0;b.textContent='Entrar al calabozo →';GAMEON=1;
+  if($('#lob-btn-resume').style.display!=='none'&&!STARTARM){STARTARM=1;b.textContent='Toca otra vez: se borrará tu partida guardada';setTimeout(()=>{if(STARTARM){STARTARM=0;b.textContent='⚔️ JUGAR'}},3000);return}
+  STARTARM=0;b.textContent='⚔️ JUGAR';GAMEON=1;
   COOP=0;MYT=1;coopUi();hideLobby();
   startGame();
 });
