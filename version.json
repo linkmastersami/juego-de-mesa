@@ -107,6 +107,9 @@
   "cartas/k05.webp": "5541a05e488f",
   "cartas/k06.webp": "9d25324938e4",
   "cartas/reverso.webp": "7a486fb28f28",
+  "fondos/derrota.jpg": "c0df791be756",
+  "fondos/menu..jpg": "59baf1c12fa2",
+  "fondos/victoria.jpg": "bacdf6e90f9d",
   "icon-192.png": "1832840b96ab",
   "icon-512.png": "c42de4552324",
   "index.html": "c879f1402ba3",
@@ -189,5 +192,5 @@
   "tableros/t07.webp": "d13add3a6534",
   "tableros/t08.webp": "df272cca3775"
  },
- "version": "db8137acd4d3"
+ "version": "b73fa85cd8e0"
 }
