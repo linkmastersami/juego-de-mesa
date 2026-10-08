@@ -164,7 +164,7 @@ button{font-family:inherit}
 .pjs>.habc{position:absolute;width:62%;aspect-ratio:696/1015;left:-4%;top:-46%;transform:rotate(-8deg);filter:drop-shadow(0 4px 6px #000c);touch-action:none;z-index:2}
 .pjs>.habc.hdrag{opacity:.35}
 .dock img{-webkit-user-drag:none;user-select:none;-webkit-touch-callout:none}.pjs .card{pointer-events:none}
-.fan{position:absolute;left:15%;right:0;bottom:0;height:100%;z-index:3;pointer-events:none;touch-action:none;user-select:none;-webkit-user-select:none;--fw:76px}
+.fan{position:absolute;left:0;right:0;bottom:0;height:100%;z-index:3;pointer-events:none;touch-action:none;user-select:none;-webkit-user-select:none;--fw:76px}
 .fan .fc{pointer-events:auto;touch-action:none}
 .fan .fc{position:absolute;left:0;bottom:4px;width:var(--fw);aspect-ratio:696/1015;transform-origin:50% 115%;transition:transform .2s cubic-bezier(.2,.8,.3,1),opacity .2s,filter .2s;will-change:transform;border-radius:8px;box-shadow:0 4px 10px #0009}
 .fan .fc .card{pointer-events:none}
@@ -1817,15 +1817,19 @@ function fanRender(){const f=$('#tHand');if(!f)return;if(FAN.st){FAN.dirty=1;ret
   fanLay();
   /* habilidad: se puede arrastrar si está activa */
   const h=$('#m20');if(h){h.classList.toggle('hdrag',!!(B&&B.act===p20()))}}
+/* la mano vive en una franja central de la mitad del ancho: cerrada, las cartas se enciman dentro de ella;
+   abierta, se separan y el dedo solo recorre esa franja (las cartas se mueven rápido hacia el dedo) */
+function fanStrip(W,fw){const L=Math.max(fw*1.4,Math.min(W*.5,W-fw));return [(W-L)/2,L]}
 function fanLay(x){const f=$('#tHand');if(!f)return;const cs=[...f.querySelectorAll('.fc')],n=cs.length;if(!n)return;
-  const W=f.clientWidth,H=f.clientHeight,fw=Math.min(H*.8*696/1015,W*.36);f.style.setProperty('--fw',fw+'px');
+  const W=f.clientWidth,H=f.clientHeight,fw=Math.min(H*.86*696/1015,W*.3);f.style.setProperty('--fw',fw+'px');
+  const [L0,L]=fanStrip(W,fw);
   if(!FAN.st||FAN.st==='press'||FAN.st==='drag'&&FAN.src!=='fan'){
-    const ang=Math.min(5,36/n),Wu=W-fw*.15-(n>1?2.3*fw*Math.sin(ang*(n-1)/2*Math.PI/180):0),sp=n>1?Math.min(fw*.62,Math.max(0,(Wu-fw)/(n-1))):0,tot=fw+sp*(n-1),x0=(W-tot)/2,mid=(n-1)/2;
-    cs.forEach((c,i)=>{const o=i-mid,dy=Math.abs(o)*Math.abs(o)*Math.min(2.2,12/n);c.style.transform=`translate(${x0+i*sp}px,${dy}px) rotate(${o*ang}deg)`;c.style.zIndex=i;c.classList.remove('up','ghost')});return}
-  /* abierto: cartas más separadas; la que está bajo el dedo queda justo debajo y se levanta */
-  const r=f.getBoundingClientRect(),sp=fw*.8,px=Math.max(0,Math.min(W,(x===undefined?FAN.x:x)-r.left)),t=n>1?px/W*(n-1):0,fi=Math.round(t),base=px-(t*sp+fw/2);
+    const sp=n>1?Math.min(fw*.6,(L-fw)/(n-1)):0,tot=fw+sp*(n-1),x0=L0+(L-tot)/2,mid=(n-1)/2,ang=Math.min(3,18/n);
+    cs.forEach((c,i)=>{const o=i-mid;c.style.transform=`translate(${x0+i*sp}px,${Math.abs(o)*Math.abs(o)*.6}px) rotate(${o*ang}deg)`;c.style.zIndex=i;c.classList.remove('up','ghost')});return}
+  /* abierta: la carta que corresponde a la posición del dedo dentro de la franja queda justo bajo el dedo y se levanta */
+  const r=f.getBoundingClientRect(),sp=fw*.92,fx=(x===undefined?FAN.x:x)-r.left,px=Math.max(0,Math.min(L,fx-L0)),t=n>1?px/L*(n-1):0,fi=Math.round(t),base=fx-(t*sp+fw/2);
   FAN.t=t;
-  cs.forEach((c,i)=>{const o=i-t,up=i===fi&&FAN.st==='browse';c.style.transform=`translate(${base+i*sp}px,${up?-26:Math.abs(o)*3}px) rotate(${o*2}deg) scale(${up?1.18:1.04})`;c.style.zIndex=up?99:50-Math.round(Math.abs(o));c.classList.toggle('ghost',FAN.st==='drag'&&i===FAN.i)});
+  cs.forEach((c,i)=>{const o=i-t,up=i===fi&&FAN.st==='browse';c.style.transform=`translate(${base+i*sp}px,${up?-28:Math.min(18,Math.abs(o)*4)}px) rotate(${Math.max(-8,Math.min(8,o*2.5))}deg) scale(${up?1.2:1.05})`;c.style.zIndex=up?99:50-Math.round(Math.abs(o));c.classList.toggle('ghost',FAN.st==='drag'&&i===FAN.i)});
   if(fi!==FAN.i&&FAN.st==='browse'){FAN.i=fi;fanPv(FAN.ids[fi]);try{tone(1250,.025,'triangle',.05)}catch(e){}}}
 function fanPv(id){const p=$('#fpv');if(!id){p.classList.remove('on');return}
   const ok=(B||CAD)?fanOk(id):validCells(id).length>0,nb=!B&&!CAD&&PICK&&canBoard();
