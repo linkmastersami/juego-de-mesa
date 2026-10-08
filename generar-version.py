@@ -9,7 +9,7 @@ import hashlib, json, os
 RAIZ = os.path.dirname(os.path.abspath(__file__))
 EXT = {'.html', '.png', '.jpg', '.jpeg', '.webp', '.gif', '.svg', '.ico',
        '.mp3', '.ogg', '.m4a', '.wav', '.json'}
-IGNORAR = {'version.json'}
+IGNORAR = {'version.json', 'package.json', 'package-lock.json', 'k02.png'}  # archivos que no son del juego (no se publican en Cloudflare)
 
 archivos = {}
 for carpeta, subs, nombres in os.walk(RAIZ):

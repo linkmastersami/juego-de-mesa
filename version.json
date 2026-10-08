@@ -146,8 +146,7 @@
   "iconos/i-comunidad.webp": "e5ffa3d48a3e",
   "iconos/i-records.webp": "3f192fdbc183",
   "iconos/i-tableros.webp": "aad177dc6e2d",
-  "index.html": "86dfe1b412f5",
-  "k02.png": "0eb551aafe99",
+  "index.html": "cc0aac07f6f9",
   "logo.webp": "c79c21426a47",
   "manifest.json": "81bc7f803d05",
   "musica/batalla.mp3": "292447f839b4",
@@ -156,7 +155,6 @@
   "musica/jefe.mp3": "9a497621265c",
   "musica/menu.mp3": "4c41a474fb19",
   "musica/victoria.mp3": "ee8f2c8a467b",
-  "package.json": "abdc4950432e",
   "personajes/personaje 1/m01.webp": "f131de040483",
   "personajes/personaje 1/m02.webp": "31b1ea1e3993",
   "personajes/personaje 1/m03.webp": "9e90229cbfee",
@@ -241,5 +239,5 @@
   "tableros/t07.webp": "d13add3a6534",
   "tableros/t08.webp": "df272cca3775"
  },
- "version": "1ff3fda94371"
+ "version": "dd796dd6acc1"
 }
