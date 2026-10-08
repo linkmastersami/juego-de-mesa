@@ -745,6 +745,8 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
 #tutq button{display:block;width:100%;border:0;border-radius:14px;padding:12px;margin-top:8px;font:700 1rem Fredoka,sans-serif;cursor:pointer}
 #tutq .y{background:linear-gradient(180deg,#ffe07a,#e0a92a);color:#3a2808}#tutq .n{background:#4a4555;color:var(--ink)}
 .fan .fc.tutc{box-shadow:0 0 0 3px #ffd34d,0 0 18px 4px #ffd34d;z-index:60!important}
+#netw{position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 64px);width:min(92vw,400px);z-index:70;background:#3a1d24f2;border:1px solid #ff8a9a88;border-radius:16px;padding:12px 14px;color:#ffe3e7;font-size:.85rem;line-height:1.3;box-shadow:0 10px 30px #000a;display:flex;flex-direction:column;gap:6px}
+#netw b{color:#ffb3bd}#netw div{display:flex;gap:8px}#netw button{flex:1;border:0;border-radius:10px;padding:8px;font:700 .85rem Fredoka,sans-serif;background:#ff8a9a;color:#2b0a10;cursor:pointer}#netw #netw-x{background:#4a4555;color:var(--ink)}
 </style>
 </head>
 <body>
@@ -3247,6 +3249,15 @@ $('#tutb').addEventListener('click',e=>{if(!TUT)return;if(e.target.closest('.tn'
   if(e.target.closest('#tutb,#tutq'))return;const st=STEPS[TUT.i];if(st&&st.allow&&e.target.closest(st.allow))return;
   e.stopPropagation();e.preventDefault()},true));
 $('#o-tut').addEventListener('click',()=>{hideOpts();if(COOP){alert('El tutorial no está disponible en una partida con amigo.');return}tutStart()});
+
+/* ===== aviso: la red actual no deja llegar al servidor del juego (se queda la versión guardada) ===== */
+async function netProbe(){if(!navigator.onLine||sinNet())return;const t0=Date.now();let err='';
+  try{const c=new AbortController(),to=setTimeout(()=>c.abort(),12000);const r=await fetch('sw.js?p='+Date.now(),{cache:'no-store',signal:c.signal});clearTimeout(to);if(r.ok){const e=$('#netw');if(e)e.remove();return}err='respuesta '+r.status}
+  catch(e){err=e&&e.name==='AbortError'?'la red tardó más de 12 s en responder':'la red bloqueó o cortó la conexión'}
+  let d=$('#netw');if(!d){d=document.createElement('div');d.id='netw';document.body.appendChild(d)}
+  d.innerHTML=`<b>⚠️ Sin conexión con el servidor del juego</b><span>Desde esta red no se pudo buscar la versión nueva (${err}). Estás jugando la versión guardada en tu teléfono.</span><div><button id="netw-r">🔄 Reintentar</button><button id="netw-x">Cerrar</button></div>`;
+  d.querySelector('#netw-r').onclick=()=>location.reload();d.querySelector('#netw-x').onclick=()=>d.remove()}
+setTimeout(netProbe,4000);addEventListener('online',()=>setTimeout(netProbe,2000));
 </script>
 </body>
 </html>
