@@ -2627,13 +2627,13 @@ const b64u=s=>{const r=(s+'='.repeat((4-s.length%4)%4)).replace(/-/g,'+').replac
 async function pushSub(ask){
   if(!('serviceWorker' in navigator)||!('PushManager' in window)||!('Notification' in window))return false;
   if(Notification.permission==='denied')return false;
-  if(Notification.permission!=='granted'){if(!ask)return false;if(await Notification.requestPermission()!=='granted')return false}
+  if(Notification.permission!=='granted'){if(!ask)return false;const pr=await Notification.requestPermission();if(pr!=='granted')throw new Error('perm:'+pr)}
   const reg=await navigator.serviceWorker.ready;let sub=await reg.pushManager.getSubscription();
   /* sin la llave del servidor (Render dormido): se despierta y se pide, esperando hasta ~70 s */
   if(!sub&&!QKEY){for(let k=0;k<7&&!QKEY;k++){try{const c=new AbortController(),to=setTimeout(()=>c.abort(),10000);const r=await fetch(MP_URL+'/quick',{cache:'no-store',signal:c.signal});clearTimeout(to);if(r.ok){const j=await r.json();QKEY=j.key||''}}catch(e){}if(!QKEY)await new Promise(ok=>setTimeout(ok,1000))}}
   if(!sub){if(!QKEY)throw new Error('srv');sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(QKEY)})}
   const r=await fetch(MP_URL+'/push/sub',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({sub:sub.toJSON()})});
-  if(!r.ok)return false;
+  if(!r.ok)throw new Error('servidor '+r.status);
   try{localStorage.setItem('mesa-push','1');localStorage.setItem('mesa-pushep',sub.endpoint)}catch(e){}
   return true}
 function notifUi(){
@@ -2646,9 +2646,9 @@ $('#lob-btn-notif').addEventListener('click',async()=>{
   if(on){try{const reg=await navigator.serviceWorker.ready,sb=await reg.pushManager.getSubscription();if(sb){fetch(MP_URL+'/push/unsub',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({endpoint:sb.endpoint})}).catch(()=>{});await sb.unsubscribe()}}catch(e){}
     try{localStorage.removeItem('mesa-push');localStorage.removeItem('mesa-pushep')}catch(e){}notifUi();return}
   const b0=$('#lob-btn-notif'),t0=b0.textContent;b0.textContent='⏳ Activando avisos…';b0.disabled=true;
-  let ok=false,why='';try{ok=await pushSub(1)}catch(e){why=e&&e.message==='srv'?'srv':'x'}b0.disabled=false;b0.textContent=t0;
+  let ok=false,why='',det='';try{ok=await pushSub(1);if(!ok)det='este navegador no admite avisos'}catch(e){det=(e&&(e.name&&e.name!=='Error'?e.name+': ':'')+(e.message||String(e)))||'?';why=det==='srv'?'srv':/^perm:/.test(det)?'perm':'x'}b0.disabled=false;b0.textContent=t0;
   if(!ok){const den=('Notification' in window)&&Notification.permission==='denied';
-    alert(den?'Las notificaciones están bloqueadas para el juego. Actívalas en Ajustes → Apps → (tu navegador o Link Master Dungeon) → Notificaciones, y vuelve a intentarlo.':why==='srv'?'El servidor de avisos no respondió (puede estar despertando). Espera un minuto e inténtalo de nuevo.':'No se pudieron activar los avisos. Revisa que el navegador permita notificaciones (en iPhone, primero instala el juego en la pantalla de inicio).')}
+    alert(den?'Las notificaciones están bloqueadas para el juego. Actívalas en Ajustes → Apps → (tu navegador o Link Master Dungeon) → Notificaciones, y vuelve a intentarlo.':why==='srv'?'El servidor de avisos no respondió (puede estar despertando). Espera un minuto e inténtalo de nuevo.':why==='perm'?'No se dio el permiso de notificaciones. Toca otra vez y elige «Permitir». Si no aparece la pregunta, actívalas en Ajustes → Apps → Link Master Dungeon → Notificaciones.':'No se pudieron activar los avisos.\n\nDetalle: '+det)}
   notifUi()});
 $('#mp-cancel').addEventListener('click',()=>{mpClose();mpEl.className=''});
 /* salir de la sala; si había una partida en marcha, también al menú */
