@@ -1403,7 +1403,9 @@ function paneFill(i){try{
   if(i===3)plazaRender();
   if(i===4){showTabs();const h=$('#recs').innerHTML;$('#recs').classList.remove('on');$('#pn-tab').innerHTML=h.replace(/<button class="rclose" id="recs-x">Cerrar<\/button>/,'')}
 }catch(e){}}
-function lobPage(i,inst){i=Math.max(0,Math.min(4,i));const ch=i!==LP;LP=i;if(ch&&!inst)try{smp('pestana')}catch(_){}const t=$('#ptrack');if(inst){t.classList.add('drag');requestAnimationFrame(()=>requestAnimationFrame(()=>t.classList.remove('drag')))}
+function lobPage(i,inst){i=Math.max(0,Math.min(4,i));const ch=i!==LP,was=LP;LP=i;
+  /* al salir del Álbum se cierra el libro abierto: al volver se ven otra vez las portadas */
+  if(ch&&was===1&&ALB.b){try{albEnd();$('#alb-view').classList.remove('on')}catch(_){}ALB.b=null;ALB.pg=0;setTimeout(()=>{if(LP!==1&&!ALB.b)try{albRender()}catch(_){}},420)}if(ch&&!inst)try{smp('pestana')}catch(_){}const t=$('#ptrack');if(inst){t.classList.add('drag');requestAnimationFrame(()=>requestAnimationFrame(()=>t.classList.remove('drag')))}
   t.style.transform=`translateX(${-i*20}%)`;document.querySelectorAll('#lob-nav button').forEach(b=>b.classList.toggle('on',+b.dataset.go===i));
   paneFill(i)}
 $('#lob-nav').addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(b)lobPage(+b.dataset.go)});
