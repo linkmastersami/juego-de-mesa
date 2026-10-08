@@ -110,6 +110,17 @@ const server = http.createServer((req, res) => {
       res.end(JSON.stringify({ r: 'ok' }));
     });
   }
+  /* el jugador borra su perfil: se libera su nombre */
+  if (req.method === 'POST' && url === '/name/delete') {
+    return readBody(req, b => {
+      const n = b && String(b.n || '').toUpperCase(), k = b && String(b.k || '');
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      const cur = okName(n) && NAMES.get(n);
+      if (!cur || cur.h !== hashK(k)) return res.end(JSON.stringify({ r: 'bad' }));
+      NAMES.delete(n); PLAZA.delete(n); saveNames();
+      res.end(JSON.stringify({ r: 'ok' }));
+    });
+  }
   /* plaza de la Comunidad: cada teléfono avisa que está ahí (con su guerrero) y recibe a los demás que están ahora */
   if (req.method === 'POST' && url === '/plaza') {
     return readBody(req, b => {

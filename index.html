@@ -473,6 +473,15 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
 .oanim input{width:100%;accent-color:var(--gold)}.oal{display:flex;justify-content:space-between;font:600 .8rem Fredoka,sans-serif;color:var(--mute)}.oal span.on{color:var(--gold)}
 .orow{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#ffffff0d;border-radius:12px;padding:10px 12px;font:600 .95rem Fredoka,sans-serif;cursor:pointer}
 .sw{position:relative;width:50px;height:28px;flex:none}.sw input{opacity:0;position:absolute;inset:0;margin:0}.sw i{position:absolute;inset:0;border-radius:99px;background:#4a4555;transition:background .2s}.sw i::after{content:'';position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:transform .2s}.sw input:checked+i{background:#2fae5a}.sw input:checked+i::after{transform:translateX(22px)}
+.obtn.odel{background:#5a1e2a;color:#ffd0d6;border:1px solid #ff3b5566}
+#delp{position:fixed;inset:0;z-index:80;background:#0d0a14e6;display:none;align-items:center;justify-content:center;padding:20px}
+#delp.on{display:flex}
+#delp .bx{width:min(100%,360px);background:#2f2b37;border-radius:20px;padding:20px;text-align:center;box-shadow:0 10px 40px #000a;border:2px solid #ff3b5577}
+#delp h3{margin:0 0 8px;font:800 1.25rem Fredoka,sans-serif;color:#ff8a9a}
+#delp p{margin:0 0 10px;color:var(--ink);font-size:.95rem;line-height:1.35}
+#delp ul{text-align:left;margin:0 0 12px;padding-left:22px;color:#cfc8da;font-size:.88rem}
+#delp button{display:block;width:100%;border:0;border-radius:14px;padding:12px;margin-top:8px;font:700 1rem Fredoka,sans-serif;cursor:pointer}
+#delp .y{background:#d8314a;color:#fff}#delp .y:disabled{opacity:.6}#delp .n{background:#4a4555;color:var(--ink)}
 .obtn{border:0;border-radius:14px;background:#4a4555;color:var(--ink);font:700 .98rem Fredoka,sans-serif;padding:12px;text-align:left;cursor:pointer}
 .obtn:disabled{opacity:.6;cursor:default}
 #opts .rclose{border:0;border-radius:14px;background:#4a4555;color:var(--ink);font:700 1.05rem Fredoka,sans-serif;padding:12px;margin-top:4px}
@@ -796,6 +805,8 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
   <button class="obtn" id="o-off"></button>
   <button class="obtn" id="o-notif"></button>
   <button class="obtn" id="o-inst"></button>
+  <h3>Perfil</h3>
+  <button class="obtn odel" id="o-del">🗑️ Eliminar mi perfil por completo</button>
   <button class="rclose" id="opts-x">Cerrar</button>
 </div></div>
 <div id="bt"></div>
@@ -2929,6 +2940,22 @@ function pzPick(){let d=$('#pz-pick');if(!d){d=document.createElement('div');d.i
   d.onclick=e=>{const b=e.target.closest('[data-av]');if(b){AV=b.dataset.av;try{localStorage.setItem('mesa-av',AV)}catch(_){}try{SFX.pop()}catch(_){}d.classList.remove('on');pzMe();PZ.poll=0;pzPoll();return}
     if(e.target.closest('.x')){d.classList.remove('on');if(!AV){AV='guerrero';try{localStorage.setItem('mesa-av',AV)}catch(_){}}}};
   d.classList.add('on')}
+
+/* ===== eliminar el perfil por completo: nombre, progreso, logros, álbum, partida guardada… y empezar como jugador nuevo ===== */
+$('#o-del').addEventListener('click',()=>{let d=$('#delp');if(!d){d=document.createElement('div');d.id='delp';document.body.appendChild(d)}let step=0;
+  const paint=()=>{d.innerHTML=`<div class="bx"><h3>${step?'⚠️ ¿Completamente seguro?':'🗑️ Eliminar mi perfil'}</h3>
+    ${step?`<p>Esto <b>no se puede deshacer</b>. Tu perfil se borrará para siempre${YO?` y el nombre <b style="color:var(--gold)">${YO.n}</b> quedará libre para otro jugador`:''}.</p>`
+      :`<p>Se borrará todo lo de este teléfono y el juego empezará como si fueras alguien nuevo:</p><ul><li>Tu nombre de aventurero${YO?` (<b>${YO.n}</b>)`:''}</li><li>Récords, medallas y logros</li><li>Álbum de estampas</li><li>Tableros desbloqueados y tu guerrero</li><li>La partida guardada</li></ul>`}
+    <button class="y">${step?'Sí, borrar todo':'Continuar'}</button><button class="n">Cancelar</button></div>`};
+  paint();d.classList.add('on');
+  d.onclick=async e=>{if(e.target.closest('.n')||e.target===d){d.classList.remove('on');return}
+    const y=e.target.closest('.y');if(!y)return;if(!step){step=1;paint();return}
+    y.disabled=true;y.textContent='Borrando…';
+    try{if(YO&&navigator.onLine){const c=new AbortController(),t=setTimeout(()=>c.abort(),5000);await fetch(MP_URL+'/name/delete',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({n:YO.n,k:YO.k}),signal:c.signal}).catch(()=>{});clearTimeout(t)}}catch(_){}
+    try{if(MP.code)mpClose()}catch(_){}
+    /* se conservan solo los ajustes del teléfono (volumen, animaciones, juego guardado sin conexión, avisos) */
+    try{['mesa-stats','mesa-yo','mesa-juego','mesa-pj','mesa-tab','mesa-av'].forEach(k=>localStorage.removeItem(k));sessionStorage.clear()}catch(_){}
+    location.reload()}});
 </script>
 </body>
 </html>
