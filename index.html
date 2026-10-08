@@ -90,7 +90,7 @@ button{font-family:inherit}
 .fin.one{animation:fxIn .5s cubic-bezier(.2,.9,.3,1.2) both,fxOut .3s ease-in 1s forwards}
 @keyframes fxIn{from{transform:translateY(60vh) scale(.3) rotate(-12deg);opacity:0}to{transform:none;opacity:1}}
 @keyframes fxOut{to{opacity:0;transform:scale(.85) translateY(-30px)}}
-.stk{position:relative;width:min(38vw,170px);aspect-ratio:696/1015}
+#fxl .stk{position:relative;width:min(38vw,170px);aspect-ratio:696/1015;height:auto;align-self:auto;cursor:auto;transform:none;box-shadow:none;border-radius:0}
 .bk{position:absolute;inset:0;border-radius:10px;border:0;background:#0b1730 url(cartas/reverso.webp) center/100% 100% no-repeat;box-shadow:0 8px 20px #0008;transition:opacity .3s}
 .bk.gone{animation:fxGone .6s ease-in forwards}
 @keyframes fxGone{to{transform:translate(var(--dx),-45vh) rotate(var(--r)) scale(.5);opacity:0;filter:brightness(2.2) saturate(0)}}
@@ -994,7 +994,7 @@ function render(){
   {const pfxH=S.personaje||'m';$('#hand').innerHTML=S.hand.length?S.hand.map((id,i)=>`<div data-h="${i}"${HSP(pfxH,id)?' class="blink"':''}>${card(id)}</div>`).join(''):'';
   if(!S.hand.length)$('#hand').innerHTML='<div class="empt" style="grid-column:1/-1;aspect-ratio:auto">Sin cartas en la mano</div>';
   try{fanRender()}catch(e){}}
-  {const p=S.personaje||'m';$('#m19').innerHTML=card(p+'19');$('#m19').dataset.pj=p+'19';$('#m20').innerHTML=card(p+'20',S.hab?'':'off');$('#m20').dataset.hab=1;}
+  {const p=S.personaje||'m',a=$('#m19'),h=$('#m20'),k=p+(S.hab?1:0)+CANIM;if(a._k!==k){a._k=k;a.innerHTML=card(p+'19');a.dataset.pj=p+'19';h.innerHTML=card(p+'20',S.hab?'':'off');h.dataset.hab=1}}
   $('#dM').innerHTML=`<span>Personaje<b>${S.dM.length}</b></span>`;
   $('#dK').innerHTML=`<span>Agotamiento<b>${S.dK.length}</b></span>`;{const nk=!!(PICK&&!S.hand.length&&S.dK.length&&!S.over);$('#dK').classList.toggle('blink',nk);$('#tSt').classList.toggle('blink',nk)}
   $('#dC').innerHTML=`<span>Calabozo<b>${S.dC.length}</b></span>`;
@@ -1108,7 +1108,7 @@ async function habFx(on,idp,amigo){try{const id=idp||(S.personaje||'m')+'20',W=i
 }catch(e){const t=document.querySelector('#m20');if(t)t.style.opacity=''}}
 const jDraw=(ids,toHand,spec)=>async L=>{
   /* cualquier robo: las cartas entran una por una (pequeñas, en cuadrícula), se quedan un momento, se juntan y vuelan juntas a la mano */
-  const n=ids.length,cols=Math.min(n,3),rows=Math.ceil(n/3),cw=Math.max(40,Math.floor(Math.min((Math.min(innerWidth-32,420)-16)/3,((innerHeight-170-(rows-1)*8)/rows)/1.458)));
+  const n=ids.length,cols=Math.min(n,3),rows=Math.ceil(n/3),cw=Math.max(40,Math.floor(Math.min((Math.min(innerWidth-32,420)-(cols-1)*8)/cols,innerWidth*.62,300,((innerHeight-170-(rows-1)*8)/rows)/1.458)));
   L.innerHTML=`<div class="fxt">${spec?(n===1?'Tu amigo roba una carta':`Tu amigo roba ${n} cartas`):(n===1?'Robas una carta':`Robas ${n} cartas`)}</div><div class="grid fxg" style="grid-template-columns:repeat(${cols},1fr);width:${cols*cw+(cols-1)*8}px;max-width:100%">${ids.map((id,i)=>`<div class="fxc fin" style="animation-delay:${i*260}ms">${card(id)}</div>`).join('')}</div>`;
   ids.forEach((_,i)=>setTimeout(()=>SFX.draw(),500+i*260));
   await wait(500+(n-1)*260+1500);
@@ -1820,6 +1820,9 @@ function validCells(id){
   return out}
 function fanRender(){const f=$('#tHand');if(!f)return;if(FAN.st){FAN.dirty=1;return}dockVar();
   const L=fanList(),pfx=S.personaje||'m';FAN.ids=L;
+  /* si la mano no cambió, no se vuelven a crear las cartas (evita que parpadeen con cada efecto) */
+  const key=L.map(id=>id+((B||CAD)&&!fanOk(id)?'d':'')+(!B&&!CAD&&HSP(pfx,id)?'h':'')).join(',')+'|'+(!S.hand.length&&S.dK.length&&PICK?1:0);
+  if(f._k===key&&f.querySelector('.fc,.emp')){fanLay();const h=$('#m20');if(h)h.classList.toggle('hdrag',!!(B&&B.act===p20()));return}f._k=key;
   f.innerHTML=L.length?L.map((id,i)=>`<div class="fc${(B||CAD)&&!fanOk(id)?' dim':''}${!B&&!CAD&&HSP(pfx,id)?' hsp':''}" data-fi="${i}">${card(id,'still')}</div>`).join('')
     :`<div class="emp">${S.hand.length?'':'Sin cartas en la mano'}${!S.hand.length&&S.dK.length&&PICK?'<br>Roba del mazo de Agotamiento en <b>Estado</b>':''}</div>`;
   fanLay();
