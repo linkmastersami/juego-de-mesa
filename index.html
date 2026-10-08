@@ -846,7 +846,7 @@ const SFX={
 {const SFXG={tick:3.7,pop:2.1,charge:2.5,draw:2.7,swoosh:1.8,place:4.3,shuffle:2.3,fire:1.9,heal:1.8,boss:1.3,thud:1.9};
  Object.keys(SFXG).forEach(k=>{const f=SFX[k];SFX[k]=(...a)=>{SK=SFXG[k];try{return f(...a)}finally{SK=1}}})}
 /* sonidos grabados (carpeta sonidos/): se cargan tras el primer toque; si aún no están, suena el tono de respaldo */
-const SMP={},SMPN=['carta','espada','dados','pagina','libro','estampa','logro','amigo','invitacion','pestana'],
+const SMP={},SMPN=['carta','espada','pagina','libro','estampa','logro','amigo','invitacion','pestana'],
   SMPG={carta:1.5,espada:.8,dados:.8,pagina:.9,libro:.9,estampa:.3,logro:.75,amigo:.8,invitacion:.7,pestana:1.2};
 function smpLoad(n){if(n in SMP)return;SMP[n]=null;fetch('sonidos/'+n+'.mp3').then(r=>{if(!r.ok)throw 0;return r.arrayBuffer()}).then(b=>new Promise((ok,ko)=>ac().decodeAudioData(b,ok,ko))).then(b=>{SMP[n]=b}).catch(()=>{delete SMP[n]})}
 function smp(n,fb,v=1){if(!SND)return;SNDT=performance.now();const b=SMP[n];if(!b){smpLoad(n);if(fb)fb();return}
@@ -1572,7 +1572,7 @@ function showRes(color){
 }
 showRes();
 function roll(color,cb,faces,only){
-  try{smp('dados')}catch(e){}btn.disabled=true;res.innerHTML='';hits.textContent='';
+  btn.disabled=true;res.innerHTML='';hits.textContent='';
   const s=dice[0].slot.offsetWidth,dur=2000;
   const anims=dice.map((d,i)=>{
     if(only!==undefined&&i!==only)return Promise.resolve();
