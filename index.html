@@ -752,6 +752,25 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
 #perfd h3{margin:0 0 8px;font:800 1.25rem Fredoka,sans-serif;color:var(--gold)}#perfd p{margin:0 0 10px;color:var(--ink);font-size:.95rem;line-height:1.35}
 #perfd button{display:block;width:100%;border:0;border-radius:14px;padding:12px;margin-top:8px;font:700 1rem Fredoka,sans-serif;cursor:pointer}
 #perfd .y{background:linear-gradient(180deg,#ffe07a,#e0a92a);color:#3a2808}#perfd .y:disabled{opacity:.6}#perfd .n{background:#4a4555;color:var(--ink)}
+
+.pzem{display:flex;gap:6px;overflow-x:auto;width:100%;max-width:520px;padding:4px 2px;scrollbar-width:none}.pzem::-webkit-scrollbar{display:none}
+.pzem button{flex:none;border:0;border-radius:14px;background:#0d0a14c4;color:#fff;font:700 .9rem Fredoka,sans-serif;padding:7px 11px;cursor:pointer;border:1px solid #ffffff22}
+.pzb{display:none;margin-left:5px;background:#ff3b55;color:#fff;border-radius:99px;padding:0 6px;font-size:.75rem}
+.pz .w .bub{position:absolute;bottom:calc(100% + 2px);left:50%;transform:translateX(-50%) scale(.4);opacity:0;background:#fff;color:#2b2208;border-radius:14px;padding:3px 9px;font:700 .85rem Fredoka,sans-serif;white-space:nowrap;box-shadow:0 3px 8px #0008;transition:opacity .2s,transform .25s cubic-bezier(.2,.9,.3,1.4)}
+.pz .w .bub.on{opacity:1;transform:translateX(-50%) scale(1)}
+.pz .w .bub::after{content:'';position:absolute;left:50%;bottom:-5px;margin-left:-5px;border:5px solid transparent;border-top-color:#fff;border-bottom:0}
+#amgd{position:fixed;inset:0;z-index:90;background:#0d0a14e6;display:none;align-items:center;justify-content:center;padding:16px}#amgd.on{display:flex}
+#amgd .bx{width:min(100%,380px);max-height:86dvh;overflow-y:auto;background:#2f2b37;border-radius:20px;padding:18px;text-align:center;box-shadow:0 10px 40px #000a;border:2px solid #ffd34d55}
+#amgd h3{margin:0 0 8px;font:800 1.25rem Fredoka,sans-serif;color:var(--gold)}#amgd p{margin:0 0 10px;color:var(--ink)}
+#amgd .av{height:110px;display:block;margin:0 auto 4px;filter:drop-shadow(0 6px 8px #000a)}
+#amgd .sec{text-align:left;font:700 .8rem Fredoka,sans-serif;color:#cfc8da;margin:12px 0 6px;text-transform:uppercase;letter-spacing:.05em}
+#amgd .fr{display:flex;align-items:center;gap:8px;background:#1d1a24;border-radius:12px;padding:6px 8px;margin-bottom:6px;text-align:left}
+#amgd .fr img{width:36px;height:36px;object-fit:contain}#amgd .fr b{flex:1;color:#fff;font:700 .95rem Fredoka,sans-serif;display:flex;align-items:center;gap:6px}
+#amgd .fr span{display:flex;gap:6px}#amgd .fr input{flex:1;min-width:0;background:#0d0a14;border:1px solid #ffffff33;border-radius:10px;color:#fff;padding:8px;font:700 1rem Fredoka,sans-serif;text-transform:uppercase}
+#amgd .dot{width:9px;height:9px;border-radius:50%;background:#6b6575;display:inline-block}#amgd .dot.on{background:#3ddc84;box-shadow:0 0 6px #3ddc84}
+#amgd .fr button{border:0;border-radius:10px;padding:7px 10px;font:700 .85rem Fredoka,sans-serif;cursor:pointer}#amgd .ok{background:var(--gold);color:#2b2208}#amgd .no{background:#4a4555;color:var(--ink)}
+#amgd .y,#amgd .n{display:block;width:100%;border:0;border-radius:14px;padding:12px;margin-top:8px;font:700 1rem Fredoka,sans-serif;cursor:pointer}
+#amgd .y{background:linear-gradient(180deg,#ffe07a,#e0a92a);color:#3a2808}#amgd .n{background:#4a4555;color:var(--ink)}
 </style>
 </head>
 <body>
@@ -3106,10 +3125,14 @@ const pzOn=()=>{try{return lobbyOn()&&LP===3&&!document.hidden}catch(e){return f
 function plazaRender(){const P=$('#pn-com');
   if(!PZ.el||!P.contains(PZ.el)){
     P.innerHTML=`<h2 class="ph">🛡️ Comunidad</h2><div class="pz" id="pz"></div>
-      <div class="pzbar"><span class="on" id="pz-n">🟢 En la plaza</span><button id="pz-av">🧙 Cambiar guerrero</button></div>
-      <p class="pzsoon">Toca el suelo para caminar · Muy pronto: amigos e invitaciones para jugar</p>`;
+      <div class="pzem" id="pz-em">${PZEM.map((e,i)=>`<button data-em="${i}">${e}</button>`).join('')}</div>
+      <div class="pzbar"><span class="on" id="pz-n">🟢 En la plaza</span><button id="pz-am">👥 Amigos<b class="pzb" id="pz-amb"></b></button><button id="pz-av" class="gh">🧙 Guerrero</button></div>
+      <p class="pzsoon">Toca el suelo para caminar · toca a un aventurero para agregarlo o invitarlo</p>`;
+    $('#pz-am').onclick=()=>amgPanel();
+    $('#pz-em').onclick=e=>{const b=e.target.closest('[data-em]');if(!b)return;const t=PZEM[+b.dataset.em];const me=PZ.w.get('@me');if(me)pzBub(me,t);PZ.ems=t;PZ.poll=0;pzPoll();try{SFX.pop()}catch(_){}};
     PZ.el=$('#pz');PZ.w.forEach(w=>w.el.remove());PZ.w.clear();
     PZ.el.addEventListener('click',e=>{const me=PZ.w.get('@me');if(!me)return;const r=PZ.el.getBoundingClientRect();
+      {let best=null,bd=1e9;PZ.w.forEach(w=>{if(w.id==='@me')return;const q=w.b.getBoundingClientRect(),cx=q.left+q.width/2;if(e.clientX>q.left-10&&e.clientX<q.right+10&&e.clientY>q.top-10&&e.clientY<q.bottom+6){const d=Math.abs(e.clientX-cx);if(d<bd){bd=d;best=w}}});if(best){amgCard(best.n,best.a);return}}
       const x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;me.tx=Math.min(.94,Math.max(.06,x));me.ty=Math.min(.97,Math.max(.5,y));me.wt=0;
       const t=document.createElement('i');t.className='tgt';t.style.left=me.tx*100+'%';t.style.top=me.ty*100+'%';PZ.el.appendChild(t);setTimeout(()=>t.remove(),700)});
     $('#pz-av').onclick=()=>pzPick();}
@@ -3138,15 +3161,17 @@ function pzLoop(){if(PZ.raf)return;PZ.last=performance.now();
     PZ.raf=requestAnimationFrame(f)};PZ.raf=requestAnimationFrame(f)}
 function pzCount(){const e=$('#pz-n');if(!e)return;
   e.textContent=!YO?'📜 Registra tu nombre para ver a los demás':sinNet()||!navigator.onLine?'📴 Sin conexión':PZ.total<=1?'🟢 Solo tú en la plaza ahora':`🟢 ${PZ.total} aventureros en la plaza`}
-async function pzPoll(){if(!pzOn()||!YO||!navigator.onLine||sinNet())return pzCount();if(Date.now()-PZ.poll<7000)return;PZ.poll=Date.now();
+async function pzPoll(){if(!pzOn()||!YO||!navigator.onLine||sinNet())return pzCount();if(Date.now()-PZ.poll<4000)return;PZ.poll=Date.now();
   try{const c=new AbortController(),to=setTimeout(()=>c.abort(),8000);
-    const r=await fetch(MP_URL+'/plaza',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({n:YO.n,k:YO.k,a:AV||'guerrero'}),signal:c.signal});clearTimeout(to);
+    const r=await fetch(MP_URL+'/plaza',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({n:YO.n,k:YO.k,a:AV||'guerrero',...(PZ.ems?{e:PZ.ems}:{})}),signal:c.signal});clearTimeout(to);PZ.ems=null;
     const j=await r.json();if(!j||j.r!=='ok'||!PZ.el)return;PZ.total=j.total||1;
     const seen=new Set(['@me']);(j.p||[]).forEach(o=>{if(!AVN[o.a])o.a='guerrero';const id='u:'+o.n;seen.add(id);const w=PZ.w.get(id);
-      if(w&&w.a!==o.a){w.el.remove();PZ.w.delete(id)}if(!PZ.w.has(id))pzAdd(id,o.n,o.a,0)});
+      if(w&&w.a!==o.a){w.el.remove();PZ.w.delete(id)}if(!PZ.w.has(id))pzAdd(id,o.n,o.a,0);
+      const w2=PZ.w.get(id);if(w2&&o.e&&o.et&&o.et!==w2.et){w2.et=o.et;pzBub(w2,o.e)}});
     PZ.w.forEach((w,id)=>{if(!seen.has(id)){PZ.w.delete(id);w.el.classList.add('out');setTimeout(()=>w.el.remove(),550)}});
   }catch(e){}pzCount()}
 setInterval(()=>{if(pzOn()){pzPoll();pzLoop()}},2000);
+function pzBub(w,t){let b=w.el.querySelector('.bub');if(!b){b=document.createElement('span');b.className='bub';w.b.prepend(b)}b.textContent=t;b.classList.remove('on');void b.offsetWidth;b.classList.add('on');clearTimeout(b._t);b._t=setTimeout(()=>b.classList.remove('on'),4000)}
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&YO&&PZ.poll&&navigator.onLine)try{navigator.sendBeacon&&navigator.sendBeacon(MP_URL+'/plaza',new Blob([JSON.stringify({n:YO.n,k:YO.k,bye:1})],{type:'text/plain'}))}catch(e){}});
 function pzPick(){let d=$('#pz-pick');if(!d){d=document.createElement('div');d.id='pz-pick';document.body.appendChild(d)}
   d.innerHTML=`<h3>Elige tu guerrero</h3><p style="margin:0;color:#cfc8da;text-align:center;font-size:.9rem">Así te verán los demás en la plaza</p>
@@ -3328,6 +3353,57 @@ function perfRecibir(desdeReg){const d=perfDlg(`<h3>🔄 Traer mi perfil</h3><p>
 $('#o-perf').addEventListener('click',()=>{hideOpts();perfDlg(`<h3>🔄 Pasar mi perfil</h3><p>Para llevar tu nombre, récords, medallas, álbum y partida guardada a la otra dirección del juego (GitHub o Cloudflare).</p>
   <button class="y" id="perf-e">📤 Enviar desde aquí</button><button class="y" id="perf-r" style="background:#4a4555;color:var(--ink)">📥 Recibir aquí</button><button class="n">Cancelar</button>`);
   $('#perf-e').onclick=perfEnviar;$('#perf-r').onclick=()=>perfRecibir(0)});
+
+/* ===== AMIGOS: solicitudes, lista, invitaciones a jugar ===== */
+const PZEM=['👋','😄','😮','😢','🔥','⚔️','¡Hola!','¿Jugamos?','¡GG!','¡Gracias!'];
+const AMG={f:[],rq:[],inv:[],t:0,seen:new Set(),pend:new Set()};
+async function amgPost(path,extra){if(!YO||!navigator.onLine||sinNet())return null;let ep='';try{ep=localStorage.getItem('mesa-pushep')||''}catch(e){}
+  try{const c=new AbortController(),to=setTimeout(()=>c.abort(),12000);const r=await fetch(MP_URL+path,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({n:YO.n,k:YO.k,ep,...(extra||{})}),signal:c.signal});clearTimeout(to);return r.ok?await r.json():null}catch(e){return null}}
+async function amgSync(){const j=await amgPost('/amigos');if(!j||j.r!=='ok')return;AMG.f=j.f||[];AMG.rq=j.rq||[];AMG.inv=j.inv||[];AMG.t=Date.now();amgDot();
+  if($('#amgd')&&$('#amgd').classList.contains('on')&&$('#amgd').dataset.k==='panel')amgPanel(1);
+  for(const v of AMG.inv){const k=v.de+':'+v.c;if(AMG.seen.has(k))continue;AMG.seen.add(k);amgInvite(v);break}}
+function amgDot(){const n=AMG.rq.length+AMG.inv.length;const b=$('#pz-amb');if(b){b.textContent=n||'';b.style.display=n?'':'none'}
+  const nav=document.querySelector('#lob-nav [data-go="3"]');if(nav){let d=nav.querySelector('.ndot');if(!d){d=document.createElement('b');d.className='ndot';nav.appendChild(d)}d.classList.toggle('on',n>0)}}
+setInterval(()=>{if(YO&&!document.hidden)amgSync()},10000);setTimeout(amgSync,3000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)amgSync()});
+try{navigator.serviceWorker.addEventListener('message',e=>{const d=e.data||{};if(d.t==='amigos'){amgSync();if(d.ver){try{lobPage(3)}catch(_){}setTimeout(()=>amgPanel(),400)}}if(d.t==='sala'&&d.c)amgJoin(d.c)})}catch(e){}
+if(new URLSearchParams(location.search).get('com'))setTimeout(()=>{try{lobPage(3)}catch(e){}amgPanel()},1500);
+function amgDlg(h,k){let d=$('#amgd');if(!d){d=document.createElement('div');d.id='amgd';document.body.appendChild(d)}d.dataset.k=k||'';
+  d.innerHTML=`<div class="bx">${h}</div>`;d.classList.add('on');d.onclick=e=>{if(e.target===d||e.target.closest('.n'))d.classList.remove('on')};return d}
+function amgCard(n,a){const amigo=AMG.f.some(x=>x.n===n),pide=AMG.rq.includes(n),env=AMG.pend.has(n);
+  const d=amgDlg(`<img class="av" src="guerreros/${a||'guerrero'}.webp" alt=""><h3>${n}</h3>
+    ${amigo?'<p>🤝 Son amigos</p><button class="y" data-inv="'+n+'">🎮 Invitar a jugar</button>':pide?'<p>Te mandó solicitud de amistad</p><button class="y" data-ok="'+n+'">✅ Aceptar</button>':env?'<p>⏳ Solicitud enviada</p>':`<button class="y" data-add="${n}">➕ Agregar amigo</button>`}
+    <button class="n">Cerrar</button>`);amgBind(d)}
+function amgPanel(keep){const on=AMG.f.filter(x=>x.on).length;
+  const d=amgDlg(`<h3>👥 Amigos</h3>
+    ${AMG.rq.length?`<div class="sec">Solicitudes</div>${AMG.rq.map(n=>`<div class="fr"><b>${n}</b><span><button class="ok" data-ok="${n}">Aceptar</button><button class="no" data-no="${n}">✕</button></span></div>`).join('')}`:''}
+    <div class="sec">Tus amigos ${AMG.f.length?`· ${on} conectado${on===1?'':'s'}`:''}</div>
+    ${AMG.f.length?AMG.f.map(x=>`<div class="fr"><img src="guerreros/${x.a}.webp" alt=""><b><i class="dot${x.on?' on':''}"></i>${x.n}</b><span><button class="ok" data-inv="${x.n}">🎮 Invitar</button><button class="no" data-del="${x.n}">✕</button></span></div>`).join('')
+      :'<p style="opacity:.8">Aún no tienes amigos. Toca a un aventurero en la plaza para agregarlo.</p>'}
+    <div class="sec">Agregar por nombre</div><div class="fr"><input id="amg-in" maxlength="8" autocapitalize="characters" autocomplete="off" placeholder="NOMBRE"><span><button class="ok" id="amg-add">➕</button></span></div>
+    <button class="n">Cerrar</button>`,'panel');amgBind(d);
+  const add=$('#amg-add');if(add)add.onclick=()=>{const v=($('#amg-in').value||'').toUpperCase().replace(/[^A-Z0-9Ñ]/g,'');if(v.length>=3)amgAdd(v)}}
+function amgBind(d){d.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>amgAdd(b.dataset.add));
+  d.querySelectorAll('[data-ok]').forEach(b=>b.onclick=async()=>{b.disabled=true;await amgPost('/amigos/resp',{a:b.dataset.ok,ok:1});try{SFX.win()}catch(_){}await amgSync();amgPanel()});
+  d.querySelectorAll('[data-no]').forEach(b=>b.onclick=async()=>{b.disabled=true;await amgPost('/amigos/resp',{a:b.dataset.no,ok:0});await amgSync();amgPanel()});
+  d.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{if(!confirm('¿Quitar a '+b.dataset.del+' de tus amigos?'))return;await amgPost('/amigos/quitar',{a:b.dataset.del});await amgSync();amgPanel()});
+  d.querySelectorAll('[data-inv]').forEach(b=>b.onclick=()=>amgInvitar(b.dataset.inv))}
+async function amgAdd(n){if(YO&&n===YO.n)return;const j=await amgPost('/amigos/pedir',{a:n});
+  const msg=!j?'Sin conexión con el servidor.':j.r==='none'?`No existe el aventurero ${n}.`:j.r==='ya'?`${n} ya es tu amigo.`:j.r==='amigos'?`🤝 ¡${n} y tú ahora son amigos!`:j.r==='full'?`${n} tiene demasiadas solicitudes.`:`✅ Solicitud enviada a ${n}.`;
+  if(j&&j.r==='ok')AMG.pend.add(n);try{cToast(msg)}catch(e){alert(msg)}const wasPanel=$('#amgd').dataset.k==='panel';await amgSync();if(wasPanel)amgPanel();else $('#amgd').classList.remove('on')}
+/* invitar: se crea la sala y se le manda el código al amigo (le llega aviso "te está esperando") */
+async function amgInvitar(n){$('#amgd').classList.remove('on');if(sinNet()){alert('Para invitar necesitas jugar con Internet.');return}
+  if(!lobbyOn()){alert('Termina o sal de la partida para invitar.');return}
+  if(!MP.code||MP.role!=='host')mpStart();
+  const t0=Date.now();while(!(MP.code&&MP.role==='host')&&Date.now()-t0<90000&&!MP.cancel)await wait2(500);
+  if(!MP.code)return;const j=await amgPost('/amigos/invitar',{a:n,c:MP.code});
+  try{cToast(j&&j.r==='ok'?`📨 Invitación enviada a ${n}. Espera en la sala…`:`No se pudo invitar a ${n}.`)}catch(e){}}
+function amgInvite(v){if(COOP||MP.code)return;
+  const d=amgDlg(`<div style="font-size:3rem">⚔️</div><h3>${v.de} te invita a jugar</h3><p>Tu amigo te está esperando en su sala.</p>
+    <button class="y" id="amg-j">🎮 Unirme</button><button class="n" id="amg-x">Ahora no</button>`);try{coopDing()}catch(e){}
+  $('#amg-j').onclick=()=>{d.classList.remove('on');amgPost('/amigos/noinv',{a:v.de});amgJoin(v.c)};
+  $('#amg-x').onclick=()=>{amgPost('/amigos/noinv',{a:v.de})}}
+function amgJoin(c){if(COOP)return;if(!lobbyOn()){try{toMenu(0)}catch(e){}}setTimeout(()=>mpStart(c),300)}
 </script>
 </body>
 </html>

@@ -144,22 +144,22 @@ self.addEventListener('push', e => {
   e.waitUntil((async () => {
     const cl = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
     /* si el juego está abierto y a la vista, no hace falta la notificación (la propia pantalla ya avisa) */
-    if (d.kind === 'quick' && cl.some(c => c.visibilityState === 'visible')) return;
+    if ((d.kind === 'quick' || d.kind === 'inv' || d.kind === 'amigo') && cl.some(c => c.visibilityState === 'visible')) { for (const c of cl) c.postMessage({ t: 'amigos' }); return; }
     try { if (self.navigator && self.navigator.setAppBadge) await self.navigator.setAppBadge(d.badge || 1); } catch (_) {}
     await self.registration.showNotification(d.title || 'Link Master Dungeon', {
       body: d.body || '', icon: 'icon-192.png', badge: 'icon-192.png', tag: d.kind || 'lm', renotify: true,
-      data: { kind: d.kind || '' }
+      data: { kind: d.kind || '', sala: d.sala || '' }
     });
   })());
 });
 self.addEventListener('notificationclick', e => {
   e.notification.close();
-  const kind = (e.notification.data && e.notification.data.kind) || '';
+  const kind = (e.notification.data && e.notification.data.kind) || '', sala = (e.notification.data && e.notification.data.sala) || '';
   e.waitUntil((async () => {
     try { if (self.navigator && self.navigator.clearAppBadge) await self.navigator.clearAppBadge(); } catch (_) {}
     const cl = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
     const hit = cl.find(c => c.url.startsWith(BASE)) || cl[0];
-    if (hit) { try { await hit.focus(); } catch (_) {} if (kind === 'quick') hit.postMessage({ t: 'quick' }); return; }
-    await self.clients.openWindow(BASE + (kind === 'quick' ? '?rapida=1' : ''));
+    if (hit) { try { await hit.focus(); } catch (_) {} if (kind === 'quick') hit.postMessage({ t: 'quick' }); if (kind === 'inv' && sala) hit.postMessage({ t: 'sala', c: sala }); if (kind === 'amigo') hit.postMessage({ t: 'amigos', ver: 1 }); return; }
+    await self.clients.openWindow(BASE + (kind === 'quick' ? '?rapida=1' : kind === 'inv' && sala ? '?sala=' + sala : kind === 'amigo' ? '?com=1' : ''));
   })());
 });

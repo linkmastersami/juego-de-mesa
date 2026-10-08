@@ -76,6 +76,19 @@ async function pushAll(payload, skip) {
 const PERF = new Map(); /* código -> { d: perfil, t } (solo en memoria, 30 min) */
 const PLAZA = new Map(); /* NOMBRE -> { a: guerrero, t: última vez visto } (solo en memoria) */
 const AVS = ['arquera', 'barbaro', 'guerrero', 'mago', 'ninja', 'paladin'];
+/* aviso a un jugador en particular (todos sus teléfonos registrados) */
+async function pushTo(name, payload) {
+  const u = NAMES.get(name); if (!pushOn || !u || !Array.isArray(u.ep)) return 0;
+  let n = 0;
+  for (const ep of u.ep.slice()) {
+    const s = SUBS.get(ep); if (!s) { u.ep = u.ep.filter(x => x !== ep); continue; }
+    try { await webpush.sendNotification(s, JSON.stringify(payload), { TTL: 600 }); n++; }
+    catch (e) { if (e && (e.statusCode === 404 || e.statusCode === 410)) { SUBS.delete(ep); u.ep = u.ep.filter(x => x !== ep); saveSubs(); } }
+  }
+  return n;
+}
+const LAST = new Map(); /* NOMBRE -> última vez que abrió el juego (para "conectado") */
+const INV = new Map();  /* NOMBRE invitado -> [{ de, c, t }] */
 let lastQuickPush = 0, lastUpdPush = 0;
 const readBody = (req, cb, max = 4096) => { let b = ''; req.on('data', d => { b += d; if (b.length > max) req.destroy(); }); req.on('end', () => { try { cb(JSON.parse(b || '{}')); } catch { cb(null); } }); };
 const waiting = () => [...rooms.entries()].filter(([, r]) => r.pub && !r.guest && !r.gone.guest && r.host && r.host.readyState === 1);
@@ -141,7 +154,9 @@ const server = http.createServer((req, res) => {
       res.writeHead(200, { 'Content-Type': 'application/json' });
       const cur = okName(n) && NAMES.get(n);
       if (!cur || cur.h !== hashK(k)) return res.end(JSON.stringify({ r: 'bad' }));
-      NAMES.delete(n); PLAZA.delete(n); saveNames();
+      NAMES.delete(n); PLAZA.delete(n); INV.delete(n);
+      for (const v of NAMES.values()) { if (Array.isArray(v.f)) v.f = v.f.filter(x => x !== n); if (Array.isArray(v.rq)) v.rq = v.rq.filter(x => x !== n); }
+      saveNames();
       res.end(JSON.stringify({ r: 'ok' }));
     });
   }
@@ -154,10 +169,53 @@ const server = http.createServer((req, res) => {
       if (!cur || cur.h !== hashK(k)) return res.end(JSON.stringify({ r: 'bad' }));
       const a = AVS.includes(av) ? av : 'guerrero', now = Date.now();
       if (cur.a !== a) { cur.a = a; saveNames(); }
-      if (b.bye) PLAZA.delete(n); else PLAZA.set(n, { a, t: now });
+      LAST.set(n, now); const old = PLAZA.get(n) || {};
+      const em = typeof b.e === 'string' && b.e.length <= 24 ? { e: b.e, et: now } : (old.et && now - old.et < 6000 ? { e: old.e, et: old.et } : {});
+      if (b.bye) PLAZA.delete(n); else PLAZA.set(n, { a, t: now, ...em });
       for (const [m, v] of PLAZA) if (now - v.t > 30000) PLAZA.delete(m);
-      const p = [...PLAZA.entries()].filter(([m]) => m !== n).sort((x, y) => y[1].t - x[1].t).slice(0, 14).map(([m, v]) => ({ n: m, a: v.a }));
+      const p = [...PLAZA.entries()].filter(([m]) => m !== n).sort((x, y) => y[1].t - x[1].t).slice(0, 14).map(([m, v]) => ({ n: m, a: v.a, e: v.et && now - v.et < 6000 ? v.e : undefined, et: v.et }));
       res.end(JSON.stringify({ r: 'ok', p, total: PLAZA.size }));
+    });
+  }
+  /* ---- amigos: solicitudes, lista, invitaciones (todo con nombre + clave) ---- */
+  if (req.method === 'POST' && url.startsWith('/amigos')) {
+    return readBody(req, b => {
+      const out = o => { res.writeHead(200, { 'Content-Type': 'application/json' }); res.end(JSON.stringify(o)); };
+      const n = b && String(b.n || '').toUpperCase(), k = b && String(b.k || ''), me = okName(n) && NAMES.get(n);
+      if (!me || me.h !== hashK(k)) return out({ r: 'bad' });
+      const now = Date.now(); LAST.set(n, now);
+      me.f = Array.isArray(me.f) ? me.f : []; me.rq = Array.isArray(me.rq) ? me.rq : [];
+      if (typeof b.ep === 'string' && /^https:\/\//.test(b.ep) && SUBS.has(b.ep)) { me.ep = Array.isArray(me.ep) ? me.ep : []; if (!me.ep.includes(b.ep)) { me.ep.push(b.ep); me.ep = me.ep.slice(-3); saveNames(); } }
+      const a = String(b.a || '').toUpperCase(), ot = a && okName(a) && NAMES.get(a);
+      const fix = u => { u.f = Array.isArray(u.f) ? u.f : []; u.rq = Array.isArray(u.rq) ? u.rq : []; };
+      if (url === '/amigos/pedir') {
+        if (!ot || a === n) return out({ r: 'none' }); fix(ot);
+        if (me.f.includes(a)) return out({ r: 'ya' });
+        if (me.rq.includes(a)) { me.rq = me.rq.filter(x => x !== a); me.f.push(a); ot.f.push(n); ot.rq = ot.rq.filter(x => x !== n); saveNames(); pushTo(a, { kind: 'amigo', title: 'Link Master Dungeon', body: `🤝 ${n} y tú ahora son amigos` }); return out({ r: 'amigos' }); }
+        if (!ot.rq.includes(n)) { if (ot.rq.length > 50) return out({ r: 'full' }); ot.rq.push(n); saveNames(); pushTo(a, { kind: 'amigo', title: 'Link Master Dungeon', body: `👋 ${n} quiere ser tu amigo` }); }
+        return out({ r: 'ok' });
+      }
+      if (url === '/amigos/resp') {
+        if (!me.rq.includes(a)) return out({ r: 'none' });
+        me.rq = me.rq.filter(x => x !== a);
+        if (b.ok && ot) { fix(ot); if (!me.f.includes(a)) me.f.push(a); if (!ot.f.includes(n)) ot.f.push(n); pushTo(a, { kind: 'amigo', title: 'Link Master Dungeon', body: `🤝 ${n} aceptó tu solicitud de amistad` }); }
+        saveNames(); return out({ r: 'ok' });
+      }
+      if (url === '/amigos/quitar') {
+        me.f = me.f.filter(x => x !== a); if (ot) { fix(ot); ot.f = ot.f.filter(x => x !== n); } saveNames(); return out({ r: 'ok' });
+      }
+      if (url === '/amigos/invitar') {
+        const c = String(b.c || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+        if (!ot || !me.f.includes(a) || !c) return out({ r: 'none' });
+        const L = (INV.get(a) || []).filter(x => x.de !== n && now - x.t < 10 * 60000); L.push({ de: n, c, t: now }); INV.set(a, L);
+        pushTo(a, { kind: 'inv', sala: c, title: 'Link Master Dungeon', body: `⚔️ ${n} te está esperando para jugar` });
+        return out({ r: 'ok' });
+      }
+      if (url === '/amigos/noinv') { INV.set(n, (INV.get(n) || []).filter(x => x.de !== a)); return out({ r: 'ok' }); }
+      /* /amigos: estado completo */
+      const on = m => now - (LAST.get(m) || 0) < 45000;
+      const inv = (INV.get(n) || []).filter(x => now - x.t < 10 * 60000 && me.f.includes(x.de));
+      return out({ r: 'ok', f: me.f.map(m => ({ n: m, a: (NAMES.get(m) || {}).a || 'guerrero', on: on(m) })).sort((x, y) => (y.on - x.on) || x.n.localeCompare(y.n)), rq: me.rq.slice(), inv: inv.map(x => ({ de: x.de, c: x.c })) });
     });
   }
   if (url === '/health') { res.writeHead(200, { 'Content-Type': 'text/plain' }); return res.end('ok'); }
