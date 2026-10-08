@@ -154,7 +154,8 @@ button{font-family:inherit}
 .pl>div{flex:1;aspect-ratio:696/1015;border:2px dashed #fff3;border-radius:8px;display:grid;place-items:center;font-size:.7rem}
 .dim{opacity:.45}
 .row3{display:flex;gap:8px;width:100%}.b3{flex:1;aspect-ratio:696/1015;transition:.4s}.b3.sel{box-shadow:0 0 0 4px var(--gold);transform:scale(1.07)}.b3 .deck{height:100%;font-size:2rem}
-#apart{position:fixed;right:6px;top:64px;display:flex;flex-direction:column;gap:4px;width:9vw;max-width:48px;z-index:1}#apart>div{aspect-ratio:696/1015}
+#mesa{position:fixed;left:6px;top:var(--hudb,100px);display:flex;flex-direction:column;gap:4px;width:9vw;max-width:48px;z-index:3}#mesa>div{aspect-ratio:696/1015;cursor:pointer;filter:drop-shadow(0 2px 4px #000a)}#mesa:empty{display:none}
+#apart{position:fixed;right:6px;top:var(--hudb,64px);display:flex;flex-direction:column;gap:4px;width:9vw;max-width:48px;z-index:1}#apart>div{aspect-ratio:696/1015}
 .step,#tTurn{display:none!important}.bar{grid-template-columns:1fr!important}.row{justify-content:center}
 /* ===== mano en abanico + carta de personaje con su habilidad ===== */
 .dock{position:relative;z-index:5;flex:none;height:max(122px,20dvh);display:flex;gap:4px;align-items:flex-end;margin-top:2px}
@@ -814,7 +815,7 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
   <div class="bar"><button class="tab" id="tTurn">Turno</button><button class="tab" data-sh="st" id="tSt">Estado</button></div>
   <div id="hud"><div class="hhp"><div class="hpb" id="hpb"><i>♥</i><i>♥</i><i>♥</i><i>♥</i><i>♥</i><i>♥</i><i>♥</i><i>♥</i><i>♥</i><i>♥</i></div><b id="hpn">10</b></div><div class="hch" id="hfire">🔥 0</div><div class="hch" id="hturn">T1</div></div>
   <div id="cross"></div>
-  <div><span class="lbl">En mesa</span><div class="strip" id="mesa"></div></div>
+  <div id="mesa"></div>
   <div class="dock" id="dock">
     <div class="pjs"><div data-pj="m19" id="m19" class="pjc"></div><div data-hab="1" id="m20" class="habc"></div></div>
     <div class="fan" id="tHand"></div>
@@ -1795,6 +1796,7 @@ const okcC=(id,c)=>{const m=MC[id];if(!m)return false;return m[0]==='w'||m[0].in
 function dkRect(){const sh=$('#sh-st');if(sh.classList.contains('on')){const r=$('#dC').getBoundingClientRect();if(r.width)return r}
   const t=$('#tSt').getBoundingClientRect();return {left:t.left+t.width/2-22,top:t.top,width:44,height:64}}
 function dockVar(){try{const d=$('#dock'),t=d?d.getBoundingClientRect().top:0;if(t>80)document.documentElement.style.setProperty('--dockt',Math.round(t-4)+'px');
+  {const hb=$('#hud').getBoundingClientRect().bottom;if(hb>20)document.documentElement.style.setProperty('--hudb',Math.round(hb+6)+'px')}
   /* el tablero se ajusta al espacio que queda entre la barra y la mano */
   const cr=$('#cross'),h=cr?cr.clientHeight:0;if(h>120){const w=Math.max(60,Math.min(innerWidth*.29,150,(h-14)/(3*1.458)));if(Math.abs((cr._cw||0)-w)>.5){cr._cw=w;cr.style.setProperty('--cw',w.toFixed(1)+'px')}}}catch(e){}}
 const FAN={st:0,ids:[],x0:0,y0:0,i:-1,t:0,pid:null,tm:null,src:null,id:null,can:[],hov:null,end:0,dirty:0};
