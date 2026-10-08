@@ -2631,7 +2631,10 @@ async function pushSub(ask){
   const reg=await navigator.serviceWorker.ready;let sub=await reg.pushManager.getSubscription();
   /* sin la llave del servidor (Render dormido): se despierta y se pide, esperando hasta ~70 s */
   if(!sub&&!QKEY){for(let k=0;k<7&&!QKEY;k++){try{const c=new AbortController(),to=setTimeout(()=>c.abort(),10000);const r=await fetch(MP_URL+'/quick',{cache:'no-store',signal:c.signal});clearTimeout(to);if(r.ok){const j=await r.json();QKEY=j.key||''}}catch(e){}if(!QKEY)await new Promise(ok=>setTimeout(ok,1000))}}
-  if(!sub){if(!QKEY)throw new Error('srv');sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(QKEY)})}
+  if(!sub){if(!QKEY)throw new Error('srv');
+    /* el servicio de avisos de Android a veces falla la primera vez (sobre todo en la app instalada): se reintenta */
+    for(let k=0;;k++){try{sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(QKEY)});break}
+      catch(e){if(k>=3||!e||e.name!=='AbortError')throw e;await new Promise(ok=>setTimeout(ok,1500*(k+1)))}}}
   const r=await fetch(MP_URL+'/push/sub',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({sub:sub.toJSON()})});
   if(!r.ok)throw new Error('servidor '+r.status);
   try{localStorage.setItem('mesa-push','1');localStorage.setItem('mesa-pushep',sub.endpoint)}catch(e){}
