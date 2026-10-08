@@ -132,6 +132,12 @@
   "k02.png": "0eb551aafe99",
   "logo.webp": "c79c21426a47",
   "manifest.json": "fdf1323b0a4d",
+  "musica/Batalla final.mp3": "480e0323109e",
+  "musica/Batalla normal.mp3": "6df8611bffab",
+  "musica/Derrota.mp3": "280b588f3d05",
+  "musica/Menú principal.mp3": "72e390fed75b",
+  "musica/Victoria.mp3": "e1bfc2d39213",
+  "musica/Álbum y Comunidad.mp3": "d4c3c0410747",
   "package.json": "abdc4950432e",
   "personajes/personaje 1/m01.webp": "f131de040483",
   "personajes/personaje 1/m02.webp": "31b1ea1e3993",
@@ -208,5 +214,5 @@
   "tableros/t07.webp": "d13add3a6534",
   "tableros/t08.webp": "df272cca3775"
  },
- "version": "7efd50961c57"
+ "version": "08536d15dac4"
 }
