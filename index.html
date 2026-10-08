@@ -1827,7 +1827,7 @@ function fanLay(x){const f=$('#tHand');if(!f)return;const cs=[...f.querySelector
     const sp=n>1?Math.min(fw*.6,(L-fw)/(n-1)):0,tot=fw+sp*(n-1),x0=L0+(L-tot)/2,mid=(n-1)/2,ang=Math.min(3,18/n);
     cs.forEach((c,i)=>{const o=i-mid;c.style.transform=`translate(${x0+i*sp}px,${Math.abs(o)*Math.abs(o)*.6}px) rotate(${o*ang}deg)`;c.style.zIndex=i;c.classList.remove('up','ghost')});return}
   /* abierta: la carta que corresponde a la posición del dedo dentro de la franja queda justo bajo el dedo y se levanta */
-  const r=f.getBoundingClientRect(),sp=fw*.92,fx=(x===undefined?FAN.x:x)-r.left,px=Math.max(0,Math.min(L,fx-L0)),t=n>1?px/L*(n-1):0,fi=Math.round(t),base=fx-(t*sp+fw/2);
+  const r=f.getBoundingClientRect(),sp=fw*.92,fx=(x===undefined?(FAN.lx!==undefined?FAN.lx:FAN.x):x)-r.left,px=Math.max(0,Math.min(L,fx-L0)),t=n>1?px/L*(n-1):0,fi=Math.round(t),base=fx-(t*sp+fw/2);
   FAN.t=t;
   cs.forEach((c,i)=>{const o=i-t,up=i===fi&&FAN.st==='browse';c.style.transform=`translate(${base+i*sp}px,${up?-28:Math.min(18,Math.abs(o)*4)}px) rotate(${Math.max(-8,Math.min(8,o*2.5))}deg) scale(${up?1.2:1.05})`;c.style.zIndex=up?99:50-Math.round(Math.abs(o));c.classList.toggle('ghost',FAN.st==='drag'&&i===FAN.i)});
   if(fi!==FAN.i&&FAN.st==='browse'){FAN.i=fi;fanPv(FAN.ids[fi]);try{tone(1250,.025,'triangle',.05)}catch(e){}}}
@@ -1838,7 +1838,7 @@ function fanClose(){FAN.st=0;FAN.i=-1;FAN.src=null;FAN.id=null;$('#tHand').class
   FAN.can.forEach(i=>{const c=cellOf(i);if(c)c.classList.remove('can','hov')});document.querySelectorAll('#cross .cell.nope').forEach(c=>c.classList.remove('nope'));FAN.can=[];FAN.hov=null;
   const ba=$('#bact');if(ba)ba.classList.remove('hov');$('#m20').classList.remove('hdrag');
   if(FAN.dirty){FAN.dirty=0;fanRender()}else fanLay()}
-function fanBrowse(){FAN.st='browse';FAN.i=-1;$('#tHand').classList.add('open');fanLay()}
+function fanBrowse(){FAN.st='browse';FAN.i=-1;FAN.lx=FAN.x;FAN.by=FAN.y;FAN.px=FAN.x;FAN.py=FAN.y;$('#tHand').classList.add('open');fanLay()}
 function fanDrag(id){FAN.st='drag';FAN.id=id;$('#fpv').classList.remove('on');const g=$('#fgh');g.innerHTML=card(id,'still');g.classList.add('on');fanGh();
   if(FAN.src==='hab')$('#m20').classList.add('hdrag');
   if(!B&&!CAD){FAN.can=validCells(id);FAN.can.forEach(i=>{const c=cellOf(i);if(c)c.classList.add('can')});
@@ -1876,8 +1876,11 @@ function fanTap(id){if(!id)return;
     if(src==='fan')FAN.tm=setTimeout(()=>{if(FAN.st==='press')fanBrowse()},150)};
   const move=e=>{if(!FAN.st||e.pointerId!==FAN.pid)return;FAN.x=e.clientX;FAN.y=e.clientY;const dx=FAN.x-FAN.x0,dy=FAN.y-FAN.y0;
     if(FAN.st==='press'){if(Math.hypot(dx,dy)>8){clearTimeout(FAN.tm);if(FAN.src==='hab'){FAN.i=-1;fanDrag(p20());}else fanBrowse()}return}
-    if(FAN.st==='browse'){fanLay();const top=f.getBoundingClientRect().top;
-      if(FAN.y<top-24&&FAN.i>=0){const id=FAN.ids[FAN.i];if(id)fanDrag(id)}return}
+    if(FAN.st==='browse'){
+      /* un movimiento sobre todo hacia arriba no cambia de carta; con poco recorrido hacia arriba ya se saca */
+      const sx=FAN.x-FAN.px,sy=FAN.y-FAN.py;FAN.px=FAN.x;FAN.py=FAN.y;
+      if(sy<0&&-sy>Math.abs(sx)*.9){if(FAN.by-FAN.y>22&&FAN.i>=0){const id=FAN.ids[FAN.i];if(id){fanDrag(id);fanGh();fanHit()}}return}
+      FAN.lx=FAN.x;FAN.by=FAN.y;fanLay();return}
     if(FAN.st==='drag'){fanGh();fanHit()}};
   const up=e=>{if(!FAN.st||e.pointerId!==FAN.pid)return;clearTimeout(FAN.tm);
     if(FAN.st==='press'){const src=FAN.src;fanClose();if(src==='fan'){const r=f.getBoundingClientRect(),cs=[...f.querySelectorAll('.fc')];
