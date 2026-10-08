@@ -515,7 +515,7 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
 .lob-nav button:last-child{border-right:0}
 .lob-nav i{font-style:normal;font-size:1.55rem;line-height:1;display:grid;place-items:center;width:40px;height:40px;transition:transform .25s cubic-bezier(.2,.9,.3,1.4)}
 .lob-nav i img{width:100%;height:100%;object-fit:contain}.lob-nav i img+*{display:none}
-.lob-nav i:has(img){font-size:0}
+.lob-nav i:has(img),.lob-nav button.mid i:has(img){font-size:0}
 .lob-nav button.on{background:linear-gradient(180deg,#ffd34d33,#ffd34d0a);color:var(--gold)}
 .lob-nav button.on i{transform:translateY(-8px) scale(1.25);filter:drop-shadow(0 4px 8px #000)}
 .lob-nav button.mid i{font-size:1.85rem}
@@ -544,10 +544,9 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
 .apage{position:relative;width:100%;box-sizing:border-box;border-radius:6px 16px 16px 6px;padding:16px 14px 12px 22px;
   background:url("album/hoja.webp") center/100% 100% no-repeat,radial-gradient(120% 90% at 40% 30%,#f6ead0,#e4cfa4 70%,#c9ae7c);
   box-shadow:inset 12px 0 18px -10px #0006,0 12px 30px #000c;transform-origin:left center;backface-visibility:hidden}
-.apage.flipout{animation:pflip .26s ease-in forwards}.apage.flipin{animation:pflipin .26s ease-out}
-.apage.flipout.back{animation:pflipb .26s ease-in forwards}.apage.flipin.back{animation:pflipinb .26s ease-out}
-@keyframes pflip{to{transform:rotateY(-95deg);filter:brightness(.6)}}@keyframes pflipin{from{transform:rotateY(95deg);filter:brightness(.6)}}
-@keyframes pflipb{to{transform:rotateY(95deg);filter:brightness(.6)}}@keyframes pflipinb{from{transform:rotateY(-95deg);filter:brightness(.6)}}
+.apage-w{position:relative}.apage{transform-origin:left center;backface-visibility:hidden}
+.apage.turn{position:absolute;left:0;top:0;pointer-events:none;box-shadow:8px 6px 24px #0009}
+.apgn{text-align:center;margin-top:8px;font:700 .8rem Fredoka,sans-serif;color:#6b4f2a}
 .agrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 10px}.agrid>*{min-width:0}.stk .card img{width:100%;height:100%;object-fit:cover}
 .stk{position:relative;width:100%;height:auto;align-self:start;aspect-ratio:696/1015;border-radius:8px;cursor:pointer;box-sizing:border-box}
 .stk.lk{border:2px dashed #8a6d4688;background:#0000000d;display:grid;place-items:center}
@@ -558,8 +557,10 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
 .stk.ok::before,.stk.ok::after{content:'';position:absolute;width:34%;height:12%;background:#fff8dcb3;box-shadow:0 1px 2px #0003;z-index:2}
 .stk.ok::before{top:-5%;left:-8%;transform:rotate(-35deg)}.stk.ok::after{bottom:-5%;right:-8%;transform:rotate(-35deg)}
 .stk .nw{position:absolute;top:-8px;right:-6px;z-index:3;background:#ff3b55;color:#fff;border-radius:99px;font:800 .6rem Fredoka,sans-serif;padding:2px 6px;animation:pop .5s}
-.apn{display:flex;justify-content:space-between;align-items:center;margin-top:10px;font:700 .85rem Fredoka,sans-serif;color:#6b4f2a}
-.apn button{border:0;background:#8a6d4633;color:#4a3418;border-radius:10px;font:800 1.1rem Fredoka,sans-serif;width:42px;height:34px;cursor:pointer}.apn button:disabled{opacity:.3}
+.apn{display:flex;justify-content:center;gap:18px;align-items:center;margin-top:14px;font:700 .95rem Fredoka,sans-serif;color:#fff;text-shadow:0 1px 3px #000;width:100%;max-width:440px}
+.apn button{border:2px solid #fff6;background:linear-gradient(180deg,#ffe07a,#e0a92a);color:#4a3418;border-radius:50%;font:900 1.15rem Fredoka,sans-serif;width:54px;height:54px;cursor:pointer;box-shadow:0 4px 0 #8a5c12,0 6px 14px #0008;display:grid;place-items:center;padding:0 0 0 2px}
+.apn button#alb-prev{padding:0 2px 0 0}.apn button:active{transform:translateY(3px);box-shadow:0 1px 0 #8a5c12,0 3px 8px #0008}
+.apn button:disabled{opacity:.3;filter:grayscale(1);box-shadow:none}
 #alb-view{position:fixed;inset:0;z-index:70;background:#000d;display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:20px}
 #alb-view.on{display:flex}
 #alb-view .card{width:min(70vw,300px);height:auto;aspect-ratio:696/1015;border-radius:14px;box-shadow:0 0 40px #ffd34d55}
@@ -813,8 +814,9 @@ setInterval(()=>{if(SPD===1||!document.getAnimations)return;for(const a of docum
 const ac=()=>AC=AC||new(window.AudioContext||window.webkitAudioContext)();
 const vib=p=>{if(SND>0&&!RM)try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}};
 let SK=1;const VOL=()=>SND/10,SGAIN=2; /* ganancia general de efectos (x2) */
-const tone=(f,d,type='sine',v=.15,t0=0,f2=0)=>{if(!SND)return;try{const A=ac();if(A.state==='suspended')A.resume();const t=A.currentTime+t0,o=A.createOscillator(),g=A.createGain();o.type=type;o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+d);g.gain.setValueAtTime(v*VOL()*SGAIN*SK,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(A.destination);o.start(t);o.stop(t+d)}catch(e){}};
-const noiz=(d,v=.3)=>{if(!SND)return;try{const A=ac(),n=Math.floor(A.sampleRate*d),b=A.createBuffer(1,n,A.sampleRate),a=b.getChannelData(0);for(let i=0;i<n;i++)a[i]=(Math.random()*2-1)*(1-i/n);const s=A.createBufferSource(),g=A.createGain(),f=A.createBiquadFilter();f.type='lowpass';f.frequency.value=1800;g.gain.value=v*VOL()*SGAIN*SK;s.buffer=b;s.connect(f);f.connect(g);g.connect(A.destination);s.start()}catch(e){}};
+let SNDT=0;
+const tone=(f,d,type='sine',v=.15,t0=0,f2=0)=>{if(!SND)return;SNDT=performance.now();try{const A=ac();if(A.state==='suspended')A.resume();const t=A.currentTime+t0,o=A.createOscillator(),g=A.createGain();o.type=type;o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+d);g.gain.setValueAtTime(v*VOL()*SGAIN*SK,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(A.destination);o.start(t);o.stop(t+d)}catch(e){}};
+const noiz=(d,v=.3)=>{if(!SND)return;SNDT=performance.now();try{const A=ac(),n=Math.floor(A.sampleRate*d),b=A.createBuffer(1,n,A.sampleRate),a=b.getChannelData(0);for(let i=0;i<n;i++)a[i]=(Math.random()*2-1)*(1-i/n);const s=A.createBufferSource(),g=A.createGain(),f=A.createBiquadFilter();f.type='lowpass';f.frequency.value=1800;g.gain.value=v*VOL()*SGAIN*SK;s.buffer=b;s.connect(f);f.connect(g);g.connect(A.destination);s.start()}catch(e){}};
 const SFX={
   tick:()=>tone(1000,.05,'square',.04),
   pop:()=>tone(520,.12,'triangle',.12,0,900),
@@ -847,12 +849,24 @@ const SFX={
 const SMP={},SMPN=['carta','espada','dados','pagina','libro','estampa','logro','amigo','invitacion','pestana'],
   SMPG={carta:1.5,espada:.8,dados:.8,pagina:.9,libro:.9,estampa:.3,logro:.75,amigo:.8,invitacion:.7,pestana:1.2};
 function smpLoad(n){if(n in SMP)return;SMP[n]=null;fetch('sonidos/'+n+'.mp3').then(r=>{if(!r.ok)throw 0;return r.arrayBuffer()}).then(b=>new Promise((ok,ko)=>ac().decodeAudioData(b,ok,ko))).then(b=>{SMP[n]=b}).catch(()=>{delete SMP[n]})}
-function smp(n,fb,v=1){if(!SND)return;const b=SMP[n];if(!b){smpLoad(n);if(fb)fb();return}
+function smp(n,fb,v=1){if(!SND)return;SNDT=performance.now();const b=SMP[n];if(!b){smpLoad(n);if(fb)fb();return}
   try{const A=ac();if(A.state==='suspended')A.resume();const s=A.createBufferSource(),g=A.createGain();s.buffer=b;g.gain.value=v*(SMPG[n]||1)*VOL();s.connect(g);g.connect(A.destination);s.start()}catch(e){}}
 {let k=0;const f=()=>{if(k)return;k=1;setTimeout(()=>SMPN.forEach(smpLoad),300)};['pointerdown','keydown'].forEach(ev=>document.addEventListener(ev,f,{capture:true,passive:true,once:true}))}
 {const d=SFX.draw,sl=SFX.slash;SFX.draw=()=>smp('carta',d);SFX.slash=()=>smp('espada',sl)}
-/* sonido de toque: cada vez que el jugador toca la pantalla (respeta el volumen de sonido) */
-{let lastTap=0;document.addEventListener('pointerdown',()=>{const n=performance.now();if(n-lastTap<40)return;lastTap=n;SFX.tap()},{capture:true,passive:true})}
+/* clics de botones: Jugar / Nueva partida, Menú principal y Reiniciar tienen su propio sonido;
+   los demás botones suenan con un clic general solo si su acción no hizo ya algún sonido */
+Object.assign(SFX,{
+  start:()=>{tone(130,.5,'sawtooth',.1,0,260);[392,523,659,784].forEach((f,i)=>tone(f,.32,'triangle',.13,.04+i*.07));noiz(.18,.12)},
+  menu:()=>{tone(520,.12,'triangle',.13,0,390);tone(390,.2,'triangle',.11,.1,260)},
+  resetArm:()=>{tone(740,.07,'square',.05);tone(740,.07,'square',.05,.12)},
+  reset:()=>{tone(880,.5,'sawtooth',.07,0,110);tone(440,.35,'square',.04,.06,90);noiz(.3,.08)},
+  click:()=>{tone(600,.05,'triangle',.2,0,420);tone(1200,.03,'square',.03)}});
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('button,[data-b],[data-y],[data-stk],[data-av],.pk');if(!b||b.disabled)return;
+  const id=b.id||'',tx=(b.textContent||'').trim();
+  try{if(id==='lob-btn-start'||id==='lob-btn-resume'||/^Nueva partida/.test(tx))return SFX.start();
+    if(id==='menuBtn'||/Menú principal/.test(tx))return SFX.menu();
+    if(id==='reset')return /otra vez/.test(tx)?SFX.reset():SFX.resetArm();}catch(_){}
+  const t=performance.now();setTimeout(()=>{if(SNDT<t-5)try{SFX.click()}catch(_){}},35)},true);
 const rng=(p,a,b)=>Array.from({length:b-a+1},(_,i)=>p+pad(a+i));
 const shuf=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 /* ruta de imagen según el prefijo: m→personaje 1, l→personaje 2, resto→cartas/ */
@@ -1305,7 +1319,7 @@ function albGet(id,k){try{if(!id)return;const o=stLoad();o.alb=o.alb||{};const n
   if(nw)achToast(['alb:'+id,'📖','¡Nueva estampa!',`${BOOKS.find(b=>b.ids.includes(id))?.t||'Álbum'}`,null,id,null,'alb']);albDot()}catch(e){}}
 function albUse(id,how){if(!id)return;if(/^[mlp]20$/.test(id)){albGet(id,'a');return}if(/^[mlp]\d\d$/.test(id))albGet(id,how)}
 function albDot(){try{const o=stLoad(),al=o.alb||{};$('#alb-dot').classList.toggle('on',Object.values(al).some(e=>e&&e.n))}catch(e){}}
-const ALB={b:null,pg:0,busy:0};
+const ALB={b:null,pg:0,fx:null};
 function albRender(){const P=$('#pn-alb'),o=stLoad();
   if(!ALB.b){P.innerHTML=`<h2 class="ph">📖 Álbum</h2><div class="books">${BOOKS.map(b=>{const n=b.ids.filter(i=>albHas(o,i)).length,nw=b.ids.some(i=>(o.alb||{})[i]&&o.alb[i].n);
       return `<div class="book${n===b.ids.length?' full':''}" data-book="${b.id}" style="--bc:${b.bc}"><img src="album/${b.img}.webp" alt="" onerror="this.remove()"><div class="be">${b.e}</div><div class="bt">${b.t}</div>${nw?'<span class="bn">¡nuevo!</span>':''}<div class="bp"><i style="width:${Math.round(n/b.ids.length*100)}%"></i><span>${n} / ${b.ids.length}</span></div></div>`}).join('')}</div>`;return}
@@ -1313,24 +1327,30 @@ function albRender(){const P=$('#pn-alb'),o=stLoad();
   P.innerHTML=`<div class="abar"><button id="alb-back">‹ Libros</button><b>${b.e} ${b.t}</b><span style="font:700 .8rem Fredoka;color:#fff">${n}/${b.ids.length}</span></div>
     <div class="apage-w"><div class="apage" id="apage"><div class="agrid">${ids.map(i=>{const ok=albHas(o,i),num=b.ids.indexOf(i)+1,r=((num*37)%7)-3;
       return ok?`<div class="stk ok" data-stk="${i}" style="--r:${r}deg">${card(i,'still')}${o.alb&&o.alb[i]&&o.alb[i].n?'<span class="nw">¡nuevo!</span>':''}</div>`:`<div class="stk lk">${card(i,'still')}<span>#${num}</span></div>`}).join('')}</div>
-    <div class="apn"><button id="alb-prev" ${ALB.pg?'':'disabled'}>‹</button><span>Página ${ALB.pg+1} de ${np}</span><button id="alb-next" ${ALB.pg<np-1?'':'disabled'}>›</button></div></div></div>`;
+    <div class="apgn">${ALB.pg+1} / ${np}</div></div></div>
+    <div class="apn"><button id="alb-prev" aria-label="Página anterior" ${ALB.pg?'':'disabled'}>◀</button><span>Página ${ALB.pg+1} de ${np}</span><button id="alb-next" aria-label="Página siguiente" ${ALB.pg<np-1?'':'disabled'}>▶</button></div>`;
   /* las estampas nuevas de esta hoja ya se vieron */
   let ch=0;ids.forEach(i=>{if(o.alb&&o.alb[i]&&o.alb[i].n){delete o.alb[i].n;ch=1}});if(ch){stSave(o);albDot()}}
 function albFlip(d){const b=BOOKS.find(x=>x.id===ALB.b);if(!b)return;const np=Math.ceil(b.ids.length/9),to=ALB.pg+d;if(to<0||to>=np)return;
-  const pg=$('#apage');if(ALB.busy||!pg||RM){ALB.pg=to;ALB.busy=0;albRender();return}
-  ALB.busy=1;try{smp('pagina',SFX.swoosh)}catch(e){}pg.classList.add('flipout');if(d<0)pg.classList.add('back');
-  ALB.ft=setTimeout(()=>{ALB.pg=to;albRender();const n=$('#apage');if(n){n.classList.add('flipin');if(d<0)n.classList.add('back')}ALB.ft=setTimeout(()=>{ALB.busy=0},260)},260)}
-function albSkip(){if(!ALB.busy)return;clearTimeout(ALB.ft);ALB.busy=0;const p=$('#apage');if(p&&p.classList.contains('flipout')){/* se salta la animación */}albRender()}
+  albEnd();const old=$('#apage'),oh=old&&!RM?old.outerHTML:null;
+  ALB.pg=to;albRender();try{smp('pagina',SFX.swoosh)}catch(e){}
+  const w=document.querySelector('#pn-alb .apage-w'),nw=$('#apage');if(!oh||!w||!nw)return;
+  /* la hoja vieja (copia) queda encima y se voltea hacia la izquierda; al regresar, la hoja nueva llega volteándose desde la izquierda */
+  w.insertAdjacentHTML('beforeend',oh);const cl=w.lastElementChild;cl.removeAttribute('id');cl.classList.add('turn');let a;
+  if(d>0){cl.style.zIndex=3;a=cl.animate([{transform:'rotateY(0deg)',filter:'brightness(1)'},{transform:'rotateY(-90deg)',filter:'brightness(.45)'}],{duration:460,easing:'cubic-bezier(.5,.05,.8,.5)',fill:'forwards'})}
+  else{cl.style.zIndex=0;nw.style.zIndex=3;a=nw.animate([{transform:'rotateY(-90deg)',filter:'brightness(.45)'},{transform:'rotateY(0deg)',filter:'brightness(1)'}],{duration:460,easing:'cubic-bezier(.2,.5,.5,.95)'})}
+  ALB.fx={a,cl,nw};a.finished.then(albEnd,albEnd)}
+/* termina al instante la vuelta de hoja que esté en curso */
+function albEnd(){const f=ALB.fx;if(!f)return;ALB.fx=null;try{f.a.cancel()}catch(e){}f.cl.remove();f.nw.style.zIndex=''}
 function albShow(id){const o=stLoad(),e=(o.alb||{})[id]||{},v=$('#alb-view'),pj=/^[mlp]\d\d$/.test(id),k=/^k/.test(id),ev=/^c(07|50|52)$/.test(id);
   const rows=pj?[['Veces usada',(e.a||0)+(e.s||0)],['Como acción',e.a||0],['Como asistencia',e.s||0]]:k?[['Veces que te salió',e.v||0]]:ev?[['Veces activada',e.v||0]]:id==='j01'?[['Partidas jugadas',o.g||0]]:[['Veces vencida',e.v||0]];
   v.innerHTML=`${card(id)}<div class="av">${rows.map(([a,b])=>`<div><span>${a}</span><b>${b}</b></div>`).join('')}</div><button id="alb-vx">Cerrar</button>`;v.classList.add('on')}
 document.body.insertAdjacentHTML('beforeend','<div id="alb-view"></div>');
 $('#alb-view').addEventListener('click',e=>{if(e.target.id==='alb-vx'||e.target.id==='alb-view')$('#alb-view').classList.remove('on')});
 $('#pn-alb').addEventListener('click',e=>{
-  if(ALB.busy){albSkip();return}
   const bk=e.target.closest('[data-book]');if(bk){ALB.b=bk.dataset.book;ALB.pg=0;try{smp('libro',SFX.thud)}catch(_){}albRender();return}
   if(e.target.id==='alb-back'){try{smp('libro',null,.7)}catch(_){}ALB.b=null;albRender();return}
-  if(e.target.id==='alb-prev')return albFlip(-1);if(e.target.id==='alb-next')return albFlip(1);
+  if(e.target.closest('#alb-prev'))return albFlip(-1);if(e.target.closest('#alb-next'))return albFlip(1);
   const st=e.target.closest('[data-stk]');if(st)albShow(st.dataset.stk)});
 /* deslizar dentro del libro abierto = pasar página */
 {let x0=null,y0=0;const P=$('#pn-alb');P.addEventListener('touchstart',e=>{if(!ALB.b)return;x0=e.touches[0].clientX;y0=e.touches[0].clientY},{passive:true});
