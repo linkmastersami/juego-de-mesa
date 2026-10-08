@@ -771,6 +771,8 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
 #amgd .fr button{border:0;border-radius:10px;padding:7px 10px;font:700 .85rem Fredoka,sans-serif;cursor:pointer}#amgd .ok{background:var(--gold);color:#2b2208}#amgd .no{background:#4a4555;color:var(--ink)}
 #amgd .y,#amgd .n{display:block;width:100%;border:0;border-radius:14px;padding:12px;margin-top:8px;font:700 1rem Fredoka,sans-serif;cursor:pointer}
 #amgd .y{background:linear-gradient(180deg,#ffe07a,#e0a92a);color:#3a2808}#amgd .n{background:#4a4555;color:var(--ink)}
+#reg.kb,#amgd.kb,#perfd.kb{justify-content:flex-start;align-items:center;overflow-y:auto}
+#reg.kb .rlogo{display:none}
 </style>
 </head>
 <body>
@@ -1536,7 +1538,7 @@ $('#lob-nav').addEventListener('click',e=>{const b=e.target.closest('[data-go]')
 $('#pn-tab').addEventListener('click',e=>{const c=e.target.closest('[data-tab]');if(!c||!c.dataset.tab)return;try{localStorage.setItem('mesa-tab',c.dataset.tab)}catch(_){}tabApply();try{SFX.pop()}catch(_){}paneFill(4)});
 /* deslizar con el dedo entre pantallas (el carrusel de personajes y el libro abierto tienen prioridad) */
 {let x0=null,y0=0,ax=0,dx=0;const pg=$('#pager'),t=$('#ptrack');
- pg.addEventListener('touchstart',e=>{const g=e.target;if(g.closest('.lob-chars,input,.apage-w,#alb-view'))return;x0=e.touches[0].clientX;y0=e.touches[0].clientY;ax=0;dx=0},{passive:true});
+ pg.addEventListener('touchstart',e=>{const g=e.target;if(g.closest('.lob-chars,input,.apage-w,#alb-view,.pzem'))return;x0=e.touches[0].clientX;y0=e.touches[0].clientY;ax=0;dx=0},{passive:true});
  pg.addEventListener('touchmove',e=>{if(x0===null)return;const mx=e.touches[0].clientX-x0,my=e.touches[0].clientY-y0;
    if(!ax){if(Math.abs(mx)>10&&Math.abs(mx)>Math.abs(my)*1.2)ax=1;else if(Math.abs(my)>10){x0=null;return}else return}
    dx=mx;if((LP===0&&dx>0)||(LP===4&&dx<0))dx*=.3;t.classList.add('drag');t.style.transform=`translateX(calc(${-LP*20}% + ${dx}px))`},{passive:true});
@@ -3404,6 +3406,15 @@ function amgInvite(v){if(COOP||MP.code)return;
   $('#amg-j').onclick=()=>{d.classList.remove('on');amgPost('/amigos/noinv',{a:v.de});amgJoin(v.c)};
   $('#amg-x').onclick=()=>{amgPost('/amigos/noinv',{a:v.de})}}
 function amgJoin(c){if(COOP)return;if(!lobbyOn()){try{toMenu(0)}catch(e){}}setTimeout(()=>mpStart(c),300)}
+
+/* teclado del teléfono: la ventana sube para que el campo donde escribes quede a la vista */
+{const OVS='#reg,#amgd,#perfd';const fit=()=>{const a=document.activeElement,vv=window.visualViewport;
+    document.querySelectorAll(OVS).forEach(o=>{o.classList.remove('kb');o.style.paddingBottom=''});
+    if(!a||a.tagName!=='INPUT')return;const o=a.closest(OVS);if(!o)return;
+    const kb=vv?Math.max(0,innerHeight-vv.height-(vv.offsetTop||0)):0;o.classList.add('kb');o.style.paddingBottom=(kb+20)+'px';
+    setTimeout(()=>{try{a.scrollIntoView({block:'center',behavior:'smooth'})}catch(e){}},60)};
+  document.addEventListener('focusin',()=>setTimeout(fit,250));document.addEventListener('focusout',()=>setTimeout(fit,150));
+  if(window.visualViewport)visualViewport.addEventListener('resize',fit)}
 </script>
 </body>
 </html>
