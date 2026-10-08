@@ -1394,7 +1394,7 @@ function paneFill(i){try{
 }catch(e){}}
 function lobPage(i,inst){i=Math.max(0,Math.min(4,i));const ch=i!==LP;LP=i;if(ch&&!inst)try{smp('pestana')}catch(_){}const t=$('#ptrack');if(inst){t.classList.add('drag');requestAnimationFrame(()=>requestAnimationFrame(()=>t.classList.remove('drag')))}
   t.style.transform=`translateX(${-i*20}%)`;document.querySelectorAll('#lob-nav button').forEach(b=>b.classList.toggle('on',+b.dataset.go===i));
-  paneFill(i);if(ch&&!inst){try{SFX.swoosh()}catch(e){}}}
+  paneFill(i)}
 $('#lob-nav').addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(b)lobPage(+b.dataset.go)});
 $('#pn-tab').addEventListener('click',e=>{const c=e.target.closest('[data-tab]');if(!c||!c.dataset.tab)return;try{localStorage.setItem('mesa-tab',c.dataset.tab)}catch(_){}tabApply();try{SFX.pop()}catch(_){}paneFill(4)});
 /* deslizar con el dedo entre pantallas (el carrusel de personajes y el libro abierto tienen prioridad) */
@@ -2208,7 +2208,7 @@ const PJD={m:['🔥','Juega cartas de fuego: cada 🔥 que usas te hace robar ca
   p:['⚡','Juega cartas de rayo: cada ⚡ le deja relanzar un dado para no fallar la tirada.']};
 var PJO=['m','l','p'];
 function lobPos(c){const i=PJO.indexOf(c);document.querySelectorAll('.lob-char').forEach(el=>{const k=PJO.indexOf(el.dataset.char);el.classList.remove('pl','pr');el.classList.toggle('sel',k===i);if(k===(i+2)%3)el.classList.add('pl');if(k===(i+1)%3)el.classList.add('pr')});document.querySelectorAll('.lob-dots i').forEach(d=>d.classList.toggle('on',d.dataset.d===c))}
-function lobPick(c){CHAR=c;try{localStorage.setItem('mesa-pj',c)}catch(e){}lobPos(c);lobInfo(c);STARTARM=0;$('#lob-btn-start').textContent='⚔️ JUGAR';$('#lob-btn-start').disabled=false;$('#lob-btn-friend').disabled=false;try{SFX.swoosh()}catch(e){}}
+function lobPick(c){CHAR=c;try{localStorage.setItem('mesa-pj',c)}catch(e){}lobPos(c);lobInfo(c);STARTARM=0;$('#lob-btn-start').textContent='⚔️ JUGAR';$('#lob-btn-start').disabled=false;$('#lob-btn-friend').disabled=false;try{smp('pestana')}catch(e){}}
 function lobInfo(c){try{document.querySelectorAll('.lob-char').forEach(el=>{const k=el.dataset.char,w=el.querySelector('.card-wrap');if(w)w.innerHTML=card(k+'19',k===c?'':'still')});
   const o=stLoad(),p=(o.pj||{})[c]||{},d=PJD[c];$('#lob-info').innerHTML=`<div class="li">${d[0]}</div><div><b>${PJN[c]}</b><span>${d[1]}</span><small>${p.g?`🏆 ${p.w||0} victorias en ${p.g} partidas${p.bt?` · récord: ${p.bt} turnos`:''}`:'Aún no has jugado con este personaje'}</small></div>`;$('#lob-info').classList.add('on')}catch(e){}}
 /* selección de personaje */
