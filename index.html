@@ -497,8 +497,9 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
 .lob-char .card-wrap{border-radius:14px}
 .lob-char.sel .card-wrap{box-shadow:0 14px 40px #000c,0 0 0 3px #ffd34d,0 0 34px #ffd34daa}
 .lob-char .char-name{font-size:1.15rem;text-shadow:0 2px 6px #000}
+.lob-char .char-st{display:block;text-align:center;font:600 .74rem Fredoka,sans-serif;color:#e9e4f2d9;text-shadow:0 1px 4px #000;margin-top:1px;min-height:1em;white-space:nowrap}
 .lob-char.pl .char-name,.lob-char.pr .char-name{opacity:0}
-.lob-dots{display:flex;gap:8px;justify-content:center;margin:0 0 10px}.lob-dots i{width:8px;height:8px;border-radius:50%;background:#ffffff40;transition:background .3s,transform .3s}.lob-dots i.on{background:var(--gold);transform:scale(1.3)}
+.lob-dots{display:flex;gap:8px;justify-content:center;margin:18px 0 10px}.lob-dots i{width:8px;height:8px;border-radius:50%;background:#ffffff40;transition:background .3s,transform .3s}.lob-dots i.on{background:var(--gold);transform:scale(1.3)}
 #lob-info{margin:0 0 12px;background:#0d0a14b3;backdrop-filter:blur(4px)}
 .lob-start{position:relative;overflow:hidden;font:800 1.5rem Fredoka,sans-serif;letter-spacing:.08em;padding:16px;background:linear-gradient(180deg,#ffe07a,#f2b632);box-shadow:0 6px 0 #a8740f,0 0 30px #ffd34d55;margin-top:2px}
 .lob-start::after{content:'';position:absolute;top:0;bottom:0;width:40%;left:-60%;background:linear-gradient(100deg,transparent,#ffffff88,transparent);transform:skewX(-20deg);animation:shine 3.2s ease-in-out infinite}
@@ -2403,6 +2404,8 @@ var PJO=['m','l','p'];
 function lobPos(c){const i=PJO.indexOf(c);document.querySelectorAll('.lob-char').forEach(el=>{const k=PJO.indexOf(el.dataset.char);el.classList.remove('pl','pr');el.classList.toggle('sel',k===i);if(k===(i+2)%3)el.classList.add('pl');if(k===(i+1)%3)el.classList.add('pr')});document.querySelectorAll('.lob-dots i').forEach(d=>d.classList.toggle('on',d.dataset.d===c))}
 function lobPick(c){CHAR=c;try{localStorage.setItem('mesa-pj',c)}catch(e){}lobPos(c);lobInfo(c);STARTARM=0;$('#lob-btn-start').textContent='⚔️ JUGAR';$('#lob-btn-start').disabled=false;$('#lob-btn-friend').disabled=false;try{smp('pestana')}catch(e){}}
 function lobInfo(c){try{document.querySelectorAll('.lob-char').forEach(el=>{const k=el.dataset.char,w=el.querySelector('.card-wrap');if(w)w.innerHTML=card(k+'19',k===c?'':'still')});
+  {const o=stLoad();document.querySelectorAll('.lob-char').forEach(el=>{const k=el.dataset.char,q=(o.pj||{})[k]||{};let t=el.querySelector('.char-st');if(!t){t=document.createElement('small');t.className='char-st';el.appendChild(t)}
+    t.textContent=k!==c?'':q.g?`🏆 ${q.w||0} victorias en ${q.g} partidas${q.bt?` · récord: ${q.bt} turnos`:''}`:'Aún no has jugado con este personaje'})}
   const o=stLoad(),p=(o.pj||{})[c]||{},d=PJD[c];$('#lob-info').innerHTML=`<div class="li">${d[0]}</div><div><b>${PJN[c]}</b><span>${d[1]}</span><small>${p.g?`🏆 ${p.w||0} victorias en ${p.g} partidas${p.bt?` · récord: ${p.bt} turnos`:''}`:'Aún no has jugado con este personaje'}</small></div>`;$('#lob-info').classList.add('on')}catch(e){}}
 /* selección de personaje */
 document.querySelectorAll('.lob-char').forEach(el=>el.addEventListener('click',()=>lobPick(el.dataset.char)));
