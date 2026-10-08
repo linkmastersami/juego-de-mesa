@@ -568,6 +568,33 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
 #alb-view button{border:0;border-radius:14px;background:#4a4555;color:var(--ink);font:700 1rem Fredoka,sans-serif;padding:11px 26px}
 .atoast.alb{border-color:#7fd6ff;box-shadow:0 10px 30px #000c,0 0 24px #4fc3ff55}.atoast.alb small{color:#7fd6ff}
 .atoast.alb .ai{background:radial-gradient(circle,#f6ead0,#c9ae7c);border-radius:10px}
+/* plaza de la Comunidad */
+#pn-com{padding-bottom:10px}
+.pz{position:relative;width:100%;max-width:520px;flex:1 0 300px;min-height:300px;touch-action:manipulation;cursor:pointer}
+.pz .w{position:absolute;left:0;top:0;width:0;height:0;pointer-events:none;will-change:transform}
+.pz .w .b{position:absolute;left:0;bottom:0;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;transform-origin:50% 100%}
+.pz .w img{height:var(--h,110px);width:auto;display:block;filter:drop-shadow(0 4px 3px #0008)}
+.pz .w img.fl{transform:scaleX(-1)}
+.pz .w .sh{position:absolute;left:50%;bottom:-4px;width:56%;height:10px;transform:translateX(-50%);border-radius:50%;background:#0007;filter:blur(2px);z-index:-1}
+.pz .w .nm{font:700 .72rem Fredoka,sans-serif;color:#fff;background:#0d0a14c4;border:1px solid #ffffff30;border-radius:10px;padding:1px 8px;margin-bottom:2px;white-space:nowrap;text-shadow:0 1px 2px #000}
+.pz .w.me .nm{color:#2b2208;background:var(--gold);border-color:#fff8}
+.pz .w.in{animation:pzin .5s ease-out both}.pz .w.out{transition:opacity .5s;opacity:0}
+@keyframes pzin{from{opacity:0}to{opacity:1}}
+.pz .tgt{position:absolute;width:22px;height:10px;border:2px solid #ffd34d;border-radius:50%;transform:translate(-50%,-50%);pointer-events:none;animation:pztg .6s ease-out forwards}
+@keyframes pztg{from{opacity:1;transform:translate(-50%,-50%) scale(.4)}to{opacity:0;transform:translate(-50%,-50%) scale(1.6)}}
+.pzbar{display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;width:100%;max-width:520px;margin-top:6px}
+.pzbar .on{font:600 .85rem Fredoka,sans-serif;color:#e9e4f2;background:#0d0a14c4;border-radius:12px;padding:6px 12px}
+.pzbar button{font:700 .85rem Fredoka,sans-serif;border:0;border-radius:12px;padding:8px 14px;background:var(--gold);color:#2b2208;cursor:pointer}
+.pzbar button.gh{background:#2f2b37;color:#e9e4f2;border:1px solid #ffffff30}
+.pzsoon{font-size:.78rem;color:#cfc8da;background:#0d0a14b3;border-radius:12px;padding:6px 12px;margin:8px 0 0;text-align:center}
+#pz-pick{position:fixed;inset:0;z-index:60;background:#0d0a14e8;display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px;gap:14px}
+#pz-pick.on{display:flex}
+#pz-pick h3{margin:0;font:800 1.3rem Fredoka,sans-serif;color:var(--gold);text-align:center}
+#pz-pick .g{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;width:min(100%,420px)}
+#pz-pick .g button{border:2px solid #ffffff22;background:radial-gradient(circle at 50% 70%,#3a3150,#1d1628);border-radius:16px;padding:6px 4px 8px;display:flex;flex-direction:column;align-items:center;gap:2px;color:#e9e4f2;font:700 .85rem Fredoka,sans-serif;cursor:pointer;min-width:0}
+#pz-pick .g button img{width:100%;aspect-ratio:1;object-fit:contain}
+#pz-pick .g button.sel{border-color:var(--gold);box-shadow:0 0 14px #ffd34d88}
+#pz-pick .x{border:0;border-radius:12px;padding:10px 22px;font:700 1rem Fredoka,sans-serif;background:#2f2b37;color:#e9e4f2;cursor:pointer}
 .comm{max-width:420px;text-align:center;display:flex;flex-direction:column;gap:12px;align-items:center;margin-top:40px}
 .comm .cbig{font-size:4rem;height:90px;display:grid;place-items:center;overflow:visible}.comm p{margin:0;color:var(--ink);font-size:1rem;background:#0d0a14b3;border-radius:16px;padding:14px}
 #mp .mpg{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:8px;max-height:46vh;overflow-y:auto;padding:4px}
@@ -816,6 +843,14 @@ const SFX={
 /* nivelación: ganancia por efecto para que todos suenen parejo (medido con ponderación A) */
 {const SFXG={tick:3.7,pop:2.1,charge:2.5,draw:2.7,swoosh:1.8,place:4.3,shuffle:2.3,fire:1.9,heal:1.8,boss:1.3,thud:1.9};
  Object.keys(SFXG).forEach(k=>{const f=SFX[k];SFX[k]=(...a)=>{SK=SFXG[k];try{return f(...a)}finally{SK=1}}})}
+/* sonidos grabados (carpeta sonidos/): se cargan tras el primer toque; si aún no están, suena el tono de respaldo */
+const SMP={},SMPN=['carta','espada','dados','pagina','libro','estampa','logro','amigo','invitacion','pestana'],
+  SMPG={carta:1.5,espada:.8,dados:.8,pagina:.9,libro:.9,estampa:.3,logro:.75,amigo:.8,invitacion:.7,pestana:1.2};
+function smpLoad(n){if(n in SMP)return;SMP[n]=null;fetch('sonidos/'+n+'.mp3').then(r=>{if(!r.ok)throw 0;return r.arrayBuffer()}).then(b=>new Promise((ok,ko)=>ac().decodeAudioData(b,ok,ko))).then(b=>{SMP[n]=b}).catch(()=>{delete SMP[n]})}
+function smp(n,fb,v=1){if(!SND)return;const b=SMP[n];if(!b){smpLoad(n);if(fb)fb();return}
+  try{const A=ac();if(A.state==='suspended')A.resume();const s=A.createBufferSource(),g=A.createGain();s.buffer=b;g.gain.value=v*(SMPG[n]||1)*VOL();s.connect(g);g.connect(A.destination);s.start()}catch(e){}}
+{let k=0;const f=()=>{if(k)return;k=1;setTimeout(()=>SMPN.forEach(smpLoad),300)};['pointerdown','keydown'].forEach(ev=>document.addEventListener(ev,f,{capture:true,passive:true,once:true}))}
+{const d=SFX.draw,sl=SFX.slash;SFX.draw=()=>smp('carta',d);SFX.slash=()=>smp('espada',sl)}
 /* sonido de toque: cada vez que el jugador toca la pantalla (respeta el volumen de sonido) */
 {let lastTap=0;document.addEventListener('pointerdown',()=>{const n=performance.now();if(n-lastTap<40)return;lastTap=n;SFX.tap()},{capture:true,passive:true})}
 const rng=(p,a,b)=>Array.from({length:b-a+1},(_,i)=>p+pad(a+i));
@@ -1213,7 +1248,7 @@ async function achNext(){const a=ATQ.shift();if(!a){ATB=0;return}ATB=1;
   const e=document.createElement('div');e.className='atoast'+(a[7]==='alb'?' alb':'');
   e.innerHTML=`<div class="ai">${a[6]?`<img src="${a[6]}">`:a[5]?card(a[5],'still'):a[1]}</div><div><small>${a[7]==='alb'?'📖 ¡Nueva estampa!':a[6]?'🎨 Desbloqueado':'🏆 Logro desbloqueado'}</small><b>${a[2]}</b><span>${a[3]}</span></div>`;
   document.body.appendChild(e);void e.offsetWidth;e.classList.add('in');
-  try{tone(784,.14,'sine',.12);tone(1175,.32,'sine',.12,.12);tone(1568,.4,'triangle',.07,.24);vib([20,40,20])}catch(_){}
+  try{vib([20,40,20]);smp(a[7]==='alb'?'estampa':'logro',()=>{tone(784,.14,'sine',.12);tone(1175,.32,'sine',.12,.12);tone(1568,.4,'triangle',.07,.24)})}catch(_){}
   setTimeout(()=>{const i=e.querySelector('.ai');if(i)i.classList.add('go')},120);
   await wait(3600);e.classList.add('out');await wait(450);e.remove();await wait(250);achNext()}
 /* desbloquea en el momento (se guarda en el teléfono y sale la notificación) */
@@ -1283,7 +1318,7 @@ function albRender(){const P=$('#pn-alb'),o=stLoad();
   let ch=0;ids.forEach(i=>{if(o.alb&&o.alb[i]&&o.alb[i].n){delete o.alb[i].n;ch=1}});if(ch){stSave(o);albDot()}}
 function albFlip(d){const b=BOOKS.find(x=>x.id===ALB.b);if(!b)return;const np=Math.ceil(b.ids.length/9),to=ALB.pg+d;if(to<0||to>=np)return;
   const pg=$('#apage');if(ALB.busy||!pg||RM){ALB.pg=to;ALB.busy=0;albRender();return}
-  ALB.busy=1;try{SFX.swoosh()}catch(e){}pg.classList.add('flipout');if(d<0)pg.classList.add('back');
+  ALB.busy=1;try{smp('pagina',SFX.swoosh)}catch(e){}pg.classList.add('flipout');if(d<0)pg.classList.add('back');
   ALB.ft=setTimeout(()=>{ALB.pg=to;albRender();const n=$('#apage');if(n){n.classList.add('flipin');if(d<0)n.classList.add('back')}ALB.ft=setTimeout(()=>{ALB.busy=0},260)},260)}
 function albSkip(){if(!ALB.busy)return;clearTimeout(ALB.ft);ALB.busy=0;const p=$('#apage');if(p&&p.classList.contains('flipout')){/* se salta la animación */}albRender()}
 function albShow(id){const o=stLoad(),e=(o.alb||{})[id]||{},v=$('#alb-view'),pj=/^[mlp]\d\d$/.test(id),k=/^k/.test(id),ev=/^c(07|50|52)$/.test(id);
@@ -1293,8 +1328,8 @@ document.body.insertAdjacentHTML('beforeend','<div id="alb-view"></div>');
 $('#alb-view').addEventListener('click',e=>{if(e.target.id==='alb-vx'||e.target.id==='alb-view')$('#alb-view').classList.remove('on')});
 $('#pn-alb').addEventListener('click',e=>{
   if(ALB.busy){albSkip();return}
-  const bk=e.target.closest('[data-book]');if(bk){ALB.b=bk.dataset.book;ALB.pg=0;try{SFX.thud()}catch(_){}albRender();return}
-  if(e.target.id==='alb-back'){ALB.b=null;albRender();return}
+  const bk=e.target.closest('[data-book]');if(bk){ALB.b=bk.dataset.book;ALB.pg=0;try{smp('libro',SFX.thud)}catch(_){}albRender();return}
+  if(e.target.id==='alb-back'){try{smp('libro',null,.7)}catch(_){}ALB.b=null;albRender();return}
   if(e.target.id==='alb-prev')return albFlip(-1);if(e.target.id==='alb-next')return albFlip(1);
   const st=e.target.closest('[data-stk]');if(st)albShow(st.dataset.stk)});
 /* deslizar dentro del libro abierto = pasar página */
@@ -1334,10 +1369,10 @@ let LP=2;
 function paneFill(i){try{
   if(i===0)recRender();
   if(i===1)albRender();
-  if(i===3)$('#pn-com').innerHTML=`<h2 class="ph">🛡️ Comunidad</h2><div class="comm"><p><span style="font-size:3rem;display:block;line-height:1.3">🏰</span><b>La plaza de aventureros</b><br>Muy pronto aquí verás a los demás jugadores, podrás mandar solicitudes de amistad e invitar a tus amigos a jugar.${YO?`<br><br>Tu nombre: <b style="color:var(--gold)">${YO.n}</b>`:''}</p></div>`;
+  if(i===3)plazaRender();
   if(i===4){showTabs();const h=$('#recs').innerHTML;$('#recs').classList.remove('on');$('#pn-tab').innerHTML=h.replace(/<button class="rclose" id="recs-x">Cerrar<\/button>/,'')}
 }catch(e){}}
-function lobPage(i,inst){i=Math.max(0,Math.min(4,i));const ch=i!==LP;LP=i;const t=$('#ptrack');if(inst){t.classList.add('drag');requestAnimationFrame(()=>requestAnimationFrame(()=>t.classList.remove('drag')))}
+function lobPage(i,inst){i=Math.max(0,Math.min(4,i));const ch=i!==LP;LP=i;if(ch&&!inst)try{smp('pestana')}catch(_){}const t=$('#ptrack');if(inst){t.classList.add('drag');requestAnimationFrame(()=>requestAnimationFrame(()=>t.classList.remove('drag')))}
   t.style.transform=`translateX(${-i*20}%)`;document.querySelectorAll('#lob-nav button').forEach(b=>b.classList.toggle('on',+b.dataset.go===i));
   paneFill(i);if(ch&&!inst){try{SFX.swoosh()}catch(e){}}}
 $('#lob-nav').addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(b)lobPage(+b.dataset.go)});
@@ -1517,7 +1552,7 @@ function showRes(color){
 }
 showRes();
 function roll(color,cb,faces,only){
-  btn.disabled=true;res.innerHTML='';hits.textContent='';
+  try{smp('dados')}catch(e){}btn.disabled=true;res.innerHTML='';hits.textContent='';
   const s=dice[0].slot.offsetWidth,dur=2000;
   const anims=dice.map((d,i)=>{
     if(only!==undefined&&i!==only)return Promise.resolve();
@@ -2081,16 +2116,35 @@ sn.value=SND;slUpd();
 sn.addEventListener('input',()=>{SND=+sn.value;slUpd();try{localStorage.setItem('mesa-snd',SND)}catch(e){}});
 sn.addEventListener('change',()=>{if(SND>0)SFX.pop()});}
 /* música de fondo con su propio volumen (independiente de los efectos) */
-{const MUS=new Audio(encodeURI('Yugioh pro music.mp3'));MUS.loop=true;MUS.preload='auto';
+/* música: una pista según la pantalla (menú · álbum y comunidad · batalla · jefe final · victoria · derrota), con fundido entre pistas */
+{const TR={menu:1,comunidad:1,batalla:1,jefe:1,victoria:0,derrota:0}; /* 1 = se repite */
+const AU={};const au=n=>{if(!AU[n]){const a=new Audio('musica/'+n+'.mp3');a.loop=!!TR[n];a.preload='none';AU[n]=a}return AU[n]};
 let MV=5;try{const sv=localStorage.getItem('mesa-mus');if(sv!==null)MV=+sv}catch(e){}
+let CUR=null,DONE=null,FD=0;
 const sl=$('#mus'),ic=$('#musIcon'),nm=$('#musNum');
-const upd=()=>{sl.style.setProperty('--pct',MV/10*100+'%');nm.textContent=MV;ic.textContent=MV===0?'🔇':'🎵';MUS.volume=MV/10};
-const go=()=>{if(MV>0&&MUS.paused&&!document.hidden)MUS.play().catch(()=>{})};
+const vol=()=>MV/10*.8;
+const upd=()=>{sl.style.setProperty('--pct',MV/10*100+'%');nm.textContent=MV;ic.textContent=MV===0?'🔇':'🎵';if(CUR&&!FD)au(CUR).volume=vol()};
+/* qué pista toca ahora */
+const want=()=>{const o=$('#ov');
+  if(o&&o.classList.contains('on')){if(o.classList.contains('vic'))return 'victoria';if(o.classList.contains('der'))return 'derrota'}
+  if(lobbyOn())return (LP===1||LP===3)?'comunidad':'menu';
+  return document.body.classList.contains('finalph')?'jefe':'batalla'};
+const fade=(a,to,ms,end)=>{const v0=a.volume,t0=performance.now();FD++;const st=()=>{const k=Math.min(1,(performance.now()-t0)/ms);try{a.volume=Math.max(0,Math.min(1,v0+(to-v0)*k))}catch(e){}if(k<1)requestAnimationFrame(st);else{FD--;end&&end()}};st()};
+let UNL=0;
+function musTick(){if(!UNL||MV<=0||document.hidden){if(CUR&&!au(CUR).paused&&(MV<=0||document.hidden))au(CUR).pause();return}
+  const w=want();
+  if(w!==CUR){const old=CUR;CUR=w;DONE=null;
+    if(old){const o=au(old);fade(o,0,500,()=>{o.pause();try{o.currentTime=0}catch(e){}})}
+    const a=au(w);try{if(!TR[w])a.currentTime=0}catch(e){}a.volume=0;a.play().then(()=>fade(a,vol(),old?700:400)).catch(()=>{CUR=null});return}
+  const a=au(CUR);if(a.paused&&!a.ended&&DONE!==CUR){a.volume=vol();a.play().catch(()=>{})}
+  if(a.ended)DONE=CUR}
+window.musTick=musTick;
 sl.value=MV;upd();
-sl.addEventListener('input',()=>{MV=+sl.value;upd();try{localStorage.setItem('mesa-mus',MV)}catch(e){}if(MV===0)MUS.pause();else go()});
+sl.addEventListener('input',()=>{MV=+sl.value;upd();try{localStorage.setItem('mesa-mus',MV)}catch(e){}musTick()});
 /* el navegador solo deja sonar tras un toque: se inicia con el primero */
-['pointerup','click','touchend'].forEach(ev=>document.addEventListener(ev,go,{capture:true,passive:true}));
-document.addEventListener('visibilitychange',()=>{if(document.hidden)MUS.pause();else go()});}
+['pointerup','click','touchend'].forEach(ev=>document.addEventListener(ev,()=>{UNL=1;musTick()},{capture:true,passive:true}));
+document.addEventListener('visibilitychange',musTick);
+setInterval(musTick,400);}
 /* ===== LOBBY ===== */
 let GAMEON=!NEWG,STARTARM=0;
 const lobbyOn=()=>!$('#lobby').classList.contains('oculto');
@@ -2248,7 +2302,7 @@ function mpOn(m){
   else if(m.t==='charno'){CHAR=m.char;MP.rdy=0;if(!COOP)mpRoom()}
   else if(m.t==='resumed'){MP.role=m.role;MP.peer=m.peer?{char:m.peerChar}:null;mpDropBanner(null);mpResync();if(!COOP||COOPEND)mpRoom()}
   else if(m.t==='peer'){
-    if(m.on){MP.peer={char:m.char};mpDropBanner(null);if(CDROP)cDlgOff();if(m.back){mpResync();if(COOP&&!COOPEND)cToast('✅ Tu amigo volvió');return}mpReset();MP.prdy=0;MP.rdy=0;setTimeout(mpHi,50)}
+    if(m.on){if(!MP.peer&&!m.back)try{smp('amigo')}catch(_){}MP.peer={char:m.char};mpDropBanner(null);if(CDROP)cDlgOff();if(m.back){mpResync();if(COOP&&!COOPEND)cToast('✅ Tu amigo volvió');return}mpReset();MP.prdy=0;MP.rdy=0;setTimeout(mpHi,50)}
     else if(m.wait){if(COOP&&!COOPEND)cDrop(m.wait);else mpDropBanner('⏳ Tu amigo perdió la conexión · esperándolo',m.wait);return}
     else{MP.peer=null;MP.prdy=0;MP.pn='';mpDropBanner(null);
       if(COOP&&!COOPEND){mpOnMsg({k:'left',lost:CDROP?1:0});return}
@@ -2424,7 +2478,8 @@ $('#mp-go').addEventListener('click',()=>{
 });
 /* ---- asistencia del compañero ---- */
 let DING=null;
-function coopDing(){try{vib([40,60,40]);if(SND<=0)return;const ac=DING||(DING=new (window.AudioContext||window.webkitAudioContext)());if(ac.state==='suspended')ac.resume();const t=ac.currentTime;[[659,0],[523,.3]].forEach(([f,d])=>{const o=ac.createOscillator(),g=ac.createGain();o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(0,t+d);g.gain.linearRampToValueAtTime(.35*SND/10,t+d+.02);g.gain.exponentialRampToValueAtTime(.001,t+d+1);o.connect(g);g.connect(ac.destination);o.start(t+d);o.stop(t+d+1.1)})}catch(e){}}
+function coopDing(){try{vib([40,60,40]);if(SND<=0)return;smp('invitacion',coopDing0)}catch(e){}}
+function coopDing0(){try{const ac=DING||(DING=new (window.AudioContext||window.webkitAudioContext)());if(ac.state==='suspended')ac.resume();const t=ac.currentTime;[[659,0],[523,.3]].forEach(([f,d])=>{const o=ac.createOscillator(),g=ac.createGain();o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(0,t+d);g.gain.linearRampToValueAtTime(.35*SND/10,t+d+.02);g.gain.exponentialRampToValueAtTime(.001,t+d+1);o.connect(g);g.connect(ac.destination);o.start(t+d);o.stop(t+d+1.1)})}catch(e){}}
 /* ===== FASES DEL TURNO (un solo dueño del control por fase) =====
    elegir (activo) → tirar dados → asistencia (amigo) → cinemática (la misma en los dos) → efectos de la asistencia (amigo) → efectos normales (activo) → fin de turno */
 /* jugador activo: toca "Tirar dados" → pide la asistencia al amigo y espera */
@@ -2641,7 +2696,8 @@ const offList=async()=>{
   rng('m',1,20).forEach(id=>L.push(abU(`personajes/personaje 1/${id}.webp`)));
   rng('l',1,20).forEach(id=>L.push(abU(`personajes/personaje 2/${id}.webp`)));
   rng('p',1,20).forEach(id=>L.push(abU(`personajes/personaje 3/${id}.webp`)));
-  L.push(abU('Yugioh pro music.mp3'),abU('index.html'),abU('manifest.json'),location.origin+location.pathname);
+  ['menu','comunidad','batalla','jefe','victoria','derrota'].forEach(n=>L.push(abU(`musica/${n}.mp3`)));
+  L.push(abU('index.html'),abU('manifest.json'),location.origin+location.pathname);
   try{const mu=new URL('manifest.json',location.href),m=await (await fetch(mu,{cache:'no-cache'})).json();(m.icons||[]).forEach(i=>L.push(new URL(i.src,mu).href))}catch(e){}
   return [...new Set(L)].map(u=>({u}))};
 const offBtn=()=>$('#lob-offline');
@@ -2712,7 +2768,7 @@ async function updCheck(){
   updUI(fail?'fail':'ok');if(!fail&&idxN){const b=$('#uB'),f0=b.onclick;b.onclick=()=>{f0&&f0();try{if(!COOP)localStorage.setItem('mesa-juego',JSON.stringify(S))}catch(e){}location.reload()}}}
 async function offInit(){
   if(!('caches' in window)||!('serviceWorker' in navigator))return;
-  let ok=0;try{ok=!!localStorage.getItem('mesa-offline')&&!!await caches.match(new URL(encodeURI('Yugioh pro music.mp3'),location.href).href)}catch(e){}
+  let ok=0;try{ok=!!localStorage.getItem('mesa-offline')&&!!await caches.match(new URL('musica/menu.mp3',location.href).href)}catch(e){}
   if(ok)offShow('✅ Guardado en el teléfono · toca para verificar');
   else{try{localStorage.removeItem('mesa-offline')}catch(e){}offShow('⬇️ Guardar el juego para jugar sin conexión')}
   offBtn().onclick=()=>{if(OFF.busy)return;if(!navigator.onLine){alert('Necesitas conexión a internet para guardar el juego.');return}
@@ -2789,6 +2845,63 @@ if('serviceWorker' in navigator){
     setInterval(()=>r.update(),60000);
   }).catch(()=>{});
 }
+
+/* ===== PLAZA DE LA COMUNIDAD: tu guerrero y los aventureros conectados ahora ===== */
+const AVN={arquera:'Arquera',barbaro:'Bárbaro',guerrero:'Guerrero',mago:'Mago',ninja:'Ninja',paladin:'Paladín'};
+let AV=null;try{AV=localStorage.getItem('mesa-av');if(!AVN[AV])AV=null}catch(e){}
+const PZ={w:new Map(),raf:0,last:0,poll:0,total:1,el:null};
+const pzOn=()=>{try{return lobbyOn()&&LP===3&&!document.hidden}catch(e){return false}};
+function plazaRender(){const P=$('#pn-com');
+  if(!PZ.el||!P.contains(PZ.el)){
+    P.innerHTML=`<h2 class="ph">🛡️ Comunidad</h2><div class="pz" id="pz"></div>
+      <div class="pzbar"><span class="on" id="pz-n">🟢 En la plaza</span><button id="pz-av">🧙 Cambiar guerrero</button></div>
+      <p class="pzsoon">Toca el suelo para caminar · Muy pronto: amigos e invitaciones para jugar</p>`;
+    PZ.el=$('#pz');PZ.w.forEach(w=>w.el.remove());PZ.w.clear();
+    PZ.el.addEventListener('click',e=>{const me=PZ.w.get('@me');if(!me)return;const r=PZ.el.getBoundingClientRect();
+      const x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;me.tx=Math.min(.94,Math.max(.06,x));me.ty=Math.min(.97,Math.max(.5,y));me.wt=0;
+      const t=document.createElement('i');t.className='tgt';t.style.left=me.tx*100+'%';t.style.top=me.ty*100+'%';PZ.el.appendChild(t);setTimeout(()=>t.remove(),700)});
+    $('#pz-av').onclick=()=>pzPick();}
+  pzMe();pzCount();if(!AV)setTimeout(()=>{if(pzOn()&&!AV)pzPick()},400);
+  pzLoop();pzPoll()}
+function pzMe(){const n=YO?YO.n:'Tú',a=AV||'guerrero';let me=PZ.w.get('@me');
+  if(me&&(me.a!==a||me.n!==n)){me.el.remove();PZ.w.delete('@me');me=null}
+  if(!me)pzAdd('@me',n,a,1)}
+function pzAdd(id,n,a,mine){const el=document.createElement('div');el.className='w in'+(mine?' me':'');
+  el.innerHTML=`<div class="b"><span class="nm"></span><img class="c" alt="" style="display:none" src="guerreros/${a}-camina.webp"><img class="p" alt="" src="guerreros/${a}-parado.webp"><i class="sh"></i></div>`;
+  el.querySelector('.nm').textContent=n;PZ.el.appendChild(el);
+  const w={id,n,a,el,x:.15+Math.random()*.7,y:mine?.85:.52+Math.random()*.42,tx:0,ty:0,wt:mine?2.5:Math.random()*3,mv:0,fl:0,
+    c:el.querySelector('img.c'),p:el.querySelector('img.p'),b:el.querySelector('.b')};w.tx=w.x;w.ty=w.y;PZ.w.set(id,w);pzPos(w);return w}
+function pzPos(w){const r=PZ.el.getBoundingClientRect(),d=.62+.38*Math.max(0,(w.y-.5)/.5); /* más lejos (arriba) = más pequeño */
+  w.el.style.transform=`translate(${w.x*r.width}px,${w.y*r.height}px)`;w.el.style.zIndex=Math.round(w.y*1000);
+  w.b.style.setProperty('--h',Math.round(Math.min(130,r.height*.36)*d)+'px')}
+function pzMode(w,mv){if(w.mv===mv)return;w.mv=mv;w.c.style.display=mv?'':'none';w.p.style.display=mv?'none':''}
+function pzLoop(){if(PZ.raf)return;PZ.last=performance.now();
+  const f=t=>{if(!pzOn()){PZ.raf=0;return}const dt=Math.min(.1,(t-PZ.last)/1000);PZ.last=t;const r=PZ.el.getBoundingClientRect();if(!r.width){PZ.raf=requestAnimationFrame(f);return}
+    PZ.w.forEach(w=>{const dx=(w.tx-w.x)*r.width,dy=(w.ty-w.y)*r.height,dist=Math.hypot(dx,dy);
+      if(dist<2){pzMode(w,0);w.wt-=dt;if(w.wt<=0&&w.id!=='@me'){w.tx=.06+Math.random()*.88;w.ty=.52+Math.random()*.44;w.wt=2+Math.random()*5}
+        else if(w.wt<=-8&&w.id==='@me'){w.tx=Math.min(.94,Math.max(.06,w.x+(Math.random()-.5)*.4));w.ty=Math.min(.97,Math.max(.52,w.y+(Math.random()-.5)*.3));w.wt=0}}
+      else{pzMode(w,1);const sp=(30+40*w.y)*dt,k=Math.min(1,sp/dist);w.x+=dx*k/r.width;w.y+=dy*k/r.height;const fl=dx<0;
+        if(Math.abs(dx)>1&&fl!==w.fl){w.fl=fl;w.c.classList.toggle('fl',fl);w.p.classList.toggle('fl',fl)}if(dist<2)w.wt=w.id==='@me'?0:2+Math.random()*4}
+      pzPos(w)});
+    PZ.raf=requestAnimationFrame(f)};PZ.raf=requestAnimationFrame(f)}
+function pzCount(){const e=$('#pz-n');if(!e)return;
+  e.textContent=!YO?'📜 Registra tu nombre para ver a los demás':sinNet()||!navigator.onLine?'📴 Sin conexión':PZ.total<=1?'🟢 Solo tú en la plaza ahora':`🟢 ${PZ.total} aventureros en la plaza`}
+async function pzPoll(){if(!pzOn()||!YO||!navigator.onLine||sinNet())return pzCount();if(Date.now()-PZ.poll<7000)return;PZ.poll=Date.now();
+  try{const c=new AbortController(),to=setTimeout(()=>c.abort(),8000);
+    const r=await fetch(MP_URL+'/plaza',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({n:YO.n,k:YO.k,a:AV||'guerrero'}),signal:c.signal});clearTimeout(to);
+    const j=await r.json();if(!j||j.r!=='ok'||!PZ.el)return;PZ.total=j.total||1;
+    const seen=new Set(['@me']);(j.p||[]).forEach(o=>{if(!AVN[o.a])o.a='guerrero';const id='u:'+o.n;seen.add(id);const w=PZ.w.get(id);
+      if(w&&w.a!==o.a){w.el.remove();PZ.w.delete(id)}if(!PZ.w.has(id))pzAdd(id,o.n,o.a,0)});
+    PZ.w.forEach((w,id)=>{if(!seen.has(id)){PZ.w.delete(id);w.el.classList.add('out');setTimeout(()=>w.el.remove(),550)}});
+  }catch(e){}pzCount()}
+setInterval(()=>{if(pzOn()){pzPoll();pzLoop()}},2000);
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&YO&&PZ.poll&&navigator.onLine)try{navigator.sendBeacon&&navigator.sendBeacon(MP_URL+'/plaza',new Blob([JSON.stringify({n:YO.n,k:YO.k,bye:1})],{type:'text/plain'}))}catch(e){}});
+function pzPick(){let d=$('#pz-pick');if(!d){d=document.createElement('div');d.id='pz-pick';document.body.appendChild(d)}
+  d.innerHTML=`<h3>Elige tu guerrero</h3><p style="margin:0;color:#cfc8da;text-align:center;font-size:.9rem">Así te verán los demás en la plaza</p>
+    <div class="g">${Object.keys(AVN).map(k=>`<button data-av="${k}" class="${k===AV?'sel':''}"><img src="guerreros/${k}.webp" alt="">${AVN[k]}</button>`).join('')}</div><button class="x">${AV?'Cerrar':'Más tarde'}</button>`;
+  d.onclick=e=>{const b=e.target.closest('[data-av]');if(b){AV=b.dataset.av;try{localStorage.setItem('mesa-av',AV)}catch(_){}try{SFX.pop()}catch(_){}d.classList.remove('on');pzMe();PZ.poll=0;pzPoll();return}
+    if(e.target.closest('.x')){d.classList.remove('on');if(!AV){AV='guerrero';try{localStorage.setItem('mesa-av',AV)}catch(_){}}}};
+  d.classList.add('on')}
 </script>
 </body>
 </html>

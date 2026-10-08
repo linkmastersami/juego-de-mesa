@@ -73,6 +73,8 @@ async function pushAll(payload, skip) {
   }));
   return n;
 }
+const PLAZA = new Map(); /* NOMBRE -> { a: guerrero, t: última vez visto } (solo en memoria) */
+const AVS = ['arquera', 'barbaro', 'guerrero', 'mago', 'ninja', 'paladin'];
 let lastQuickPush = 0, lastUpdPush = 0;
 const readBody = (req, cb) => { let b = ''; req.on('data', d => { b += d; if (b.length > 4096) req.destroy(); }); req.on('end', () => { try { cb(JSON.parse(b || '{}')); } catch { cb(null); } }); };
 const waiting = () => [...rooms.entries()].filter(([, r]) => r.pub && !r.guest && !r.gone.guest && r.host && r.host.readyState === 1);
@@ -106,6 +108,21 @@ const server = http.createServer((req, res) => {
       if (cur && cur.h !== h) return res.end(JSON.stringify({ r: 'taken' }));
       if (!cur) { NAMES.set(n, { h, t: Date.now() }); saveNames(); }
       res.end(JSON.stringify({ r: 'ok' }));
+    });
+  }
+  /* plaza de la Comunidad: cada teléfono avisa que está ahí (con su guerrero) y recibe a los demás que están ahora */
+  if (req.method === 'POST' && url === '/plaza') {
+    return readBody(req, b => {
+      const n = b && String(b.n || '').toUpperCase(), k = b && String(b.k || ''), av = b && String(b.a || '');
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      const cur = okName(n) && NAMES.get(n);
+      if (!cur || cur.h !== hashK(k)) return res.end(JSON.stringify({ r: 'bad' }));
+      const a = AVS.includes(av) ? av : 'guerrero', now = Date.now();
+      if (cur.a !== a) { cur.a = a; saveNames(); }
+      if (b.bye) PLAZA.delete(n); else PLAZA.set(n, { a, t: now });
+      for (const [m, v] of PLAZA) if (now - v.t > 30000) PLAZA.delete(m);
+      const p = [...PLAZA.entries()].filter(([m]) => m !== n).sort((x, y) => y[1].t - x[1].t).slice(0, 14).map(([m, v]) => ({ n: m, a: v.a }));
+      res.end(JSON.stringify({ r: 'ok', p, total: PLAZA.size }));
     });
   }
   if (url === '/health') { res.writeHead(200, { 'Content-Type': 'text/plain' }); return res.end('ok'); }
