@@ -930,7 +930,7 @@ function smp(n,fb,v=1){if(!SND)return;SNDT=performance.now();const b=SMP[n];if(!
 /* clics de botones: Jugar / Nueva partida, Menú principal y Reiniciar tienen su propio sonido;
    los demás botones suenan con un clic general solo si su acción no hizo ya algún sonido */
 Object.assign(SFX,{
-  start:()=>{tone(130,.5,'sawtooth',.1,0,260);[392,523,659,784].forEach((f,i)=>tone(f,.32,'triangle',.13,.04+i*.07));noiz(.18,.12)},
+  start:()=>{[392,523,659,784].forEach((f,i)=>tone(f,.32,'triangle',.13,i*.07))},
   menu:()=>{tone(520,.12,'triangle',.13,0,390);tone(390,.2,'triangle',.11,.1,260)},
   resetArm:()=>{tone(740,.07,'square',.05);tone(740,.07,'square',.05,.12)},
   reset:()=>{tone(880,.5,'sawtooth',.07,0,110);tone(440,.35,'square',.04,.06,90);noiz(.3,.08)},
