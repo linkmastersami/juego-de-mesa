@@ -145,7 +145,7 @@
   "iconos/i-comunidad.webp": "e5ffa3d48a3e",
   "iconos/i-records.webp": "3f192fdbc183",
   "iconos/i-tableros.webp": "aad177dc6e2d",
-  "index.html": "8a7a22d1aecd",
+  "index.html": "4283856f6af1",
   "k02.png": "0eb551aafe99",
   "logo.webp": "c79c21426a47",
   "manifest.json": "fdf1323b0a4d",
@@ -224,7 +224,6 @@
   "personajes/personaje 3/p20a.webp": "1f135e22276f",
   "sonidos/amigo.mp3": "a509390a7514",
   "sonidos/carta.mp3": "c8844d91fefd",
-  "sonidos/dados.mp3": "7b44dd1bb526",
   "sonidos/espada.mp3": "19cce4ce7420",
   "sonidos/estampa.mp3": "758c7c03f8c9",
   "sonidos/invitacion.mp3": "db981dc86ef5",
@@ -241,5 +240,5 @@
   "tableros/t07.webp": "d13add3a6534",
   "tableros/t08.webp": "df272cca3775"
  },
- "version": "39aefbd5147f"
+ "version": "9330d6892746"
 }
