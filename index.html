@@ -54,6 +54,9 @@ button{font-family:inherit}
 .heart{color:var(--heart)}
 .step{width:46px;height:46px;border-radius:50%;border:0;background:#4a4555;color:var(--ink);font:700 1.7rem Fredoka,sans-serif}
 .step:active{background:#5b5568;transform:scale(.94)}
+.sdecks{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:4px 0 6px;text-align:center;font-size:.85rem;color:var(--mute)}
+.sdecks>div>.deck{height:16dvh;aspect-ratio:696/1015;margin:4px auto;font-size:.9rem}
+.sdecks>div>.deck b{font-size:1.6rem}
 .piles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:10px 0;text-align:center;font-size:.85rem;color:var(--mute)}
 .piles>div>div{height:20dvh;aspect-ratio:696/1015;margin:4px auto}
 #pDm{position:relative}#pDm .cn{position:absolute;right:4px;bottom:4px;background:#000b;color:#fff;border-radius:10px;padding:1px 7px;font-weight:700}
@@ -152,7 +155,58 @@ button{font-family:inherit}
 .dim{opacity:.45}
 .row3{display:flex;gap:8px;width:100%}.b3{flex:1;aspect-ratio:696/1015;transition:.4s}.b3.sel{box-shadow:0 0 0 4px var(--gold);transform:scale(1.07)}.b3 .deck{height:100%;font-size:2rem}
 #apart{position:fixed;right:6px;top:64px;display:flex;flex-direction:column;gap:4px;width:9vw;max-width:48px;z-index:1}#apart>div{aspect-ratio:696/1015}
-.step,#tTurn{display:none!important}.bar{grid-template-columns:1fr 1fr!important}.row{justify-content:center}
+.step,#tTurn{display:none!important}.bar{grid-template-columns:1fr!important}.row{justify-content:center}
+/* ===== mano en abanico + carta de personaje con su habilidad ===== */
+.dock{position:relative;z-index:5;flex:none;height:max(122px,20dvh);display:flex;gap:4px;align-items:flex-end;margin-top:2px}
+.pjs{position:relative;height:84%;aspect-ratio:696/1015;flex:none;margin-top:auto}
+.pjs>.pjc{position:absolute;inset:0}
+.pjs>.habc{position:absolute;width:62%;aspect-ratio:696/1015;left:-4%;top:-46%;transform:rotate(-8deg);filter:drop-shadow(0 4px 6px #000c);touch-action:none;z-index:2}
+.pjs>.habc.hdrag{opacity:.35}
+.dock img{-webkit-user-drag:none;user-select:none;-webkit-touch-callout:none}.pjs .card{pointer-events:none}
+.fan{position:relative;flex:1;height:100%;touch-action:none;user-select:none;-webkit-user-select:none;--fw:76px}
+.fan .fc{position:absolute;left:0;bottom:4px;width:var(--fw);aspect-ratio:696/1015;transform-origin:50% 115%;transition:transform .2s cubic-bezier(.2,.8,.3,1),opacity .2s,filter .2s;will-change:transform;border-radius:8px;box-shadow:0 4px 10px #0009}
+.fan .fc .card{pointer-events:none}
+.fan .fc.dim{opacity:.4;filter:grayscale(.7)}
+.fan .fc.hsp{box-shadow:0 0 0 2px #ffd34d,0 0 14px #ffd34daa}
+.fan .fc.ghost{opacity:.15}
+.fan.open .fc{transition:transform .12s ease-out,opacity .2s}
+.fan .emp{position:absolute;inset:auto 0 18px;text-align:center;color:var(--mute);font-size:.85rem;line-height:1.3}
+#fpv{position:fixed;left:50%;bottom:calc(max(122px,20dvh) + 46px);width:min(56vw,250px);transform:translateX(-50%) scale(.85);opacity:0;pointer-events:none;z-index:7;transition:opacity .15s,transform .15s;filter:drop-shadow(0 12px 30px #000e)}
+#fpv.on{opacity:1;transform:translateX(-50%) scale(1)}
+#fpv .card{width:100%;height:auto;aspect-ratio:696/1015}
+#fpv small{display:block;text-align:center;margin-top:6px;font:700 .8rem Fredoka,sans-serif;color:#ffd34d;text-shadow:0 1px 3px #000}
+#fgh{position:fixed;left:0;top:0;width:84px;aspect-ratio:696/1015;pointer-events:none;z-index:8;display:none;filter:drop-shadow(0 10px 18px #000d)}
+#fgh.on{display:block}
+#fgh .card{width:100%;height:100%}
+.cell.can{box-shadow:0 0 0 3px #ffd34d,0 0 22px 6px #ffd34dbb;animation:canp .8s ease-in-out infinite alternate;z-index:2}
+.cell.can.hov{transform:scale(1.07);box-shadow:0 0 0 4px #fff,0 0 30px 10px #ffd34d}
+@keyframes canp{to{box-shadow:0 0 0 3px #ffd34d,0 0 10px 2px #ffd34d66}}
+.cell.nope{opacity:.45;filter:grayscale(.6);transition:opacity .2s}
+/* ===== batalla flotante sobre el tablero ===== */
+#bt{position:fixed;left:0;right:0;top:0;bottom:auto;height:var(--dockt,72dvh);inset:auto;top:0;left:0;right:0;background:radial-gradient(ellipse at 50% 45%,#1d1a24e6,#0d0a14f2 75%);z-index:4;display:none;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:calc(env(safe-area-inset-top,0px) + 8px) 12px 8px;max-width:520px;margin:0 auto;overflow:hidden}
+#bt.on{display:flex}
+#bt>.btns{position:static;background:none;margin:0;padding:0;box-shadow:none;width:100%;max-width:420px}
+.bf{display:flex;align-items:flex-start;justify-content:center;gap:6px;width:100%}
+.bf .bc{width:min(36vw,clamp(110px,calc((var(--dockt,600px) - 210px)*.62),180px));display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--mute);font-size:.78rem}
+.bf .bc:first-child .cw{animation:bfl 3.2s ease-in-out infinite alternate}.bf .bc:last-child .cw{animation:bfl 3.2s ease-in-out -1.6s infinite alternate}
+@keyframes bfl{from{transform:translateY(-4px) rotate(-1deg)}to{transform:translateY(4px) rotate(1deg)}}
+.bf .cw{position:relative;width:100%;aspect-ratio:696/1015;border-radius:10px;filter:drop-shadow(0 10px 18px #000c)}
+.bf .cw>.card,.bf .cw>div>.card{width:100%;height:100%}
+.bf .drop{border:2px dashed #ffd34d99;display:grid;place-items:center;text-align:center;color:#ffd34d;font:600 .82rem Fredoka,sans-serif;background:#ffd34d10;transition:transform .15s,background .15s}
+.bf .hov{transform:scale(1.06);background:#ffd34d30;box-shadow:0 0 0 3px #fff,0 0 26px 8px #ffd34d}
+.bf .ca{position:absolute;inset:0;cursor:pointer}
+.bf .ass{position:absolute;right:-14%;bottom:-8%;display:flex;flex-direction:column-reverse;gap:0;width:52%;z-index:2}
+.bf .ass>div{width:100%;aspect-ratio:696/1015;margin-top:-62%;transform:rotate(6deg);cursor:pointer;filter:drop-shadow(0 4px 8px #000c)}
+.bf .ass>div:first-child{margin-top:0}
+.bf .ass>div .card{width:100%;height:100%}
+.bf .vsx{align-self:center;margin-top:-30px}
+.bf .orb{width:52px;height:52px;font-size:1.55rem;margin-top:4px}
+.bhint{font-size:.8rem;color:#e9e4f2;text-align:center;background:#0d0a14aa;border-radius:10px;padding:4px 10px;max-width:420px}
+#bt .btns{flex-direction:row;gap:8px}#bt .btns button{flex:1}
+#bt #go,#bt #cas-go{background:linear-gradient(180deg,#ffe07a,#e0a92a);color:#3a2808;font-weight:800;box-shadow:0 4px 0 #8a5c12}
+#bt .xtra{width:100%;max-width:420px}
+.bf.in .bc{animation:bfin .35s cubic-bezier(.2,.9,.3,1.3) both}.bf.in .bc:last-child{animation-delay:.08s}
+@keyframes bfin{from{transform:scale(.6);opacity:0}}
 
 .box{animation:pop .28s cubic-bezier(.2,.9,.3,1.3)}@keyframes pop{from{transform:scale(.8);opacity:0}}
 .tbn{font:700 clamp(3rem,16vw,6rem) Fredoka,sans-serif;color:#fff;letter-spacing:.12em;text-shadow:0 4px 0 #0008;animation:pop .4s}
@@ -757,23 +811,25 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
 </div>
 
 <div class="app">
-  <div class="bar"><button class="tab" id="tTurn">Turno</button><button class="tab" data-sh="hand" id="tHand">Mano</button><button class="tab" data-sh="st" id="tSt">Estado</button></div>
+  <div class="bar"><button class="tab" id="tTurn">Turno</button><button class="tab" data-sh="st" id="tSt">Estado</button></div>
   <div id="hud"><div class="hhp"><div class="hpb" id="hpb"><i>♥</i><i>♥</i><i>♥</i><i>♥</i><i>♥</i><i>♥</i><i>♥</i><i>♥</i><i>♥</i><i>♥</i></div><b id="hpn">10</b></div><div class="hch" id="hfire">🔥 0</div><div class="hch" id="hturn">T1</div></div>
   <div id="cross"></div>
   <div><span class="lbl">En mesa</span><div class="strip" id="mesa"></div></div>
-  <div class="decks">
-    <div data-pj="m19" id="m19"></div><div data-hab="1" id="m20"></div>
-    <div class="deck" data-dk="M" id="dM"></div><div class="deck" data-dk="K" id="dK"></div><div class="deck" data-dk="C" id="dC"></div>
+  <div class="dock" id="dock">
+    <div class="pjs"><div data-pj="m19" id="m19" class="pjc"></div><div data-hab="1" id="m20" class="habc"></div></div>
+    <div class="fan" id="tHand"></div>
   </div>
 </div>
 
-<div class="sheet" id="sh-hand"><h3>Mano</h3><div class="grid" id="hand"></div></div>
+<div class="sheet" id="sh-hand" style="display:none"><div class="grid" id="hand"></div></div>
+<div id="fpv"></div><div id="fgh"></div>
 
 <div class="sheet" id="sh-st">
   <h3>Estado del jugador</h3>
-  <div class="top">
-    <div class="panel"><small>Turno</small><div class="row"><button class="step" data-k="turn" data-d="-1" aria-label="Turno menos">−</button><span class="num" id="turn">1</span><button class="step" data-k="turn" data-d="1" aria-label="Turno más">+</button></div></div>
-    <div class="panel"><small>Corazones</small><div class="row"><button class="step" data-k="hp" data-d="-1" aria-label="Corazón menos">−</button><span class="num"><span class="heart">♥</span><span id="hp">10</span></span><button class="step" data-k="hp" data-d="1" aria-label="Corazón más">+</button></div></div>
+  <div class="sdecks">
+    <div>Personaje<div class="deck" data-dk="M" id="dM"></div></div>
+    <div>Agotamiento<div class="deck" data-dk="K" id="dK"></div></div>
+    <div>Calabozo<div class="deck" data-dk="C" id="dC"></div></div>
   </div>
   <div class="piles">
     <div data-pile="disc">Descartes calabozo<div class="deck" id="pDisc"></div></div>
@@ -926,19 +982,18 @@ function render(){
   if(!S.over&&!ENDQ&&(!COOP||MYT)&&lost()){ENDQ=1;whenFree(()=>{ENDQ=0;if(!S.over&&lost())endGame()})}
   $('#cross').innerHTML=[null,1,null,2,0,3,null,4,null].map(i=>{
     if(i===null)return'<div></div>';const c=S.cross[i];
-    return c?`<div class="cell${PICK&&!filling()&&(i||S.final&&unl().length)&&CH[c.id]&&!blk(c)?' blink':''}${HIDE.has(i)?' hid':''}" data-s="${i}">${card(c.id)}<b class="pg">${PGOLD[i]!==undefined?PGOLD[i]:c.p}</b></div>`:PEND[i]?`<div class="cell">${PEND[i].h}<b class="pg">${PEND[i].p}</b></div>`:'<div class="cell empty"></div>'}).join('');
+    return c?`<div class="cell${HIDE.has(i)?' hid':''}" data-s="${i}">${card(c.id)}<b class="pg">${PGOLD[i]!==undefined?PGOLD[i]:c.p}</b></div>`:PEND[i]?`<div class="cell">${PEND[i].h}<b class="pg">${PEND[i].p}</b></div>`:'<div class="cell empty"></div>'}).join('');
   $('#mesa').innerHTML=S.mesa.map((id,i)=>`<div data-m="${i}">${card(id)}</div>`).join('');
   {const pfxH=S.personaje||'m';$('#hand').innerHTML=S.hand.length?S.hand.map((id,i)=>`<div data-h="${i}"${HSP(pfxH,id)?' class="blink"':''}>${card(id)}</div>`).join(''):'';
   if(!S.hand.length)$('#hand').innerHTML='<div class="empt" style="grid-column:1/-1;aspect-ratio:auto">Sin cartas en la mano</div>';
-  $('#tHand').textContent='Mano ('+S.hand.length+')';$('#tHand').classList.toggle('blink',S.hand.some(x=>HSP(pfxH,x)));}
+  try{fanRender()}catch(e){}}
   {const p=S.personaje||'m';$('#m19').innerHTML=card(p+'19');$('#m19').dataset.pj=p+'19';$('#m20').innerHTML=card(p+'20',S.hab?'':'off');$('#m20').dataset.hab=1;}
   $('#dM').innerHTML=`<span>Personaje<b>${S.dM.length}</b></span>`;
-  $('#dK').innerHTML=`<span>Agotamiento<b>${S.dK.length}</b></span>`;$('#dK').classList.toggle('blink',!!(PICK&&!S.hand.length&&S.dK.length));
+  $('#dK').innerHTML=`<span>Agotamiento<b>${S.dK.length}</b></span>`;{const nk=!!(PICK&&!S.hand.length&&S.dK.length&&!S.over);$('#dK').classList.toggle('blink',nk);$('#tSt').classList.toggle('blink',nk)}
   $('#dC').innerHTML=`<span>Calabozo<b>${S.dC.length}</b></span>`;
   $('#pDisc').innerHTML=`<span><b>${S.disc.filter(x=>x[0]==='c').length}</b></span>`;
   {const pfxR=S.personaje||'m';const dm=S.disc.filter(x=>x[0]===pfxR);$('#pDm').innerHTML=(dm.length?card(dm[dm.length-1]):'<div class="card" style="opacity:.4"></div>')+`<span class="cn">${dm.length}</span>`;$('#pFire').textContent=ICO()+' '+fireDisc()}
   $('#pComp').innerHTML=S.comp.length?card(S.comp[S.comp.length-1]):'<div class="card" style="opacity:.4"></div>';
-  $('#turn').textContent=S.turn;$('#hp').textContent=S.hp;
   {const hp=Math.max(0,S.hp),pb=$('#hpb');[...pb.children].forEach((e,k)=>e.classList.toggle('on',k<hp));pb.classList.toggle('low',hp>0&&hp<=3);$('#hpn').textContent=hp;
    $('#hfire').textContent=ICO()+' '+fireDisc();$('#hturn').textContent='Turno '+S.turn;
    if(HUDHP!==null&&hp!==HUDHP){const h=$('#hud');h.classList.remove('hit','heal');void h.offsetWidth;h.classList.add(hp<HUDHP?'hit':'heal')}HUDHP=hp}
@@ -997,7 +1052,7 @@ function fxDiff(){
   /* agotamiento (u otra carta) que sale de la mesa: vuela de la mesa al mazo de agotamiento */
   if(!NOFX&&PMA&&S.mesa.length<PMA.length&&S.turn>=PT&&!S.over){const left=PMA.slice();S.mesa.forEach(x=>{const k=left.indexOf(x);if(k>=0)left.splice(k,1)});if(left.length)BQ.push(async()=>{await Promise.all(left.slice(0,4).map((x,i)=>wait(i*160).then(()=>flyCard(x,rc('#mesa'),rc('#dK'),800,'#7dffb0'))))})}
   PMA=S.mesa.slice();PHAB=S.hab?1:0;PV=nv;PHP=S.hp;PM=S.mesa.length;PT=S.turn}
-const rc=sel=>{const e=document.querySelector(sel),r=e&&e.getBoundingClientRect();return r&&r.width?r:null};
+const rc=sel=>{let e=document.querySelector(sel);if(e&&e.closest('#sh-st')&&!$('#sh-st').classList.contains('on'))e=$('#tSt');const r=e&&e.getBoundingClientRect();return r&&r.width?r:null};
 /* una carta vuela de un punto a otro con brillo (si no hay punto visible, sale del centro / llega abajo) */
 async function flyCard(id,a,b,ms=850,col='#ffd34d',w=64,g=1.5){try{if(RM)return;const h=w*1.458,A=a?ctr(a):[innerWidth/2,innerHeight*.45],B=b?ctr(b):[innerWidth/2,innerHeight-60];
   const g=document.createElement('div');g.className='cgh';g.style.cssText=`left:${A[0]-w/2}px;top:${A[1]-h/2}px;width:${w}px;height:${h}px;border-radius:8px;box-shadow:0 0 22px 6px ${col}`;g.innerHTML=card(id);document.body.appendChild(g);
@@ -1693,15 +1748,21 @@ function evt(i){const id=S.cross[i].id,ef=(sel,col)=>{try{albGet(CREP[id]||id,'v
   if(id==='c52')return ov(id,[['Activar: +2 al jefe final y apartar la carta',()=>{ef('#apart','#b06bff');S.cross[0].p+=2;S.apart.push(id);S.cross[i]=null}]]);
   ov(id,[['Activar: descartar este + otro desafío',()=>{ef('#pDisc','#ff8a4d');S.disc.push(id);S.cross[i]=null;render();pickCh('Elige el desafío a descartar',x=>{const mj=/^c4[0-8]$/.test(x.id);dropCh(S.cross.indexOf(x));if(mj){S.hand.forEach(h=>S.disc.push(h));S.hand=[];const pm=S.disc.filter(q=>q[0]===PC());S.disc=S.disc.filter(q=>q[0]!==PC());S.dM.push(...pm);shuf(S.dM);fxShufM();draw(hN())}render();close()},()=>close(),null);return 1}]])}
 const unl=()=>[['a',6],['r',7],['v',8]].filter(([k,n])=>S.cross.some(x=>x&&x.id==='g0'+n));
-function openBat(i){const go=k=>{PICK=0;B={i,act:null,as:[],col:k,m18sh:0};$('#bt').classList.add('on');rb()};
+function openBat(i,k0,act){const go=k=>{PICK=0;B={i,act:act||null,as:[],col:k,m18sh:0};BIN=1;$('#bt').classList.add('on');rb();try{SFX.place()}catch(e){}};
   if(i)return go();
-  const u=unl();if(!u.length)return;
+  if(k0)return go(k0);
+  const u=unl().filter(([k])=>!act||okcC(act,k));if(!u.length)return;
+  if(u.length===1&&act)return go(u[0][0]);
   ov(null,u.map(([k])=>['Desafiar con '+COLN[k],()=>go(k)]),'<p>Elige el color con el que desafías al jefe</p>')}
+let BIN=0;
 function rb(){
-  const c=S.cross[B.i],h=CH[c.id],sl=(id,t,a)=>`<div data-bp="${a}">${id?card(id):t}</div>`;
-  $('#bt').innerHTML=`<div class="vs"><div class="side"><div class="cell">${card(c.id)}</div><div class="orb">${Math.max(0,LV(c)-c.p)}</div><small>falta</small></div><b class="vsx">VS</b><div class="side"><div class="pl">${sl(B.act,'Acción','a')}${sl(B.as[0],'Asist.','s0')}${sl(B.as[1],'Asist.','s1')}</div><div class="orb p">${totB()}</div><small>tu progreso${l05on()?' · l05: +1':''}</small></div></div>
-  <span class="lbl">Tu mano: toca una carta</span>${(()=>{const L=[...S.hand,...(S.hab?[p20()]:[])].filter(x=>x!==B.act&&!B.as.includes(x));return `<div class="${hgc(L.length)}">${L.map(id=>`<div data-bh="${id}" class="${(B.act?oka(id):okc(id)&&id!=='l12')?'':'dim'}">${card(id)}</div>`).join('')}</div>`})()}
-  ${B.act==='m20'?`<div class="btns"><button id="m20disc" class="fxb"><span class="fth">${card('m20')}</span><span>Descartar cartas antes de actuar</span></button></div>`:''}${B.act==='l20'?`<div class="btns" style="flex-direction:row"><button id="l20m" style="flex:1">−</button><div style="flex:3;display:flex;align-items:center;justify-content:center;gap:10px;font-weight:700"><span class="fth" style="width:38px">${card('l20')}</span>Valor ${B.v20===undefined?7:B.v20} (0 a 7)</div><button id="l20p" style="flex:1">+</button></div>`:''}<div class="btns"><button id="go">${noDice(B.act)?'Aplicar (sin dados)':S.cross[B?.i]?.id==='g02'?'Resolver (sin dados · g02)':'Tirar dados'}</button><button id="nogo" class="ghost">Cancelar</button></div>`;
+  const c=S.cross[B.i],cin=BIN;BIN=0;dockVar();
+  const hint=!B.act?'Arrastra una carta de tu mano hasta aquí':COOP?'Al lanzar los dados, tu amigo podrá asistirte':B.as.length<2?'Arrastra cartas a tu carta para asistirla (máx. 2) · tócalas para quitarlas':'Ya tienes 2 asistencias';
+  $('#bt').innerHTML=`<div class="bf${cin?' in':''}"><div class="bc"><div class="cw">${card(c.id)}</div><div class="orb">${Math.max(0,LV(c)-c.p)}</div><small>falta</small></div><b class="vsx">VS</b>
+    <div class="bc"><div class="cw${B.act?'':' drop'}" id="bact">${B.act?`<div data-bp="a" class="ca">${card(B.act)}</div>`:'<span>Arrastra aquí<br>tu carta</span>'}<div class="ass">${B.as.map((x,k)=>`<div data-bp="s${k}">${card(x)}</div>`).join('')}</div></div><div class="orb p">${totB()}</div><small>tu progreso${l05on()?' · +1':''}</small></div></div>
+  <div class="bhint">${hint}</div>
+  ${B.act==='m20'?`<div class="btns xtra"><button id="m20disc" class="fxb"><span class="fth">${card('m20')}</span><span>Descartar cartas antes de actuar</span></button></div>`:''}${B.act==='l20'?`<div class="btns xtra" style="flex-direction:row"><button id="l20m" style="flex:1">−</button><div style="flex:3;display:flex;align-items:center;justify-content:center;gap:10px;font-weight:700"><span class="fth" style="width:38px">${card('l20')}</span>Valor ${B.v20===undefined?7:B.v20} (0 a 7)</div><button id="l20p" style="flex:1">+</button></div>`:''}<div class="btns"><button id="go">${noDice(B.act)?'✨ Aplicar (sin dados)':S.cross[B?.i]?.id==='g02'?'Resolver (sin dados)':'🎲 Lanzar dados'}</button><button id="nogo" class="ghost">Cancelar</button></div>`;
+  try{fanRender()}catch(e){}
   try{syBat()}catch(e){}
 }
 function syBat(){if(!B||!syS())return;const c=S.cross[B.i];if(!c)return;
@@ -1713,7 +1774,7 @@ $('#bt').onclick=e=>{
     if((v=g('cah'))!==null){const sel=CAD._sel,ok=sel.size<2&&okaC(v,CAD.col);NOSY=1;ov(v,[['Usar como asistencia',()=>{if(CAD&&CAD._sel.size<2&&okaC(v,CAD.col))CAD._sel.add(v);rbC()},!ok],['Cancelar',()=>{},0,'ghost']],ok?'':`<p>${sel.size>=2?'Ya elegiste 2 asistencias.':'Esta carta no puede asistir en este desafío (color).'}</p>`,1);NOSY=0;return}
     if((v=g('cap'))!==null){CAD._sel.delete(v);rbC();return}
     if(e.target.id==='cas-cancel'){CAD._sel.clear();rbC();return}
-    if(e.target.id==='cas-go'){const as=[...CAD._sel],d=CAD;CAD=null;COOPBUSY=0;OWNER='a';$('#bt').classList.remove('on');coopUi();SBTL=null;sbtRender({cid:d.cid,falta:d.falta,act:d.act,as,tot:(d.tot||0)+as.reduce((t,x)=>t+avF(x,d.cid),0),n:0,ph:'dice'});mpSend({k:'assistRes',as});return}
+    if(e.target.id==='cas-go'){const as=[...CAD._sel],d=CAD;CAD=null;COOPBUSY=0;OWNER='a';$('#bt').classList.remove('on');try{fanRender()}catch(_){}coopUi();SBTL=null;sbtRender({cid:d.cid,falta:d.falta,act:d.act,as,tot:(d.tot||0)+as.reduce((t,x)=>t+avF(x,d.cid),0),n:0,ph:'dice'});mpSend({k:'assistRes',as});return}
     return;
   }
   /* ---- MODO NORMAL ---- */
@@ -1723,9 +1784,99 @@ $('#bt').onclick=e=>{
   else if(e.target.closest('#m20disc')){discDraw(()=>{render();rb()},1,null,1)}
   else if(e.target.id==='l20m'){B.v20=Math.max(0,(B.v20===undefined?7:B.v20)-1);rb()}
   else if(e.target.id==='l20p'){B.v20=Math.min(7,(B.v20===undefined?7:B.v20)+1);rb()}
-  else if(e.target.id==='nogo'){B=null;PICK=1;$('#bt').classList.remove('on');try{sy('batx',{})}catch(e){}render()}
+  else if(e.target.id==='nogo'){B=null;PICK=1;$('#bt').classList.remove('on');try{sy('batx',{})}catch(e){}render();try{SFX.down()}catch(e){}}
   else if(e.target.id==='go'){const pfxB=S.personaje||'m';if(S.cross[B.i].id==='c55'&&!B.d55){B.d55=1;if(S.hand.length){pickHand(1,()=>{close();if(B.act&&B.act!==p20()&&!S.hand.includes(B.act)){B.act=null;B.as=[]}B.as=B.as.filter(x=>S.hand.includes(x));rb()},1);return}}if(B.act==='m17'&&B.v17===undefined){const d=S.dM.pop();B.v17=0;if(d){S.disc.push(d);const fi3=getFI();B.v17=MC[d][1]+(+(fi3[+d.slice(1)-1]||'00')[0]?2:0)}render();rb()}if(COOP&&B.act&&!B.coopOk){coopAsk();return}cine(COLN[col()],noDice(B.act)||S.cross[B.i]?.id==='g02'?1:0)}
 };
+/* ===== MANO EN ABANICO (estilo Pokémon TCG Pocket) =====
+   · mantener el dedo: el abanico se abre y la carta bajo el dedo se ve en grande; deslizar recorre las cartas
+   · arrastrar una carta hacia arriba: se juega (al desafío que brilla, o a tu carta en la batalla para asistir)
+   · toque corto: ver la carta y sus opciones */
+const okcC=(id,c)=>{const m=MC[id];if(!m)return false;return m[0]==='w'||m[0].includes(c)};
+function dkRect(){const sh=$('#sh-st');if(sh.classList.contains('on')){const r=$('#dC').getBoundingClientRect();if(r.width)return r}
+  const t=$('#tSt').getBoundingClientRect();return {left:t.left+t.width/2-22,top:t.top,width:44,height:64}}
+function dockVar(){try{const d=$('#dock'),t=d?d.getBoundingClientRect().top:0;if(t>80)document.documentElement.style.setProperty('--dockt',Math.round(t-4)+'px');
+  /* el tablero se ajusta al espacio que queda entre la barra y la mano */
+  const cr=$('#cross'),h=cr?cr.clientHeight:0;if(h>120){const w=Math.max(60,Math.min(innerWidth*.29,150,(h-14)/(3*1.458)));if(Math.abs((cr._cw||0)-w)>.5){cr._cw=w;cr.style.setProperty('--cw',w.toFixed(1)+'px')}}}catch(e){}}
+const FAN={st:0,ids:[],x0:0,y0:0,i:-1,t:0,pid:null,tm:null,src:null,id:null,can:[],hov:null,end:0,dirty:0};
+function fanList(){let L=S.hand.slice();if(B)L=L.filter(x=>x!==B.act&&!B.as.includes(x));if(CAD)L=L.filter(x=>!CAD._sel.has(x));return L}
+function fanOk(id){if(CAD)return CAD._sel.size<2&&okaC(id,CAD.col);if(B)return B.act?(!COOP&&B.as.length<2&&oka(id)):(okc(id)&&id!=='l12');return true}
+/* desafíos que se pueden enfrentar con esta carta ahora mismo */
+function canBoard(){return !COOP||ctl()}
+function validCells(id){
+  if(!id||id==='l12'||!MC[id]||!PICK||B||CAD||S.over||INTRO||SL||COOPBUSY||!canBoard()||filling()||boardBusy())return [];
+  const out=[];[1,2,3,4].forEach(i=>{const c=S.cross[i];if(c&&CH[c.id]&&!blk(c)&&okcC(id,CH[c.id].c))out.push(i)});
+  {const c=S.cross[0];if(S.final&&c&&CH[c.id]&&!blk(c)&&unl().some(([k])=>okcC(id,k)))out.push(0)}
+  return out}
+function fanRender(){const f=$('#tHand');if(!f)return;if(FAN.st){FAN.dirty=1;return}dockVar();
+  const L=fanList(),pfx=S.personaje||'m';FAN.ids=L;
+  f.innerHTML=L.length?L.map((id,i)=>`<div class="fc${(B||CAD)&&!fanOk(id)?' dim':''}${!B&&!CAD&&HSP(pfx,id)?' hsp':''}" data-fi="${i}">${card(id,'still')}</div>`).join('')
+    :`<div class="emp">${S.hand.length?'':'Sin cartas en la mano'}${!S.hand.length&&S.dK.length&&PICK?'<br>Roba del mazo de Agotamiento en <b>Estado</b>':''}</div>`;
+  fanLay();
+  /* habilidad: se puede arrastrar si está activa */
+  const h=$('#m20');if(h){h.classList.toggle('hdrag',!!(B&&B.act===p20()))}}
+function fanLay(x){const f=$('#tHand');if(!f)return;const cs=[...f.querySelectorAll('.fc')],n=cs.length;if(!n)return;
+  const W=f.clientWidth,H=f.clientHeight,fw=Math.min(H*.86*696/1015,W*.42);f.style.setProperty('--fw',fw+'px');
+  if(!FAN.st||FAN.st==='press'||FAN.st==='drag'&&FAN.src!=='fan'){
+    const ang=Math.min(6,44/n),Wu=W-fw*.35-(n>1?fw*Math.sin(ang*(n-1)/2*Math.PI/180):0),sp=n>1?Math.min(fw*.62,Math.max(0,(Wu-fw)/(n-1))):0,tot=fw+sp*(n-1),x0=(W-tot)/2,mid=(n-1)/2;
+    cs.forEach((c,i)=>{const o=i-mid,dy=Math.abs(o)*Math.abs(o)*Math.min(2.2,12/n);c.style.transform=`translate(${x0+i*sp}px,${dy}px) rotate(${o*ang}deg)`;c.style.zIndex=i;c.classList.remove('up')});return}
+  /* abierto: cartas más separadas; la que está bajo el dedo queda justo debajo y se levanta */
+  const r=f.getBoundingClientRect(),sp=fw*.8,px=Math.max(0,Math.min(W,(x===undefined?FAN.x:x)-r.left)),t=n>1?px/W*(n-1):0,fi=Math.round(t),base=px-(t*sp+fw/2);
+  FAN.t=t;
+  cs.forEach((c,i)=>{const o=i-t,up=i===fi&&FAN.st==='browse';c.style.transform=`translate(${base+i*sp}px,${up?-26:Math.abs(o)*3}px) rotate(${o*2}deg) scale(${up?1.18:1.04})`;c.style.zIndex=up?99:50-Math.round(Math.abs(o));c.classList.toggle('ghost',FAN.st==='drag'&&i===FAN.i)});
+  if(fi!==FAN.i&&FAN.st==='browse'){FAN.i=fi;fanPv(FAN.ids[fi]);try{tone(1250,.025,'triangle',.05)}catch(e){}}}
+function fanPv(id){const p=$('#fpv');if(!id){p.classList.remove('on');return}
+  const ok=(B||CAD)?fanOk(id):validCells(id).length>0,nb=!B&&!CAD&&PICK&&canBoard();
+  p.innerHTML=card(id)+`<small>${(B||CAD)?(ok?'↑ Arrastra para usarla':'No sirve en este desafío'):nb?(ok?'↑ Arrastra hacia un desafío':'No puede enfrentar ningún desafío ahora'):''}</small>`;p.classList.add('on')}
+function fanClose(){FAN.st=0;FAN.i=-1;FAN.src=null;FAN.id=null;$('#tHand').classList.remove('open');$('#fpv').classList.remove('on');$('#fgh').classList.remove('on');
+  FAN.can.forEach(i=>{const c=cellOf(i);if(c)c.classList.remove('can','hov')});document.querySelectorAll('#cross .cell.nope').forEach(c=>c.classList.remove('nope'));FAN.can=[];FAN.hov=null;
+  const ba=$('#bact');if(ba)ba.classList.remove('hov');$('#m20').classList.remove('hdrag');
+  if(FAN.dirty){FAN.dirty=0;fanRender()}else fanLay()}
+function fanBrowse(){FAN.st='browse';FAN.i=-1;$('#tHand').classList.add('open');fanLay()}
+function fanDrag(id){FAN.st='drag';FAN.id=id;$('#fpv').classList.remove('on');const g=$('#fgh');g.innerHTML=card(id,'still');g.classList.add('on');fanGh();
+  if(FAN.src==='hab')$('#m20').classList.add('hdrag');
+  if(!B&&!CAD){FAN.can=validCells(id);FAN.can.forEach(i=>{const c=cellOf(i);if(c)c.classList.add('can')});
+    [0,1,2,3,4].forEach(i=>{if(!FAN.can.includes(i)&&S.cross[i]){const c=cellOf(i);if(c)c.classList.add('nope')}})}
+  fanLay();try{SFX.draw()}catch(e){}vib(10)}
+function fanGh(){const g=$('#fgh');g.style.transform=`translate(${FAN.x-42}px,${FAN.y-100}px) rotate(${Math.max(-12,Math.min(12,(FAN.x-FAN.x0)/12))}deg)`}
+function fanHit(){const g=$('#fgh');const el=document.elementFromPoint(FAN.x,FAN.y-40);
+  if(B||CAD){const ba=$('#bact'),on=!!(el&&ba&&(el===ba||ba.contains(el)||el.closest('#bt .bc:last-child')))&&fanOk(FAN.id);if(ba)ba.classList.toggle('hov',on);FAN.hov=on?'bact':null;return}
+  const c=el&&el.closest('#cross [data-s]'),i=c?+c.dataset.s:null,ok=i!==null&&FAN.can.includes(i);
+  if(FAN.hov!==null&&FAN.hov!==i){const o=cellOf(FAN.hov);if(o)o.classList.remove('hov')}
+  if(ok){c.classList.add('hov');if(FAN.hov!==i)vib(6);FAN.hov=i}else FAN.hov=null}
+function fanDrop(){const id=FAN.id,h=FAN.hov;FAN.end=performance.now();
+  if(h===null||h===undefined){fanClose();return}
+  if(h==='bact'){fanClose();
+    if(CAD){if(CAD._sel.size<2&&okaC(id,CAD.col)){CAD._sel.add(id);try{SFX.place()}catch(e){}rbC()}return}
+    if(!B)return;if(!B.act){if(okc(id)&&id!=='l12')B.act=id}else if(!COOP&&B.as.length<2&&oka(id))B.as.push(id);try{SFX.place()}catch(e){}rb();return}
+  const i=h;fanClose();openBat(i,null,id)}
+function fanTap(id){if(!id)return;
+  if(CAD){const sel=CAD._sel,ok=sel.size<2&&okaC(id,CAD.col);NOSY=1;ov(id,[['Usar como asistencia',()=>{if(CAD&&CAD._sel.size<2&&okaC(id,CAD.col))CAD._sel.add(id);rbC()},!ok],['Cancelar',()=>{},0,'ghost']],ok?'':`<p>${sel.size>=2?'Ya elegiste 2 asistencias.':'Esta carta no puede asistir en este desafío (color).'}</p>`,1);NOSY=0;return}
+  if(B){NOSY=1;ov(id,[['Jugar como acción',()=>{B.act=id;rb()},!!B.act||!okc(id)||id==='l12'],['Jugar como asistencia',()=>{B.as.push(id);rb()},COOP||!B.act||B.as.length>1||!oka(id)]]);NOSY=0;return}
+  const k=S.hand.indexOf(id);if(k>=0)openHand(k)}
+{const f=$('#tHand'),hb=$('#m20');
+  const down=(e,src)=>{if(FAN.st||e.button>0)return;if(src==='fan'&&!FAN.ids.length)return;
+    if(src==='hab'&&!(S.hab&&(B?!B.act&&okc(p20()):!CAD)))return;
+    FAN.src=src;FAN.st='press';FAN.x=FAN.x0=e.clientX;FAN.y=FAN.y0=e.clientY;FAN.pid=e.pointerId;FAN.t0=performance.now();
+    try{(src==='fan'?f:hb).setPointerCapture(e.pointerId)}catch(_){}
+    if(src==='fan')FAN.tm=setTimeout(()=>{if(FAN.st==='press')fanBrowse()},150)};
+  const move=e=>{if(!FAN.st||e.pointerId!==FAN.pid)return;FAN.x=e.clientX;FAN.y=e.clientY;const dx=FAN.x-FAN.x0,dy=FAN.y-FAN.y0;
+    if(FAN.st==='press'){if(Math.hypot(dx,dy)>8){clearTimeout(FAN.tm);if(FAN.src==='hab'){FAN.i=-1;fanDrag(p20());}else fanBrowse()}return}
+    if(FAN.st==='browse'){fanLay();const top=f.getBoundingClientRect().top;
+      if(FAN.y<top-24&&FAN.i>=0){const id=FAN.ids[FAN.i];if(id)fanDrag(id)}return}
+    if(FAN.st==='drag'){fanGh();fanHit()}};
+  const up=e=>{if(!FAN.st||e.pointerId!==FAN.pid)return;clearTimeout(FAN.tm);
+    if(FAN.st==='press'){const src=FAN.src;fanClose();if(src==='fan'){const r=f.getBoundingClientRect(),cs=[...f.querySelectorAll('.fc')];
+        /* toque corto: la carta de encima bajo el dedo */
+        let hit=null;for(let i=cs.length-1;i>=0;i--){const b=cs[i].getBoundingClientRect();if(e.clientX>=b.left&&e.clientX<=b.right&&e.clientY>=b.top-10&&e.clientY<=b.bottom){hit=i;break}}
+        if(hit!==null){FAN.end=performance.now();fanTap(FAN.ids[hit])}}return}
+    if(FAN.st==='browse'){fanClose();return}
+    if(FAN.st==='drag')fanDrop()};
+  f.addEventListener('pointerdown',e=>down(e,'fan'));hb.addEventListener('pointerdown',e=>down(e,'hab'));
+  [f,hb].forEach(el=>{el.addEventListener('pointermove',move);el.addEventListener('pointerup',up);el.addEventListener('pointercancel',e=>{if(FAN.st&&e.pointerId===FAN.pid){clearTimeout(FAN.tm);fanClose()}});el.addEventListener('contextmenu',e=>e.preventDefault())});
+  /* después de arrastrar no se abre la ventana de la carta */
+  document.addEventListener('click',e=>{if(performance.now()-FAN.end<450&&e.target.closest('#m20,#tHand')){e.stopPropagation();e.preventDefault()}},true);
+  $('#dock').addEventListener('dragstart',e=>e.preventDefault());
+  addEventListener('resize',()=>{dockVar();fanLay()});}
 /* FI: fuego de acción(0) y asistencia(1) por carta de personaje. índice = número de carta - 1 */
 const FI_M='11,11,00,11,11,11,00,11,00,00,11,00,00,11,11,00,00,00,00,00'.split(',');
 /* Personaje 2: icono de ESPADA (hace el papel del fuego): carta / asistencia */
@@ -2111,7 +2262,7 @@ async function autoFill(){
   try{
     const cell=$('#cross').children[[null,1,null,2,0,3,null,4,null].indexOf(i)],dk=$('#dC');
     if(cell&&dk){
-      const A=dk.getBoundingClientRect(),C=cell.getBoundingClientRect();
+      const A=dkRect(),C=cell.getBoundingClientRect();
       const dx=A.left+A.width/2-(C.left+C.width/2),dy=A.top+A.height/2-(C.top+C.height/2),sx=A.width/C.width,sy=A.height/C.height,P='perspective(900px) ';
       blk.className='fblk';blk.innerHTML=`<div class="flip" style="left:${C.left}px;top:${C.top}px;width:${C.width}px;height:${C.height}px"><div class="b"></div><div class="a">${card(d)}</div></div>`;
       document.body.appendChild(blk);
@@ -2536,37 +2687,15 @@ const hgc=n=>'hgrid';
 let CAD=null; /* datos de la petición de asistencia activa */
 /* amigo: pantalla normal de batalla con la acción bloqueada; el círculo azul sube con cada asistencia que elige */
 function rbC(){
-  const d=CAD;if(!d)return;
-  const sel=d._sel,selArr=[...sel],sumAs=selArr.reduce((t,x)=>t+avF(x,d.cid),0),total=(d.tot||0)+sumAs;
-  const slAs=id=>id
-    ?`<div data-cap="${id}" style="cursor:pointer">${card(id)}</div>`
-    :`<div>Asist.</div>`;
-  $('#bt').innerHTML=`
-    <p class="sbt-t">Tu amigo te pide asistencia · elige hasta 2 cartas o pasa <b id="cas-t" style="color:#ffd34d;white-space:nowrap"></b></p>
-    <div class="vs">
-      <div class="side">
-        <div class="cell">${card(d.cid)}</div>
-        <div class="orb">${d.falta}</div>
-        <small>falta</small>
-      </div>
-      <b class="vsx">VS</b>
-      <div class="side">
-        <div class="pl">
-          ${d.act?`<div style="border:0">${card(d.act)}</div>`:'<div>Acción</div>'}
-          ${slAs(selArr[0]||null)}${slAs(selArr[1]||null)}
-        </div>
-        <div class="orb p">${total}</div>
-        <small>progreso · acción ${d.tot||0}${sumAs?` + asistencia ${sumAs}`:''}</small>
-      </div>
-    </div>
-    <span class="lbl">Tus cartas — toca una para verla (máx. 2 asistencias)</span>
-    ${(()=>{const L=[...S.hand,...(S.hab?[p20()]:[])].filter(x=>!sel.has(x));return `<div class="${hgc(L.length)}">${L.map(id=>`<div data-cah="${id}" class="${(sel.size<2&&okaC(id,d.col))?'':'dim'}">${card(id)}</div>`).join('')}</div>`})()}
-    <div class="btns">
-      <button id="cas-go">${sel.size?`Asistir con ${sel.size} carta${sel.size>1?'s':''}`:'No asistir'}</button>
-      ${sel.size?`<button id="cas-cancel" class="ghost">Cancelar selección</button>`:''}
-    </div>`;
+  const d=CAD;if(!d)return;dockVar();
+  const sel=d._sel,selArr=[...sel],sumAs=selArr.reduce((t,x)=>t+avF(x,d.cid),0),total=(d.tot||0)+sumAs,cin=!d._shown;d._shown=1;
+  $('#bt').innerHTML=`<div class="bhint">🤝 Tu amigo te pide asistencia <b id="cas-t" style="color:#ffd34d;white-space:nowrap"></b></div>
+    <div class="bf${cin?' in':''}"><div class="bc"><div class="cw">${card(d.cid)}</div><div class="orb">${d.falta}</div><small>falta</small></div><b class="vsx">VS</b>
+    <div class="bc"><div class="cw" id="bact">${d.act?`<div class="ca" style="cursor:default">${card(d.act)}</div>`:'<div class="ca drop" style="display:grid;place-items:center">Sin carta</div>'}<div class="ass">${selArr.map(x=>`<div data-cap="${x}">${card(x)}</div>`).join('')}</div></div><div class="orb p">${total}</div><small>progreso${sumAs?` · +${sumAs} tuyo`:''}</small></div></div>
+    <div class="bhint">${sel.size<2?'Arrastra cartas de tu mano a la carta de tu amigo para asistirla (máx. 2)':'Ya elegiste 2 asistencias'}${sel.size?' · tócalas para quitarlas':''}</div>
+    <div class="btns"><button id="cas-go">${sel.size?`🎲 Asistir con ${sel.size} y lanzar`:'🎲 Lanzar dados sin asistir'}</button></div>`;
   const o=$('#bt .orb.p');if(o&&d._last!==undefined&&d._last!==total)o.animate([{transform:'scale(1.45)'},{transform:'scale(1)'}],{duration:280});
-  d._last=total;
+  d._last=total;try{fanRender()}catch(e){}
 }
 /* amigo: pantalla de solo lectura de lo que hace el jugador activo (cartas de la mano en reverso; desafío y acción de frente) */
 let SBTL=null;
@@ -2685,7 +2814,7 @@ async function syFill(i,d){
   try{
     const cell=cellOf(i),dk=$('#dC');
     if(cell&&dk){
-      const A=dk.getBoundingClientRect(),C=cell.getBoundingClientRect();
+      const A=dkRect(),C=cell.getBoundingClientRect();
       const dx=A.left+A.width/2-(C.left+C.width/2),dy=A.top+A.height/2-(C.top+C.height/2),sx=A.width/C.width,sy2=A.height/C.height,P='perspective(900px) ';
       blk.className='fblk';blk.innerHTML=`<div class="flip" style="left:${C.left}px;top:${C.top}px;width:${C.width}px;height:${C.height}px"><div class="b"></div><div class="a">${card(d)}</div></div>`;
       document.body.appendChild(blk);
