@@ -1604,6 +1604,9 @@ function openPile(p){
 }
 
 /* ---------- clics ---------- */
+/* con la hoja de Estado abierta, tocar la batalla (o el abanico) solo cierra la hoja */
+document.addEventListener('click',e=>{const sh=$('#sh-st');if(!sh||!sh.classList.contains('on'))return;if(e.target.closest('#sh-st,#ov,[data-sh]'))return;
+  if(e.target.closest('#bt,#sbt,#dock')){sh.classList.remove('on');$('#tSt').classList.remove('on');e.stopPropagation();e.preventDefault()}},true);
 document.addEventListener('click',e=>{
   const g=k=>{const n=e.target.closest(`[data-${k}]`);return n?n.dataset[k]:null};let v;
   if(document.querySelector('.sheet.on')&&!e.target.closest('.sheet,#ov,#bt,#fxl,[data-sh]')){['hand','st'].forEach(n=>$('#sh-'+n).classList.remove('on'));['tHand','tSt'].forEach(n=>$('#'+n).classList.remove('on'));return}
