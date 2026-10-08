@@ -145,7 +145,7 @@
   "iconos/i-comunidad.webp": "e5ffa3d48a3e",
   "iconos/i-records.webp": "3f192fdbc183",
   "iconos/i-tableros.webp": "aad177dc6e2d",
-  "index.html": "73a2de2b74d7",
+  "index.html": "8a7a22d1aecd",
   "k02.png": "0eb551aafe99",
   "logo.webp": "c79c21426a47",
   "manifest.json": "fdf1323b0a4d",
@@ -241,5 +241,5 @@
   "tableros/t07.webp": "d13add3a6534",
   "tableros/t08.webp": "df272cca3775"
  },
- "version": "c1dfffacd9ce"
+ "version": "39aefbd5147f"
 }
