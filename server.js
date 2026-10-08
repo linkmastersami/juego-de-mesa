@@ -73,10 +73,11 @@ async function pushAll(payload, skip) {
   }));
   return n;
 }
+const PERF = new Map(); /* código -> { d: perfil, t } (solo en memoria, 30 min) */
 const PLAZA = new Map(); /* NOMBRE -> { a: guerrero, t: última vez visto } (solo en memoria) */
 const AVS = ['arquera', 'barbaro', 'guerrero', 'mago', 'ninja', 'paladin'];
 let lastQuickPush = 0, lastUpdPush = 0;
-const readBody = (req, cb) => { let b = ''; req.on('data', d => { b += d; if (b.length > 4096) req.destroy(); }); req.on('end', () => { try { cb(JSON.parse(b || '{}')); } catch { cb(null); } }); };
+const readBody = (req, cb, max = 4096) => { let b = ''; req.on('data', d => { b += d; if (b.length > max) req.destroy(); }); req.on('end', () => { try { cb(JSON.parse(b || '{}')); } catch { cb(null); } }); };
 const waiting = () => [...rooms.entries()].filter(([, r]) => r.pub && !r.guest && !r.gone.guest && r.host && r.host.readyState === 1);
 
 const server = http.createServer((req, res) => {
@@ -108,6 +109,29 @@ const server = http.createServer((req, res) => {
       if (cur && cur.h !== h) return res.end(JSON.stringify({ r: 'taken' }));
       if (!cur) { NAMES.set(n, { h, t: Date.now() }); saveNames(); }
       res.end(JSON.stringify({ r: 'ok' }));
+    });
+  }
+  /* pasar el perfil a otra dirección del juego: se guarda 30 min con un código de 6 letras */
+  if (req.method === 'POST' && url === '/perfil/subir') {
+    return readBody(req, b => {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      const d = b && b.d;
+      if (!d || typeof d !== 'object') return res.end(JSON.stringify({ r: 'bad' }));
+      const now = Date.now();
+      for (const [c, v] of PERF) if (now - v.t > 30 * 60000) PERF.delete(c);
+      if (PERF.size > 500) return res.end(JSON.stringify({ r: 'full' }));
+      const A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let c;
+      do { c = ''; for (let i = 0; i < 6; i++) c += A[crypto.randomInt(A.length)]; } while (PERF.has(c));
+      PERF.set(c, { d, t: now });
+      res.end(JSON.stringify({ r: 'ok', c }));
+    }, 400000);
+  }
+  if (req.method === 'POST' && url === '/perfil/bajar') {
+    return readBody(req, b => {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      const c = b && String(b.c || '').toUpperCase().replace(/[^A-Z0-9]/g, ''), v = PERF.get(c);
+      if (!v || Date.now() - v.t > 30 * 60000) return res.end(JSON.stringify({ r: 'none' }));
+      PERF.delete(c); res.end(JSON.stringify({ r: 'ok', d: v.d }));
     });
   }
   /* el jugador borra su perfil: se libera su nombre */

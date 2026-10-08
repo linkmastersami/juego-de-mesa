@@ -747,6 +747,11 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
 .fan .fc.tutc{box-shadow:0 0 0 3px #ffd34d,0 0 18px 4px #ffd34d;z-index:60!important}
 #netw{position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 64px);width:min(92vw,400px);z-index:70;background:#3a1d24f2;border:1px solid #ff8a9a88;border-radius:16px;padding:12px 14px;color:#ffe3e7;font-size:.85rem;line-height:1.3;box-shadow:0 10px 30px #000a;display:flex;flex-direction:column;gap:6px}
 #netw b{color:#ffb3bd}#netw div{display:flex;gap:8px}#netw button{flex:1;border:0;border-radius:10px;padding:8px;font:700 .85rem Fredoka,sans-serif;background:#ff8a9a;color:#2b0a10;cursor:pointer}#netw #netw-x{background:#4a4555;color:var(--ink)}
+#perfd{position:fixed;inset:0;z-index:98;background:#0d0a14e6;display:none;align-items:center;justify-content:center;padding:20px}#perfd.on{display:flex}
+#perfd .bx{width:min(100%,360px);background:#2f2b37;border-radius:20px;padding:20px;text-align:center;box-shadow:0 10px 40px #000a;border:2px solid #ffd34d55}
+#perfd h3{margin:0 0 8px;font:800 1.25rem Fredoka,sans-serif;color:var(--gold)}#perfd p{margin:0 0 10px;color:var(--ink);font-size:.95rem;line-height:1.35}
+#perfd button{display:block;width:100%;border:0;border-radius:14px;padding:12px;margin-top:8px;font:700 1rem Fredoka,sans-serif;cursor:pointer}
+#perfd .y{background:linear-gradient(180deg,#ffe07a,#e0a92a);color:#3a2808}#perfd .y:disabled{opacity:.6}#perfd .n{background:#4a4555;color:var(--ink)}
 </style>
 </head>
 <body>
@@ -902,6 +907,7 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
   <button class="obtn" id="o-inst"></button>
   <button class="obtn" id="o-tut">🦉 Tutorial: aprender a jugar</button>
   <h3>Perfil</h3>
+  <button class="obtn" id="o-perf">🔄 Pasar mi perfil a otra dirección</button>
   <button class="obtn odel" id="o-del">🗑️ Eliminar mi perfil por completo</button>
   <button class="rclose" id="opts-x">Cerrar</button>
 </div></div>
@@ -1296,7 +1302,9 @@ function regShow(msg){
     <div class="warn">⚠️ Una vez elegido, <b>no se puede cambiar</b>.</div>
     <input id="reg-in" maxlength="8" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="TU NOMBRE">
     <div class="hint${msg?' bad':''}" id="reg-h">${msg||'De 3 a 8 letras o números'}</div>
-    <button class="rgo" id="reg-go" disabled>Continuar</button>`;
+    <button class="rgo" id="reg-go" disabled>Continuar</button>
+    <button class="rsec" id="reg-imp">🔄 Ya tengo perfil: traerlo con un código</button>`;
+  $('#reg-imp').onclick=()=>perfRecibir(1);
   const inp=$('#reg-in'),h=$('#reg-h'),go=$('#reg-go');
   inp.addEventListener('input',()=>{const v=nClean(inp.value);if(inp.value!==v)inp.value=v;
     let t='',ok=false;if(v.length<3)t=`${v.length}/8 · mínimo 3`;else if(nBad(v))t='❌ Ese nombre no está permitido';else{t=`✅ ${v.length}/8`;ok=true}
@@ -1314,7 +1322,7 @@ async function regSend(n){const c=$('#reg-c');
   const up=navigator.onLine&&await nWake();const r=up?await nPost('/name/claim',{n,k}):null;clearTimeout(slow);
   if(r&&r.r==='ok'){YO={n,k,t:Date.now()};try{localStorage.setItem('mesa-yo',JSON.stringify(YO))}catch(e){}
     c.innerHTML=`<h2>¡Bienvenido!</h2><div class="rbig">${n}</div><p>Tu aventura comienza ahora.</p><button class="rgo" id="reg-fin">⚔️ Entrar</button>`;
-    try{SFX.fanfare()}catch(e){}$('#reg-fin').onclick=()=>{$('#reg').classList.remove('on');yoUi()};return}
+    try{SFX.fanfare()}catch(e){}$('#reg-fin').onclick=()=>{yoUi();onbAvisos()};return}
   if(r&&r.r==='taken')return regShow(`❌ ${n} ya lo tiene otro aventurero. Elige otro.`);
   if(r&&r.r==='rude')return regShow('❌ Ese nombre no está permitido. Elige otro.');
   c.innerHTML=`<h2>Sin conexión</h2><p>No se pudo conectar con el servidor para registrar tu nombre. Revisa tu internet e inténtalo de nuevo.</p>
@@ -3265,6 +3273,61 @@ async function netProbe(){if(!navigator.onLine||sinNet())return;const t0=Date.no
   d.innerHTML=`<b>⚠️ Sin conexión con el servidor del juego</b><span>Desde esta red no se pudo buscar la versión nueva (${err}). Estás jugando la versión guardada en tu teléfono.</span><div><button id="netw-r">🔄 Reintentar</button><button id="netw-x">Cerrar</button></div>`;
   d.querySelector('#netw-r').onclick=()=>location.reload();d.querySelector('#netw-x').onclick=()=>d.remove()}
 setTimeout(netProbe,4000);addEventListener('online',()=>setTimeout(netProbe,2000));
+
+/* ===== después del registro: avisos (obligatorio) e instalación (opcional) ===== */
+const enApp=()=>matchMedia('(display-mode: standalone)').matches||matchMedia('(display-mode: fullscreen)').matches||navigator.standalone;
+function onbFin(){$('#reg').classList.remove('on');try{localStorage.removeItem('mesa-onb')}catch(e){}try{notifUi()}catch(e){}}
+function onbAvisos(err){const c=$('#reg-c');$('#reg').classList.add('on');
+  let on=0;try{on=localStorage.getItem('mesa-push')==='1'}catch(e){}if(on)return onbInstalar();
+  const sop=('serviceWorker' in navigator)&&('PushManager' in window)&&('Notification' in window);
+  c.innerHTML=`<h2>🔔 Activa los avisos</h2><p>Así sabrás cuando <b>tu amigo te espera</b> para jugar, cuando alguien busca <b>partida rápida</b> y cuando hay una <b>actualización</b> del juego.</p>
+    ${err?`<div class="warn">${err}</div>`:''}
+    ${sop?'<button class="rgo" id="onb-on">🔔 Activar avisos</button>':'<div class="warn">Este navegador no permite avisos. En iPhone, primero instala el juego en la pantalla de inicio.</div>'}
+    <p style="font-size:.82rem;opacity:.75;margin-top:10px">Podrás desactivarlos después en <b>☰ Opciones</b>.</p>
+    ${err||!sop?'<button class="rsec" id="onb-skip">Continuar sin avisos</button>':''}`;
+  const sk=$('#onb-skip');if(sk)sk.onclick=onbInstalar;
+  const b=$('#onb-on');if(b)b.onclick=async()=>{b.disabled=true;b.textContent='⏳ Activando avisos…';let ok=false,det='';
+    try{ok=await pushSub(1)}catch(e){det=(e&&e.message)||''}
+    if(ok){try{SFX.win()}catch(e){}return onbInstalar()}
+    const den=('Notification' in window)&&Notification.permission==='denied';
+    onbAvisos(den?'Las notificaciones están bloqueadas. Actívalas en Ajustes → Apps → (tu navegador o Link Master Dungeon) → Notificaciones y vuelve a intentarlo.':det==='srv'?'El servidor está despertando. Espera unos segundos y vuelve a intentarlo.':/^perm:/.test(det)?'Para continuar toca «Permitir» cuando el teléfono pregunte.':'No se pudo activar ('+det+'). Vuelve a intentarlo.')}}
+function onbInstalar(){if(enApp())return onbFin();const c=$('#reg-c');$('#reg').classList.add('on');
+  const ios=/iphone|ipad|ipod/i.test(navigator.userAgent);
+  c.innerHTML=`<h2>📲 Instala el juego</h2><p>Tendrás el icono en tu pantalla de inicio, se abre en pantalla completa y funciona sin internet.</p>
+    ${_installPrompt?'<button class="rgo" id="onb-ins">📲 Instalar</button>':`<div class="warn" style="text-align:left">${ios?'Toca <b>Compartir</b> ⬆️ y luego <b>Agregar a inicio</b>.':'Abre el menú <b>⋮</b> del navegador y toca <b>Instalar aplicación</b> o <b>Agregar a pantalla principal</b>.'}</div>`}
+    <button class="rsec" id="onb-no">Ahora no</button>`;
+  $('#onb-no').onclick=onbFin;
+  const b=$('#onb-ins');if(b)b.onclick=async()=>{try{_installPrompt.prompt();await _installPrompt.userChoice}catch(e){}_installPrompt=null;onbFin()}}
+/* tras traer un perfil se ofrece lo mismo (los avisos se activan por dirección) */
+setTimeout(()=>{try{if(YO&&localStorage.getItem('mesa-onb')==='1')onbAvisos()}catch(e){}},2500);
+/* ===== pasar el perfil a otra dirección del juego (GitHub Pages ⇄ Cloudflare) ===== */
+const PERFK=['mesa-yo','mesa-stats','mesa-av','mesa-tab','mesa-pj','mesa-juego'];
+function perfDlg(h){let d=$('#perfd');if(!d){d=document.createElement('div');d.id='delp';d.className='perfd';d.id='perfd';document.body.appendChild(d)}
+  d.innerHTML=`<div class="bx">${h}</div>`;d.classList.add('on');d.onclick=e=>{if(e.target===d||e.target.closest('.n'))d.classList.remove('on')};return d}
+async function perfEnviar(){if(!YO){alert('Primero registra tu nombre.');return}
+  const d=perfDlg('<h3>🔄 Pasar mi perfil</h3><p>Preparando tu código…</p>');
+  const data={};PERFK.forEach(k=>{try{const v=localStorage.getItem(k);if(v!==null)data[k]=v}catch(e){}});
+  try{await nWake();const r=await nPost('/perfil/subir',{d:data});if(!r||r.r!=='ok')throw 0;
+    perfDlg(`<h3>🔄 Tu código</h3><div class="rbig" style="font-size:2.4rem;letter-spacing:.2em;margin:8px 0;color:var(--gold)">${r.c}</div>
+      <p>Abre el juego en la <b>otra dirección</b> y en la pantalla de nombre toca <b>«Ya tengo perfil»</b> (o en ☰ Opciones → Pasar mi perfil → Recibir) y escribe este código.</p>
+      <p style="font-size:.8rem;opacity:.75">Vale 30 minutos y solo se puede usar una vez.</p><button class="n">Listo</button>`)}
+  catch(e){perfDlg('<h3>Sin conexión</h3><p>No se pudo generar el código. Revisa tu internet e inténtalo de nuevo.</p><button class="n">Cerrar</button>')}}
+function perfRecibir(desdeReg){const d=perfDlg(`<h3>🔄 Traer mi perfil</h3><p>En la otra dirección del juego ve a <b>☰ Opciones → Pasar mi perfil → Enviar</b> y escribe aquí el código.</p>
+    <input id="perf-in" maxlength="6" autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="CÓDIGO" style="width:100%;box-sizing:border-box;font:800 1.6rem Fredoka,sans-serif;text-align:center;letter-spacing:.2em;padding:10px;border-radius:12px;border:2px solid #ffd34d66;background:#1d1a24;color:#fff;text-transform:uppercase">
+    ${YO?'<p style="font-size:.8rem;color:#ffb3bd">⚠️ Esto reemplaza el perfil que tienes en esta dirección.</p>':''}
+    <button class="y" id="perf-ok">Traer perfil</button><button class="n">Cancelar</button>`);
+  const inp=$('#perf-in');setTimeout(()=>inp.focus(),200);
+  $('#perf-ok').onclick=async()=>{const c=inp.value.toUpperCase().replace(/[^A-Z0-9]/g,'');if(c.length!==6){inp.style.borderColor='#ff3b55';return}
+    const b=$('#perf-ok');b.disabled=true;b.textContent='Buscando…';
+    try{await nWake();const r=await nPost('/perfil/bajar',{c});
+      if(!r||r.r!=='ok'||!r.d){b.disabled=false;b.textContent='Traer perfil';inp.value='';inp.placeholder='No existe o ya venció';inp.style.borderColor='#ff3b55';return}
+      PERFK.forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});Object.entries(r.d).forEach(([k,v])=>{if(PERFK.includes(k))try{localStorage.setItem(k,v)}catch(e){}});
+      try{localStorage.setItem('mesa-onb','1')}catch(e){}
+      perfDlg('<h3>✅ ¡Perfil recibido!</h3><p>Reiniciando el juego…</p>');setTimeout(()=>location.reload(),1200)}
+    catch(e){b.disabled=false;b.textContent='Traer perfil';alert('Sin conexión con el servidor. Inténtalo de nuevo.')}}}
+$('#o-perf').addEventListener('click',()=>{hideOpts();perfDlg(`<h3>🔄 Pasar mi perfil</h3><p>Para llevar tu nombre, récords, medallas, álbum y partida guardada a la otra dirección del juego (GitHub o Cloudflare).</p>
+  <button class="y" id="perf-e">📤 Enviar desde aquí</button><button class="y" id="perf-r" style="background:#4a4555;color:var(--ink)">📥 Recibir aquí</button><button class="n">Cancelar</button>`);
+  $('#perf-e').onclick=perfEnviar;$('#perf-r').onclick=()=>perfRecibir(0)});
 </script>
 </body>
 </html>
