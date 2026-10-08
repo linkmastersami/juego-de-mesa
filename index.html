@@ -164,7 +164,8 @@ button{font-family:inherit}
 .pjs>.habc{position:absolute;width:62%;aspect-ratio:696/1015;left:-4%;top:-46%;transform:rotate(-8deg);filter:drop-shadow(0 4px 6px #000c);touch-action:none;z-index:2}
 .pjs>.habc.hdrag{opacity:.35}
 .dock img{-webkit-user-drag:none;user-select:none;-webkit-touch-callout:none}.pjs .card{pointer-events:none}
-.fan{position:relative;flex:1;height:100%;touch-action:none;user-select:none;-webkit-user-select:none;--fw:76px}
+.fan{position:absolute;left:15%;right:0;bottom:0;height:100%;z-index:3;pointer-events:none;touch-action:none;user-select:none;-webkit-user-select:none;--fw:76px}
+.fan .fc{pointer-events:auto;touch-action:none}
 .fan .fc{position:absolute;left:0;bottom:4px;width:var(--fw);aspect-ratio:696/1015;transform-origin:50% 115%;transition:transform .2s cubic-bezier(.2,.8,.3,1),opacity .2s,filter .2s;will-change:transform;border-radius:8px;box-shadow:0 4px 10px #0009}
 .fan .fc .card{pointer-events:none}
 .fan .fc.dim{opacity:.4;filter:grayscale(.7)}
@@ -1817,10 +1818,10 @@ function fanRender(){const f=$('#tHand');if(!f)return;if(FAN.st){FAN.dirty=1;ret
   /* habilidad: se puede arrastrar si está activa */
   const h=$('#m20');if(h){h.classList.toggle('hdrag',!!(B&&B.act===p20()))}}
 function fanLay(x){const f=$('#tHand');if(!f)return;const cs=[...f.querySelectorAll('.fc')],n=cs.length;if(!n)return;
-  const W=f.clientWidth,H=f.clientHeight,fw=Math.min(H*.86*696/1015,W*.42);f.style.setProperty('--fw',fw+'px');
+  const W=f.clientWidth,H=f.clientHeight,fw=Math.min(H*.8*696/1015,W*.36);f.style.setProperty('--fw',fw+'px');
   if(!FAN.st||FAN.st==='press'||FAN.st==='drag'&&FAN.src!=='fan'){
-    const ang=Math.min(6,44/n),Wu=W-fw*.35-(n>1?fw*Math.sin(ang*(n-1)/2*Math.PI/180):0),sp=n>1?Math.min(fw*.62,Math.max(0,(Wu-fw)/(n-1))):0,tot=fw+sp*(n-1),x0=(W-tot)/2,mid=(n-1)/2;
-    cs.forEach((c,i)=>{const o=i-mid,dy=Math.abs(o)*Math.abs(o)*Math.min(2.2,12/n);c.style.transform=`translate(${x0+i*sp}px,${dy}px) rotate(${o*ang}deg)`;c.style.zIndex=i;c.classList.remove('up')});return}
+    const ang=Math.min(5,36/n),Wu=W-fw*.15-(n>1?2.3*fw*Math.sin(ang*(n-1)/2*Math.PI/180):0),sp=n>1?Math.min(fw*.62,Math.max(0,(Wu-fw)/(n-1))):0,tot=fw+sp*(n-1),x0=(W-tot)/2,mid=(n-1)/2;
+    cs.forEach((c,i)=>{const o=i-mid,dy=Math.abs(o)*Math.abs(o)*Math.min(2.2,12/n);c.style.transform=`translate(${x0+i*sp}px,${dy}px) rotate(${o*ang}deg)`;c.style.zIndex=i;c.classList.remove('up','ghost')});return}
   /* abierto: cartas más separadas; la que está bajo el dedo queda justo debajo y se levanta */
   const r=f.getBoundingClientRect(),sp=fw*.8,px=Math.max(0,Math.min(W,(x===undefined?FAN.x:x)-r.left)),t=n>1?px/W*(n-1):0,fi=Math.round(t),base=px-(t*sp+fw/2);
   FAN.t=t;
@@ -1846,11 +1847,19 @@ function fanHit(){const g=$('#fgh');const el=document.elementFromPoint(FAN.x,FAN
   if(FAN.hov!==null&&FAN.hov!==i){const o=cellOf(FAN.hov);if(o)o.classList.remove('hov')}
   if(ok){c.classList.add('hov');if(FAN.hov!==i)vib(6);FAN.hov=i}else FAN.hov=null}
 function fanDrop(){const id=FAN.id,h=FAN.hov;FAN.end=performance.now();
-  if(h===null||h===undefined){fanClose();return}
+  if(h===null||h===undefined){fanBack();return}
   if(h==='bact'){fanClose();
     if(CAD){if(CAD._sel.size<2&&okaC(id,CAD.col)){CAD._sel.add(id);try{SFX.place()}catch(e){}rbC()}return}
     if(!B)return;if(!B.act){if(okc(id)&&id!=='l12')B.act=id}else if(!COOP&&B.as.length<2&&oka(id))B.as.push(id);try{SFX.place()}catch(e){}rb();return}
   const i=h;fanClose();openBat(i,null,id)}
+/* la carta vuelve a su lugar en el abanico (o a la carta de habilidad) */
+function fanBack(){const g=$('#fgh'),src=FAN.src,id=FAN.id,gr=g.getBoundingClientRect();
+  fanClose();if(RM||!id||!gr.width)return;
+  const tgt=src==='hab'?$('#m20'):[...$('#tHand').querySelectorAll('.fc')].find(x=>{const k=x.querySelector('.card');return k&&k.dataset.id===id});
+  if(!tgt)return;const tr=tgt.getBoundingClientRect();if(!tr.width)return;
+  const c=document.createElement('div');c.className='cgh';c.style.cssText=`left:${gr.left}px;top:${gr.top}px;width:${gr.width}px;height:${gr.height}px;z-index:8`;c.innerHTML=card(id,'still');document.body.appendChild(c);
+  tgt.style.visibility='hidden';
+  c.animate([{transform:'none'},{transform:`translate(${tr.left-gr.left}px,${tr.top-gr.top}px) scale(${tr.width/gr.width})`}],{duration:260,easing:'cubic-bezier(.3,.7,.4,1)',fill:'forwards'}).finished.then(()=>{c.remove();tgt.style.visibility=''},()=>{c.remove();tgt.style.visibility=''});try{SFX.down()}catch(e){}}
 function fanTap(id){if(!id)return;
   if(CAD){const sel=CAD._sel,ok=sel.size<2&&okaC(id,CAD.col);NOSY=1;ov(id,[['Usar como asistencia',()=>{if(CAD&&CAD._sel.size<2&&okaC(id,CAD.col))CAD._sel.add(id);rbC()},!ok],['Cancelar',()=>{},0,'ghost']],ok?'':`<p>${sel.size>=2?'Ya elegiste 2 asistencias.':'Esta carta no puede asistir en este desafío (color).'}</p>`,1);NOSY=0;return}
   if(B){NOSY=1;ov(id,[['Jugar como acción',()=>{B.act=id;rb()},!!B.act||!okc(id)||id==='l12'],['Jugar como asistencia',()=>{B.as.push(id);rb()},COOP||!B.act||B.as.length>1||!oka(id)]]);NOSY=0;return}
@@ -1859,7 +1868,7 @@ function fanTap(id){if(!id)return;
   const down=(e,src)=>{if(FAN.st||e.button>0)return;if(src==='fan'&&!FAN.ids.length)return;
     if(src==='hab'&&!(S.hab&&(B?!B.act&&okc(p20()):!CAD)))return;
     FAN.src=src;FAN.st='press';FAN.x=FAN.x0=e.clientX;FAN.y=FAN.y0=e.clientY;FAN.pid=e.pointerId;FAN.t0=performance.now();
-    try{(src==='fan'?f:hb).setPointerCapture(e.pointerId)}catch(_){}
+    try{(src==='fan'?(e.target.closest('.fc')||f):hb).setPointerCapture(e.pointerId)}catch(_){}
     if(src==='fan')FAN.tm=setTimeout(()=>{if(FAN.st==='press')fanBrowse()},150)};
   const move=e=>{if(!FAN.st||e.pointerId!==FAN.pid)return;FAN.x=e.clientX;FAN.y=e.clientY;const dx=FAN.x-FAN.x0,dy=FAN.y-FAN.y0;
     if(FAN.st==='press'){if(Math.hypot(dx,dy)>8){clearTimeout(FAN.tm);if(FAN.src==='hab'){FAN.i=-1;fanDrag(p20());}else fanBrowse()}return}
@@ -1876,7 +1885,7 @@ function fanTap(id){if(!id)return;
   f.addEventListener('pointerdown',e=>down(e,'fan'));hb.addEventListener('pointerdown',e=>down(e,'hab'));
   [f,hb].forEach(el=>{el.addEventListener('pointermove',move);el.addEventListener('pointerup',up);el.addEventListener('pointercancel',e=>{if(FAN.st&&e.pointerId===FAN.pid){clearTimeout(FAN.tm);fanClose()}});el.addEventListener('contextmenu',e=>e.preventDefault())});
   /* después de arrastrar no se abre la ventana de la carta */
-  document.addEventListener('click',e=>{if(performance.now()-FAN.end<450&&e.target.closest('#m20,#tHand')){e.stopPropagation();e.preventDefault()}},true);
+  document.addEventListener('click',e=>{if(performance.now()-FAN.end<450){e.stopPropagation();e.preventDefault()}},true);
   $('#dock').addEventListener('dragstart',e=>e.preventDefault());
   addEventListener('resize',()=>{dockVar();fanLay()});}
 /* FI: fuego de acción(0) y asistencia(1) por carta de personaje. índice = número de carta - 1 */
