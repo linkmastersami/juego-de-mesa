@@ -163,6 +163,10 @@ button{font-family:inherit}
 .pjs>.pjc{position:absolute;inset:0}
 .pjs>.habc{position:absolute;width:62%;aspect-ratio:696/1015;left:-4%;top:-46%;transform:rotate(-8deg);filter:drop-shadow(0 4px 6px #000c);touch-action:none;z-index:2}
 .pjs>.habc.hdrag{opacity:.35}
+.pjs.rt{position:absolute;right:0;bottom:0;height:84%;pointer-events:none;z-index:4}
+.pjs>.stc{position:absolute;width:62%;aspect-ratio:696/1015;right:-4%;top:-46%;transform:rotate(8deg);border-radius:7px;background:#0b1730 url(cartas/reverso.webp) center/100% 100% no-repeat;box-shadow:0 0 0 1px #4fc3ff55,0 4px 8px #000c;cursor:pointer;pointer-events:auto;transition:transform .15s}
+.pjs>.stc:active{transform:rotate(8deg) scale(.94)}
+.pjs>.stc.on{box-shadow:0 0 0 2px var(--gold),0 0 14px #ffd34d99}
 .dock img{-webkit-user-drag:none;user-select:none;-webkit-touch-callout:none}.pjs .card{pointer-events:none}
 .fan{position:absolute;left:0;right:0;bottom:0;height:100%;z-index:3;pointer-events:none;touch-action:none;user-select:none;-webkit-user-select:none;--fw:76px}
 .fan .fc{pointer-events:auto;touch-action:none}
@@ -813,12 +817,13 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
 </div>
 
 <div class="app">
-  <div class="bar"><button class="tab" id="tTurn">Turno</button><button class="tab" data-sh="st" id="tSt">Estado</button></div>
+  <div class="bar" style="display:none"><button class="tab" id="tTurn">Turno</button></div>
   <div id="hud"><div class="hhp"><div class="hpb" id="hpb"><i>♥</i><i>♥</i><i>♥</i><i>♥</i><i>♥</i><i>♥</i><i>♥</i><i>♥</i><i>♥</i><i>♥</i></div><b id="hpn">10</b></div><div class="hch" id="hfire">🔥 0</div><div class="hch" id="hturn">T1</div></div>
   <div id="cross"></div>
   <div id="mesa"></div>
   <div class="dock" id="dock">
     <div class="pjs"><div data-pj="m19" id="m19" class="pjc"></div><div data-hab="1" id="m20" class="habc"></div></div>
+    <div class="pjs rt"><div data-sh="st" id="tSt" class="stc" role="button" aria-label="Estado"></div></div>
     <div class="fan" id="tHand"></div>
   </div>
 </div>
@@ -930,7 +935,7 @@ Object.assign(SFX,{
   resetArm:()=>{tone(740,.07,'square',.05);tone(740,.07,'square',.05,.12)},
   reset:()=>{tone(880,.5,'sawtooth',.07,0,110);tone(440,.35,'square',.04,.06,90);noiz(.3,.08)},
   click:()=>{tone(600,.05,'triangle',.2,0,420);tone(1200,.03,'square',.03)}});
-document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('button,[data-b],[data-y],[data-stk],[data-av],.pk');if(!b||b.disabled)return;
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('button,[data-b],[data-y],[data-stk],[data-av],.pk,[data-sh]');if(!b||b.disabled)return;
   const id=b.id||'',tx=(b.textContent||'').trim();
   try{if(id==='lob-btn-start'||id==='lob-btn-resume'||/^Nueva partida/.test(tx))return SFX.start();
     if(id==='menuBtn'||/Menú principal/.test(tx))return SFX.menu();
@@ -1795,7 +1800,7 @@ $('#bt').onclick=e=>{
    · toque corto: ver la carta y sus opciones */
 const okcC=(id,c)=>{const m=MC[id];if(!m)return false;return m[0]==='w'||m[0].includes(c)};
 function dkRect(){const sh=$('#sh-st');if(sh.classList.contains('on')){const r=$('#dC').getBoundingClientRect();if(r.width)return r}
-  const t=$('#tSt').getBoundingClientRect();return {left:t.left+t.width/2-22,top:t.top,width:44,height:64}}
+  const t=$('#tSt').getBoundingClientRect();return t.width?t:{left:innerWidth-60,top:innerHeight-200,width:44,height:64}}
 function dockVar(){try{const d=$('#dock'),t=d?d.getBoundingClientRect().top:0;if(t>80)document.documentElement.style.setProperty('--dockt',Math.round(t-4)+'px');
   {const hb=$('#hud').getBoundingClientRect().bottom;if(hb>20)document.documentElement.style.setProperty('--hudb',Math.round(hb+6)+'px')}
   /* el tablero se ajusta al espacio que queda entre la barra y la mano */
