@@ -121,6 +121,12 @@
   "fondos/records.webp": "e2bf21851c5e",
   "fondos/tableros.webp": "d49d6f5845d2",
   "fondos/victoria.webp": "04d1b27a2897",
+  "guerreros/arquera estatico.jpg": "d20589d9a5af",
+  "guerreros/barbaro estatico.jpg": "b665919d83ac",
+  "guerreros/guerrero imagen.jpg": "214bd9a9934d",
+  "guerreros/mago estatico.jpg": "6033e404468d",
+  "guerreros/ninja estatico.jpg": "1f518da2b407",
+  "guerreros/paladin estatico.jpg": "5c6feaa810d7",
   "icon-192.png": "1832840b96ab",
   "icon-512.png": "c42de4552324",
   "iconos/i-album.webp": "7d3fa0ed1b3a",
@@ -224,5 +230,5 @@
   "tableros/t07.webp": "d13add3a6534",
   "tableros/t08.webp": "df272cca3775"
  },
- "version": "2ae3a70de8de"
+ "version": "0fec3ac4778e"
 }
