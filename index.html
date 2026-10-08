@@ -716,6 +716,35 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
 #alb-view .bigm.lk{background:radial-gradient(circle,#1a1622,#2c2636);box-shadow:0 0 0 6px #4a4555;filter:grayscale(1);animation:none}
 #alb-view h3{margin:0;font:800 1.3rem Fredoka,sans-serif;color:var(--gold);text-align:center}
 @keyframes mspin{from{transform:rotateY(540deg) scale(.4)}to{transform:none}}
+
+/* ===== tutorial guiado (Búho) ===== */
+#tut{position:fixed;inset:0;z-index:6;pointer-events:none;display:none}
+#tut.on{display:block}
+#tut svg{position:absolute;inset:0;width:100%;height:100%}
+#tut .tring{position:absolute;border:3px solid #ffd34d;border-radius:14px;box-shadow:0 0 18px #ffd34daa,inset 0 0 12px #ffd34d55;animation:tring 1.1s ease-in-out infinite alternate;transition:all .3s cubic-bezier(.2,.8,.3,1)}
+@keyframes tring{to{box-shadow:0 0 30px #ffd34d,inset 0 0 18px #ffd34d88;border-color:#fff3b0}}
+#tut .tbub{position:absolute;left:50%;transform:translateX(-50%);width:min(94vw,440px);display:flex;gap:10px;align-items:flex-end;pointer-events:auto;transition:top .3s,bottom .3s}
+#tut .tbub.top{top:calc(env(safe-area-inset-top,0px) + 10px)}#tut .tbub.bot{bottom:calc(max(122px,20dvh) + 14px)}
+#tut .towl{flex:none;width:76px;height:76px;display:grid;place-items:center;font-size:3.2rem;filter:drop-shadow(0 6px 10px #000c);animation:towl 2.4s ease-in-out infinite}
+#tut .towl img{width:100%;height:100%;object-fit:contain}
+@keyframes towl{50%{transform:translateY(-5px) rotate(-3deg)}}
+#tut .tbx{flex:1;background:linear-gradient(180deg,#fffaf0,#f3e6c8);color:#2b2208;border-radius:18px 18px 18px 4px;padding:12px 14px 10px;box-shadow:0 8px 24px #000b;border:2px solid #c9a24a;font:500 .98rem/1.3 Fredoka,sans-serif;animation:tpop .3s cubic-bezier(.2,.9,.3,1.3)}
+@keyframes tpop{from{transform:scale(.85);opacity:0}}
+#tut .tbx b{color:#7a4a00}
+#tut .tbtn{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}
+#tut .tbtn button{border:0;border-radius:12px;padding:8px 16px;font:700 .9rem Fredoka,sans-serif;cursor:pointer}
+#tut .tbtn .tn{background:linear-gradient(180deg,#ffe07a,#e0a92a);color:#3a2808;box-shadow:0 3px 0 #8a5c12}
+#tut .tbtn .tsk{background:none;color:#8a6d46;margin-right:auto;padding-left:0}
+#tut .thand{position:absolute;left:0;top:0;font-size:2.6rem;filter:drop-shadow(0 4px 6px #000c);display:none;transform-origin:30% 10%}
+#tut .thand.on{display:block}
+#tutq{position:fixed;inset:0;z-index:80;background:#0d0a14e6;display:none;align-items:center;justify-content:center;padding:20px}
+#tutq.on{display:flex}
+#tutq .bx{width:min(100%,360px);background:#2f2b37;border-radius:20px;padding:18px;text-align:center;box-shadow:0 10px 40px #000a;border:2px solid #ffd34d55}
+#tutq .ow{font-size:3.4rem;height:90px;display:grid;place-items:center}#tutq .ow img{height:90px}
+#tutq h3{margin:4px 0 6px;font:800 1.25rem Fredoka,sans-serif;color:var(--gold)}#tutq p{margin:0 0 12px;color:var(--ink)}
+#tutq button{display:block;width:100%;border:0;border-radius:14px;padding:12px;margin-top:8px;font:700 1rem Fredoka,sans-serif;cursor:pointer}
+#tutq .y{background:linear-gradient(180deg,#ffe07a,#e0a92a);color:#3a2808}#tutq .n{background:#4a4555;color:var(--ink)}
+.fan .fc.tutc{box-shadow:0 0 0 3px #ffd34d,0 0 18px 4px #ffd34d;z-index:60!important}
 </style>
 </head>
 <body>
@@ -869,6 +898,7 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
   <button class="obtn" id="o-off"></button>
   <button class="obtn" id="o-notif"></button>
   <button class="obtn" id="o-inst"></button>
+  <button class="obtn" id="o-tut">🦉 Tutorial: aprender a jugar</button>
   <h3>Perfil</h3>
   <button class="obtn odel" id="o-del">🗑️ Eliminar mi perfil por completo</button>
   <button class="rclose" id="opts-x">Cerrar</button>
@@ -963,6 +993,7 @@ const card=(id,c='')=>{if(id==='back')return BACKH(c);const an=!!animSrc(id)&&CA
 setTimeout(()=>{if(navigator.onLine&&CANIM&&!sinNet())[...ANIMC].forEach(id=>fetch(imgSrc(id).replace('.webp','a.webp')).catch(()=>{}))},3000);
 /* personaje activo: 'm' = personaje 1 (cartas m), 'l' = personaje 2 (cartas l) */
 let CHAR='m'; /* se elige en el lobby antes de startGame */
+var TUT=null; /* tutorial guiado en curso */
 const ICO=()=>S.personaje==='l'?'⚔️':S.personaje==='p'?'⚡':'🔥'; /* icono propio de cada personaje (hace el papel del fuego) */
 const HSP=(p,id)=>p==='l'?id==='l17':p==='p'?id==='p10':(id==='m08'||id==='m14'); /* cartas que se pueden descartar al inicio del turno */
 const PC=()=>S.personaje||'m';
@@ -1007,7 +1038,7 @@ function render(){
    if(HUDHP!==null&&hp!==HUDHP){const h=$('#hud');h.classList.remove('hit','heal');void h.offsetWidth;h.classList.add(hp<HUDHP?'hit':'heal')}HUDHP=hp}
   document.body.classList.toggle('finalph',!!S.final&&!S.over&&document.getElementById('lobby').classList.contains('oculto'));
   document.body.classList.toggle('lowhp',!S.over&&S.hp>0&&S.hp<=3&&document.getElementById('lobby').classList.contains('oculto'));
-  if(!SL&&!COOP)try{localStorage.setItem('mesa-juego',JSON.stringify(S))}catch(e){}
+  if(!SL&&!COOP&&!TUT)try{localStorage.setItem('mesa-juego',JSON.stringify(S))}catch(e){}
   try{fxDiff()}catch(e){}
   try{syState()}catch(e){}
 }
@@ -1301,6 +1332,7 @@ const CGRP=['c01|c02','c03|c04','c05|c06','c09|c10','c11|c12|c13','c14|c15|c16',
 const CREP={};CGRP.forEach(g=>g.forEach(x=>CREP[x]=g[0]));
 /* [id, icono, nombre, cómo se consigue, prueba(estadísticas, partida)] */
 const ACH=[
+  ['tut','🎓','Aprendiz','Completa el tutorial del Búho',o=>!!o.tutok],
   ['g1','🎲','Primer paso','Juega tu primera partida',o=>(o.g||0)>=1],
   ['c1','✅','Primer desafío','Completa tu primer desafío',(o,g)=>g.nc>=1],
   ['w1','🗝️','Primera victoria','Gana tu primera partida',(o,g)=>g.win],
@@ -1340,16 +1372,16 @@ async function achNext(){const a=ATQ.shift();if(!a){ATB=0;return}ATB=1;
   setTimeout(()=>{const i=e.querySelector('.ai');if(i)i.classList.add('go')},120);
   await wait(3600);e.classList.add('out');await wait(450);e.remove();await wait(250);achNext()}
 /* desbloquea en el momento (se guarda en el teléfono y sale la notificación) */
-function achGive(list){if(!list.length)return;const o=stLoad();o.ach=o.ach||{};S.newAch=S.newAch||[];
+function achGive(list){if(!list.length||(TUT&&!TUT.give))return;const o=stLoad();o.ach=o.ach||{};S.newAch=S.newAch||[];
   setTimeout(()=>{try{recDot()}catch(e){}},300);list.forEach(a=>{if(o.ach[a[0]])return;o.ach[a[0]]=Date.now();S.newAch.push(a[0]);achToast(a);
     try{TABS.filter(x=>x[2]===a[0]).forEach(x=>achToast(['tab:'+x[0],'🎨','Nuevo tablero: '+x[1],'Elígelo en 🎨 Tableros, en el menú',null,null,tabUrl(x[0])]))}catch(e){}});stSave(o)}
-function achScan(win){try{const o=stLoad(),A=o.ach||{},g=liveG(win);achGive(ACH.filter(a=>!A[a[0]]&&a[4](o,g)))}catch(e){}}
+function achScan(win){if(TUT)return;try{const o=stLoad(),A=o.ach||{},g=liveG(win);achGive(ACH.filter(a=>!A[a[0]]&&a[4](o,g)))}catch(e){}}
 /* se vence una carta: logro de esa carta (si es la primera vez) y revisión de los demás */
-function achCard(id){try{if(COOP&&!MYT)return;const r=CREP[id];if(!r)return;const o=stLoad();o.cards=o.cards||{};
+function achCard(id){if(TUT)return;try{if(COOP&&!MYT)return;const r=CREP[id];if(!r)return;const o=stLoad();o.cards=o.cards||{};
   if(/^c4[0-8]$/.test(id)){S.minis=S.minis||[];S.minis.push(id)}
   albGet(r,'v');{const o2=stLoad();o2.cards=o2.cards||{};if(!o2.cards[r]){o2.cards[r]=1;stSave(o2)}}if(/^g0[1-4]$/.test(id))albGet('g0'+(+id[2]+4));achScan(0)}catch(e){}}
 /* guarda el resultado una sola vez por partida; devuelve logros nuevos y récords */
-function stRecord(win){
+function stRecord(win){if(TUT)return;
   if(S.rec)return null;S.rec=1;
   const g=liveG(win);
   const o=stLoad();o.g=(o.g||0)+1;if(win)o.w=(o.w||0)+1;
@@ -1388,7 +1420,7 @@ const BOOKS=[
   {id:'p',t:'Pikachu',e:'⚡',bc:'linear-gradient(135deg,#f2b632,#7a5200)',img:'libro-rayo',ids:rng('p',1,20)}];
 const albHas=(o,id)=>!!((o.alb||{})[id]||(o.cards||{})[id]);
 /* gana una estampa (o suma a sus datos): k = v vencida/activada/salió · a acción · s asistencia */
-function albGet(id,k){try{if(!id)return;const o=stLoad();o.alb=o.alb||{};const nw=!albHas(o,id);const e=o.alb[id]=o.alb[id]||{};
+function albGet(id,k){if(TUT)return;try{if(!id)return;const o=stLoad();o.alb=o.alb||{};const nw=!albHas(o,id);const e=o.alb[id]=o.alb[id]||{};
   if(k)e[k]=(e[k]||0)+1;if(nw){e.n=1;S.newAlb=(S.newAlb||0)+1}stSave(o);
   if(nw)achToast(['alb:'+id,'📖','¡Nueva estampa!',`${BOOKS.find(b=>b.ids.includes(id))?.t||'Álbum'}`,null,id,null,'alb']);albDot()}catch(e){}}
 function albUse(id,how){if(!id)return;if(/^[mlp]20$/.test(id)){albGet(id,'a');return}if(/^[mlp]\d\d$/.test(id))albGet(id,how)}
@@ -1434,7 +1466,7 @@ albDot();setTimeout(recDot,500);
 /* ---------- Sala de Trofeos (pantalla Récords) ---------- */
 const TITLES=[[0,'🪵','Novato'],[3,'🗡️','Aventurero'],[10,'🛡️','Guerrero'],[25,'⚔️','Héroe'],[50,'👑','Leyenda']];
 const titleOf=w=>{let t=TITLES[0];TITLES.forEach(x=>{if(w>=x[0])t=x});return t};
-const SHELVES=[['Primeros pasos',['g1','c1','w1','fin']],['Héroes',['wm','wl','wp','w3p','jf3','coop']],['Retos',['nok','hp10','hp1','fast','nc15','mini3','c52w','nb5','dbl']],['Leyenda',['w5','g10','w10','st3','allc']]];
+const SHELVES=[['Primeros pasos',['tut','g1','c1','w1','fin']],['Héroes',['wm','wl','wp','w3p','jf3','coop']],['Retos',['nok','hp10','hp1','fast','nc15','mini3','c52w','nb5','dbl']],['Leyenda',['w5','g10','w10','st3','allc']]];
 function recRender(){const P=$('#pn-rec'),o=stLoad(),A=o.ach||{},seen=o.achSeen||{},w=o.w||0,t=titleOf(w),nx=TITLES.find(x=>x[0]>w),pj=o.pj||{};
   const prev=t[0],pct=nx?Math.round((w-prev)/(nx[0]-prev)*100):100;
   const best=Math.max(0,...PJO.map(k=>(pj[k]||{}).w||0));
@@ -1811,10 +1843,11 @@ function dockVar(){try{const d=$('#dock'),t=d?d.getBoundingClientRect().top:0;if
   const cr=$('#cross'),h=cr?cr.clientHeight:0;if(h>120){const w=Math.max(60,Math.min(innerWidth*.29,150,(h-14)/(3*1.458)));if(Math.abs((cr._cw||0)-w)>.5){cr._cw=w;cr.style.setProperty('--cw',w.toFixed(1)+'px')}}}catch(e){}}
 const FAN={st:0,ids:[],x0:0,y0:0,i:-1,t:0,pid:null,tm:null,src:null,id:null,can:[],hov:null,end:0,dirty:0};
 function fanList(){let L=S.hand.slice();if(B)L=L.filter(x=>x!==B.act&&!B.as.includes(x));if(CAD)L=L.filter(x=>!CAD._sel.has(x));return L}
-function fanOk(id){if(CAD)return CAD._sel.size<2&&okaC(id,CAD.col);if(B)return B.act?(!COOP&&B.as.length<2&&oka(id)):(okc(id)&&id!=='l12');return true}
+function fanOk(id){if(TUT&&TUT.onlyAs&&B)return id===TUT.onlyAs&&!COOP&&B.as.length<2&&oka(id);if(CAD)return CAD._sel.size<2&&okaC(id,CAD.col);if(B)return B.act?(!COOP&&B.as.length<2&&oka(id)):(okc(id)&&id!=='l12');return true}
 /* desafíos que se pueden enfrentar con esta carta ahora mismo */
 function canBoard(){return !COOP||ctl()}
-function validCells(id){
+function validCells(id){const vc=validCells0(id);if(TUT&&TUT.only)return id===TUT.only.id&&vc.includes(TUT.only.cell)?[TUT.only.cell]:[];return vc}
+function validCells0(id){
   if(!id||id==='l12'||!MC[id]||!PICK||B||CAD||S.over||INTRO||SL||COOPBUSY||!canBoard()||filling()||boardBusy())return [];
   const out=[];[1,2,3,4].forEach(i=>{const c=S.cross[i];if(c&&CH[c.id]&&!blk(c)&&okcC(id,CH[c.id].c))out.push(i)});
   {const c=S.cross[0];if(S.final&&c&&CH[c.id]&&!blk(c)&&unl().some(([k])=>okcC(id,k)))out.push(0)}
@@ -1850,7 +1883,7 @@ function fanClose(){FAN.st=0;FAN.i=-1;FAN.src=null;FAN.id=null;$('#tHand').class
   FAN.can.forEach(i=>{const c=cellOf(i);if(c)c.classList.remove('can','hov')});document.querySelectorAll('#cross .cell.nope').forEach(c=>c.classList.remove('nope'));FAN.can=[];FAN.hov=null;
   const ba=$('#bact');if(ba)ba.classList.remove('hov');$('#m20').classList.remove('hdrag');
   if(FAN.dirty){FAN.dirty=0;fanRender()}else fanLay()}
-function fanBrowse(){FAN.st='browse';FAN.i=-1;FAN.lx=FAN.x;FAN.by=FAN.y;FAN.px=FAN.x;FAN.py=FAN.y;$('#tHand').classList.add('open');fanLay()}
+function fanBrowse(){if(TUT)TUT.browsed=1;FAN.st='browse';FAN.i=-1;FAN.lx=FAN.x;FAN.by=FAN.y;FAN.px=FAN.x;FAN.py=FAN.y;$('#tHand').classList.add('open');fanLay()}
 function fanDrag(id){FAN.st='drag';FAN.id=id;$('#fpv').classList.remove('on');const g=$('#fgh');g.innerHTML=card(id,'still');g.classList.add('on');fanGh();
   if(FAN.src==='hab')$('#m20').classList.add('hdrag');
   if(!B&&!CAD){FAN.can=validCells(id);FAN.can.forEach(i=>{const c=cellOf(i);if(c)c.classList.add('can')});
@@ -2188,7 +2221,7 @@ async function cine(color,nd,SP){
         const F=dice.map(d=>d.face);F[i]=Math.floor(Math.random()*6);cmSend({t:'rr',i,faces:F});
         const tk=setInterval(()=>SFX.tick(),130);try{await roll(color,null,F,i)}finally{clearInterval(tk)}await wait(500)}
       cmSend({t:'rr',stop:1})};
-    const doRoll=async()=>{let F;if(SP){const m=await cmWait('roll');F=m&&m.faces}else{F=dice.map(()=>Math.floor(Math.random()*6));cmSend({t:'roll',faces:F})}
+    const doRoll=async()=>{let F;if(SP){const m=await cmWait('roll');F=m&&m.faces}else{F=(TUT&&TUT.dice&&TUT.dice.length)?TUT.dice.shift():dice.map(()=>Math.floor(Math.random()*6));cmSend({t:'roll',faces:F})}
       const tk=setInterval(()=>SFX.tick(),130);try{await roll(color,null,F)}finally{clearInterval(tk)}await wait(500)};
     if(!nd){
       spins.forEach(x=>x.cancel());
@@ -2316,7 +2349,7 @@ setInterval(autoFill,400);
 function startGame(){
   closeSheets();close();setTimeout(()=>{try{albGet((S.personaje||CHAR||'m')+'19');albGet('j01')}catch(e){}},5000);
   /* CHAR ya fue fijado por el lobby antes de llamar a startGame */
-  SYON=0;SYQ=null;SYLAST='';SYSENT=0;OWNER='a';COOPFX=0;CMQ.length=0;S=fresh0();if(COOPDC){S.dC=COOPDC;COOPDC=null}if(COOPDK){S.dK=COOPDK;COOPDK=null}BQ.length=0;DFQ.length=0;PHAB=null;PMA=null;for(const k in PGOLD)delete PGOLD[k];for(const k in PGN)delete PGN[k];for(const k in PEND)delete PEND[k];FXQ.length=0;TP=null;PV=[];PHP=null;PM=null;PT=null;PICK=1;B=null;PH=0;ENDQ=0;SHF=0;M18=0;HIDE.clear();
+  SYON=0;SYQ=null;SYLAST='';SYSENT=0;OWNER='a';COOPFX=0;CMQ.length=0;S=fresh0();if(TUT)tutDeck();if(COOPDC){S.dC=COOPDC;COOPDC=null}if(COOPDK){S.dK=COOPDK;COOPDK=null}BQ.length=0;DFQ.length=0;PHAB=null;PMA=null;for(const k in PGOLD)delete PGOLD[k];for(const k in PGN)delete PGN[k];for(const k in PEND)delete PEND[k];FXQ.length=0;TP=null;PV=[];PHP=null;PM=null;PT=null;PICK=1;B=null;PH=0;ENDQ=0;SHF=0;M18=0;HIDE.clear();
   $('#bt').classList.remove('on');$('#sh-st').classList.remove('on');$('#tTurn').textContent='Turno';hits.textContent='';
   SL=1;INTRO=1;render();
   fxPlay(async L=>{try{
@@ -2416,6 +2449,7 @@ document.querySelectorAll('.lob-dots i').forEach(d=>d.addEventListener('click',(
 
 
 $('#lob-btn-start').addEventListener('click',()=>{
+  if(tutAsk())return;
   const b=$('#lob-btn-start');
   if($('#lob-btn-resume').style.display!=='none'&&!STARTARM){STARTARM=1;b.innerHTML='<span style="font-size:.82rem;letter-spacing:0;line-height:1.15;display:block">¿Nueva partida?<br>Toca otra vez (se borra la guardada)</span>';setTimeout(()=>{if(STARTARM){STARTARM=0;b.textContent='⚔️ JUGAR'}},3000);return}
   STARTARM=0;b.textContent='⚔️ JUGAR';GAMEON=1;
@@ -3119,6 +3153,100 @@ $('#o-del').addEventListener('click',()=>{let d=$('#delp');if(!d){d=document.cre
     /* se conservan solo los ajustes del teléfono (volumen, animaciones, juego guardado sin conexión, avisos) */
     try{['mesa-stats','mesa-yo','mesa-juego','mesa-pj','mesa-tab','mesa-av'].forEach(k=>localStorage.removeItem(k));sessionStorage.clear()}catch(_){}
     location.reload()}});
+
+/* ===== TUTORIAL GUIADO: el Búho enseña a jugar con una partida de práctica arreglada (Mario) ===== */
+const OWL='<img src="guia/buho.webp" alt="" onerror="this.replaceWith(document.createTextNode(\'🦉\'))">';
+document.body.insertAdjacentHTML('beforeend',`<div id="tut"><svg><defs><mask id="tutm"><rect width="100%" height="100%" fill="#fff"/><g id="tuth"></g></mask></defs><rect width="100%" height="100%" fill="#05030aa8" mask="url(#tutm)"/></svg><div id="tutr"></div><div class="tbub bot" id="tutb"></div><div class="thand" id="tutp">👆</div></div><div id="tutq"></div>`);
+/* partida arreglada: mano y desafíos fijos (Mario) */
+function tutDeck(){const H=['m16','m02','m12','m09','m06','m15','m11','m17'],R=['c36','c23','c24'],C=['c54','c03','c35','c56'],D=['c20','c21','c22'],A=[...R,...C,...D];
+  /* orden desde arriba del mazo: 3 descartes iniciales, 4 desafíos, 2 que descarta la recompensa y el que rellena el hueco */
+  S.dM=S.dM.filter(x=>!H.includes(x)).concat(H);S.dC=S.dC.filter(x=>!A.includes(x)).concat(A)}
+const tutCell=id=>S.cross.findIndex(c=>c&&c.id===id);
+const tutIdle=()=>!B&&!CAD&&PICK&&!CINE&&!RUNFX&&!RES2&&!INTRO&&!SL&&!boardBusy()&&!PRES;
+/* dados: h aciertos exactos para el color del desafío */
+function tutRig(h){const cf={verde:0,rojo:1,azul:2}[COLN[col()]],miss=[0,1,2].find(k=>k!==cf);const F=[0,1,2].map(k=>k<Math.min(h,3)?cf:miss);F.push(h>3?0:1);TUT.dice=[F]}
+const el=s=>typeof s==='string'?$(s):s;
+const STEPS=[
+  {when:()=>S.cross.slice(1).every(Boolean)&&tutIdle(),txt:'¡Hola, aventurero! Soy el <b>Búho</b> y te voy a enseñar a jugar en un momento. ¿Listo?',btn:'¡Vamos!'},
+  {tgt:()=>cellOf(0),txt:'Este es el <b>Jefe Final</b>. Su progreso es como tu <b>reloj</b>: si llega a 0, pierdes. Cuando acabes el <b>mazo del calabozo</b> aparecerá el verdadero jefe… ¡y si lo vences, ganas!',btn:'Siguiente'},
+  {tgt:()=>$('#hud .hhp'),txt:'Estos son tus <b>corazones</b>. Fallar desafíos te quita corazones. Si llegan a 0, pierdes.',btn:'Siguiente'},
+  {tgt:()=>cellOf(tutCell('c56')),txt:'Estos son los <b>desafíos</b>. El número de arriba es lo que necesitas para vencerlo y su color indica qué dados te ayudan. Debajo vienen su <b>recompensa</b> y su <b>penalización</b>.',btn:'Siguiente'},
+  {tgt:()=>$('#tHand'),allow:'#tHand',hand:'hold',txt:'Esta es tu <b>mano</b>. <b>Mantén el dedo</b> sobre las cartas para verlas en grande y <b>desliza</b> a los lados para recorrerlas.',done:()=>TUT.browsed&&!FAN.st},
+  {on:()=>{TUT.card='m16';TUT.only={id:'m16',cell:tutCell('c56')}},tgt:()=>[$('#tHand'),cellOf(tutCell('c56'))],allow:'#tHand',hand:'drag',from:()=>tutFc('m16'),to:()=>cellOf(tutCell('c56')),
+    txt:'¡Ahora a jugar! Toma la carta que brilla y <b>arrástrala hacia arriba</b> hasta el desafío que brilla.',done:()=>B&&B.act==='m16'},
+  {on:()=>{TUT.card=null;TUT.only=null},tgt:()=>document.querySelectorAll('#bt .orb'),txt:'¡Comienza la batalla! En <b>amarillo</b> lo que falta para vencer el desafío y en <b>azul</b> tu progreso.',btn:'Siguiente'},
+  {on:()=>{TUT.card='m02';TUT.onlyAs='m02';fanRender()},tgt:()=>[$('#tHand'),$('#bact')],allow:'#tHand',hand:'drag',from:()=>tutFc('m02'),to:()=>$('#bact'),
+    txt:'Puedes reforzar tu carta con hasta <b>2 asistencias</b>. Arrastra la carta que brilla <b>encima de tu carta</b>.',done:()=>B&&B.as.includes('m02')},
+  {on:()=>{TUT.card=null;TUT.onlyAs=null;fanRender();const c=S.cross[B.i];tutRig(Math.max(1,LV(c)-c.p-totB()))},tgt:()=>$('#go'),allow:'#go',hand:'tap',to:()=>$('#go'),
+    txt:'Aún te falta un poco… ¡a la suerte! Cada dado del <b>color del desafío</b> suma 1, y el dado <b>blanco</b> también. ¡Lanza los dados!',done:()=>CINE||!TUT.dice.length},
+  {when:tutIdle,txt:'¡<b>Desafío completado</b>! Recibiste su <b>recompensa</b>: descartar cartas del mazo del calabozo, ¡así llegas más rápido al verdadero jefe!',btn:'Siguiente'},
+  {when:()=>tutIdle()&&tutCell('c03')>0&&S.hand.includes('m12'),on:()=>{TUT.card='m12';TUT.only={id:'m12',cell:tutCell('c03')}},tgt:()=>[$('#tHand'),cellOf(tutCell('c03'))],allow:'#tHand',hand:'drag',from:()=>tutFc('m12'),to:()=>cellOf(tutCell('c03')),
+    txt:'Nuevo turno. Probemos con otro: arrastra esta carta al <b>desafío azul</b>.',done:()=>B&&B.act==='m12'},
+  {on:()=>{TUT.card=null;TUT.only=null;tutRig(0)},tgt:()=>$('#go'),allow:'#go',hand:'tap',to:()=>$('#go'),txt:'Te falta solo 1. ¿Tendrás suerte esta vez? ¡Lanza los dados!',done:()=>CINE||!TUT.dice.length},
+  {when:tutIdle,tgt:()=>$('#hud .hhp'),txt:'Esta vez <b>fallaste</b>. Cuando fallas sufres la <b>penalización</b> del desafío: aquí perdiste un corazón. ¡No pasa nada, así se aprende!',btn:'Siguiente'},
+  {when:tutIdle,tgt:()=>$('.pjs'),txt:'Esta es tu <b>carta de personaje</b> y arriba su <b>habilidad</b>. Cuando la habilidad se activa, también la puedes arrastrar a un desafío.',btn:'Siguiente'},
+  {when:tutIdle,tgt:()=>$('#tSt'),allow:'#tSt',hand:'tap',to:()=>$('#tSt'),txt:'Toca esta carta para ver el <b>Estado</b>: tus mazos y descartes.',done:()=>$('#sh-st').classList.contains('on')},
+  {tgt:()=>$('#sh-st'),txt:'Aquí ves tus mazos. Si te quedas <b>sin cartas</b>, toca el mazo de <b>Agotamiento</b> para robar una mano nueva (pero cuidado con su efecto).',btn:'Entendido',next:()=>{$('#sh-st').classList.remove('on');$('#tSt').classList.remove('on')}},
+  {txt:'¡Listo, aventurero! Ya sabes lo básico. Te ganaste la medalla <b>🎓 Aprendiz</b>. ¡Mucha suerte en el calabozo!',btn:'Terminar',next:()=>tutEnd(1)}];
+const tutFc=id=>{const c=[...document.querySelectorAll('#tHand .fc')].find(x=>{const k=x.querySelector('.card');return k&&k.dataset.id===id});return c};
+function tutAsk(){if(TUT||COOP)return false;const o=stLoad();if(!YO||o.tut||(o.g||0)>0||$('#lob-btn-resume').style.display!=='none')return false;
+  const q=$('#tutq');q.innerHTML=`<div class="bx"><div class="ow">${OWL}</div><h3>¿Quieres aprender a jugar?</h3><p>El Búho te enseña lo básico en una partida de práctica (unos 2 minutos).</p><button class="y">Sí, enséñame</button><button class="n">Ahora no</button></div>`;
+  q.onclick=e=>{if(e.target.closest('.y')){q.classList.remove('on');tutStart()}else if(e.target.closest('.n')){q.classList.remove('on');const o2=stLoad();o2.tut='no';stSave(o2);$('#lob-btn-start').click()}};
+  q.classList.add('on');return true}
+function tutStart(){if(TUT)return;closeSheets();close();
+  TUT={i:-1,prev:{NEWG,GAMEON,CHAR},dice:[]};COOP=0;MYT=1;CHAR='m';GAMEON=1;
+  hideLobby();startGame();tutGo(0)}
+function tutGo(i){TUT.i=i;TUT.shown=0;const st=STEPS[i];if(st&&st.on&&!st.when)st.on();TUT.onDone=!st||!st.when;tutDraw(1)}
+function tutNext(){const st=STEPS[TUT.i];if(st&&st.next){st.next();if(!TUT)return}tutGo(TUT.i+1)}
+function tutEnd(ok){const p=TUT.prev;$('#tut').classList.remove('on');
+  try{const o=stLoad();if(ok){o.tut='ok';o.tutok=1}else if(!o.tut)o.tut='skip';stSave(o)}catch(e){}
+  TUT=null;try{closeSheets();close();presHide(1)}catch(e){}B=null;CAD=null;$('#bt').classList.remove('on');BQ.length=0;FXQ.length=0;RES2=null;RUNFX=0;PICK=1;
+  try{const j=localStorage.getItem('mesa-juego');S=j?JSON.parse(j):fresh()}catch(e){S=fresh()}
+  NEWG=p.NEWG;GAMEON=p.GAMEON;CHAR=p.CHAR;showLobby();
+  if(ok)setTimeout(()=>{TUT={give:1};try{achGive(ACH.filter(a=>a[0]==='tut'))}catch(e){}TUT=null;try{recDot()}catch(e){}},500)}
+const tutHide=()=>!TUT||!TUT.prev||lobbyOn()||CINE||FXR||INTRO||SL||AFB||BR||$('#ov').classList.contains('on')||!!PRES||$('#fxl').classList.contains('on')||document.querySelector('#cine[style*="flex"]');
+function tutRects(t){if(!t)return[];const L=(t instanceof NodeList||Array.isArray(t))?[...t]:[t];return L.filter(Boolean).map(e=>e.getBoundingClientRect()).filter(r=>r.width)}
+function tutDraw(force){const T=$('#tut');if(!TUT||!TUT.prev){T.classList.remove('on');return}
+  const st=STEPS[TUT.i];if(!st){T.classList.remove('on');return}
+  if(TUT.shown&&st.done&&st.done()){tutNext();return}
+  if(tutHide()||(st.when&&!st.when()&&!TUT.shown)){T.classList.remove('on');return}
+  if(!TUT.shown){TUT.shown=1;if(st.when&&st.on)st.on();force=1}
+  if(st.done&&st.done()){tutNext();return}
+  T.classList.add('on');
+  const rs=tutRects(st.tgt&&st.tgt()),pad=8;
+  $('#tuth').innerHTML=rs.map(r=>`<rect x="${r.left-pad}" y="${r.top-pad}" width="${r.width+pad*2}" height="${r.height+pad*2}" rx="14" fill="#000"/>`).join('');
+  $('#tutr').innerHTML=rs.map(r=>`<div class="tring" style="left:${r.left-pad}px;top:${r.top-pad}px;width:${r.width+pad*2}px;height:${r.height+pad*2}px"></div>`).join('');
+  const b=$('#tutb');
+  if(force||b.dataset.i!=TUT.i){b.dataset.i=TUT.i;b.innerHTML=`<div class="towl">${OWL}</div><div class="tbx">${st.txt}<div class="tbtn">${TUT.i<STEPS.length-1?'<button class="tsk">Saltar tutorial</button>':''}${st.btn?`<button class="tn">${st.btn}</button>`:''}</div></div>`;try{SFX.pop()}catch(e){}}
+  /* globo arriba si lo importante está abajo */
+  const main=rs[rs.length-1],low=rs.some(r=>r.top+r.height/2>innerHeight*.5)&&!rs.some(r=>r.top<innerHeight*.35);
+  b.classList.toggle('top',!!main&&(low||st.allow==='#tHand'));b.classList.toggle('bot',!(!!main&&(low||st.allow==='#tHand')));
+  if(st.allow==='#tHand'&&rs.some(r=>r.top<innerHeight*.45)){b.classList.add('top');b.classList.remove('bot');b.style.top='auto';b.style.bottom='auto';
+    const tr=rs.find(r=>r.top<innerHeight*.45);b.style.top=Math.max(8,Math.min(innerHeight*.5,tr.top+tr.height+18))+'px'}else{b.style.top='';b.style.bottom=''}
+  tutHand(st)}
+let TUTH=null;
+function tutHand(st){const h=$('#tutp');const k=st.hand?(st.hand+':'+TUT.i):null;
+  if(!k||FAN.st){h.classList.remove('on');if(TUTH){TUTH.cancel();TUTH=null}h.dataset.k='';return}
+  if(h.dataset.k===k&&TUTH)return;h.dataset.k=k;if(TUTH){TUTH.cancel();TUTH=null}
+  const ctr=e=>{if(!e)return null;const r=e.getBoundingClientRect();return r.width?[r.left+r.width/2,r.top+r.height/2]:null};
+  let fr,to;
+  if(st.hand==='hold'){const r=$('#tHand').getBoundingClientRect();const y=r.top+r.height*.55,x=r.left+r.width/2;
+    h.classList.add('on');TUTH=h.animate([{transform:`translate(${x-60}px,${y}px)`,opacity:0},{transform:`translate(${x-60}px,${y}px)`,opacity:1,offset:.1},{transform:`translate(${x-60}px,${y+6}px) scale(.9)`,offset:.25},{transform:`translate(${x+50}px,${y+6}px) scale(.9)`,offset:.6},{transform:`translate(${x-60}px,${y+6}px) scale(.9)`,offset:.9},{transform:`translate(${x-60}px,${y}px)`,opacity:0}],{duration:2600,iterations:Infinity});return}
+  if(st.hand==='tap'){to=ctr(st.to());if(!to){h.classList.remove('on');return}h.classList.add('on');
+    TUTH=h.animate([{transform:`translate(${to[0]-12}px,${to[1]+30}px)`,opacity:0},{transform:`translate(${to[0]-12}px,${to[1]+6}px)`,opacity:1,offset:.3},{transform:`translate(${to[0]-12}px,${to[1]+6}px) scale(.85)`,offset:.45},{transform:`translate(${to[0]-12}px,${to[1]+6}px)`,offset:.6},{transform:`translate(${to[0]-12}px,${to[1]+30}px)`,opacity:0}],{duration:1500,iterations:Infinity});return}
+  fr=ctr(st.from&&st.from());to=ctr(st.to&&st.to());if(!fr||!to){h.classList.remove('on');h.dataset.k='';return}
+  h.classList.add('on');
+  TUTH=h.animate([{transform:`translate(${fr[0]-12}px,${fr[1]}px)`,opacity:0},{transform:`translate(${fr[0]-12}px,${fr[1]}px) scale(.9)`,opacity:1,offset:.15},{transform:`translate(${fr[0]-12}px,${fr[1]-30}px) scale(.9)`,offset:.3},{transform:`translate(${to[0]-12}px,${to[1]}px) scale(.9)`,opacity:1,offset:.8},{transform:`translate(${to[0]-12}px,${to[1]}px)`,opacity:0}],{duration:2200,iterations:Infinity,easing:'ease-in-out'})}
+setInterval(()=>{if(!TUT||!TUT.prev)return;try{tutDraw();
+  /* resaltar la carta que hay que usar */
+  document.querySelectorAll('#tHand .fc.tutc').forEach(x=>x.classList.remove('tutc'));if(TUT.card){const c=tutFc(TUT.card);if(c)c.classList.add('tutc')}}catch(e){}},200);
+addEventListener('resize',()=>{if(TUT)tutDraw(1)});
+$('#tutb').addEventListener('click',e=>{if(!TUT)return;if(e.target.closest('.tn')){tutNext();return}if(e.target.closest('.tsk'))tutEnd(0)});
+/* mientras el Búho habla, solo responde lo que señala */
+['pointerdown','click'].forEach(ev=>document.addEventListener(ev,e=>{if(!TUT||!TUT.prev||!$('#tut').classList.contains('on'))return;
+  if(e.target.closest('#tutb,#tutq'))return;const st=STEPS[TUT.i];if(st&&st.allow&&e.target.closest(st.allow))return;
+  e.stopPropagation();e.preventDefault()},true));
+$('#o-tut').addEventListener('click',()=>{hideOpts();if(COOP){alert('El tutorial no está disponible en una partida con amigo.');return}tutStart()});
 </script>
 </body>
 </html>
