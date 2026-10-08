@@ -138,6 +138,7 @@
   "guerreros/paladin-camina.webp": "17fd1fa9238c",
   "guerreros/paladin-parado.webp": "5963261b0316",
   "guerreros/paladin.webp": "28c8bad34e88",
+  "guia/buho.webp": "d1e883253c6f",
   "icon-192.png": "1832840b96ab",
   "icon-512.png": "c42de4552324",
   "iconos/i-album.webp": "7d3fa0ed1b3a",
@@ -240,5 +241,5 @@
   "tableros/t07.webp": "d13add3a6534",
   "tableros/t08.webp": "df272cca3775"
  },
- "version": "11308b607de4"
+ "version": "c1bb1f276181"
 }
