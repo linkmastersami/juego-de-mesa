@@ -1,0 +1,6 @@
+{
+  // Publicación del juego en Cloudflare (copia de GitHub Pages para redes que bloquean github.io)
+  "name": "juego-de-mesa",
+  "compatibility_date": "2026-10-01",
+  "assets": { "directory": "." }
+}
