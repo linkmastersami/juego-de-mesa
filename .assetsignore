@@ -1,7 +1,13 @@
 server.js
 package.json
 package-lock.json
+bun.lock
 wrangler.jsonc
 .github
+.wrangler
 node_modules
 .git
+.gitignore
+*.mp4
+k02.png
+**/.gitkeep
