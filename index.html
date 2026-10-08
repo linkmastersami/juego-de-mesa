@@ -1603,11 +1603,11 @@ async function shareVictory(st){
         else{x.font=F(400,46);x.fillStyle='#fff';x.fillText(a[1]||'🏆',bx+cw/2,ay+cw/2+16)}}
       ay+=cw}
     /* pie */
-    x.font=F(700,34);x.fillStyle='#ffffff';x.fillText('¡Juega gratis! linkmastersami.github.io/juego-de-mesa',W/2,H-58);
+    x.font=F(700,34);x.fillStyle='#ffffff';x.fillText('¡Juega gratis! '+(location.host+location.pathname).replace(/index\.html$/,'').replace(/\/$/,''),W/2,H-58);
     x.font=F(500,26);x.fillStyle='#ffffff99';x.fillText('Link Master · Dungeon Edition · '+new Date().toLocaleDateString('es-MX'),W/2,H-20);
     const blob=await new Promise(r=>cv.toBlob(r,'image/png'));
     const f=new File([blob],'victoria.png',{type:'image/png'});
-    const LINK='https://linkmastersami.github.io/juego-de-mesa/',TXT=`${YO?YO.n+': ':''}¡Gané en Link Master con ${PJN[pj]} en ${st.turn} turnos! ⚔️ ¿Puedes superarme? Juega gratis aquí: ${LINK}`;
+    const LINK=location.origin+location.pathname.replace(/index\.html$/,''),TXT=`${YO?YO.n+': ':''}¡Gané en Link Master con ${PJN[pj]} en ${st.turn} turnos! ⚔️ ¿Puedes superarme? Juega gratis aquí: ${LINK}`;
     /* algunas apps (como WhatsApp) quitan el texto al compartir una imagen: el enlace también se copia para pegarlo */
     try{await navigator.clipboard.writeText(TXT);cToast('🔗 Enlace del juego copiado · pégalo en tu mensaje')}catch(e){}
     if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:'¡Victoria en Link Master!',text:TXT});return}
