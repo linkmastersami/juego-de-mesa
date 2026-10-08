@@ -205,6 +205,16 @@
   "personajes/personaje 3/p19a.webp": "668183484e23",
   "personajes/personaje 3/p20.webp": "eebc4056974d",
   "personajes/personaje 3/p20a.webp": "1f135e22276f",
+  "sonidos/amigo.mp3": "a509390a7514",
+  "sonidos/carta.mp3": "c8844d91fefd",
+  "sonidos/dados.mp3": "7b44dd1bb526",
+  "sonidos/espada.mp3": "19cce4ce7420",
+  "sonidos/estampa.mp3": "758c7c03f8c9",
+  "sonidos/invitacion.mp3": "db981dc86ef5",
+  "sonidos/libro.mp3": "0203097157a0",
+  "sonidos/logro.mp3": "29a42962db9e",
+  "sonidos/pagina.mp3": "bece14788d80",
+  "sonidos/pestana.mp3": "c262f055256b",
   "tableros/t01.webp": "2c4477bdcd87",
   "tableros/t02.webp": "513dae1464e2",
   "tableros/t03.webp": "7312f7623e55",
@@ -214,5 +224,5 @@
   "tableros/t07.webp": "d13add3a6534",
   "tableros/t08.webp": "df272cca3775"
  },
- "version": "08536d15dac4"
+ "version": "2ae3a70de8de"
 }
