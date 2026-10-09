@@ -527,7 +527,10 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
 
 /* ===== menú de opciones ===== */
 #lobby #lob-yo{position:absolute}
-#lobby #lob-menu{position:absolute;top:calc(env(safe-area-inset-top,0px) + 12px);right:14px;z-index:5;width:46px;height:46px;border-radius:14px;border:2px solid #ffffff2a;background:#0d0a14b3;color:#fff;font-size:1.5rem;line-height:1;cursor:pointer;box-shadow:0 4px 12px #0008}
+#lobby #lob-exit{position:absolute;top:calc(env(safe-area-inset-top,0px) + 66px);right:18px;z-index:5;width:38px;height:38px;border-radius:12px;border:2px solid #ff6b6b55;background:#2a0d12b3;color:#ff8a8a;font-size:1.15rem;line-height:1;cursor:pointer;box-shadow:0 4px 12px #0008;padding:0}
+#bye{position:fixed;inset:0;z-index:120;display:none;place-items:center;background:radial-gradient(circle at 50% 40%,#2b2238,#0b0910);color:#fff;text-align:center;padding:24px;font-family:Fredoka,sans-serif}#bye.on{display:grid}#bye .bx{max-width:340px}#bye .ow{width:120px;height:120px;margin:0 auto 6px}#bye .ow img{width:100%;height:100%;object-fit:contain}#bye h2{color:var(--gold);margin:6px 0}#bye p{opacity:.85;line-height:1.35}#bye button{margin-top:16px;border:0;border-radius:14px;padding:12px 22px;background:var(--gold);color:#2b2208;font:800 1rem Fredoka,sans-serif}
+#lobby #lob-menu{position:absolute}
+#lob-menu{position:absolute;top:calc(env(safe-area-inset-top,0px) + 12px);right:14px;z-index:5;width:46px;height:46px;border-radius:14px;border:2px solid #ffffff2a;background:#0d0a14b3;color:#fff;font-size:1.5rem;line-height:1;cursor:pointer;box-shadow:0 4px 12px #0008}
 #lob-menu:active{transform:scale(.92)}
 #opts{position:fixed;inset:0;z-index:62;background:#000c;display:none;overflow-y:auto;padding:calc(env(safe-area-inset-top,0px) + 16px) 14px 24px}
 #opts.on{display:block}
@@ -835,6 +838,7 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
 <!-- LOBBY -->
 <div id="lobby" class="oculto">
   <button id="lob-menu" aria-label="Opciones">☰</button>
+  <button id="lob-exit" aria-label="Salir del juego">⏻</button>
   <div id="lob-yo"></div>
   <div class="lob-amb"><b style="left:6%;--x:30px;animation-duration:10s;animation-delay:-2s"></b><b style="left:18%;--x:-20px;animation-duration:13s;animation-delay:-7s"></b><b style="left:31%;--x:25px;animation-duration:11s;animation-delay:-4s"></b><b style="left:46%;--x:-35px;animation-duration:14s;animation-delay:-9s"></b><b style="left:60%;--x:20px;animation-duration:12s;animation-delay:-1s"></b><b style="left:74%;--x:-25px;animation-duration:15s;animation-delay:-11s"></b><b style="left:88%;--x:15px;animation-duration:11s;animation-delay:-6s"></b><b style="left:95%;--x:-10px;animation-duration:13s;animation-delay:-3s"></b></div>
   <div class="pager" id="pager"><div class="ptrack" id="ptrack">
@@ -2445,7 +2449,7 @@ const want=()=>{const o=$('#ov');
   return document.body.classList.contains('finalph')?'jefe':'batalla'};
 const fade=(a,to,ms,end)=>{const v0=a.volume,t0=performance.now();FD++;const st=()=>{const k=Math.min(1,(performance.now()-t0)/ms);try{a.volume=Math.max(0,Math.min(1,v0+(to-v0)*k))}catch(e){}if(k<1)requestAnimationFrame(st);else{FD--;end&&end()}};st()};
 let UNL=0;
-function musTick(){if(!UNL||MV<=0||document.hidden){if(CUR&&!au(CUR).paused&&(MV<=0||document.hidden))au(CUR).pause();return}
+function musTick(){if(!UNL||MV<=0||document.hidden||window.BYE){if(CUR&&!au(CUR).paused&&(MV<=0||document.hidden||window.BYE))au(CUR).pause();return}
   const w=want();
   if(w!==CUR){const old=CUR;CUR=w;DONE=null;
     if(old){const o=au(old);fade(o,0,500,()=>{o.pause();try{o.currentTime=0}catch(e){}})}
@@ -3273,6 +3277,19 @@ $('#o-del').addEventListener('click',()=>{let d=$('#delp');if(!d){d=document.cre
     /* se conservan solo los ajustes del teléfono (volumen, animaciones, juego guardado sin conexión, avisos) */
     try{['mesa-stats','mesa-yo','mesa-juego','mesa-pj','mesa-tab','mesa-av'].forEach(k=>localStorage.removeItem(k));sessionStorage.clear()}catch(_){}
     location.reload()}});
+
+/* ===== salir del juego: se guarda todo, se calla la música y se intenta cerrar (si el teléfono no lo permite, pantalla de despedida) ===== */
+$('#lob-exit').addEventListener('click',()=>{const d=amgDlg(`<div style="font-size:2.6rem">👋</div><h3>¿Salir del juego?</h3><p>Tu progreso queda guardado.</p><button class="y" id="bye-y" style="background:#e5484d;color:#fff">⏻ Salir</button><button class="n">Cancelar</button>`);
+  $('#bye-y').onclick=()=>{d.classList.remove('on');byeGo()}});
+function byeGo(){window.BYE=1;try{vzStop()}catch(e){}try{document.querySelectorAll('audio').forEach(a=>a.pause())}catch(e){}
+  try{if(MP.code)mpClose()}catch(e){}
+  try{if(YO&&navigator.sendBeacon)navigator.sendBeacon(MP_URL+'/plaza',new Blob([JSON.stringify({n:YO.n,k:YO.k,bye:1})],{type:'text/plain'}))}catch(e){}
+  try{if(AC&&AC.state==='running')AC.suspend()}catch(e){}
+  try{window.close()}catch(e){}
+  setTimeout(()=>{try{if(document.fullscreenElement)document.exitFullscreen()}catch(e){}
+    let b=$('#bye');if(!b){b=document.createElement('div');b.id='bye';document.body.appendChild(b)}
+    b.innerHTML=`<div class="bx"><div class="ow">${OWL}</div><h2>¡Hasta pronto, aventurero!</h2><p>Tu progreso está guardado.<br>Ya puedes cerrar el juego: desliza hacia arriba desde la parte de abajo de la pantalla (o abre tus apps recientes) y quítalo.</p><button id="bye-back">⚔️ Seguir jugando</button></div>`;
+    b.classList.add('on');$('#bye-back').onclick=()=>{b.classList.remove('on');window.BYE=0;try{AC&&AC.resume()}catch(e){}}},350)}
 
 /* ===== TUTORIAL GUIADO: el Búho enseña a jugar con una partida de práctica arreglada (Mario) ===== */
 const OWL='<img src="guia/buho.webp" alt="" onerror="this.replaceWith(document.createTextNode(\'🦉\'))">';
