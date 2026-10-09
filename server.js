@@ -89,6 +89,8 @@ async function pushTo(name, payload) {
 }
 const LAST = new Map(); /* NOMBRE -> última vez que abrió el juego (para "conectado") */
 const INV = new Map();  /* NOMBRE invitado -> [{ de, c, t }] */
+/* la invitación sigue viva mientras la sala exista, su anfitrión siga ahí y el lugar sea para el invitado (máx. 1 hora) */
+const invOk = (x, n) => { const rm = rooms.get(x.c); return !!rm && Date.now() - x.t < 60 * 60000 && !!rm.host && (rm.host.readyState === 1 || !!rm.gone.host) && (!rm.guest || rm.gn === n); };
 let lastQuickPush = 0, lastUpdPush = 0;
 const readBody = (req, cb, max = 4096) => { let b = ''; req.on('data', d => { b += d; if (b.length > max) req.destroy(); }); req.on('end', () => { try { cb(JSON.parse(b || '{}')); } catch { cb(null); } }); };
 const waiting = () => [...rooms.entries()].filter(([, r]) => r.pub && !r.guest && !r.gone.guest && r.host && r.host.readyState === 1);
@@ -220,14 +222,15 @@ const server = http.createServer((req, res) => {
       if (url === '/amigos/invitar') {
         const c = String(b.c || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
         if (!ot || !me.f.includes(a) || !c) return out({ r: 'none' });
-        const L = (INV.get(a) || []).filter(x => x.de !== n && now - x.t < 10 * 60000); L.push({ de: n, c, t: now }); INV.set(a, L);
+        const L = (INV.get(a) || []).filter(x => x.de !== n && invOk(x, a)); L.push({ de: n, c, t: now }); INV.set(a, L);
+        const rm = rooms.get(c); if (rm) rm.inv = a; /* la sala recuerda a quién espera */
         pushTo(a, { kind: 'inv', sala: c, title: 'Link Master Dungeon', body: `⚔️ ${n} te está esperando para jugar` });
         return out({ r: 'ok' });
       }
       if (url === '/amigos/noinv') { INV.set(n, (INV.get(n) || []).filter(x => x.de !== a)); return out({ r: 'ok' }); }
       /* /amigos: estado completo */
       const on = m => now - (LAST.get(m) || 0) < 45000;
-      const inv = (INV.get(n) || []).filter(x => now - x.t < 10 * 60000 && me.f.includes(x.de));
+      const inv = (INV.get(n) || []).filter(x => invOk(x, n) && me.f.includes(x.de));
       return out({ r: 'ok', f: me.f.map(m => ({ n: m, a: (NAMES.get(m) || {}).a || 'guerrero', on: on(m) })).sort((x, y) => (y.on - x.on) || x.n.localeCompare(y.n)), rq: me.rq.slice(), inv: inv.map(x => ({ de: x.de, c: x.c })) });
     });
   }
@@ -299,7 +302,7 @@ wss.on('connection', ws => {
     const doJoin = (code, r) => {
       const tok = newTok();
       r.gc = (m.t === 'quick' && /^[a-z]$/.test(m.char || '') && m.char !== r.hostChar) ? m.char : (r.hostChar === 'm' ? 'l' : 'm'); /* nunca el mismo personaje que el anfitrión */ r.pub = false; /* en partida rápida el invitado entra con el personaje que eligió */
-      r.guest = ws; r.tok.guest = tok; r.v2.guest = !!m.v; ws.room = code; ws.role = 'guest';
+      r.guest = ws; r.tok.guest = tok; r.v2.guest = !!m.v; ws.room = code; ws.role = 'guest'; r.gn = okName(String(m.n || '').toUpperCase()) ? String(m.n).toUpperCase() : null;
       send(ws, { t: 'joined', code, char: guestChar(r), hostChar: r.hostChar, tok });
       send(r.host, { t: 'peer', on: true, char: guestChar(r) });
     };
@@ -307,7 +310,9 @@ wss.on('connection', ws => {
       const code = String(m.code || '').toUpperCase().trim(), r = rooms.get(code);
       if (!r) return send(ws, { t: 'err', msg: 'Esa sala no existe o ya se cerró.' });
       if (r.guest && r.guest.readyState === 1) return send(ws, { t: 'err', msg: 'La sala ya está llena.' });
-      if (r.gone.guest) return send(ws, { t: 'err', msg: 'La sala ya está llena.' }); /* su lugar está reservado un momento */
+      const nm = String(m.n || '').toUpperCase();
+      /* su lugar está reservado un momento; si vuelve el mismo jugador (p. ej. se le reinició el juego) recupera su lugar */
+      if (r.gone.guest) { if (nm && r.gn === nm) { clearTimeout(r.gone.guest); r.gone.guest = null; r.guest = null; r.tok.guest = null; } else return send(ws, { t: 'err', msg: 'La sala ya está llena.' }); }
       return doJoin(code, r);
     }
 

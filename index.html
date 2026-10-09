@@ -273,7 +273,7 @@ body.noanim *:not(.blink),body.noanim *::before,body.noanim *::after{animation-d
 
 /* ===== MULTIJUGADOR ===== */
 .lob-friend{margin-top:10px;width:min(86vw,320px);border:0;border-radius:16px;padding:14px;font:700 1.1rem Fredoka,sans-serif;color:#fff;background:linear-gradient(180deg,#4b7cf0,#2f55c4);box-shadow:0 5px 0 #1d3a8a,0 0 22px #4b7cf055;cursor:pointer}
-.lob-quick{background:linear-gradient(180deg,#3fcf72,#1f9a4a);box-shadow:0 5px 0 #136a30,0 0 22px #3fcf7255}.lob-quick:not(:disabled):active{box-shadow:0 1px 0 #136a30}.lob-quick.hot{animation:qpulse 1.2s ease-in-out infinite}@keyframes qpulse{50%{transform:scale(1.05)}}.lob-qb{background:#ff4d4d;border-radius:99px;padding:2px 9px;font-size:.8rem;margin-left:8px;font-weight:700}
+.lob-quick{background:linear-gradient(180deg,#3fcf72,#1f9a4a);box-shadow:0 5px 0 #136a30,0 0 22px #3fcf7255}.lob-quick:not(:disabled):active{box-shadow:0 1px 0 #136a30}.lob-quick.hot,.lob-friend.hot{animation:qpulse 1.2s ease-in-out infinite}@keyframes qpulse{50%{transform:scale(1.05)}}.lob-qb{background:#ff4d4d;border-radius:99px;padding:2px 9px;font-size:.8rem;margin-left:8px;font-weight:700}
 .lob-friend:disabled{opacity:.4;box-shadow:none;cursor:default}
 .lob-friend:not(:disabled):active{transform:translateY(4px);box-shadow:0 1px 0 #1d3a8a}
 #mp{position:fixed;inset:0;z-index:70;display:none;place-items:center;background:radial-gradient(120% 80% at 50% 30%,#2a1f45f2,#0d0a14f7);padding:16px;overflow-y:auto}
@@ -514,6 +514,7 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
 .lob-cont:active{transform:translateY(3px);box-shadow:inset 0 -2px 0 #1d4aa3}
 .lob-row{display:flex;gap:10px;width:100%;max-width:420px;margin-top:12px}
 .lob-row .lob-friend{flex:1;width:auto;margin:0;font-size:1rem;padding:13px 6px;white-space:nowrap}
+#lob-btn-friend{position:relative}#lob-f{position:absolute;top:-12px;left:50%;transform:translateX(-50%);margin:0;white-space:nowrap;box-shadow:0 2px 6px #0008;max-width:110%;overflow:hidden;text-overflow:ellipsis}
 .lob-icons{display:flex;justify-content:space-around;width:100%;max-width:420px;margin-top:18px;gap:6px}
 .lob-icons button{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;border:0;background:none;color:var(--ink);font:600 .74rem Fredoka,sans-serif;cursor:pointer;padding:0}
 .lob-icons i{font-style:normal;width:54px;height:54px;border-radius:50%;display:grid;place-items:center;font-size:1.5rem;background:#0d0a14b3;border:2px solid #ffffff22;box-shadow:0 4px 12px #0008;transition:transform .15s,border-color .2s}
@@ -2566,7 +2567,7 @@ async function mpStart(join,quick){
 function mpOpen(){
   let ws;try{ws=new WebSocket(MP_URL.replace(/^http/,'ws'))}catch(e){mpErr('No se pudo abrir la conexión.');return}
   MP.ws=ws;MP.last=Date.now();
-  ws.onopen=()=>{MP.last=Date.now();ws.send(JSON.stringify(MP.join?{t:'join',code:MP.join,v:2}:MP.quick?{t:'quick',char:CHAR,v:2,ep:(()=>{try{return localStorage.getItem('mesa-pushep')||''}catch(e){return ''}})()}:{t:'create',char:CHAR,v:2}))};
+  ws.onopen=()=>{MP.last=Date.now();ws.send(JSON.stringify(MP.join?{t:'join',code:MP.join,v:2,n:YO?YO.n:''}:MP.quick?{t:'quick',char:CHAR,v:2,ep:(()=>{try{return localStorage.getItem('mesa-pushep')||''}catch(e){return ''}})()}:{t:'create',char:CHAR,v:2}))};
   mpBind(ws);
 }
 /* mensajes del servidor + latido: si pasan 22 s sin oír nada, se da la conexión por perdida */
@@ -2655,7 +2656,8 @@ const mpHi=()=>mpSend({k:'hi',n:YO?YO.n:'',c:CHAR,r:MP.rdy?1:0});
 let MPSTART=0;
 function mpTryStart(){if(MP.role!=='host'||!MP.peer||!MP.rdy||!MP.prdy||MP.peer.char===CHAR||COOP||MPSTART)return;MPSTART=1;
   setTimeout(()=>{MPSTART=0;if(MP.role!=='host'||!MP.peer||!MP.rdy||!MP.prdy||COOP)return;$('#mp-go').click()},900)}
-$('#lob-btn-friend').addEventListener('click',()=>{if(sinNet()){alert('Jugar con un amigo necesita Internet. Toca "Jugando sin Internet" para volver a usarlo.');return}mpStart()});
+$('#lob-btn-friend').addEventListener('click',()=>{if(sinNet()){alert('Jugar con un amigo necesita Internet. Toca "Jugando sin Internet" para volver a usarlo.');return}
+  if(!MP.code&&typeof AMG!=='undefined'&&AMG.inv.length){amgInvite(AMG.inv[0],1);return}mpStart()});
 $('#mp-pick').addEventListener('click',e=>{const b=e.target.closest('button[data-c]');if(!b||COOP)return;if(b.classList.contains('tk')){try{SFX.fail()}catch(_){}return}
   if(b.dataset.c===CHAR)return;CHAR=b.dataset.c;try{localStorage.setItem('mesa-pj',CHAR)}catch(_){}MP.rdy=0;mpRaw({t:'char',char:CHAR});if(MP.peer)mpSend({k:'rdy',v:0,c:CHAR});try{SFX.pop()}catch(_){}mpRoom()});
 $('#mp-rdy').addEventListener('click',()=>{if(!MP.peer||MP.peer.char===CHAR)return;MP.rdy=MP.rdy?0:1;mpSend({k:'rdy',v:MP.rdy,c:CHAR});try{MP.rdy?SFX.bell():SFX.tap()}catch(_){}mpRoom()});
@@ -3452,7 +3454,7 @@ async function amgSync(){const j=await amgPost('/amigos');if(!j||j.r!=='ok')retu
   AMG.f=j.f||[];AMG.rq=j.rq||[];AMG.inv=j.inv||[];AMG.t=Date.now();amgDot();
   if($('#amgd')&&$('#amgd').classList.contains('on')&&$('#amgd').dataset.k==='panel')amgPanel(1);
   for(const v of AMG.inv){const k=v.de+':'+v.c;if(AMG.seen.has(k))continue;AMG.seen.add(k);amgInvite(v);break}}
-function amgDot(){const n=AMG.rq.length+AMG.inv.length;const b=$('#pz-amb');if(b){b.textContent=n||'';b.style.display=n?'':'none'}
+function amgDot(){try{amgFriendBtn()}catch(e){}const n=AMG.rq.length+AMG.inv.length;const b=$('#pz-amb');if(b){b.textContent=n||'';b.style.display=n?'':'none'}
   const nav=document.querySelector('#lob-nav [data-go="3"]');if(nav){let d=nav.querySelector('.ndot');if(!d){d=document.createElement('b');d.className='ndot';nav.appendChild(d)}d.classList.toggle('on',n>0)}}
 setInterval(()=>{if(YO&&!document.hidden)amgSync()},10000);setTimeout(amgSync,3000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)amgSync()});
@@ -3493,11 +3495,14 @@ async function amgInvitar(n){$('#amgd').classList.remove('on');if(sinNet()){aler
   const t0=Date.now();while(!(MP.code&&MP.role==='host')&&Date.now()-t0<90000&&!MP.cancel)await wait2(500);
   if(!MP.code)return;const j=await amgPost('/amigos/invitar',{a:n,c:MP.code});
   try{cToast(j&&j.r==='ok'?`📨 Invitación enviada a ${n}. Espera en la sala…`:`No se pudo invitar a ${n}.`)}catch(e){}}
-function amgInvite(v){if(COOP||MP.code)return;
+function amgInvite(v,btn){if(COOP||MP.code)return;
   const d=amgDlg(`<div style="font-size:3rem">⚔️</div><h3>${v.de} te invita a jugar</h3><p>Tu amigo te está esperando en su sala.</p>
-    <button class="y" id="amg-j">🎮 Unirme</button><button class="n" id="amg-x">Ahora no</button>`);try{coopDing()}catch(e){}
-  $('#amg-j').onclick=()=>{d.classList.remove('on');amgPost('/amigos/noinv',{a:v.de});amgJoin(v.c)};
-  $('#amg-x').onclick=()=>{amgPost('/amigos/noinv',{a:v.de})}}
+    <button class="y" id="amg-j">🎮 Unirme</button>${btn?'<button class="y" id="amg-own" style="background:#4a4555;color:var(--ink)">👥 Crear mi propia sala</button>':''}<button class="n" id="amg-x">${btn?'Cancelar':'Ahora no'}</button>`);if(!btn)try{coopDing()}catch(e){}
+  $('#amg-j').onclick=()=>{d.classList.remove('on');amgJoin(v.c)};
+  const o=$('#amg-own');if(o)o.onclick=()=>{d.classList.remove('on');mpStart()}}
+/* el botón azul "Con un amigo" avisa si un amigo te espera en su sala (como el verde con la partida rápida) */
+function amgFriendBtn(){const b=$('#lob-btn-friend');if(!b)return;let q=$('#lob-f');if(!q){q=document.createElement('b');q.id='lob-f';q.className='lob-qb';b.appendChild(q)}
+  const v=!MP.code&&AMG.inv[0];q.style.display=v?'':'none';q.textContent=v?(AMG.inv.length>1?AMG.inv.length+' te esperan':v.de+' te espera'):'';b.classList.toggle('hot',!!v)}
 function amgJoin(c){if(COOP)return;if(!lobbyOn()){try{toMenu(0)}catch(e){}}setTimeout(()=>mpStart(c),300)}
 
 /* teclado del teléfono: la ventana sube para que el campo donde escribes quede a la vista */
