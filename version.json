@@ -146,7 +146,7 @@
   "iconos/i-comunidad.webp": "e5ffa3d48a3e",
   "iconos/i-records.webp": "3f192fdbc183",
   "iconos/i-tableros.webp": "aad177dc6e2d",
-  "index.html": "58ffbed9fa6d",
+  "index.html": "478c1ce4aca2",
   "logo.webp": "c79c21426a47",
   "manifest.json": "81bc7f803d05",
   "musica/batalla.mp3": "292447f839b4",
@@ -239,5 +239,5 @@
   "tableros/t07.webp": "d13add3a6534",
   "tableros/t08.webp": "df272cca3775"
  },
- "version": "7ed6a3221c61"
+ "version": "03f6c45f838f"
 }
