@@ -1784,8 +1784,9 @@ Object.assign(CH,{j02:{c:'n',l:20},j03:{c:'n',l:30},j04:{c:'n',l:25}});
 const LV0=c=>c.id==='j02'?20+5*S.cross.filter(x=>x&&/^g0[1-4]$/.test(x.id)).length:c.id==='j03'?30+5*S.mesa.filter(k=>k[0]==='k').length:CH[c.id].l;
 const LV=c=>{const b=LV0(c);if(c.id[0]!=='c')return b;let d=-S.cross.filter(y=>y&&y!==c&&/^c(29|3[0-2])$/.test(y.id)).length;if(/^c2[345]$/.test(c.id))d+=7*S.cross.filter(y=>y&&y!==c&&/^c2[345]$/.test(y.id)).length;return b+d};
 const TY={};{const R={C:[[1,2],[11,16],[23,28],[33,33],[35,35],[40,48]],P:[[3,6],[29,32],[36,36],[53,53]],T:[[9,10],[20,22],[38,38],[49,49],[51,51],[55,55]],O:[[17,19],[37,37],[39,39],[54,54],[56,57]]};for(const k in R)R[k].forEach(([a,b])=>{for(let i=a;i<=b;i++)TY['c'+pad(i)]=k})}
-['g01','g02','g03','g04'].forEach(g=>TY[g]='C');
-TY.j02='J';TY.j03='T';TY.j04='P';
+/* guardianes: uno de cada tipo (sus versiones vencidas g05-g08 conservan el tipo) */
+Object.assign(TY,{g01:'O',g05:'O',g02:'P',g06:'P',g03:'C',g07:'C',g04:'T',g08:'T'});
+TY.j02='C';TY.j03='T';TY.j04='P';
 let PICK=1,B=null,SHF=0,M18=0;
 const col=()=>B.col||CH[S.cross[B.i].id].c;
 const okc=id=>{const c=MC[id][0];return c==='w'||c.includes(col())};
