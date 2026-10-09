@@ -766,6 +766,10 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
 .pzb{display:none;margin-left:5px;background:#ff3b55;color:#fff;border-radius:99px;padding:0 6px;font-size:.75rem}
 .pz .w .bub{position:absolute;bottom:calc(100% + 2px);left:50%;transform:translateX(-50%) scale(.4);opacity:0;background:#fff;color:#2b2208;border-radius:14px;padding:3px 9px;font:700 .85rem Fredoka,sans-serif;white-space:nowrap;box-shadow:0 3px 8px #0008;transition:opacity .2s,transform .25s cubic-bezier(.2,.9,.3,1.4)}
 .pz .w .bub.on{opacity:1;transform:translateX(-50%) scale(1)}
+.pz .w .bub.big{font-size:1.6rem;padding:2px 8px;line-height:1.2}
+.pz .w .bub.shk{animation:rpsk .5s ease-in-out 3}
+@keyframes rpsk{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-10px)}}
+.pzsend{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin:4px 0 8px}.pzsend button{font-size:1.5rem;width:46px;height:46px;border-radius:12px;border:1px solid #ffffff30;background:#ffffff14;padding:0}
 .pz .w .bub::after{content:'';position:absolute;left:50%;bottom:-5px;margin-left:-5px;border:5px solid transparent;border-top-color:#fff;border-bottom:0}
 #amgd{position:fixed;inset:0;z-index:90;background:#0d0a14e6;display:none;align-items:center;justify-content:center;padding:16px}#amgd.on{display:flex}
 #amgd .bx{width:min(100%,380px);max-height:86dvh;overflow-y:auto;background:#2f2b37;border-radius:20px;padding:18px;text-align:center;box-shadow:0 10px 40px #000a;border:2px solid #ffd34d55}
@@ -3192,7 +3196,7 @@ function pzLoop(){if(PZ.raf)return;PZ.last=performance.now();
     PZ.w.forEach(w=>{const dx=(w.tx-w.x)*r.width,dy=(w.ty-w.y)*r.height,dist=Math.hypot(dx,dy);
       if(dist<2){pzMode(w,0);w.wt-=dt;if(w.wt<=0&&w.id!=='@me'){w.tx=.06+Math.random()*.88;w.ty=.52+Math.random()*.44;w.wt=2+Math.random()*5}
         else if(w.wt<=-8&&w.id==='@me'){w.tx=Math.min(.94,Math.max(.06,w.x+(Math.random()-.5)*.4));w.ty=Math.min(.97,Math.max(.52,w.y+(Math.random()-.5)*.3));w.wt=0}}
-      else{pzMode(w,1);const sp=(30+40*w.y)*dt*(w.off?.6:1),k=Math.min(1,sp/dist);w.x+=dx*k/r.width;w.y+=dy*k/r.height;const fl=dx<0;
+      else{pzMode(w,1);const sp=(30+40*w.y)*dt*(w.off?.6:w.rps?2.4:1),k=Math.min(1,sp/dist);w.x+=dx*k/r.width;w.y+=dy*k/r.height;const fl=dx<0;
         if(Math.abs(dx)>1&&fl!==w.fl){w.fl=fl;w.c.classList.toggle('fl',fl);w.p.classList.toggle('fl',fl)}if(dist<2)w.wt=w.id==='@me'?0:2+Math.random()*4}
       pzPos(w)});
     PZ.raf=requestAnimationFrame(f)};PZ.raf=requestAnimationFrame(f)}
@@ -3205,7 +3209,11 @@ async function pzPoll(){if(!pzOn()||!YO||!navigator.onLine||sinNet())return pzCo
     const seen=new Set(['@me']);(j.p||[]).forEach(o=>{if(!AVN[o.a])o.a='guerrero';const id='u:'+o.n;seen.add(id);const w=PZ.w.get(id);
       if(w&&w.a!==o.a){w.el.remove();PZ.w.delete(id)}if(!PZ.w.has(id))pzAdd(id,o.n,o.a,0);
       const w2=PZ.w.get(id);if(w2){w2.off=0;w2.el.classList.remove('off')}if(w2&&o.e&&o.et&&o.et!==w2.et){w2.et=o.et;
-        if(o.e.startsWith('MAIL:')){const tn=o.e.slice(5),mine=YO&&tn===YO.n,to=mine?PZ.w.get('@me'):PZ.w.get('u:'+tn);if(to)pzMail(w2,to);if(mine)setTimeout(amgSync,1300)}else pzBub(w2,o.e)}});
+        const tw=tn=>YO&&tn===YO.n?PZ.w.get('@me'):PZ.w.get('u:'+tn);
+        if(o.e.startsWith('MAIL:')){const tn=o.e.slice(5),to=tw(tn);if(to)pzMail(w2,to);if(YO&&tn===YO.n)setTimeout(amgSync,1300)}
+        else if(o.e.startsWith('TO:')){const[,tn,ch]=o.e.split(':'),to=tw(tn);if(to&&ch)pzFly(w2,to,ch);else if(ch)pzBub(w2,ch)}
+        else if(o.e.startsWith('RPS:')){const[,tn,hh]=o.e.split(':'),to=tw(tn);if(to&&/^[0-2]{2}$/.test(hh||''))pzRps(w2,to,+hh[0],+hh[1])}
+        else pzBub(w2,o.e)}});
     (j.o||[]).forEach(o=>{if(!AVN[o.a])o.a='guerrero';const id='u:'+o.n;if(seen.has(id))return;seen.add(id);let w=PZ.w.get(id);
       if(w&&w.a!==o.a){w.el.remove();PZ.w.delete(id);w=null}if(!w)w=pzAdd(id,o.n,o.a,0);w.off=1;w.el.classList.add('off')});
     PZ.reg=j.reg||0;
@@ -3213,12 +3221,30 @@ async function pzPoll(){if(!pzOn()||!YO||!navigator.onLine||sinNet())return pzCo
   }catch(e){}pzCount()}
 setInterval(()=>{if(pzOn()){pzPoll();pzLoop()}},2000);
 /* sobre de carta que vuela de un guerrero a otro (solicitud de amistad) */
-function pzMail(a,b){if(!PZ.el)return;const hd=w=>{const q=w.b.getBoundingClientRect(),r=PZ.el.getBoundingClientRect();return[q.left+q.width/2-r.left,q.top-r.top+10]};
-  pzBub(a,'✉️');const m=document.createElement('i');m.className='pzmail';m.textContent='✉️';PZ.el.appendChild(m);
+function pzMail(a,b){pzFly(a,b,'✉️','💌')}
+function pzFly(a,b,ch,land){if(!PZ.el)return;const hd=w=>{const q=w.b.getBoundingClientRect(),r=PZ.el.getBoundingClientRect();return[q.left+q.width/2-r.left,q.top-r.top+10]};
+  pzBub(a,ch);const m=document.createElement('i');m.className='pzmail';m.textContent=ch;PZ.el.appendChild(m);
   const[x0,y0]=hd(a),[x1,y1]=hd(b),up=Math.min(y0,y1)-60;
   m.animate([{transform:`translate(${x0}px,${y0}px) scale(.4) rotate(-20deg)`,opacity:0},{transform:`translate(${x0}px,${y0-24}px) scale(1.1) rotate(-10deg)`,opacity:1,offset:.15},
     {transform:`translate(${(x0+x1)/2}px,${up}px) scale(1.3) rotate(8deg)`,opacity:1,offset:.55},{transform:`translate(${x1}px,${y1}px) scale(.9) rotate(0)`,opacity:1,offset:.92},{transform:`translate(${x1}px,${y1}px) scale(.2)`,opacity:0}],
-    {duration:1500,easing:'ease-in-out',fill:'forwards'}).finished.then(()=>{m.remove();pzBub(b,'💌');try{SFX.pop()}catch(_){}})}
+    {duration:1500,easing:'ease-in-out',fill:'forwards'}).finished.then(()=>{m.remove();pzBub(b,land||ch);try{SFX.pop()}catch(_){}})}
+/* piedra, papel o tijeras entre guerreros: todo al azar. h: 0 piedra, 1 tijeras, 2 papel */
+const RPSH=['✊','✌️','✋'];
+function pzRps(a,b,ha,hb){if(!a||!b||a.rps||b.rps)return;a.rps=b.rps=1;
+  /* el retador camina hasta quedar frente al otro */
+  const side=a.x<b.x?-1:1;a.tx=Math.min(.94,Math.max(.06,b.x+side*.16));a.ty=b.y;a.wt=12;b.tx=b.x;b.ty=b.y;b.wt=12;
+  const face=()=>{const l=a.x>b.x;a.fl=l;a.c.classList.toggle('fl',l);a.p.classList.toggle('fl',l);b.fl=!l;b.c.classList.toggle('fl',!l);b.p.classList.toggle('fl',!l)};
+  const say=(w,t,c)=>{let e=w.el.querySelector('.bub');if(!e){e=document.createElement('span');e.className='bub';w.b.prepend(e)}clearTimeout(e._t);e.className='bub on big'+(c?' '+c:'');e.textContent=t};
+  const end=()=>{[a,b].forEach(w=>{const e=w.el.querySelector('.bub');if(e){e.classList.remove('on');setTimeout(()=>{e.className='bub'},300)}w.rps=0;w.wt=1+Math.random()*2})};
+  const t0=Date.now(),go=()=>{
+  setTimeout(()=>{face();say(a,'✊','shk');say(b,'✊','shk');try{SFX.tick()}catch(_){}},200);
+  setTimeout(()=>{say(a,RPSH[ha]);say(b,RPSH[hb]);try{SFX.pop()}catch(_){}},1800);
+  setTimeout(()=>{const d=(hb-ha+3)%3;/* 1: gana a, 2: gana b, 0: empate */
+    if(!d){say(a,'😐');say(b,'😐')}else{say(a,d===1?'😄':'😓');say(b,d===1?'😓':'😄')}
+    const me=PZ.w.get('@me');if((d===1&&a===me)||(d===2&&b===me))try{SFX.win()}catch(_){}},3200);
+  setTimeout(end,5700)};
+  const wt=()=>{if(Math.hypot(a.x-a.tx,a.y-a.ty)<.02||Date.now()-t0>4500)go();else setTimeout(wt,150)};setTimeout(wt,300)}
+function pzSend(e){PZ.ems=e;PZ.poll=0;setTimeout(pzPoll,50)}
 function pzBub(w,t){let b=w.el.querySelector('.bub');if(!b){b=document.createElement('span');b.className='bub';w.b.prepend(b)}b.textContent=t;b.classList.remove('on');void b.offsetWidth;b.classList.add('on');clearTimeout(b._t);b._t=setTimeout(()=>b.classList.remove('on'),4000)}
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&YO&&PZ.poll&&navigator.onLine)try{navigator.sendBeacon&&navigator.sendBeacon(MP_URL+'/plaza',new Blob([JSON.stringify({n:YO.n,k:YO.k,bye:1})],{type:'text/plain'}))}catch(e){}});
 function pzPick(){let d=$('#pz-pick');if(!d){d=document.createElement('div');d.id='pz-pick';document.body.appendChild(d)}
@@ -3427,7 +3453,12 @@ function amgDlg(h,k){let d=$('#amgd');if(!d){d=document.createElement('div');d.i
 function amgCard(n,a){const amigo=AMG.f.some(x=>x.n===n),pide=AMG.rq.includes(n),env=AMG.pend.has(n);
   const d=amgDlg(`<img class="av" src="guerreros/${a||'guerrero'}.webp" alt=""><h3>${n}</h3>
     ${amigo?'<p>🤝 Son amigos</p><button class="y" data-inv="'+n+'">🎮 Invitar a jugar</button>':pide?'<p>Te mandó solicitud de amistad</p><button class="y" data-ok="'+n+'">✅ Aceptar</button>':env?'<p>⏳ Solicitud enviada</p>':`<button class="y" data-add="${n}">➕ Agregar amigo</button>`}
-    <button class="n">Cerrar</button>`);amgBind(d)}
+    ${pzOn()&&PZ.w.has('u:'+n)&&!PZ.w.get('u:'+n).off?`<div class="sec">En la plaza</div><div class="pzsend">${PZFLY.map((e,i)=>`<button data-fly="${i}">${e}</button>`).join('')}</div><button class="y" id="pz-rps" style="background:#4a4555;color:var(--ink)">✊✌️✋ Retar a piedra, papel o tijeras</button>`:''}
+    <button class="n">Cerrar</button>`);amgBind(d);
+  d.querySelectorAll('[data-fly]').forEach(b=>b.onclick=()=>{const me=PZ.w.get('@me'),to=PZ.w.get('u:'+n),ch=PZFLY[+b.dataset.fly];d.classList.remove('on');if(!me||!to)return;pzFly(me,to,ch);pzSend('TO:'+n+':'+ch)});
+  const rb=$('#pz-rps');if(rb)rb.onclick=()=>{const me=PZ.w.get('@me'),to=PZ.w.get('u:'+n);d.classList.remove('on');if(!me||!to)return;if(me.rps||to.rps){cToast('Espera a que termine el duelo');return}
+    const ha=Math.floor(Math.random()*3),hb=Math.floor(Math.random()*3);pzRps(me,to,ha,hb);pzSend('RPS:'+n+':'+ha+hb)}}
+const PZFLY=['❤️','👍','😂','👋','🔥','🎉','⚔️','😎'];
 function amgPanel(keep){const on=AMG.f.filter(x=>x.on).length;
   const d=amgDlg(`<h3>👥 Amigos</h3>
     ${AMG.rq.length?`<div class="sec">Solicitudes</div>${AMG.rq.map(n=>`<div class="fr"><b>${n}</b><span><button class="ok" data-ok="${n}">Aceptar</button><button class="no" data-no="${n}">✕</button></span></div>`).join('')}`:''}

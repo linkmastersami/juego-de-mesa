@@ -179,9 +179,9 @@ const server = http.createServer((req, res) => {
       const cur = okName(n) && NAMES.get(n);
       if (!cur || cur.h !== hashK(k)) return res.end(JSON.stringify({ r: 'bad' }));
       const a = AVS.includes(av) ? av : 'guerrero', now = Date.now();
-      if (cur.a !== a) { cur.a = a; saveNames(); }
+      if (!b.bye && AVS.includes(av) && cur.a !== a) { cur.a = a; saveNames(); } /* el aviso de salida no trae guerrero: no se toca */
       LAST.set(n, now); const old = PLAZA.get(n) || {};
-      const em = typeof b.e === 'string' && b.e.length <= 24 ? { e: b.e, et: now } : (old.et && now - old.et < 6000 ? { e: old.e, et: old.et } : {});
+      const em = typeof b.e === 'string' && b.e.length <= 28 ? { e: b.e, et: now } : (old.et && now - old.et < 6000 ? { e: old.e, et: old.et } : {});
       if (b.bye) PLAZA.delete(n); else PLAZA.set(n, { a, t: now, ...em });
       for (const [m, v] of PLAZA) if (now - v.t > 30000) PLAZA.delete(m);
       const p = [...PLAZA.entries()].filter(([m]) => m !== n).sort((x, y) => y[1].t - x[1].t).slice(0, 14).map(([m, v]) => ({ n: m, a: v.a, e: v.et && now - v.et < 6000 ? v.e : undefined, et: v.et }));
