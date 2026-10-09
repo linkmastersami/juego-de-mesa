@@ -2426,14 +2426,16 @@ function musTick(){if(!UNL||MV<=0||document.hidden){if(CUR&&!au(CUR).paused&&(MV
   const w=want();
   if(w!==CUR){const old=CUR;CUR=w;DONE=null;
     if(old){const o=au(old);fade(o,0,500,()=>{o.pause();try{o.currentTime=0}catch(e){}})}
-    const a=au(w);try{if(!TR[w])a.currentTime=0}catch(e){}a.volume=0;a.play().then(()=>fade(a,vol(),old?700:400)).catch(()=>{CUR=null});return}
+    const a=au(w);try{if(!TR[w])a.currentTime=0}catch(e){}a.volume=0;a.play().then(()=>fade(a,vol(),old?700:400)).catch(()=>{CUR=null;if(UNL===2)UNL=0});return}
   const a=au(CUR);if(a.paused&&!a.ended&&DONE!==CUR){a.volume=vol();a.play().catch(()=>{})}
   if(a.ended)DONE=CUR}
 window.musTick=musTick;
 sl.value=MV;upd();
 sl.addEventListener('input',()=>{MV=+sl.value;upd();try{localStorage.setItem('mesa-mus',MV)}catch(e){}musTick()});
 /* el navegador solo deja sonar tras un toque: se inicia con el primero */
-['pointerup','click','touchend'].forEach(ev=>document.addEventListener(ev,()=>{UNL=1;musTick()},{capture:true,passive:true}));
+['pointerdown','pointerup','click','touchend'].forEach(ev=>document.addEventListener(ev,()=>{UNL=1;musTick()},{capture:true,passive:true}));
+/* la app instalada suele poder sonar sin tocar nada: se intenta al abrir (si el teléfono no lo permite, empieza con el primer toque) */
+setTimeout(()=>{if(!UNL){UNL=2;musTick()}},600);
 document.addEventListener('visibilitychange',musTick);
 setInterval(musTick,400);}
 /* ===== LOBBY ===== */
@@ -3111,7 +3113,7 @@ $('#o-notif').addEventListener('click',()=>{$('#lob-btn-notif').click();setTimeo
 $('#o-inst').addEventListener('click',()=>$('#install').click());
 /* app instalada: pantalla completa (sin barra de estado ni botones del teléfono); el navegador lo permite al primer toque */
 {const inst=()=>matchMedia('(display-mode: fullscreen)').matches||matchMedia('(display-mode: standalone)').matches||navigator.standalone;
- const fs=()=>{if(!inst()||document.fullscreenElement||!document.documentElement.requestFullscreen)return;document.documentElement.requestFullscreen({navigationUI:'hide'}).catch(()=>{})};
+ const fs=()=>{if(!inst()||matchMedia('(display-mode: fullscreen)').matches||document.fullscreenElement||!document.documentElement.requestFullscreen)return;document.documentElement.requestFullscreen({navigationUI:'hide'}).catch(()=>{})};
  document.addEventListener('pointerup',fs,{passive:true});document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(()=>document.addEventListener('pointerup',fs,{once:true,passive:true}),0)})}
 window.addEventListener('appinstalled',()=>$('#install').classList.remove('on'));
 if('serviceWorker' in navigator){
