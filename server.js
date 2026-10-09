@@ -119,7 +119,7 @@ const server = http.createServer((req, res) => {
       res.writeHead(200, { 'Content-Type': 'application/json' });
       if (!okName(n) || k.length < 16) return res.end(JSON.stringify({ r: 'bad' }));
       const cur = NAMES.get(n), h = hashK(k);
-      if (cur && cur.h !== h) return res.end(JSON.stringify({ r: 'taken' }));
+      if (cur && cur.h !== h) return res.end(JSON.stringify({ r: Array.isArray(cur.mv) && cur.mv.includes(h) ? 'moved' : 'taken' }));
       if (!cur) { NAMES.set(n, { h, t: Date.now() }); saveNames(); }
       res.end(JSON.stringify({ r: 'ok' }));
     });
@@ -144,7 +144,18 @@ const server = http.createServer((req, res) => {
       res.writeHead(200, { 'Content-Type': 'application/json' });
       const c = b && String(b.c || '').toUpperCase().replace(/[^A-Z0-9]/g, ''), v = PERF.get(c);
       if (!v || Date.now() - v.t > 30 * 60000) return res.end(JSON.stringify({ r: 'none' }));
-      PERF.delete(c); res.end(JSON.stringify({ r: 'ok', d: v.d }));
+      PERF.delete(c);
+      /* el perfil cambia de lugar: el nombre recibe una llave nueva y la vieja queda marcada como "se mudó",
+         así el lugar anterior se entera, borra su copia y ya no puede borrar ni usar el nombre */
+      try {
+        const yo = JSON.parse(v.d['mesa-yo'] || 'null'), n = yo && String(yo.n || '').toUpperCase(), cur = okName(n) && NAMES.get(n);
+        if (cur && cur.h === hashK(yo.k)) {
+          const k2 = crypto.randomBytes(15).toString('hex');
+          cur.mv = [...(Array.isArray(cur.mv) ? cur.mv : []), cur.h].slice(-5); cur.h = hashK(k2); saveNames();
+          v.d['mesa-yo'] = JSON.stringify({ ...yo, k: k2 });
+        }
+      } catch (e) {}
+      res.end(JSON.stringify({ r: 'ok', d: v.d }));
     });
   }
   /* el jugador borra su perfil: se libera su nombre */

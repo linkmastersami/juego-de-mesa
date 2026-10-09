@@ -1355,9 +1355,14 @@ async function regSend(n){const c=$('#reg-c');
     <button class="rgo" id="reg-re">Reintentar</button><button class="rsec" id="reg-skip">Jugar sin nombre por ahora</button>`;
   $('#reg-re').onclick=()=>regSend(n);$('#reg-skip').onclick=()=>$('#reg').classList.remove('on')}
 /* al abrir: si no tienes nombre se pide; si ya lo tienes, se confirma con el servidor */
-setTimeout(async()=>{yoUi();if(!YO){regShow();return}
-  if(!navigator.onLine||sinNet())return;const r=await nPost('/name/hello',{n:YO.n,k:YO.k});
-  if(r&&r.r==='taken'){try{localStorage.removeItem('mesa-yo')}catch(e){}const old=YO.n;YO=null;yoUi();regShow(`Tu nombre ${old} ya no está disponible. Elige otro.`)}},1200);
+async function nHello(){if(!YO||!navigator.onLine||sinNet())return;const r=await nPost('/name/hello',{n:YO.n,k:YO.k});
+  if(r&&r.r==='moved'){perfMovido();return}
+  if(r&&r.r==='taken'){try{localStorage.removeItem('mesa-yo')}catch(e){}const old=YO.n;YO=null;yoUi();regShow(`Tu nombre ${old} ya no está disponible. Elige otro.`)}}
+setTimeout(()=>{yoUi();if(!YO){let m='';try{m=localStorage.getItem('mesa-mv')||'';localStorage.removeItem('mesa-mv')}catch(e){}regShow();if(m)$('#reg-c h2').insertAdjacentHTML('afterend',`<div class="warn">🔄 Tu perfil <b>${m}</b> se pasó a la otra dirección del juego, así que aquí se borró. Juega allá, o crea aquí un perfil nuevo con otro nombre.</div>`);return}nHello()},1200);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')nHello()});
+/* el perfil se pasó a otro lugar: aquí se borra la copia (sin tocar el nombre en el servidor, que ya es del otro lugar) */
+async function perfMovido(){const n=YO&&YO.n;try{const g=navigator.serviceWorker&&await navigator.serviceWorker.getRegistration();const s=g&&await g.pushManager.getSubscription();if(s)await s.unsubscribe()}catch(e){}
+  try{PERFK.forEach(k=>localStorage.removeItem(k));localStorage.setItem('mesa-mv',n||'');sessionStorage.clear()}catch(e){}location.reload()}
 
 /* ---------- récords y logros (se guardan en el teléfono) ---------- */
 const PJN={m:'Mario',l:'Link',p:'Pikachu'},PJI={m:'🍄',l:'🗡️',p:'⚡'};
@@ -3351,7 +3356,7 @@ async function perfEnviar(){if(!YO){alert('Primero registra tu nombre.');return}
   try{await nWake();const r=await nPost('/perfil/subir',{d:data});if(!r||r.r!=='ok')throw 0;
     perfDlg(`<h3>🔄 Tu código</h3><div class="rbig" style="font-size:2.4rem;letter-spacing:.2em;margin:8px 0;color:var(--gold)">${r.c}</div>
       <p>Abre el juego en la <b>otra dirección</b> y en la pantalla de nombre toca <b>«Ya tengo perfil»</b> (o en ☰ Opciones → Pasar mi perfil → Recibir) y escribe este código.</p>
-      <p style="font-size:.8rem;opacity:.75">Vale 30 minutos y solo se puede usar una vez.</p><button class="n">Listo</button>`)}
+      <p style="font-size:.8rem;opacity:.75">Vale 30 minutos y solo se puede usar una vez. Cuando lo uses, tu perfil <b>se borrará de aquí</b> y quedará solo en la otra dirección.</p><button class="n">Listo</button>`)}
   catch(e){perfDlg('<h3>Sin conexión</h3><p>No se pudo generar el código. Revisa tu internet e inténtalo de nuevo.</p><button class="n">Cerrar</button>')}}
 function perfRecibir(desdeReg){const d=perfDlg(`<h3>🔄 Traer mi perfil</h3><p>En la otra dirección del juego ve a <b>☰ Opciones → Pasar mi perfil → Enviar</b> y escribe aquí el código.</p>
     <input id="perf-in" maxlength="6" autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="CÓDIGO" style="width:100%;box-sizing:border-box;font:800 1.6rem Fredoka,sans-serif;text-align:center;letter-spacing:.2em;padding:10px;border-radius:12px;border:2px solid #ffd34d66;background:#1d1a24;color:#fff;text-transform:uppercase">
