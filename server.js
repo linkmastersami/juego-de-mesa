@@ -185,7 +185,9 @@ const server = http.createServer((req, res) => {
       if (b.bye) PLAZA.delete(n); else PLAZA.set(n, { a, t: now, ...em });
       for (const [m, v] of PLAZA) if (now - v.t > 30000) PLAZA.delete(m);
       const p = [...PLAZA.entries()].filter(([m]) => m !== n).sort((x, y) => y[1].t - x[1].t).slice(0, 14).map(([m, v]) => ({ n: m, a: v.a, e: v.et && now - v.et < 6000 ? v.e : undefined, et: v.et }));
-      res.end(JSON.stringify({ r: 'ok', p, total: PLAZA.size }));
+      /* los demás aventureros registrados también salen en la plaza, pero apagados (fuera de línea) */
+      const o = [...NAMES.entries()].filter(([m]) => m !== n && !PLAZA.has(m)).sort((x, y) => (LAST.get(y[0]) || y[1].t || 0) - (LAST.get(x[0]) || x[1].t || 0)).slice(0, 30).map(([m, v]) => ({ n: m, a: AVS.includes(v.a) ? v.a : 'guerrero' }));
+      res.end(JSON.stringify({ r: 'ok', p, o, total: PLAZA.size, reg: NAMES.size }));
     });
   }
   /* ---- amigos: solicitudes, lista, invitaciones (todo con nombre + clave) ---- */

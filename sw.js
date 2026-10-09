@@ -144,7 +144,7 @@ self.addEventListener('push', e => {
   e.waitUntil((async () => {
     const cl = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
     /* si el juego está abierto y a la vista, no hace falta la notificación (la propia pantalla ya avisa) */
-    if ((d.kind === 'quick' || d.kind === 'inv' || d.kind === 'amigo') && cl.some(c => c.visibilityState === 'visible')) { for (const c of cl) c.postMessage({ t: 'amigos' }); return; }
+    if ((d.kind === 'quick' || d.kind === 'inv' || d.kind === 'amigo') && cl.some(c => c.visibilityState === 'visible')) { for (const c of cl) c.postMessage({ t: d.kind === 'quick' ? 'quick' : 'amigos' }); return; }
     try { if (self.navigator && self.navigator.setAppBadge) await self.navigator.setAppBadge(d.badge || 1); } catch (_) {}
     await self.registration.showNotification(d.title || 'Link Master Dungeon', {
       body: d.body || '', icon: 'icon-192.png', badge: 'icon-192.png', tag: d.kind || 'lm', renotify: true,

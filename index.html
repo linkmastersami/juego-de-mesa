@@ -651,7 +651,12 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
 .pz .w .sh{position:absolute;left:50%;bottom:-4px;width:56%;height:10px;transform:translateX(-50%);border-radius:50%;background:#0007;filter:blur(2px);z-index:-1}
 .pz .w .nm{font:700 .72rem Fredoka,sans-serif;color:#fff;background:#0d0a14c4;border:1px solid #ffffff30;border-radius:10px;padding:1px 8px;margin-bottom:2px;white-space:nowrap;text-shadow:0 1px 2px #000}
 .pz .w.me .nm{color:#2b2208;background:var(--gold);border-color:#fff8}
-.pz .w.in{animation:pzin .5s ease-out both}.pz .w.out{transition:opacity .5s;opacity:0}
+.pz .w.in{animation:pzin .5s ease-out both}
+#qtoast{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 10px);transform:translate(-50%,-140%);z-index:99;width:min(94vw,440px);box-sizing:border-box;display:flex;align-items:center;gap:8px;padding:10px 10px 10px 14px;border-radius:16px;background:linear-gradient(135deg,#3b2a12,#1d1626);border:2px solid var(--gold);box-shadow:0 10px 30px #000c,0 0 24px #ffb34766;color:#fff;font:600 .9rem Fredoka,sans-serif;transition:transform .35s cubic-bezier(.2,.9,.3,1.2)}
+#qtoast.on{transform:translate(-50%,0)}#qtoast span{flex:1;line-height:1.2}
+#qtoast .y{flex:none;border:0;border-radius:12px;padding:8px 12px;background:var(--gold);color:#2b2208;font:800 .9rem Fredoka,sans-serif}
+#qtoast .x{flex:none;border:0;background:none;color:#fff9;font-size:1.1rem;padding:6px}
+.pz .w.off img{filter:grayscale(1) brightness(.7) drop-shadow(0 4px 3px #0008);opacity:.85}.pz .w.off .nm{color:#ffffff88;background:#0d0a1488}.pz .w.out{transition:opacity .5s;opacity:0}
 @keyframes pzin{from{opacity:0}to{opacity:1}}
 .pz .tgt{position:absolute;width:22px;height:10px;border:2px solid #ffd34d;border-radius:50%;transform:translate(-50%,-50%);pointer-events:none;animation:pztg .6s ease-out forwards}
 @keyframes pztg{from{opacity:1;transform:translate(-50%,-50%) scale(.4)}to{opacity:0;transform:translate(-50%,-50%) scale(1.6)}}
@@ -2652,9 +2657,16 @@ let QN=0,QPUSH=0,QKEY='',NREF=0;
 function setBadge(n){try{if(n>0&&navigator.setAppBadge)navigator.setAppBadge(n);else if(!n&&navigator.clearAppBadge)navigator.clearAppBadge()}catch(e){}}
 function qUi(){const b=$('#lob-q');b.style.display=QN>0?'':'none';b.textContent=QN>0?(QN===1?'1 buscando':QN+' buscando'):'';$('#lob-btn-quick').classList.toggle('hot',QN>0);setBadge(QN)}
 async function qPoll(){
-  if(!lobbyOn()||sinNet()||document.hidden||MP.code||!navigator.onLine)return;
+  if(!lobbyOn()&&(COOP||TUT||!GAMEON))return;if(sinNet()||document.hidden||MP.code||!navigator.onLine)return;
   try{const c=new AbortController(),to=setTimeout(()=>c.abort(),6000);const r=await fetch(MP_URL+'/quick',{cache:'no-store',signal:c.signal});clearTimeout(to);if(!r.ok)return;
-    const j=await r.json();QN=j.n|0;QPUSH=!!j.push;QKEY=j.key||'';qUi();notifUi()}catch(e){}}
+    const j=await r.json();const q0=QN;QN=j.n|0;if(QN>q0&&!MP.code)qToast();QPUSH=!!j.push;QKEY=j.key||'';qUi();notifUi()}catch(e){}}
+/* aviso dentro del juego: alguien acaba de abrir una partida rápida (en cualquier pantalla del menú o jugando solo) */
+function qToast(){if(TUT||COOP)return;let t=$('#qtoast');if(!t){t=document.createElement('div');t.id='qtoast';document.body.appendChild(t)}
+  t.innerHTML=`<span>⚔️ <b>¡Alguien está buscando partida rápida!</b></span><button class="y">⚡ Unirme</button><button class="x" aria-label="Cerrar">✕</button>`;
+  t.classList.remove('on');void t.offsetWidth;t.classList.add('on');try{SFX.bell()}catch(_){}vib([60,40,60]);clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('on'),15000);
+  t.onclick=e=>{if(e.target.closest('.x')){t.classList.remove('on');return}if(!e.target.closest('.y'))return;t.classList.remove('on');
+    if(!QN){alert('Esa partida ya no está disponible.');return}
+    if(!lobbyOn())toMenu();try{lobPage(2)}catch(_){}setTimeout(()=>$('#lob-btn-quick').click(),350)}}
 setInterval(qPoll,6000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)qPoll()});setTimeout(qPoll,1500);
 try{navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.t==='quick')qPoll();if(e.data&&e.data.t==='nueva')nuevaVer()})}catch(e){}
 /* llegó una versión nueva mientras se abría la copia guardada (señal lenta): en el menú se recarga sola; en partida se pregunta */
@@ -3175,19 +3187,22 @@ function pzLoop(){if(PZ.raf)return;PZ.last=performance.now();
     PZ.w.forEach(w=>{const dx=(w.tx-w.x)*r.width,dy=(w.ty-w.y)*r.height,dist=Math.hypot(dx,dy);
       if(dist<2){pzMode(w,0);w.wt-=dt;if(w.wt<=0&&w.id!=='@me'){w.tx=.06+Math.random()*.88;w.ty=.52+Math.random()*.44;w.wt=2+Math.random()*5}
         else if(w.wt<=-8&&w.id==='@me'){w.tx=Math.min(.94,Math.max(.06,w.x+(Math.random()-.5)*.4));w.ty=Math.min(.97,Math.max(.52,w.y+(Math.random()-.5)*.3));w.wt=0}}
-      else{pzMode(w,1);const sp=(30+40*w.y)*dt,k=Math.min(1,sp/dist);w.x+=dx*k/r.width;w.y+=dy*k/r.height;const fl=dx<0;
+      else{pzMode(w,1);const sp=(30+40*w.y)*dt*(w.off?.6:1),k=Math.min(1,sp/dist);w.x+=dx*k/r.width;w.y+=dy*k/r.height;const fl=dx<0;
         if(Math.abs(dx)>1&&fl!==w.fl){w.fl=fl;w.c.classList.toggle('fl',fl);w.p.classList.toggle('fl',fl)}if(dist<2)w.wt=w.id==='@me'?0:2+Math.random()*4}
       pzPos(w)});
     PZ.raf=requestAnimationFrame(f)};PZ.raf=requestAnimationFrame(f)}
 function pzCount(){const e=$('#pz-n');if(!e)return;
-  e.textContent=!YO?'📜 Registra tu nombre para ver a los demás':sinNet()||!navigator.onLine?'📴 Sin conexión':PZ.total<=1?'🟢 Solo tú en la plaza ahora':`🟢 ${PZ.total} aventureros en la plaza`}
+  e.textContent=!YO?'📜 Registra tu nombre para ver a los demás':sinNet()||!navigator.onLine?'📴 Sin conexión':(PZ.total<=1?'🟢 Solo tú en línea':`🟢 ${PZ.total} en línea`)+(PZ.reg>1?` · ${PZ.reg} aventureros`:'')}
 async function pzPoll(){if(!pzOn()||!YO||!navigator.onLine||sinNet())return pzCount();if(Date.now()-PZ.poll<4000)return;PZ.poll=Date.now();
   try{const c=new AbortController(),to=setTimeout(()=>c.abort(),8000);
     const r=await fetch(MP_URL+'/plaza',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({n:YO.n,k:YO.k,a:AV||'guerrero',...(PZ.ems?{e:PZ.ems}:{})}),signal:c.signal});clearTimeout(to);PZ.ems=null;
     const j=await r.json();if(!j||j.r!=='ok'||!PZ.el)return;PZ.total=j.total||1;
     const seen=new Set(['@me']);(j.p||[]).forEach(o=>{if(!AVN[o.a])o.a='guerrero';const id='u:'+o.n;seen.add(id);const w=PZ.w.get(id);
       if(w&&w.a!==o.a){w.el.remove();PZ.w.delete(id)}if(!PZ.w.has(id))pzAdd(id,o.n,o.a,0);
-      const w2=PZ.w.get(id);if(w2&&o.e&&o.et&&o.et!==w2.et){w2.et=o.et;pzBub(w2,o.e)}});
+      const w2=PZ.w.get(id);if(w2){w2.off=0;w2.el.classList.remove('off')}if(w2&&o.e&&o.et&&o.et!==w2.et){w2.et=o.et;pzBub(w2,o.e)}});
+    (j.o||[]).forEach(o=>{if(!AVN[o.a])o.a='guerrero';const id='u:'+o.n;if(seen.has(id))return;seen.add(id);let w=PZ.w.get(id);
+      if(w&&w.a!==o.a){w.el.remove();PZ.w.delete(id);w=null}if(!w)w=pzAdd(id,o.n,o.a,0);w.off=1;w.el.classList.add('off')});
+    PZ.reg=j.reg||0;
     PZ.w.forEach((w,id)=>{if(!seen.has(id)){PZ.w.delete(id);w.el.classList.add('out');setTimeout(()=>w.el.remove(),550)}});
   }catch(e){}pzCount()}
 setInterval(()=>{if(pzOn()){pzPoll();pzLoop()}},2000);
@@ -3251,9 +3266,9 @@ const STEPS=[
   {tgt:()=>$('#sh-st'),txt:'Aquí ves tus mazos. Si te quedas <b>sin cartas</b>, toca el mazo de <b>Agotamiento</b> para robar una mano nueva (pero cuidado con su efecto).',btn:'Entendido',next:()=>{$('#sh-st').classList.remove('on');$('#tSt').classList.remove('on')}},
   {txt:'¡Listo, aventurero! Ya sabes lo básico. Te ganaste la medalla <b>🎓 Aprendiz</b>. ¡Mucha suerte en el calabozo!',btn:'Terminar',next:()=>tutEnd(1)}];
 const tutFc=id=>{const c=[...document.querySelectorAll('#tHand .fc')].find(x=>{const k=x.querySelector('.card');return k&&k.dataset.id===id});return c};
-function tutAsk(){if(TUT||COOP)return false;const o=stLoad();if(!YO||o.tut||(o.g||0)>0||$('#lob-btn-resume').style.display!=='none')return false;
-  const q=$('#tutq');q.innerHTML=`<div class="bx"><div class="ow">${OWL}</div><h3>¿Quieres aprender a jugar?</h3><p>El Búho te enseña lo básico en una partida de práctica (unos 2 minutos).</p><button class="y">Sí, enséñame</button><button class="n">Ahora no</button></div>`;
-  q.onclick=e=>{if(e.target.closest('.y')){q.classList.remove('on');tutStart()}else if(e.target.closest('.n')){q.classList.remove('on');const o2=stLoad();o2.tut='no';stSave(o2);$('#lob-btn-start').click()}};
+function tutAsk(fz){if(TUT||COOP)return false;const o=stLoad();if(!fz&&(!YO||o.tut||(o.g||0)>0||$('#lob-btn-resume').style.display!=='none'))return false;
+  const q=$('#tutq');q.innerHTML=`<div class="bx"><div class="ow">${OWL}</div><h3>¿Quieres aprender a jugar?</h3><p>Te enseño lo básico en una partida de práctica (unos 2 minutos).</p><button class="y">Sí, enséñame</button><button class="n">Ahora no</button></div>`;
+  q.onclick=e=>{if(e.target.closest('.y')){q.classList.remove('on');tutStart()}else if(e.target.closest('.n')){q.classList.remove('on');if(fz)return;const o2=stLoad();o2.tut='no';stSave(o2);$('#lob-btn-start').click()}};
   q.classList.add('on');return true}
 function tutStart(){if(TUT)return;closeSheets();close();
   TUT={i:-1,prev:{NEWG,GAMEON,CHAR},dice:[]};COOP=0;MYT=1;CHAR='m';GAMEON=1;
@@ -3309,7 +3324,7 @@ $('#tutb').addEventListener('click',e=>{if(!TUT)return;if(e.target.closest('.tn'
 ['pointerdown','click'].forEach(ev=>document.addEventListener(ev,e=>{if(!TUT||!TUT.prev||!$('#tut').classList.contains('on'))return;
   if(e.target.closest('#tutb,#tutq'))return;const st=STEPS[TUT.i];if(st&&st.allow&&e.target.closest(st.allow))return;
   e.stopPropagation();e.preventDefault()},true));
-$('#o-tut').addEventListener('click',()=>{hideOpts();if(COOP){alert('El tutorial no está disponible en una partida con amigo.');return}tutStart()});
+$('#o-tut').addEventListener('click',()=>{hideOpts();if(COOP){alert('El tutorial no está disponible en una partida con amigo.');return}tutAsk(1)});
 
 /* ===== aviso: la red actual no deja llegar al servidor del juego (se queda la versión guardada) ===== */
 async function netProbe(){if(!navigator.onLine||sinNet())return;const t0=Date.now();let err='';
