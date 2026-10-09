@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <title>Juego de mesa</title>
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#2b2833">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -15,7 +15,9 @@
 :root{color-scheme:dark;--felt:#2b2833;--panel:#38343f;--ink:#f3eee6;--mute:#a9a2b3;--gold:#f2c14e;--heart:#ff5d73;--g:#2fae5a;--r:#e0393e;--b:#2f6fe0;--w:#f4f1ea;--k:#17171b;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;margin:0}
+html,body{height:100%;margin:0;overflow:hidden;overscroll-behavior:none}
+body{position:fixed;inset:0;width:100%}
+.app{overflow-x:clip}
 body{background:radial-gradient(120% 80% at 50% 40%,#3a3544,var(--felt));color:var(--ink);font-family:Fredoka,system-ui,sans-serif;overflow:hidden;user-select:none}
 button{font-family:inherit}
 .app{height:100%;display:flex;flex-direction:column;gap:8px;padding:10px;max-width:520px;margin:0 auto}
@@ -3293,6 +3295,7 @@ setInterval(()=>{if(!TUT||!TUT.prev)return;try{tutDraw();
   /* resaltar la carta que hay que usar */
   document.querySelectorAll('#tHand .fc.tutc').forEach(x=>x.classList.remove('tutc'));if(TUT.card){const c=tutFc(TUT.card);if(c)c.classList.add('tutc')}}catch(e){}},200);
 addEventListener('resize',()=>{if(TUT)tutDraw(1)});
+addEventListener('scroll',()=>{if(scrollX||scrollY)scrollTo(0,0);for(const e of [document.documentElement,document.body])if(e.scrollLeft||e.scrollTop){e.scrollLeft=0;e.scrollTop=0}},{passive:true,capture:true});
 $('#tutb').addEventListener('click',e=>{if(!TUT)return;if(e.target.closest('.tn')){tutNext();return}if(e.target.closest('.tsk'))tutEnd(0)});
 /* mientras el Búho habla, solo responde lo que señala */
 ['pointerdown','click'].forEach(ev=>document.addEventListener(ev,e=>{if(!TUT||!TUT.prev||!$('#tut').classList.contains('on'))return;
