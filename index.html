@@ -1916,7 +1916,10 @@ function fanClose(){FAN.st=0;FAN.i=-1;FAN.h0=undefined;FAN.src=null;FAN.id=null;
   FAN.can.forEach(i=>{const c=cellOf(i);if(c)c.classList.remove('can','hov')});document.querySelectorAll('#cross .cell.nope').forEach(c=>c.classList.remove('nope'));FAN.can=[];FAN.hov=null;
   const ba=$('#bact');if(ba)ba.classList.remove('hov');$('#m20').classList.remove('hdrag');
   if(FAN.dirty){FAN.dirty=0;fanRender()}else fanLay()}
-function fanHitIdx(x,y){const cs=[...$('#tHand').querySelectorAll('.fc')];for(let i=cs.length-1;i>=0;i--){const b=cs[i].getBoundingClientRect();if(x>=b.left&&x<=b.right&&y>=b.top-10&&y<=b.bottom)return i}return undefined}
+/* carta que está realmente encima bajo el dedo (respeta la que el tutorial resalta por encima de las demás) */
+function fanHitIdx(x,y){const cs=[...$('#tHand').querySelectorAll('.fc')];
+  for(const dy of [0,10]){const e=document.elementsFromPoint(x,y+dy).find(el=>el.classList&&el.classList.contains('fc')&&el.closest('#tHand'));if(e){const i=cs.indexOf(e);if(i>=0)return i}}
+  return undefined}
 function fanBrowse(){if(TUT)TUT.browsed=1;FAN.h0=fanHitIdx(FAN.x0,FAN.y0);FAN.fx0=FAN.x0;FAN.st='browse';FAN.i=-1;FAN.lx=FAN.x;FAN.by=FAN.y;FAN.px=FAN.x;FAN.py=FAN.y;$('#tHand').classList.add('open');fanLay()}
 function fanDrag(id){FAN.st='drag';FAN.id=id;$('#fpv').classList.remove('on');const g=$('#fgh');g.innerHTML=card(id,'still');g.classList.add('on');fanGh();
   if(FAN.src==='hab')$('#m20').classList.add('hdrag');
@@ -1964,8 +1967,8 @@ function fanTap(id){if(!id)return;
   const up=e=>{if(!FAN.st||e.pointerId!==FAN.pid)return;clearTimeout(FAN.tm);
     if(FAN.st==='press'){const src=FAN.src;fanClose();if(src==='fan'){const r=f.getBoundingClientRect(),cs=[...f.querySelectorAll('.fc')];
         /* toque corto: la carta de encima bajo el dedo */
-        let hit=null;for(let i=cs.length-1;i>=0;i--){const b=cs[i].getBoundingClientRect();if(e.clientX>=b.left&&e.clientX<=b.right&&e.clientY>=b.top-10&&e.clientY<=b.bottom){hit=i;break}}
-        if(hit!==null){FAN.end=performance.now();fanTap(FAN.ids[hit])}}return}
+        const hit=fanHitIdx(e.clientX,e.clientY);
+        if(hit!==undefined){FAN.end=performance.now();fanTap(FAN.ids[hit])}}return}
     if(FAN.st==='browse'){fanClose();return}
     if(FAN.st==='drag')fanDrop()};
   f.addEventListener('pointerdown',e=>down(e,'fan'));hb.addEventListener('pointerdown',e=>down(e,'hab'));
