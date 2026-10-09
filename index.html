@@ -949,10 +949,12 @@ let RM=ANIM===0,SPD=ANIM===2?.5:ANIM===0?.3:1;
 setInterval(()=>{if(SPD===1||!document.getAnimations)return;for(const a of document.getAnimations()){try{if(typeof CSSAnimation!=='undefined'&&a instanceof CSSAnimation&&a.effect&&a.effect.getTiming().iterations!==Infinity&&a.playbackRate!==1/SPD)a.playbackRate=1/SPD}catch(e){}}},120);let SND=10,AC=null;try{const sv=localStorage.getItem('mesa-snd');SND=sv===null?10:+sv}catch(e){}
 const ac=()=>AC=AC||new(window.AudioContext||window.webkitAudioContext)();
 const vib=p=>{if(SND>0&&!RM)try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}};
-let SK=1;const VOL=()=>SND/10,SGAIN=2; /* ganancia general de efectos (x2) */
+let SK=1,SOUT=null;const VOL=()=>SND/10,SGAIN=3; /* ganancia general de efectos (x3) */
+/* salida de efectos con limitador: permite subir el volumen sin que truene */
+const OUT=A=>{if(!SOUT){const c=A.createDynamicsCompressor();c.threshold.value=-8;c.knee.value=6;c.ratio.value=12;c.attack.value=.002;c.release.value=.15;c.connect(A.destination);SOUT=c}return SOUT};
 let SNDT=0;
-const tone=(f,d,type='sine',v=.15,t0=0,f2=0)=>{if(!SND)return;SNDT=performance.now();try{const A=ac();if(A.state==='suspended')A.resume();const t=A.currentTime+t0,o=A.createOscillator(),g=A.createGain();o.type=type;o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+d);g.gain.setValueAtTime(v*VOL()*SGAIN*SK,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(A.destination);o.start(t);o.stop(t+d)}catch(e){}};
-const noiz=(d,v=.3)=>{if(!SND)return;SNDT=performance.now();try{const A=ac(),n=Math.floor(A.sampleRate*d),b=A.createBuffer(1,n,A.sampleRate),a=b.getChannelData(0);for(let i=0;i<n;i++)a[i]=(Math.random()*2-1)*(1-i/n);const s=A.createBufferSource(),g=A.createGain(),f=A.createBiquadFilter();f.type='lowpass';f.frequency.value=1800;g.gain.value=v*VOL()*SGAIN*SK;s.buffer=b;s.connect(f);f.connect(g);g.connect(A.destination);s.start()}catch(e){}};
+const tone=(f,d,type='sine',v=.15,t0=0,f2=0)=>{if(!SND)return;SNDT=performance.now();try{const A=ac();if(A.state==='suspended')A.resume();const t=A.currentTime+t0,o=A.createOscillator(),g=A.createGain();o.type=type;o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+d);g.gain.setValueAtTime(v*VOL()*SGAIN*SK,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(OUT(A));o.start(t);o.stop(t+d)}catch(e){}};
+const noiz=(d,v=.3)=>{if(!SND)return;SNDT=performance.now();try{const A=ac(),n=Math.floor(A.sampleRate*d),b=A.createBuffer(1,n,A.sampleRate),a=b.getChannelData(0);for(let i=0;i<n;i++)a[i]=(Math.random()*2-1)*(1-i/n);const s=A.createBufferSource(),g=A.createGain(),f=A.createBiquadFilter();f.type='lowpass';f.frequency.value=1800;g.gain.value=v*VOL()*SGAIN*SK;s.buffer=b;s.connect(f);f.connect(g);g.connect(OUT(A));s.start()}catch(e){}};
 const SFX={
   tick:()=>tone(1000,.05,'square',.04),
   pop:()=>tone(520,.12,'triangle',.12,0,900),
@@ -982,11 +984,12 @@ const SFX={
 {const SFXG={tick:3.7,pop:2.1,charge:2.5,draw:2.7,swoosh:1.8,place:4.3,shuffle:2.3,fire:1.9,heal:1.8,boss:1.3,thud:1.9};
  Object.keys(SFXG).forEach(k=>{const f=SFX[k];SFX[k]=(...a)=>{SK=SFXG[k];try{return f(...a)}finally{SK=1}}})}
 /* sonidos grabados (carpeta sonidos/): se cargan tras el primer toque; si aún no están, suena el tono de respaldo */
-const SMP={},SMPN=['carta','espada','pagina','libro','estampa','logro','amigo','invitacion','pestana'],
+const SMPO={carta:.1},SMP={},SMPN=['carta','espada','pagina','libro','estampa','logro','amigo','invitacion','pestana'],
   SMPG={carta:1.5,espada:.8,dados:.8,pagina:.9,libro:.9,estampa:.3,logro:.75,amigo:.8,invitacion:.7,pestana:1.2};
 function smpLoad(n){if(n in SMP)return;SMP[n]=null;fetch('sonidos/'+n+'.mp3').then(r=>{if(!r.ok)throw 0;return r.arrayBuffer()}).then(b=>new Promise((ok,ko)=>ac().decodeAudioData(b,ok,ko))).then(b=>{SMP[n]=b}).catch(()=>{delete SMP[n]})}
 function smp(n,fb,v=1){if(!SND)return;SNDT=performance.now();const b=SMP[n];if(!b){smpLoad(n);if(fb)fb();return}
-  try{const A=ac();if(A.state==='suspended')A.resume();const s=A.createBufferSource(),g=A.createGain();s.buffer=b;g.gain.value=v*(SMPG[n]||1)*VOL();s.connect(g);g.connect(A.destination);s.start()}catch(e){}}
+  try{const A=ac();if(A.state==='suspended')A.resume();const s=A.createBufferSource(),g=A.createGain();s.buffer=b;g.gain.value=v*(SMPG[n]||1)*VOL()*1.5;s.connect(g);g.connect(OUT(A));s.start(0,SMPO[n]||0)}catch(e){}}
+setTimeout(()=>{try{SMPN.forEach(smpLoad)}catch(e){}},200); /* precarga al abrir para que el primer sonido no llegue tarde */
 {let k=0;const f=()=>{if(k)return;k=1;setTimeout(()=>SMPN.forEach(smpLoad),300)};['pointerdown','keydown'].forEach(ev=>document.addEventListener(ev,f,{capture:true,passive:true,once:true}))}
 {const d=SFX.draw,sl=SFX.slash;SFX.draw=()=>smp('carta',d);SFX.slash=()=>smp('espada',sl)}
 /* clics de botones: Jugar / Nueva partida, Menú principal y Reiniciar tienen su propio sonido;
@@ -1173,7 +1176,7 @@ const jDraw=(ids,toHand,spec)=>async L=>{
   /* cualquier robo: las cartas entran una por una (pequeñas, en cuadrícula), se quedan un momento, se juntan y vuelan juntas a la mano */
   const n=ids.length,cols=Math.min(n,3),rows=Math.ceil(n/3),cw=Math.max(40,Math.floor(Math.min((Math.min(innerWidth-32,420)-(cols-1)*8)/cols,innerWidth*.62,300,((innerHeight-170-(rows-1)*8)/rows)/1.458)));
   L.innerHTML=`<div class="fxt">${spec?(n===1?'Tu amigo roba una carta':`Tu amigo roba ${n} cartas`):(n===1?'Robas una carta':`Robas ${n} cartas`)}</div><div class="grid fxg" style="grid-template-columns:repeat(${cols},1fr);width:${cols*cw+(cols-1)*8}px;max-width:100%">${ids.map((id,i)=>`<div class="fxc fin" style="animation-delay:${i*260}ms">${card(id)}</div>`).join('')}</div>`;
-  ids.forEach((_,i)=>setTimeout(()=>SFX.draw(),500+i*260));
+  ids.forEach((_,i)=>setTimeout(()=>SFX.draw(),60+i*260));
   await wait(500+(n-1)*260+1500);
   await gatherToHand(L,spec)
 };
@@ -2415,7 +2418,7 @@ const AU={};const au=n=>{if(!AU[n]){const a=new Audio('musica/'+n+'.mp3');a.loop
 let MV=5;try{const sv=localStorage.getItem('mesa-mus');if(sv!==null)MV=+sv}catch(e){}
 let CUR=null,DONE=null,FD=0;
 const sl=$('#mus'),ic=$('#musIcon'),nm=$('#musNum');
-const vol=()=>MV/10*.8;
+const vol=()=>MV/10*.4;
 const upd=()=>{sl.style.setProperty('--pct',MV/10*100+'%');nm.textContent=MV;ic.textContent=MV===0?'🔇':'🎵';if(CUR&&!FD)au(CUR).volume=vol()};
 /* qué pista toca ahora */
 const want=()=>{const o=$('#ov');
