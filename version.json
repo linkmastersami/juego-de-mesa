@@ -237,7 +237,25 @@
   "tableros/t05.webp": "83f9feec7d13",
   "tableros/t06.webp": "4639a0983b0b",
   "tableros/t07.webp": "d13add3a6534",
-  "tableros/t08.webp": "df272cca3775"
+  "tableros/t08.webp": "df272cca3775",
+  "voces/00.wav": "e5b1e49e16db",
+  "voces/01.wav": "8b229b960d8d",
+  "voces/02.wav": "acfeeb81b3c6",
+  "voces/03.wav": "1a7cded59f31",
+  "voces/04.wav": "b11730ff2b4e",
+  "voces/05.wav": "64dd98246cc4",
+  "voces/06.wav": "b509c56e248b",
+  "voces/07.wav": "bf15f974e6c1",
+  "voces/08.wav": "bac11c25421e",
+  "voces/09.wav": "ce59d4dc14d3",
+  "voces/10.wav": "9463b259c8bd",
+  "voces/11.wav": "2957a03cc309",
+  "voces/12.wav": "a8734fac998d",
+  "voces/13.wav": "9d27e53ffc29",
+  "voces/14.wav": "b5c3531367f2",
+  "voces/15.wav": "be46f98a4e76",
+  "voces/16.wav": "8275a66f03d3",
+  "voces/17.wav": "f809c1d1368a"
  },
- "version": "00cb9a60da12"
+ "version": "91d3d065b16e"
 }
