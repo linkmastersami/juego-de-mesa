@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Link Master Dungeon — Creador de Cartas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Cinzel+Decorative:wght@700&family=Fredoka:wght@500;600;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js"></script>
+<style>
+  :root{
+    --bg:#171512; --panel:#1f1c18; --panel-2:#26221d; --line:#3a342c;
+    --ink:#ede6da; --ink-dim:#a89d8c; --ember:#d9772e; --ember-dim:#8a5223;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; min-height:100vh;
+    background:radial-gradient(ellipse at top left, #221d17 0%, var(--bg) 55%);
+    color:var(--ink); font-family:'Inter',system-ui,sans-serif;
+    padding:32px 20px 60px;
+  }
+  h1{font-family:'Cinzel Decorative','Cinzel',serif; font-size:22px; letter-spacing:.03em; margin:0 0 4px;}
+  .sub{color:var(--ink-dim); font-size:13px; margin:0 0 28px; max-width:64ch;}
+  .layout{display:flex; gap:36px; align-items:flex-start; flex-wrap:wrap;}
+  .panel{background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:20px; width:340px; flex:0 0 340px; max-height:calc(100vh - 64px); overflow-y:auto;}
+  fieldset{border:1px solid var(--line); border-radius:8px; margin:0 0 14px; padding:10px 12px 12px;}
+  fieldset.off{opacity:.55;}
+  legend{display:flex; align-items:center; gap:7px; font-size:12.5px; font-weight:600; color:var(--ink); padding:0 4px;}
+  legend input[type=checkbox]{accent-color:var(--ember); width:14px; height:14px;}
+  label{display:block; font-size:12px; color:var(--ink-dim); margin:10px 0 6px;}
+  label:first-of-type{margin-top:0;}
+  input[type=text], input[type=number], textarea, select{
+    width:100%; background:var(--panel-2); border:1px solid var(--line); border-radius:6px;
+    color:var(--ink); font-family:inherit; font-size:13.5px; padding:8px 10px;
+  }
+  textarea{resize:vertical; min-height:56px; line-height:1.4;}
+  input:focus, textarea:focus, select:focus{outline:2px solid var(--ember-dim); outline-offset:1px;}
+  input[type=file]{width:100%; font-size:12px; color:var(--ink-dim);}
+  input[type=range]{width:100%; accent-color:var(--ember); margin-top:4px;}
+  .colorpicks{display:flex; gap:8px; margin-top:4px; flex-wrap:wrap;}
+  .cpick{
+    width:30px; height:30px; border-radius:50%; border:2px solid transparent; cursor:pointer;
+    position:relative; box-shadow:inset 0 0 0 1px rgba(255,255,255,.22);
+  }
+  .cpick.active{border-color:var(--ink);}
+  .cpick.active::after{content:''; position:absolute; inset:-5px; border:1px solid var(--ember); border-radius:50%;}
+  .cpick[data-c=rojo]{background:#8c2b25;} .cpick[data-c=azul]{background:#25548c;}
+  .cpick[data-c=verde]{background:#356b34;} .cpick[data-c=blanco]{background:#cfc6b4;}
+  .cpick[data-c=negro]{background:#2b2b2b;}
+  .hint{font-size:11px; color:var(--ink-dim); margin-top:6px; line-height:1.5;}
+  .emojirow{display:flex; flex-wrap:wrap; gap:5px; margin-top:6px;}
+  .emojirow button{
+    width:28px; height:28px; font-size:14px; background:var(--panel-2); border:1px solid var(--line);
+    border-radius:5px; cursor:pointer;
+  }
+  .emojirow button:hover{border-color:var(--ember);}
+  button#dl{
+    margin-top:6px; width:100%; background:var(--ember); color:#1c1006; border:none; border-radius:6px;
+    font-weight:700; font-size:14px; padding:11px; cursor:pointer;
+  }
+  button#dl:hover{background:#e88a42;}
+
+  .preview-col{flex:1; display:flex; flex-direction:column; align-items:center; gap:14px; position:sticky; top:20px;}
+  .zoom-note{font-size:12px; color:var(--ink-dim);}
+
+  /* Carta real: 59mm x 86mm @96dpi = 223x325px */
+  #card{
+    width:223px; height:325px; transform:scale(2.1); transform-origin:top center;
+    margin-bottom:135px; position:relative; border-radius:11px; overflow:hidden;
+    font-family:'Inter',sans-serif; box-shadow:0 10px 30px rgba(0,0,0,.5); border:3px solid #0c0b09;
+  }
+  #card .frame{ position:absolute; inset:0; padding:8px; display:flex; flex-direction:column; gap:5px; }
+  #card .art{
+    flex:1; background:#12100d; border:1px solid rgba(255,255,255,.25); border-radius:4px;
+    overflow:hidden; position:relative; display:flex; align-items:center; justify-content:center;
+  }
+  #card .art img{
+    width:100%; height:100%; object-fit:cover; position:absolute; inset:0;
+    cursor:grab; touch-action:none; transform-origin:center center;
+  }
+  #card .art img:active{cursor:grabbing;}
+  #card .art .placeholder{color:rgba(255,255,255,.35); font-size:9px; text-align:center; padding:10px; position:relative; z-index:1;}
+
+  #card .corner{ position:absolute; top:5px; left:5px; display:flex; flex-direction:column; gap:3px; z-index:3; align-items:flex-start; }
+  #card .value{
+    width:24px; height:24px; border-radius:50%; background:#f3ead9; color:#1c1006;
+    font-family:'Cinzel',serif; font-weight:700; font-size:12px; display:flex; align-items:center;
+    justify-content:center; border:1.5px solid rgba(0,0,0,.6);
+  }
+  #card .colorbox{ width:24px; height:9px; border-radius:2px; border:1px solid rgba(0,0,0,.6); overflow:hidden; display:flex; }
+  #card .colorbox .seg{flex:1;}
+  #card .iconcircle{
+    width:21px; height:21px; border-radius:50%; background:#fdf9f0; border:1.5px solid rgba(0,0,0,.6);
+    display:flex; align-items:center; justify-content:center; font-size:9.5px; font-weight:700; color:#1c1006;
+    font-family:'Inter',sans-serif; gap:1px; padding:0 1px; overflow:hidden;
+  }
+
+  #card .nametagwrap{ position:absolute; top:5px; right:5px; max-width:72%; z-index:3; display:flex; flex-direction:column; align-items:flex-end; gap:2px; }
+  #card .nametag{
+    background:rgba(10,9,7,.62); color:#f7f0e3; font-family:'Cinzel',serif; font-weight:700;
+    font-size:9.5px; line-height:1.15; padding:3px 6px; border-radius:4px; text-align:right;
+  }
+  #card .typetag{
+    background:rgba(10,9,7,.45); color:#e7dcc6; font-size:7.3px; letter-spacing:.03em;
+    padding:2px 5px; border-radius:3px; text-align:right; text-transform:uppercase;
+  }
+
+  #card .textbox{
+    background:#241f18; border:1px solid rgba(255,255,255,.2); border-radius:4px; padding:6px 7px;
+    min-height:56px; display:flex; flex-direction:column; gap:3px;
+  }
+  #card .story{ font-size:7.6px; font-style:italic; color:#d8c9a8; line-height:1.3; }
+  #card .ability{ font-size:8.2px; color:#f3ead9; line-height:1.32; }
+
+  #card .boostbar{
+    display:flex; align-items:center; position:relative; background:#241f18; border:1px solid rgba(255,255,255,.2);
+    border-radius:4px; padding:4px 6px; min-height:20px;
+  }
+  #card .boostswatch{ width:15px; height:15px; border-radius:3px; overflow:hidden; display:flex; position:absolute; left:6px; border:1px solid rgba(255,255,255,.5); }
+  #card .boostswatch .seg{flex:1;}
+  #card .boosttext{ font-size:8px; color:#e7c98e; line-height:1.25; width:100%; text-align:center; }
+
+  #card .footer{ display:flex; justify-content:flex-start; font-size:6.2px; color:rgba(255,255,255,.5); padding:0 2px; }
+
+  /* ===== Plantilla CARTUCHO: la carta es un cartucho de videojuego convertido en reliquia ===== */
+  #card .cartui{display:none;}
+  #card.cart{border:none; border-radius:14px 14px 10px 10px; background:#111;}
+  #card.cart .frame{display:none;}
+  #card.cart .cartui{display:block; position:absolute; inset:0;}
+  .cartui .shell{position:absolute; inset:0; border-radius:14px 14px 10px 10px;}
+  .cartui .shell::before{content:''; position:absolute; inset:0; border-radius:inherit;
+    background:linear-gradient(180deg,rgba(255,255,255,.35),rgba(255,255,255,0) 14%,rgba(0,0,0,0) 80%,rgba(0,0,0,.18));}
+  .cartui .grip{position:absolute; top:60px; bottom:70px; width:7px;
+    background:repeating-linear-gradient(180deg,rgba(0,0,0,.22) 0 2px,rgba(255,255,255,.25) 2px 5px); border-radius:3px;}
+  .cartui .grip.l{left:3px;} .cartui .grip.r{right:3px;}
+  .cartui .trim{position:absolute; inset:4px; border-radius:11px 11px 8px 8px; border:1.5px solid #e2bd62;
+    box-shadow:inset 0 0 0 1px rgba(80,50,0,.6), 0 0 0 1px rgba(0,0,0,.35);}
+  .cartui .notch{position:absolute; top:0; left:50%; transform:translateX(-50%); width:56px; height:6px;
+    background:rgba(0,0,0,.45); border-radius:0 0 6px 6px;}
+  .cartui .label{position:absolute; top:12px; left:16px; right:16px; height:31px; border-radius:6px;
+    background:linear-gradient(180deg,#fbf3e2,#eadbbd); border:1.5px solid #b8913d; overflow:hidden;
+    display:flex; flex-direction:column; justify-content:center; align-items:center; box-shadow:0 2px 3px rgba(0,0,0,.35);}
+  .cartui .label .stripe{position:absolute; left:0; right:0; top:0; height:5px; display:flex;}
+  .cartui .label .stripe .seg{flex:1;}
+  .cartui .label .nm{font-family:'Fredoka',sans-serif; font-weight:700; font-size:13.5px; color:#2a1d0b;
+    line-height:1.05; text-align:center; padding:5px 26px 0 8px; letter-spacing:.01em;}
+  .cartui .label .ty{font-family:'Fredoka',sans-serif; font-weight:600; font-size:6.4px; color:#7a5a1e;
+    letter-spacing:.12em; text-transform:uppercase; margin-top:1px;}
+  #card .cartui .art{position:absolute; display:block; flex:none; top:48px; left:13px; right:13px; height:146px; border-radius:7px; overflow:hidden;
+    background:#0d0c0b; border:2px solid #d9b45a; box-shadow:inset 0 0 0 1px rgba(0,0,0,.6), 0 2px 4px rgba(0,0,0,.5);}
+  #card .cartui .art img{width:100%; height:100%; object-fit:cover; position:absolute; inset:0; transform-origin:center;}
+  .cartui .art .ph{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,.35); font-size:9px;}
+  .cartui .led{position:absolute; top:6px; right:6px; z-index:2; min-width:28px; height:28px; padding:0 4px; border-radius:14px;
+    background:radial-gradient(circle at 50% 40%,#3a3f4a,#11141a 70%); border:2px solid #d9b45a;
+    display:flex; align-items:center; justify-content:center; font-family:'Fredoka',sans-serif; font-weight:700; font-size:11px; color:#fff;
+    box-shadow:0 0 8px 2px rgba(255,214,120,.55), inset 0 0 6px rgba(255,214,120,.35); text-shadow:0 0 4px rgba(255,220,140,.9);}
+  .cartui .led.b{top:6px; right:auto; left:6px; box-shadow:0 0 8px 2px rgba(255,90,90,.5), inset 0 0 6px rgba(255,90,90,.3);}
+  .cartui .screen{position:absolute; top:199px; left:13px; right:13px; bottom:44px; border-radius:6px;
+    background:linear-gradient(180deg,#141a22,#0c1016); border:2px solid #0a0a0a; box-shadow:0 0 0 1.5px #d9b45a, inset 0 0 10px rgba(0,0,0,.8);
+    padding:6px 8px; display:flex; flex-direction:column; justify-content:center; gap:3px; overflow:hidden;}
+  .cartui .screen::after{content:''; position:absolute; inset:0; pointer-events:none;
+    background:repeating-linear-gradient(180deg,rgba(255,255,255,.035) 0 1px,transparent 1px 3px);}
+  .cartui .screen .st{font-size:8.6px; font-style:italic; color:#a9c3d6; line-height:1.3;}
+  .cartui .screen .ab{font-size:10px; font-weight:600; color:#eef4f8; line-height:1.33;}
+  .cartui .gem{position:absolute; bottom:7px; width:36px; height:36px; z-index:2;
+    clip-path:polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);
+    display:flex; align-items:center; justify-content:center;}
+  .cartui .gem::before{content:''; position:absolute; inset:2.5px; clip-path:inherit; background:var(--g);}
+  .cartui .gem::after{content:''; position:absolute; inset:2.5px; clip-path:inherit;
+    background:conic-gradient(from 0deg,rgba(255,255,255,.45),rgba(255,255,255,0) 60deg,rgba(0,0,0,.25) 120deg,rgba(255,255,255,.15) 180deg,rgba(0,0,0,.3) 240deg,rgba(255,255,255,.35) 300deg,rgba(255,255,255,.45));}
+  .cartui .gem{background:#e2bd62;}
+  .cartui .gem span{position:relative; z-index:1; font-family:'Fredoka',sans-serif; font-weight:700; font-size:17px; color:#fff;
+    text-shadow:0 1px 0 #000,0 0 3px #000,0 0 6px rgba(0,0,0,.8);}
+  .cartui .gem.a{left:10px;} .cartui .gem.b{right:10px;}
+  .cartui .gem small{position:absolute; bottom:-1px; left:0; right:0; text-align:center; font-size:0;}
+  .cartui .pins{position:absolute; bottom:6px; left:52px; right:52px; height:11px; border-radius:2px;
+    background:repeating-linear-gradient(90deg,#e7c66f 0 4px,#6b4d12 4px 6px); box-shadow:0 0 0 1px rgba(0,0,0,.5);}
+  .cartui .brand{position:absolute; bottom:20px; left:0; right:0; text-align:center; font-family:'Fredoka',sans-serif; font-weight:600;
+    font-size:5.6px; letter-spacing:.22em; color:rgba(255,240,200,.75); text-shadow:0 1px 1px rgba(0,0,0,.6);}
+
+  /* cartucho DORADO para cartas especiales (personaje y habilidad) */
+  #card.cart.gold .shell{background:linear-gradient(160deg,#fff4bf 0%,#f5cf55 16%,#d49b22 38%,#ffe48a 55%,#c08417 78%,#f1c24a 92%,#fff0a8 100%) !important;}
+  #card.cart.gold .shell::after{content:''; position:absolute; inset:0; border-radius:inherit;
+    background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.55) 42%,transparent 50%,transparent 64%,rgba(255,255,255,.3) 70%,transparent 76%);}
+  #card.cart.gold .grip{background:repeating-linear-gradient(180deg,rgba(120,70,0,.45) 0 2px,rgba(255,250,210,.55) 2px 5px);}
+  #card.cart.gold .trim{border-color:#fff3c4; box-shadow:inset 0 0 0 1px rgba(150,95,10,.7), 0 0 0 1px rgba(110,70,0,.5);}
+  #card.cart.gold .label{border-color:#8a5d0c; background:linear-gradient(180deg,#fffaf0,#f3e3bd);}
+  #card.cart.gold .brand{color:#5a3a04; text-shadow:0 1px 0 rgba(255,245,200,.7);}
+  #card.cart.gold .notch{background:rgba(110,70,0,.45);}
+</style>
+</head>
+<body>
+
+<h1>Link Master Dungeon — Creador de Cartas</h1>
+<p class="sub">Cartas de Seeker y de Desafío con las mismas piezas reutilizables: nombre, valor/dificultad + color, texto de historia, efecto, boost e iconos. Tamaño real: 59×86&nbsp;mm, listo para imprimir y pegar sobre una carta vieja.</p>
+
+<div class="layout">
+  <div class="panel">
+
+    <input type="hidden" id="tpl" value="cart">
+
+    <label style="display:flex;align-items:center;gap:8px;margin-top:10px"><input type="checkbox" id="goldOn" style="accent-color:#e0b030"> Cartucho dorado (cartas especiales)</label>
+
+    <label for="type">Tipo de carta</label>
+    <select id="type">
+      <option value="seeker">Seeker (skill card)</option>
+      <option value="well">Desafío (Well Master)</option>
+      <option value="exhausted">Agotamiento</option>
+    </select>
+
+    <label for="name">Nombre de la carta</label>
+    <input type="text" id="name" placeholder="Ej: Fireball">
+
+    <div id="challengeTypeWrap" style="display:none;">
+      <label for="challengeType">Tipo de desafío</label>
+      <select id="challengeType">
+        <option value="">Sin especificar</option>
+        <option value="Combate">Combate</option>
+        <option value="Obstáculo">Obstáculo</option>
+        <option value="Puzzle">Puzzle</option>
+        <option value="Trampa">Trampa</option>
+      </select>
+    </div>
+
+    <label>Color(es) de la carta (elige 1 o 2)</label>
+    <div class="colorpicks" id="mainColors">
+      <div class="cpick active" data-c="rojo"></div>
+      <div class="cpick" data-c="azul"></div>
+      <div class="cpick" data-c="verde"></div>
+      <div class="cpick" data-c="blanco"></div>
+      <div class="cpick" data-c="negro"></div>
+    </div>
+
+    <label for="img">Arte de la carta</label>
+    <input type="file" id="img" accept="image/*">
+    <div id="imgAdjust" style="display:none;">
+      <label for="imgZoom">Tamaño de la imagen</label>
+      <input type="range" id="imgZoom" min="100" max="300" value="100">
+      <p class="hint">Arrastra la imagen directamente sobre la vista previa para moverla dentro del recuadro.</p>
+      <button type="button" id="imgReset" style="width:100%; background:var(--panel-2); color:var(--ink); border:1px solid var(--line); border-radius:6px; padding:6px; font-size:12px; cursor:pointer;">Restablecer imagen</button>
+    </div>
+
+    <fieldset id="fsValue">
+      <legend><input type="checkbox" id="valueOn"> <span id="valueLegendText">Valor y color indicador</span></legend>
+      <label for="value" id="valueLabelText">Valor</label>
+      <input type="text" id="value" maxlength="3" value="3" placeholder="0-99, X o ∞">
+      <div class="emojirow" id="valueQuick"></div>
+      <p class="hint">El círculo con el número y la franja de color debajo solo aparecen si activas esta casilla. La franja usa el/los mismo(s) color(es) elegidos arriba. Puedes escribir un número de hasta 2 dígitos, o usar los botones para X (tache) o infinito.</p>
+    </fieldset>
+
+    <fieldset id="fsStory">
+      <legend><input type="checkbox" id="storyOn"> Texto de historia (opcional)</legend>
+      <textarea id="story" placeholder="Texto narrativo en cursiva, sin efecto en el juego..."></textarea>
+    </fieldset>
+
+    <label for="effect">Efecto de la carta</label>
+    <textarea id="effect" placeholder="Texto del efecto/habilidad..."></textarea>
+
+    <fieldset id="fsBoost">
+      <legend><input type="checkbox" id="boostOn" checked> Boost</legend>
+      <label>Color(es) con los que se puede usar este boost</label>
+      <div class="colorpicks" id="boostColors">
+        <div class="cpick active" data-c="rojo"></div>
+        <div class="cpick" data-c="azul"></div>
+        <div class="cpick" data-c="verde"></div>
+        <div class="cpick" data-c="blanco"></div>
+        <div class="cpick" data-c="negro"></div>
+      </div>
+      <label for="boost">Texto/valor del boost</label>
+      <input type="text" id="boost" placeholder="Ej: +2 (+🕊)">
+    </fieldset>
+
+    <fieldset id="fsIcon1">
+      <legend><input type="checkbox" id="iconOn1"> <span id="icon1LegendText">Icono de efecto (opcional)</span></legend>
+      <label for="iconText1" id="icon1LabelText">Número, +/- y emoticón del icono</label>
+      <input type="text" id="iconText1" placeholder="Ej: +2🕊 o -1💀" maxlength="6">
+      <div class="emojirow" id="emojiQuick1"></div>
+      <p class="hint">En Windows abre el selector de emojis con <b>Win + .</b>, en Mac con <b>Cmd+Ctrl+Espacio</b>, o toca un botón de arriba.</p>
+    </fieldset>
+
+    <fieldset id="fsIcon2" style="display:none;">
+      <legend><input type="checkbox" id="iconOn2"> Icono de penalización (opcional)</legend>
+      <label for="iconText2">Número, +/- y emoticón del icono</label>
+      <input type="text" id="iconText2" placeholder="Ej: -1💀" maxlength="6">
+      <div class="emojirow" id="emojiQuick2"></div>
+    </fieldset>
+
+    <button id="dl">Descargar carta (PNG, lista para imprimir)</button>
+    <p class="hint">Se exporta a 300&nbsp;dpi en el tamaño exacto de la carta: imprime a "tamaño real / 100%", no "ajustar a página".</p>
+  </div>
+
+  <div class="preview-col">
+    <div id="card">
+      <div class="frame" id="pFrame">
+        <div class="art">
+          <div class="placeholder" id="pPlaceholder">Sube una imagen</div>
+          <img id="pImg" style="display:none;">
+          <div class="corner" id="pCorner">
+            <div class="value" id="pValue" style="display:none;"></div>
+            <div class="colorbox" id="pColorbox" style="display:none;"></div>
+            <div class="iconcircle" id="pIconCircle1" style="display:none;"></div>
+            <div class="iconcircle" id="pIconCircle2" style="display:none;"></div>
+          </div>
+          <div class="nametagwrap">
+            <div class="nametag" id="pName">Nombre de la carta</div>
+            <div class="typetag" id="pTypeTag" style="display:none;"></div>
+          </div>
+        </div>
+        <div class="textbox">
+          <div class="story" id="pStory" style="display:none;"></div>
+          <div class="ability" id="pAbility">Escribe el efecto de la carta aquí.</div>
+        </div>
+        <div class="boostbar" id="pBoostBar" style="display:none;">
+          <div class="boostswatch" id="pBoostSwatch"></div>
+          <div class="boosttext" id="pBoostText"></div>
+        </div>
+      </div>
+      <div class="cartui">
+        <div class="shell" id="cShell"></div>
+        <div class="grip l"></div><div class="grip r"></div>
+        <div class="trim"></div><div class="notch"></div>
+        <div class="label"><div class="stripe" id="cStripe"></div><div class="nm" id="cName"></div><div class="ty" id="cType"></div></div>
+        <div class="art"><div class="ph" id="cPh">Sube una imagen</div><img id="cImg" style="display:none;">
+          <div class="led" id="cLed1" style="display:none;"></div><div class="led b" id="cLed2" style="display:none;"></div></div>
+        <div class="screen"><div class="st" id="cStory" style="display:none;"></div><div class="ab" id="cAb"></div></div>
+        <div class="brand">LINK MASTER DUNGEON</div>
+        <div class="pins"></div>
+        <div class="gem a" id="cGemA" style="display:none;"><span id="cGemAv"></span></div>
+        <div class="gem b" id="cGemB" style="display:none;"><span id="cGemBv"></span></div>
+      </div>
+    </div>
+    <p class="zoom-note">Vista ampliada solo para editar — el archivo exportado sale al tamaño real de una carta.</p>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const COLORS = {rojo:'#8c2b25', azul:'#25548c', verde:'#356b34', blanco:'#cfc6b4', negro:'#2b2b2b'};
+const DARK   = {rojo:'#2a0d0a', azul:'#0a1a2c', verde:'#0f230f', blanco:'#3a3527', negro:'#050505'};
+
+let mainSel = ['rojo'];
+let boostSel = ['rojo'];
+
+function setupPicker(containerId, onChange){
+  const container = $(containerId);
+  container.querySelectorAll('.cpick').forEach(el=>{
+    el.addEventListener('click', () => {
+      const c = el.dataset.c;
+      let arr = onChange.get();
+      if(arr.includes(c)){
+        if(arr.length > 1) arr = arr.filter(x=>x!==c);
+      } else {
+        arr = [...arr, c];
+        if(arr.length > 2) arr.shift();
+      }
+      onChange.set(arr);
+      container.querySelectorAll('.cpick').forEach(s=>s.classList.toggle('active', arr.includes(s.dataset.c)));
+      update();
+    });
+  });
+}
+setupPicker('mainColors', {get:()=>mainSel, set:v=>mainSel=v});
+setupPicker('boostColors', {get:()=>boostSel, set:v=>boostSel=v});
+
+function frameBackground(colors){
+  if(colors.length === 1) return `linear-gradient(160deg, ${COLORS[colors[0]]}, ${DARK[colors[0]]})`;
+  return `linear-gradient(135deg, ${COLORS[colors[0]]} 49%, ${COLORS[colors[1]]} 51%)`;
+}
+function fillSegments(container, colors){
+  container.innerHTML = '';
+  colors.forEach(c=>{
+    const seg = document.createElement('div');
+    seg.className = 'seg';
+    seg.style.background = COLORS[c];
+    container.appendChild(seg);
+  });
+}
+
+const quickEmojis = ['🕊️','🔥','💧','🌪️','⚡','📖','✋','👊','🛡️','🗡️','🎯','👑','💀','🌙','⭐','🦋'];
+function buildEmojiRow(rowId, inputId){
+  const row = $(rowId);
+  quickEmojis.forEach(e=>{
+    const b = document.createElement('button');
+    b.type = 'button'; b.textContent = e;
+    b.addEventListener('click', ()=>{
+      const input = $(inputId);
+      input.value = (input.value || '') + e;
+      update();
+    });
+    row.appendChild(b);
+  });
+}
+buildEmojiRow('emojiQuick1', 'iconText1');
+buildEmojiRow('emojiQuick2', 'iconText2');
+
+// Botones rápidos para el valor: X (tache) e infinito
+['X','∞'].forEach(sym=>{
+  const b = document.createElement('button');
+  b.type = 'button'; b.textContent = sym;
+  b.addEventListener('click', ()=>{ $('value').value = sym; update(); });
+  $('valueQuick').appendChild(b);
+});
+
+const typeSel=$('type'), nameIn=$('name'), effectIn=$('effect'), boostIn=$('boost'),
+      imgIn=$('img'), challengeType=$('challengeType'),
+      valueOn=$('valueOn'), valueIn=$('value'), storyOn=$('storyOn'), storyIn=$('story'),
+      boostOn=$('boostOn'), iconOn1=$('iconOn1'), iconText1=$('iconText1'),
+      iconOn2=$('iconOn2'), iconText2=$('iconText2');
+
+function toggleFieldset(fs, on){ fs.classList.toggle('off', !on); }
+
+function update(){
+  const type = typeSel.value;
+  const isWell = type === 'well';
+
+  $('challengeTypeWrap').style.display = isWell ? 'block' : 'none';
+  $('fsIcon2').style.display = isWell ? 'block' : 'none';
+
+  $('valueLegendText').textContent = isWell ? 'Dificultad y color indicador' : 'Valor y color indicador';
+  $('valueLabelText').textContent = isWell ? 'Dificultad' : 'Valor';
+  $('icon1LegendText').textContent = isWell ? 'Icono de recompensa (opcional)' : 'Icono de efecto (opcional)';
+  $('icon1LabelText').textContent = isWell ? 'Número, +/- y emoticón de la recompensa' : 'Número, +/- y emoticón del icono';
+
+  $('pFrame').style.background = frameBackground(mainSel);
+
+  $('pName').textContent = nameIn.value || 'Nombre de la carta';
+  $('pTypeTag').style.display = (isWell && challengeType.value) ? 'block' : 'none';
+  $('pTypeTag').textContent = challengeType.value || '';
+
+  toggleFieldset($('fsValue'), valueOn.checked);
+  $('pValue').style.display = valueOn.checked ? 'flex' : 'none';
+  $('pValue').textContent = valueIn.value;
+  $('pValue').style.fontSize = (valueIn.value.length >= 2) ? '9px' : '12px';
+  $('pColorbox').style.display = valueOn.checked ? 'flex' : 'none';
+  if(valueOn.checked) fillSegments($('pColorbox'), mainSel);
+
+  toggleFieldset($('fsStory'), storyOn.checked);
+  $('pStory').style.display = storyOn.checked ? 'block' : 'none';
+  $('pStory').textContent = storyOn.checked ? (storyIn.value || 'Texto de historia...') : '';
+
+  $('pAbility').textContent = effectIn.value || 'Escribe el efecto de la carta aquí.';
+
+  toggleFieldset($('fsBoost'), boostOn.checked);
+  $('pBoostBar').style.display = boostOn.checked ? 'flex' : 'none';
+  if(boostOn.checked){
+    $('pBoostBar').style.background = frameBackground(boostSel);
+    fillSegments($('pBoostSwatch'), boostSel);
+    $('pBoostText').textContent = boostIn.value || '+1';
+  }
+
+  toggleFieldset($('fsIcon1'), iconOn1.checked);
+  $('pIconCircle1').style.display = iconOn1.checked ? 'flex' : 'none';
+  $('pIconCircle1').textContent = iconOn1.checked ? (iconText1.value || '+1') : '';
+
+  toggleFieldset($('fsIcon2'), iconOn2.checked);
+  $('pIconCircle2').style.display = (isWell && iconOn2.checked) ? 'flex' : 'none';
+  $('pIconCircle2').textContent = (isWell && iconOn2.checked) ? (iconText2.value || '-1') : '';
+
+  /* --- plantilla Cartucho --- */
+  const cart = $('tpl').value === 'cart';
+  $('card').classList.toggle('cart', cart);
+  $('card').classList.toggle('gold', cart && $('goldOn').checked);
+  $('cShell').style.background = shellBackground(mainSel);
+  fillSegments($('cStripe'), mainSel);
+  $('cName').textContent = nameIn.value || 'Nombre de la carta';
+  $('cType').style.display = (isWell && challengeType.value) ? 'block' : 'none';
+  $('cType').textContent = challengeType.value || '';
+  $('cGemA').style.display = valueOn.checked ? 'flex' : 'none';
+  $('cGemAv').textContent = valueIn.value;
+  $('cGemA').style.setProperty('--g', gemBackground(mainSel));
+  $('cGemB').style.display = boostOn.checked ? 'flex' : 'none';
+  $('cGemBv').textContent = boostIn.value || '+1';
+  $('cGemBv').style.fontSize = (boostIn.value||'').length > 3 ? '9px' : (boostIn.value||'').length > 2 ? '11px' : '15px';
+  $('cGemB').style.setProperty('--g', gemBackground(boostSel));
+  $('cStory').style.display = storyOn.checked ? 'block' : 'none';
+  $('cStory').textContent = storyOn.checked ? (storyIn.value || 'Texto de historia...') : '';
+  $('cAb').textContent = effectIn.value || 'Escribe el efecto de la carta aquí.';
+  $('cLed1').style.display = iconOn1.checked ? 'flex' : 'none';
+  $('cLed1').textContent = iconOn1.checked ? (iconText1.value || '+1') : '';
+  $('cLed2').style.display = (isWell && iconOn2.checked) ? 'flex' : 'none';
+  $('cLed2').textContent = (isWell && iconOn2.checked) ? (iconText2.value || '-1') : '';
+}
+const SHELL = {rojo:['#f2353a','#c8141c'], azul:['#2f7bff','#1452d6'], verde:['#2fc25a','#139638'], blanco:['#d9d9de','#a9a9b2'], negro:['#4a4a52','#26262c']}; /* colores de cartucho: rojo, azul y verde vivos; gris clásico para el blanco */
+function shellBackground(colors){
+  if(colors.length === 1){const [a,b]=SHELL[colors[0]];return `linear-gradient(160deg, ${a}, ${b})`;}
+  return `linear-gradient(135deg, ${SHELL[colors[0]][0]} 0%, ${SHELL[colors[0]][1]} 49%, ${SHELL[colors[1]][0]} 51%, ${SHELL[colors[1]][1]} 100%)`;
+}
+const GEM = {rojo:'#ff2a36', azul:'#1f7bff', verde:'#18c454', blanco:'#f4f4fa', negro:'#3a3a48'};
+function gemBackground(colors){
+  if(colors.length === 1) return `radial-gradient(circle at 32% 26%, rgba(255,255,255,.7) 0, rgba(255,255,255,0) 22%), radial-gradient(circle at 50% 50%, ${GEM[colors[0]]} 55%, rgba(0,0,0,.45) 100%), ${GEM[colors[0]]}`;
+  return `linear-gradient(135deg, ${GEM[colors[0]]} 49%, ${GEM[colors[1]]} 51%)`;
+}
+
+// --- Ajuste de imagen: zoom + arrastre ---
+const DISPLAY_SCALE = 2.1; // debe coincidir con transform:scale(2.1) de #card
+const pImg = $('pImg');
+const imgZoom = $('imgZoom');
+let imgOffsetX = 0, imgOffsetY = 0, imgScale = 1;
+let dragging = false, dragStartX = 0, dragStartY = 0, startOffsetX = 0, startOffsetY = 0;
+
+function applyImgTransform(){
+  pImg.style.transform = `translate(${imgOffsetX}px, ${imgOffsetY}px) scale(${imgScale})`;
+  const ci = document.getElementById('cImg'); if(ci) ci.style.transform = pImg.style.transform;
+}
+function resetImgTransform(){
+  imgOffsetX = 0; imgOffsetY = 0; imgScale = 1;
+  imgZoom.value = 100;
+  applyImgTransform();
+}
+
+imgIn.addEventListener('change', () => {
+  const file = imgIn.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    pImg.src = e.target.result;
+    pImg.style.display = 'block';
+    $('cImg').src = e.target.result; $('cImg').style.display = 'block'; $('cPh').style.display = 'none';
+    $('pPlaceholder').style.display = 'none';
+    $('imgAdjust').style.display = 'block';
+    resetImgTransform();
+  };
+  reader.readAsDataURL(file);
+});
+
+imgZoom.addEventListener('input', () => {
+  imgScale = imgZoom.value / 100;
+  applyImgTransform();
+});
+$('imgReset').addEventListener('click', resetImgTransform);
+
+pImg.addEventListener('pointerdown', e => {
+  dragging = true;
+  dragStartX = e.clientX; dragStartY = e.clientY;
+  startOffsetX = imgOffsetX; startOffsetY = imgOffsetY;
+  pImg.setPointerCapture(e.pointerId);
+});
+pImg.addEventListener('pointermove', e => {
+  if(!dragging) return;
+  imgOffsetX = startOffsetX + (e.clientX - dragStartX) / DISPLAY_SCALE;
+  imgOffsetY = startOffsetY + (e.clientY - dragStartY) / DISPLAY_SCALE;
+  applyImgTransform();
+});
+['pointerup','pointercancel'].forEach(ev => pImg.addEventListener(ev, () => dragging = false));
+{const ci=$('cImg');ci.style.touchAction='none';ci.style.cursor='grab';
+ ci.addEventListener('pointerdown',e=>{dragging=true;dragStartX=e.clientX;dragStartY=e.clientY;startOffsetX=imgOffsetX;startOffsetY=imgOffsetY;ci.setPointerCapture(e.pointerId);});
+ ci.addEventListener('pointermove',e=>{if(!dragging)return;imgOffsetX=startOffsetX+(e.clientX-dragStartX)/DISPLAY_SCALE;imgOffsetY=startOffsetY+(e.clientY-dragStartY)/DISPLAY_SCALE;applyImgTransform();});
+ ['pointerup','pointercancel'].forEach(ev=>ci.addEventListener(ev,()=>dragging=false));}
+
+[$('tpl'), $('goldOn'), typeSel, nameIn, effectIn, boostIn, challengeType, valueOn, valueIn,
+ storyOn, storyIn, boostOn, iconOn1, iconText1, iconOn2, iconText2].forEach(el=>{
+  el.addEventListener('input', update);
+  el.addEventListener('change', update);
+});
+
+update();
+
+$('dl').addEventListener('click', () => {
+  const card = $('card');
+  const original = card.style.transform;
+  card.style.transform = 'none';
+  /* el diseño Cartucho usa efectos (gemas, rejillas) que html2canvas no dibuja: se exporta con html-to-image */
+  const render = (card.classList.contains('cart') && window.htmlToImage)
+    ? htmlToImage.toCanvas(card, {pixelRatio: 3.125, filter: n => !(n.classList && n.classList.contains('frame')) && !(n.tagName === 'IMG' && !n.getAttribute('src'))})
+    : html2canvas(card, {scale: 3.125, backgroundColor: null});
+  render.then(canvas => {
+    card.style.transform = original;
+    const link = document.createElement('a');
+    const fname = (nameIn.value.trim() || 'carta-link-master').toLowerCase().replace(/[^a-z0-9]+/g,'-');
+    link.download = fname + '.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  }).catch(() => { card.style.transform = original; });
+});
+</script>
+</body>
+</html>

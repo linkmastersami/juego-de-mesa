@@ -13,7 +13,7 @@ IGNORAR = {'version.json', 'package.json', 'package-lock.json', 'k02.png'}  # ar
 
 archivos = {}
 for carpeta, subs, nombres in os.walk(RAIZ):
-    subs[:] = sorted(d for d in subs if not d.startswith('.') and d != 'node_modules')
+    subs[:] = sorted(d for d in subs if not d.startswith('.') and d not in ('node_modules', 'herramientas'))
     for n in sorted(nombres):
         if n in IGNORAR or n.startswith('.') or os.path.splitext(n)[1].lower() not in EXT:
             continue
