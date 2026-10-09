@@ -144,7 +144,7 @@
   .cartui .label .stripe{position:absolute; left:0; right:0; top:0; height:5px; display:flex;}
   .cartui .label .stripe .seg{flex:1;}
   .cartui .label .nm{font-family:'Fredoka',sans-serif; font-weight:700; font-size:13.5px; color:#2a1d0b;
-    line-height:1.05; text-align:center; padding:5px 26px 0 8px; letter-spacing:.01em;}
+    line-height:1.05; text-align:center; padding:5px 10px 0; letter-spacing:.01em;}
   .cartui .label .ty{font-family:'Fredoka',sans-serif; font-weight:600; font-size:6.4px; color:#7a5a1e;
     letter-spacing:.12em; text-transform:uppercase; margin-top:1px;}
   #card .cartui .art{position:absolute; display:block; flex:none; top:48px; left:13px; right:13px; height:146px; border-radius:7px; overflow:hidden;
@@ -213,6 +213,12 @@
     <input type="text" id="name" placeholder="Ej: Fireball">
 
     <div id="challengeTypeWrap" style="display:none;">
+      <label for="rank">Rango del desafío</label>
+      <select id="rank">
+        <option value="">Normal</option>
+        <option value="Guardián">Guardián</option>
+        <option value="Jefe final">Jefe final</option>
+      </select>
       <label for="challengeType">Tipo de desafío</label>
       <select id="challengeType">
         <option value="">Sin especificar</option>
@@ -220,7 +226,6 @@
         <option value="Obstáculo">Obstáculo</option>
         <option value="Puzle">Puzle</option>
         <option value="Trampa">Trampa</option>
-        <option value="Jefe final">Jefe final</option>
       </select>
     </div>
 
@@ -465,8 +470,11 @@ function update(){
   $('cShell').style.background = shellBackground(mainSel);
   fillSegments($('cStripe'), mainSel);
   $('cName').textContent = nameIn.value || 'Nombre de la carta';
-  $('cType').style.display = (isWell && challengeType.value) ? 'block' : 'none';
-  $('cType').textContent = challengeType.value || '';
+  {const L=(nameIn.value||'Nombre de la carta').length; const e=$('cName'); e.style.whiteSpace='nowrap';
+   e.style.fontSize = (L<=16?13.5:L<=21?11.5:L<=26?10:8.8)+'px';}
+  const tyTxt = [$('rank').value, challengeType.value].filter(Boolean).join(' · ');
+  $('cType').style.display = (isWell && tyTxt) ? 'block' : 'none';
+  $('cType').textContent = tyTxt;
   $('cGemA').style.display = valueOn.checked ? 'flex' : 'none';
   $('cGemAv').textContent = valueIn.value;
   $('cGemA').style.setProperty('--g', gemBackground(mainSel));
@@ -549,7 +557,7 @@ pImg.addEventListener('pointermove', e => {
  ci.addEventListener('pointermove',e=>{if(!dragging)return;imgOffsetX=startOffsetX+(e.clientX-dragStartX)/DISPLAY_SCALE;imgOffsetY=startOffsetY+(e.clientY-dragStartY)/DISPLAY_SCALE;applyImgTransform();});
  ['pointerup','pointercancel'].forEach(ev=>ci.addEventListener(ev,()=>dragging=false));}
 
-[$('tpl'), $('goldOn'), typeSel, nameIn, effectIn, boostIn, challengeType, valueOn, valueIn,
+[$('tpl'), $('goldOn'), $('rank'), typeSel, nameIn, effectIn, boostIn, challengeType, valueOn, valueIn,
  storyOn, storyIn, boostOn, iconOn1, iconText1, iconOn2, iconText2].forEach(el=>{
   el.addEventListener('input', update);
   el.addEventListener('change', update);
