@@ -527,10 +527,9 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
 
 /* ===== menú de opciones ===== */
 #lobby #lob-yo{position:absolute}
-#lobby #lob-exit{position:absolute;top:calc(env(safe-area-inset-top,0px) + 66px);right:18px;z-index:5;width:38px;height:38px;border-radius:12px;border:2px solid #ff6b6b55;background:#2a0d12b3;color:#ff8a8a;font-size:1.15rem;line-height:1;cursor:pointer;box-shadow:0 4px 12px #0008;padding:0}
+#lobby #lob-exit{position:absolute;top:calc(env(safe-area-inset-top,0px) + 66px);right:18px;z-index:5;display:grid;place-items:center;width:38px;height:38px;border-radius:12px;border:2px solid #ff6b6b55;background:#2a0d12b3;color:#ff8a8a;font-size:1.15rem;line-height:1;cursor:pointer;box-shadow:0 4px 12px #0008;padding:0}
 #bye{position:fixed;inset:0;z-index:120;display:none;place-items:center;background:radial-gradient(circle at 50% 40%,#2b2238,#0b0910);color:#fff;text-align:center;padding:24px;font-family:Fredoka,sans-serif}#bye.on{display:grid}#bye .bx{max-width:340px}#bye .ow{width:120px;height:120px;margin:0 auto 6px}#bye .ow img{width:100%;height:100%;object-fit:contain}#bye h2{color:var(--gold);margin:6px 0}#bye p{opacity:.85;line-height:1.35}#bye button{margin-top:16px;border:0;border-radius:14px;padding:12px 22px;background:var(--gold);color:#2b2208;font:800 1rem Fredoka,sans-serif}
-#lobby #lob-menu{position:absolute}
-#lob-menu{position:absolute;top:calc(env(safe-area-inset-top,0px) + 12px);right:14px;z-index:5;width:46px;height:46px;border-radius:14px;border:2px solid #ffffff2a;background:#0d0a14b3;color:#fff;font-size:1.5rem;line-height:1;cursor:pointer;box-shadow:0 4px 12px #0008}
+#lobby #lob-menu{position:absolute;top:calc(env(safe-area-inset-top,0px) + 12px);right:14px;z-index:5;width:46px;height:46px;border-radius:14px;border:2px solid #ffffff2a;background:#0d0a14b3;color:#fff;font-size:1.5rem;line-height:1;cursor:pointer;box-shadow:0 4px 12px #0008}
 #lob-menu:active{transform:scale(.92)}
 #opts{position:fixed;inset:0;z-index:62;background:#000c;display:none;overflow-y:auto;padding:calc(env(safe-area-inset-top,0px) + 16px) 14px 24px}
 #opts.on{display:block}
@@ -838,7 +837,7 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
 <!-- LOBBY -->
 <div id="lobby" class="oculto">
   <button id="lob-menu" aria-label="Opciones">☰</button>
-  <button id="lob-exit" aria-label="Salir del juego">⏻</button>
+  <button id="lob-exit" aria-label="Salir del juego"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 3v8"/><path d="M6.3 6.8a8 8 0 1 0 11.4 0"/></svg></button>
   <div id="lob-yo"></div>
   <div class="lob-amb"><b style="left:6%;--x:30px;animation-duration:10s;animation-delay:-2s"></b><b style="left:18%;--x:-20px;animation-duration:13s;animation-delay:-7s"></b><b style="left:31%;--x:25px;animation-duration:11s;animation-delay:-4s"></b><b style="left:46%;--x:-35px;animation-duration:14s;animation-delay:-9s"></b><b style="left:60%;--x:20px;animation-duration:12s;animation-delay:-1s"></b><b style="left:74%;--x:-25px;animation-duration:15s;animation-delay:-11s"></b><b style="left:88%;--x:15px;animation-duration:11s;animation-delay:-6s"></b><b style="left:95%;--x:-10px;animation-duration:13s;animation-delay:-3s"></b></div>
   <div class="pager" id="pager"><div class="ptrack" id="ptrack">
@@ -3279,7 +3278,7 @@ $('#o-del').addEventListener('click',()=>{let d=$('#delp');if(!d){d=document.cre
     location.reload()}});
 
 /* ===== salir del juego: se guarda todo, se calla la música y se intenta cerrar (si el teléfono no lo permite, pantalla de despedida) ===== */
-$('#lob-exit').addEventListener('click',()=>{const d=amgDlg(`<div style="font-size:2.6rem">👋</div><h3>¿Salir del juego?</h3><p>Tu progreso queda guardado.</p><button class="y" id="bye-y" style="background:#e5484d;color:#fff">⏻ Salir</button><button class="n">Cancelar</button>`);
+$('#lob-exit').addEventListener('click',()=>{const d=amgDlg(`<div style="font-size:2.6rem">👋</div><h3>¿Salir del juego?</h3><p>Tu progreso queda guardado.</p><button class="y" id="bye-y" style="background:#e5484d;color:#fff">Salir</button><button class="n">Cancelar</button>`);
   $('#bye-y').onclick=()=>{d.classList.remove('on');byeGo()}});
 function byeGo(){window.BYE=1;try{vzStop()}catch(e){}try{document.querySelectorAll('audio').forEach(a=>a.pause())}catch(e){}
   try{if(MP.code)mpClose()}catch(e){}
