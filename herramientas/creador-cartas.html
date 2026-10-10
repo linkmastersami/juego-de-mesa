@@ -147,7 +147,7 @@
     line-height:1.05; text-align:center; padding:5px 10px 0; letter-spacing:.01em;}
   .cartui .label .ty{font-family:'Fredoka',sans-serif; font-weight:600; font-size:6.4px; color:#7a5a1e;
     letter-spacing:.12em; text-transform:uppercase; margin-top:1px;}
-  #card .cartui .art{position:absolute; display:block; flex:none; top:48px; left:13px; right:13px; height:146px; border-radius:7px; overflow:hidden;
+  #card .cartui .art{position:absolute; display:block; flex:none; top:48px; left:13px; right:13px; bottom:91px; border-radius:7px; overflow:hidden;
     background:#0d0c0b; border:2px solid #d9b45a; box-shadow:inset 0 0 0 1px rgba(0,0,0,.6), 0 2px 4px rgba(0,0,0,.5);}
   #card .cartui .art img{width:100%; height:100%; object-fit:cover; position:absolute; inset:0; transform-origin:center;}
   .cartui .art .ph{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,.35); font-size:9px;}
@@ -156,14 +156,14 @@
     display:flex; align-items:center; justify-content:center; font-family:'Fredoka',sans-serif; font-weight:700; font-size:11px; color:#fff;
     box-shadow:0 0 8px 2px rgba(255,214,120,.55), inset 0 0 6px rgba(255,214,120,.35); text-shadow:0 0 4px rgba(255,220,140,.9);}
   .cartui .led.b{top:6px; right:auto; left:6px; box-shadow:0 0 8px 2px rgba(255,90,90,.5), inset 0 0 6px rgba(255,90,90,.3);}
-  .cartui .screen{position:absolute; top:199px; left:13px; right:13px; bottom:62px; border-radius:6px;
+  .cartui .screen{position:absolute; left:13px; right:13px; bottom:17px; height:76px; z-index:1; border-radius:6px;
     background:linear-gradient(180deg,#141a22,#0c1016); border:2px solid #0a0a0a; box-shadow:0 0 0 1.5px #d9b45a, inset 0 0 10px rgba(0,0,0,.8);
     padding:6px 8px; display:flex; flex-direction:column; justify-content:center; gap:3px; overflow:hidden;}
   .cartui .screen::after{content:''; position:absolute; inset:0; pointer-events:none;
     background:repeating-linear-gradient(180deg,rgba(255,255,255,.035) 0 1px,transparent 1px 3px);}
   .cartui .screen .st{font-size:8.6px; font-style:italic; color:#a9c3d6; line-height:1.3;}
   .cartui .screen .ab{font-size:10px; font-weight:600; color:#eef4f8; line-height:1.33;}
-  .cartui .gem{position:absolute; bottom:16px; width:46px; height:46px; z-index:2;
+  .cartui .gem{position:absolute; bottom:108px; width:46px; height:46px; z-index:2;
     clip-path:polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);
     display:flex; align-items:center; justify-content:center;}
   .cartui .gem::before{content:''; position:absolute; inset:2.5px; clip-path:inherit; background:var(--g);}
@@ -173,13 +173,13 @@
   .cartui .gem span{position:relative; z-index:1; font-family:'Fredoka',sans-serif; font-weight:700; font-size:22px; color:#fff;
     text-shadow:0 1px 0 #000,0 0 3px #000,0 0 6px rgba(0,0,0,.8);}
   .cartui .gem.a{left:12px;} .cartui .gem.b{right:12px;}
-  .cartui .glab{position:absolute; bottom:7px; width:52px; z-index:3; text-align:center; font-family:'Fredoka',sans-serif; font-weight:700;
+  .cartui .glab{position:absolute; bottom:98px; width:52px; z-index:3; text-align:center; font-family:'Fredoka',sans-serif; font-weight:700;
     font-size:6.4px; letter-spacing:.04em; color:#fff; background:rgba(15,12,8,.78); border:1px solid #e2bd62; border-radius:6px; padding:1px 0 1.5px; line-height:1.1;}
   .cartui .glab.a{left:9px;} .cartui .glab.b{right:9px;}
   .cartui .gem small{position:absolute; bottom:-1px; left:0; right:0; text-align:center; font-size:0;}
   .cartui .pins{position:absolute; bottom:6px; left:52px; right:52px; height:11px; border-radius:2px;
     background:repeating-linear-gradient(90deg,#e7c66f 0 4px,#6b4d12 4px 6px); box-shadow:0 0 0 1px rgba(0,0,0,.5);}
-  .cartui .brand{position:absolute; bottom:30px; left:0; right:0; text-align:center; font-family:'Fredoka',sans-serif; font-weight:600;
+  .cartui .brand{position:absolute; bottom:7.5px; left:0; right:0; text-align:center; font-family:'Fredoka',sans-serif; font-weight:600;
     font-size:5.6px; letter-spacing:.22em; color:rgba(255,240,200,.75); text-shadow:0 1px 1px rgba(0,0,0,.6);}
 
   /* cartucho DORADO para cartas especiales (personaje y habilidad) */
