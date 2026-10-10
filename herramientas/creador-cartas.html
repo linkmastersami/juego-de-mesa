@@ -175,6 +175,9 @@
   .cartui .gem.a{left:12px;} .cartui .gem.b{right:12px;}
   .cartui .glab{position:absolute; bottom:98px; width:52px; z-index:3; text-align:center; font-family:'Fredoka',sans-serif; font-weight:700;
     font-size:6.4px; letter-spacing:.04em; color:#fff; background:rgba(15,12,8,.78); border:1px solid #e2bd62; border-radius:6px; padding:1px 0 1.5px; line-height:1.1;}
+  .cartui .gbonus{position:absolute; bottom:96px; left:50%; transform:translateX(-50%); z-index:3; white-space:nowrap; font-family:'Fredoka',sans-serif; font-weight:700;
+    font-size:8px; letter-spacing:.04em; color:#2b1d05; background:linear-gradient(180deg,#ffe59a,#e2b23f); border:1.5px solid #fff3c4; border-radius:8px; padding:2px 7px 2.5px;
+    box-shadow:0 2px 5px rgba(0,0,0,.55);}
   .cartui .glab.a{left:9px;} .cartui .glab.b{right:9px;}
   .cartui .gem small{position:absolute; bottom:-1px; left:0; right:0; text-align:center; font-size:0;}
   .cartui .pins{position:absolute; bottom:6px; left:52px; right:52px; height:11px; border-radius:2px;
@@ -258,6 +261,15 @@
       <p class="hint">El círculo con el número y la franja de color debajo solo aparecen si activas esta casilla. La franja usa el/los mismo(s) color(es) elegidos arriba. Puedes escribir un número de hasta 2 dígitos, o usar los botones para X (tache) o infinito.</p>
     </fieldset>
 
+    <label for="bonusTy">Bonus +3 contra un tipo (vale en acción y en asistencia)</label>
+    <select id="bonusTy">
+      <option value="">Sin bonus</option>
+      <option value="Obstáculo">+3 vs Obstáculo</option>
+      <option value="Trampa">+3 vs Trampa</option>
+      <option value="Puzle">+3 vs Puzle</option>
+      <option value="Combate">+3 vs Combate</option>
+    </select>
+
     <fieldset id="fsStory">
       <legend><input type="checkbox" id="storyOn"> Texto de historia (opcional)</legend>
       <textarea id="story" placeholder="Texto narrativo en cursiva, sin efecto en el juego..."></textarea>
@@ -270,10 +282,10 @@
       <legend><input type="checkbox" id="boostOn" checked> Boost</legend>
       <label>Color(es) con los que se puede usar este boost</label>
       <div class="colorpicks" id="boostColors">
-        <div class="cpick active" data-c="rojo"></div>
+        <div class="cpick" data-c="rojo"></div>
         <div class="cpick" data-c="azul"></div>
         <div class="cpick" data-c="verde"></div>
-        <div class="cpick" data-c="blanco"></div>
+        <div class="cpick active" data-c="blanco"></div>
         <div class="cpick" data-c="negro"></div>
       </div>
       <label for="boost">Texto/valor del boost</label>
@@ -337,6 +349,7 @@
         <div class="gem a" id="cGemA" style="display:none;"><span id="cGemAv"></span></div>
         <div class="gem b" id="cGemB" style="display:none;"><span id="cGemBv"></span></div>
         <div class="glab a" id="cLabA" style="display:none;"></div>
+        <div class="gbonus" id="cBonus" style="display:none;"></div>
         <div class="glab b" id="cLabB" style="display:none;">ASISTENCIA</div>
       </div>
     </div>
@@ -350,7 +363,7 @@ const COLORS = {rojo:'#8c2b25', azul:'#25548c', verde:'#356b34', blanco:'#cfc6b4
 const DARK   = {rojo:'#2a0d0a', azul:'#0a1a2c', verde:'#0f230f', blanco:'#3a3527', negro:'#050505'};
 
 let mainSel = ['rojo'];
-let boostSel = ['rojo'];
+let boostSel = ['blanco']; /* las asistencias sirven para cualquier color */
 
 function setupPicker(containerId, onChange){
   const container = $(containerId);
@@ -483,6 +496,8 @@ function update(){
   $('cLabA').style.display = valueOn.checked ? 'block' : 'none';
   $('cLabA').textContent = isWell ? 'DIFICULTAD' : 'ACCIÓN';
   $('cLabB').style.display = boostOn.checked ? 'block' : 'none';
+  $('cBonus').style.display = (!isWell && $('bonusTy').value) ? 'block' : 'none';
+  $('cBonus').textContent = '+3 vs ' + $('bonusTy').value.toUpperCase();
   $('cGemAv').textContent = valueIn.value;
   $('cGemAv').style.fontSize = valueIn.value.length >= 2 ? '17px' : '22px';
   $('cGemA').style.setProperty('--g', gemBackground(mainSel));
@@ -565,7 +580,7 @@ pImg.addEventListener('pointermove', e => {
  ci.addEventListener('pointermove',e=>{if(!dragging)return;imgOffsetX=startOffsetX+(e.clientX-dragStartX)/DISPLAY_SCALE;imgOffsetY=startOffsetY+(e.clientY-dragStartY)/DISPLAY_SCALE;applyImgTransform();});
  ['pointerup','pointercancel'].forEach(ev=>ci.addEventListener(ev,()=>dragging=false));}
 
-[$('tpl'), $('goldOn'), $('rank'), typeSel, nameIn, effectIn, boostIn, challengeType, valueOn, valueIn,
+[$('tpl'), $('goldOn'), $('rank'), $('bonusTy'), typeSel, nameIn, effectIn, boostIn, challengeType, valueOn, valueIn,
  storyOn, storyIn, boostOn, iconOn1, iconText1, iconOn2, iconText2].forEach(el=>{
   el.addEventListener('input', update);
   el.addEventListener('change', update);
