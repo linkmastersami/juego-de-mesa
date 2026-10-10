@@ -588,13 +588,33 @@ pImg.addEventListener('pointermove', e => {
 
 update();
 
-$('dl').addEventListener('click', () => {
+/* las letras del diseño vienen de Google Fonts: para que salgan en la descarga hay que incrustarlas en la imagen
+   (si no, la carta descargada usa otra letra más ancha y los textos se salen de sus recuadros) */
+let FONTCSS = null;
+async function fontCSS(){
+  if(FONTCSS !== null) return FONTCSS;
+  try{
+    const link = document.querySelector('link[href*="fonts.googleapis"]');
+    if(!link){ FONTCSS = ''; return FONTCSS; }
+    let css = await (await fetch(link.href)).text();
+    const urls = [...new Set([...css.matchAll(/url\((https?:[^)'"]+)\)/g)].map(m => m[1]))];
+    await Promise.all(urls.map(async u => {
+      const b = await (await fetch(u)).blob();
+      const d = await new Promise(ok => { const fr = new FileReader(); fr.onload = () => ok(fr.result); fr.readAsDataURL(b); });
+      css = css.split(u).join(d);
+    }));
+    FONTCSS = css;
+  }catch(e){ FONTCSS = ''; }
+  return FONTCSS;
+}
+fontCSS();
+$('dl').addEventListener('click', async () => {
   const card = $('card');
   const original = card.style.transform;
   card.style.transform = 'none';
   /* el diseño Cartucho usa efectos (gemas, rejillas) que html2canvas no dibuja: se exporta con html-to-image */
   const render = (card.classList.contains('cart') && window.htmlToImage)
-    ? htmlToImage.toCanvas(card, {pixelRatio: 3.125, filter: n => !(n.classList && n.classList.contains('frame')) && !(n.tagName === 'IMG' && !n.getAttribute('src'))})
+    ? htmlToImage.toCanvas(card, {pixelRatio: 3.125, fontEmbedCSS: (await fontCSS()) || undefined, filter: n => !(n.classList && n.classList.contains('frame')) && !(n.tagName === 'IMG' && !n.getAttribute('src'))})
     : html2canvas(card, {scale: 3.125, backgroundColor: null});
   render.then(canvas => {
     card.style.transform = original;
