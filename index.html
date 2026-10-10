@@ -852,16 +852,16 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
       <div class="lob-sub">⚔️ Dungeon Edition ⚔️</div>
       <div class="lob-chars">
         <div class="lob-char" id="lob-p1" data-char="m">
-          <div class="card-wrap"><div class="card" data-id="m19"><img src="personajes/personaje 1/m19.webp" alt="Mario" onerror="this.remove()"></div></div>
-          <div class="char-name">Mario</div>
+          <div class="card-wrap"><div class="card" data-id="m19"><img src="personajes/personaje 1/m19.webp" alt="Bruno" onerror="this.remove()"></div></div>
+          <div class="char-name">Bruno</div>
         </div>
         <div class="lob-char" id="lob-p2" data-char="l">
           <div class="card-wrap"><div class="card" data-id="l19"><img src="personajes/personaje 2/l19.webp" alt="Veralyn" onerror="this.remove()"></div></div>
           <div class="char-name">Veralyn</div>
         </div>
         <div class="lob-char" id="lob-p3" data-char="p">
-          <div class="card-wrap"><div class="card" data-id="p19"><img src="personajes/personaje 3/p19.webp" alt="Pikachu" onerror="this.remove()"></div></div>
-          <div class="char-name">Pikachu</div>
+          <div class="card-wrap"><div class="card" data-id="p19"><img src="personajes/personaje 3/p19.webp" alt="Volti" onerror="this.remove()"></div></div>
+          <div class="char-name">Volti</div>
         </div>
       </div>
       <div class="lob-dots"><i data-d="m"></i><i data-d="l"></i><i data-d="p"></i></div>
@@ -1031,7 +1031,7 @@ const shuf=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i
 const imgSrc=id=>id[0]==='m'?`personajes/personaje 1/${id}.webp`:id[0]==='l'?`personajes/personaje 2/${id}.webp`:id[0]==='p'?`personajes/personaje 3/${id}.webp`:`cartas/${id}.webp`;
 const BACKH=c=>`<div class="card ${c}" data-id=""><div class="deck" style="width:100%;height:100%"></div></div>`;
 /* m19 y m20 tienen versión animada (m19a/m20a); la habilidad apagada y "reducir movimiento" usan la imagen fija */
-const ANIMC=new Set(['m19','m20','p19','p20']);
+const ANIMC=new Set();
 /* cartas de calabozo animadas (cartas/animaciones/cXX.webp): todas las copias de una carta usan la animación de la primera (c39 no tiene) */
 const ANCAL={};Object.entries({'c01':'c01|c02','c03':'c03|c04','c05':'c05|c06','c07':'c07|c08','c09':'c09|c10','c11':'c11|c12|c13','c14':'c14|c15|c16','c17':'c17|c18|c19','c20':'c20|c21|c22','c23':'c23|c24|c25','c26':'c26|c27|c28','c29':'c29|c30|c31|c32','c33':'c33','c34':'c34','c35':'c35','c36':'c36','c37':'c37','c38':'c38','c40':'c40|c41|c42','c43':'c43|c44|c45','c46':'c46|c47|c48','c49':'c49','c50':'c50','c51':'c51','c52':'c52','c53':'c53','c54':'c54','c55':'c55','c56':'c56','c57':'c57'}).forEach(([a,l])=>l.split('|').forEach(x=>ANCAL[x]=a));
 const animSrc=id=>ANIMC.has(id)?imgSrc(id).replace('.webp','a.webp'):ANCAL[id]?`cartas/animaciones/${ANCAL[id]}.webp`:null;
@@ -1384,7 +1384,7 @@ async function perfMovido(){const n=YO&&YO.n;try{const g=navigator.serviceWorker
   try{PERFK.forEach(k=>localStorage.removeItem(k));localStorage.setItem('mesa-mv',n||'');sessionStorage.clear()}catch(e){}location.reload()}
 
 /* ---------- récords y logros (se guardan en el teléfono) ---------- */
-const PJN={m:'Mario',l:'Veralyn',p:'Pikachu'},PJI={m:'🍄',l:'🗡️',p:'⚡'};
+const PJN={m:'Bruno',l:'Veralyn',p:'Volti'},PJI={m:'🔥',l:'🗡️',p:'⚡'};
 const stLoad=()=>{try{return JSON.parse(localStorage.getItem('mesa-stats')||'{}')||{}}catch(e){return {}}};
 const stSave=o=>{try{localStorage.setItem('mesa-stats',JSON.stringify(o))}catch(e){}};
 /* cartas que se pueden vencer: copias agrupadas (la primera de cada grupo representa a todas) */
@@ -1396,9 +1396,9 @@ const ACH=[
   ['g1','🎲','Primer paso','Juega tu primera partida',o=>(o.g||0)>=1],
   ['c1','✅','Primer desafío','Completa tu primer desafío',(o,g)=>g.nc>=1],
   ['w1','🗝️','Primera victoria','Gana tu primera partida',(o,g)=>g.win],
-  ['wm','🍄','Héroe de los hongos','Gana con Mario',(o,g)=>g.win&&g.pj==='m'],
+  ['wm','🔥','Corazón de forja','Gana con Bruno',(o,g)=>g.win&&g.pj==='m'],
   ['wl','🗡️','Ojo de halcón','Gana con Veralyn',(o,g)=>g.win&&g.pj==='l'],
-  ['wp','⚡','Ratón eléctrico','Gana con Pikachu',(o,g)=>g.win&&g.pj==='p'],
+  ['wp','⚡','Cola de nube','Gana con Volti',(o,g)=>g.win&&g.pj==='p'],
   ['fin','🚪','Hasta el fondo','Llega a la batalla final',(o,g)=>g.final],
   ['w5','🥉','Aventurero','Gana 5 partidas',o=>(o.w||0)>=5],
   ['g10','🛡️','Perseverante','Juega 10 partidas',o=>(o.g||0)>=10],
@@ -1475,9 +1475,9 @@ $('#lob-recs').addEventListener('click',showRecs);
 const BOOKS=[
   {id:'cal',t:'Cartas del calabozo',e:'💀',bc:'linear-gradient(135deg,#4a4f5c,#24262e)',img:'libro-calabozo',ids:[...CGRP.filter(g=>g[0][0]==='c').map(g=>g[0]),'c07','c50','c52'].sort()},
   {id:'jef',t:'El jefe final',e:'👹',bc:'linear-gradient(135deg,#5b2a7a,#26102f)',img:'libro-jefe',ids:['j01','j02','j03','j04','g01','g05','g02','g06','g03','g07','g04','g08','k01','k02','k03','k04','k05','k06']},
-  {id:'m',t:'Mario',e:'🍄',bc:'linear-gradient(135deg,#c0392b,#5e130c)',img:'libro-fuego',ids:rng('m',1,20)},
+  {id:'m',t:'Bruno',e:'🔥',bc:'linear-gradient(135deg,#c0392b,#5e130c)',img:'libro-fuego',ids:rng('m',1,20)},
   {id:'l',t:'Veralyn',e:'🗡️',bc:'linear-gradient(135deg,#2e7d32,#0f3312)',img:'libro-espada',ids:rng('l',1,20)},
-  {id:'p',t:'Pikachu',e:'⚡',bc:'linear-gradient(135deg,#f2b632,#7a5200)',img:'libro-rayo',ids:rng('p',1,20)}];
+  {id:'p',t:'Volti',e:'⚡',bc:'linear-gradient(135deg,#5aa9e6,#1d4f7a)',img:'libro-rayo',ids:rng('p',1,20)}];
 const albHas=(o,id)=>!!((o.alb||{})[id]||(o.cards||{})[id]);
 /* gana una estampa (o suma a sus datos): k = v vencida/activada/salió · a acción · s asistencia */
 function albGet(id,k){if(TUT)return;try{if(!id)return;const o=stLoad();o.alb=o.alb||{};const nw=!albHas(o,id);const e=o.alb[id]=o.alb[id]||{};
@@ -1792,8 +1792,8 @@ MC.m20=['w',5,0];
 /* Personaje 2 (espada en lugar de fuego): datos reales de l01-l18
    Formato: [colores, valor acción, valor asistencia] */
 'w11,vr21,va21,rv21,v22,w54,rv52,ra21,w53,w21,w11,w04,av32,r62,w11,ra01,v32,v21'.split(',').forEach((t,i)=>{const m=t.match(/^([a-z]+)(\d)(\d)$/);MC['l'+pad(i+1)]=[m[1],+m[2],+m[3]]});
-/* Personaje 3 (Pikachu, rayo ⚡): p01-p18 */
-'r52,a21,v31,ra21,av32,v11,w21,w01,w63,r21,w12,rv31,w21,w21,w42,w22,w11,w21'.split(',').forEach((t,i)=>{const m=t.match(/^([a-z]+)(\d)(\d)$/);MC['p'+pad(i+1)]=[m[1],+m[2],+m[3]]});
+/* Personaje 3 (Volti, rayo ⚡): p01-p18 */
+'r52,a21,v31,ra21,av32,v11,a21,w01,w63,r21,w12,rv31,v21,w21,r42,w22,w11,w21'.split(',').forEach((t,i)=>{const m=t.match(/^([a-z]+)(\d)(\d)$/);MC['p'+pad(i+1)]=[m[1],+m[2],+m[3]]});
 MC.p20=['w',0,0]; /* Trueno Máximo: su valor es igual a los ⚡ en descartes (sin límite) */
 MC.l20=['w',0,0]; /* l20: valor 0 a 7 a elección (ver baseV); l12: valor X, no se juega como acción */
 Object.assign(CH,{j02:{c:'n',l:20},j03:{c:'n',l:30},j04:{c:'n',l:25}});
@@ -2020,11 +2020,11 @@ function fanTap(id){if(!id)return;
   $('#dock').addEventListener('dragstart',e=>e.preventDefault());
   addEventListener('resize',()=>{dockVar();fanLay()});}
 /* FI: fuego de acción(0) y asistencia(1) por carta de personaje. índice = número de carta - 1 */
-const FI_M='11,11,00,11,11,11,00,11,00,00,11,00,00,11,11,00,00,00,00,00'.split(',');
+const FI_M='11,11,00,11,11,11,00,11,00,00,00,00,00,11,00,00,00,00,00,00'.split(',');
 /* Personaje 2: icono de ESPADA (hace el papel del fuego): carta / asistencia */
 const FI_L='11,11,00,11,00,00,11,11,11,11,00,00,00,00,00,00,00,00,00,00'.split(',');
 /* Personaje 3: icono de RAYO ⚡ */
-const FI_P='11,11,00,11,11,11,00,11,11,11,00,11,00,11,11,00,00,00,00,00'.split(',');
+const FI_P='11,11,00,11,11,00,00,11,11,11,00,00,00,00,00,00,00,00,00,00'.split(',');
 const FI_MAP={'m':FI_M,'l':FI_L,'p':FI_P};
 const ico=(x,k)=>{const f=FI_MAP[x[0]];return !!f&&(f[+x.slice(1)-1]||'00')[k]==='1'}; /* ¿la carta lleva icono propio en acción (0) o asistencia (1)? */
 const getFI=()=>FI_MAP[S.personaje||'m']||FI_M;
@@ -2289,9 +2289,9 @@ async function cine(color,nd,SP){
       const ca=[...$('#cA').children];
       for(let i=0;i<ca.length;i++){const e=ca[i],r=e.getBoundingClientRect();e.style.visibility='hidden';SFX.pop();await cfly(r,e.innerHTML,Ro.getBoundingClientRect(),550);v+=asv[i];popV(Ro,v);const [rx,ry]=ctr(Ro.getBoundingClientRect()),f=big('+'+asv[i],rx,ry-50,30);f.style.color='#fff';f.style.textShadow='0 2px 6px #000';f.style.fontWeight=700;f.animate([{opacity:1,transform:'translate(-50%,-50%)'},{opacity:0,transform:'translate(-50%,-140%)'}],{duration:700,fill:'forwards'}).finished.then(()=>f.remove());await wait(150)}
       if(ca.length)await wait(300)}
-    /* Pikachu (p19): una vez por turno, si juegas o asistes con una carta ⚡, relanzas 1 dado (p05: 1 relanzamiento extra) */
+    /* Volti (p19): una vez por turno, si juegas o asistes con una carta ⚡, relanzas 1 dado (p05: 1 relanzamiento extra) */
     const askDie=n=>new Promise(ok=>{const d=document.createElement('div');d.style.cssText='position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 20px);z-index:43;width:min(92vw,360px);display:flex;flex-direction:column;gap:10px;background:#2f2b37;border-radius:18px;padding:14px;text-align:center;box-shadow:0 10px 40px #000a';
-      d.innerHTML=`<div>⚡ Pikachu: ¿relanzar un dado? (${n} disponible${n>1?'s':''})</div><div class="btns">${dice.map((q,i)=>{const f=q.f[q.face];return `<button data-y="${i}" style="background:${COL[f]};color:${f==='blanco'||f==='verde'?'#111':'#fff'}">${i<3?'Dado '+(i+1):'Dado blanco/negro'} · ${f}</button>`}).join('')}<button class="ghost" data-y="-1">No relanzar</button></div>`;
+      d.innerHTML=`<div>⚡ Volti: ¿relanzar un dado? (${n} disponible${n>1?'s':''})</div><div class="btns">${dice.map((q,i)=>{const f=q.f[q.face];return `<button data-y="${i}" style="background:${COL[f]};color:${f==='blanco'||f==='verde'?'#111':'#fff'}">${i<3?'Dado '+(i+1):'Dado blanco/negro'} · ${f}</button>`}).join('')}<button class="ghost" data-y="-1">No relanzar</button></div>`;
       d.onclick=e=>{const b=e.target.closest('[data-y]');if(!b)return;d.remove();ok(+b.dataset.y)};document.body.appendChild(d)});
     let RRN=(!SP&&PC()==='p'&&act)?((ico(act,0)||B.as.some(x=>ico(x,1)))?1:0)+(act==='p05'?1:0):0;
     const rrDo=async()=>{
@@ -2551,7 +2551,7 @@ const MP={ws:null,code:null,role:null,peer:null,join:null,cancel:0,tm:null,hb:nu
 /* mensajes numerados: si se corta la conexión, al volver cada lado reenvía lo que el otro no recibió */
 const OUTB=[];let SEQ=0,LASTIN=0;
 const mpReset=()=>{OUTB.length=0;SEQ=0;LASTIN=0};
-const mpEl=$('#mp'),mpNm=c=>c==='l'?'Veralyn':c==='p'?'Pikachu':'Mario';
+const mpEl=$('#mp'),mpNm=c=>c==='l'?'Veralyn':c==='p'?'Volti':'Bruno';
 const mpShow=v=>{mpEl.className='on '+v};
 const mpLink=()=>location.origin+location.pathname+'?sala='+MP.code;
 const MP_TIPS=['Despertando al servidor…','Encendiendo las antorchas del calabozo…','Afilando las espadas…','Barajando el mazo…','Casi listo, aventurero…'];
