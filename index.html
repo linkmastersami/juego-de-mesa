@@ -1363,9 +1363,12 @@ function regConfirm(n){const c=$('#reg-c');
 async function regSend(n){const c=$('#reg-c');
   c.innerHTML=`<h2>Registrando…</h2><div class="spin"></div><p id="reg-w">Conectando con el calabozo…</p>`;
   const slow=setTimeout(()=>{const w=$('#reg-w');if(w)w.textContent='Despertando el servidor, puede tardar hasta un minuto…'},4000);
+  /* si tarda mucho, se puede jugar mientras tanto (el nombre se registra después) */
+  const skip=setTimeout(()=>{const w=$('#reg-w');if(!w||$('#reg-skip0'))return;w.insertAdjacentHTML('afterend',`<button class="rsec" id="reg-skip0">Jugar sin nombre por ahora</button>`);$('#reg-skip0').onclick=()=>{REGX=1;$('#reg').classList.remove('on')}},20000);let REGX=0;
   const k=[...crypto.getRandomValues(new Uint8Array(16))].map(b=>b.toString(16).padStart(2,'0')).join('');
-  const up=navigator.onLine&&await nWake();const r=up?await nPost('/name/claim',{n,k}):null;clearTimeout(slow);
+  const up=navigator.onLine&&await nWake();const r=up?await nPost('/name/claim',{n,k}):null;clearTimeout(slow);clearTimeout(skip);if(REGX&&!(r&&r.r==='ok'))return;
   if(r&&r.r==='ok'){YO={n,k,t:Date.now()};try{localStorage.setItem('mesa-yo',JSON.stringify(YO))}catch(e){}
+    if(REGX){yoUi();return}
     c.innerHTML=`<h2>¡Bienvenido!</h2><div class="rbig">${n}</div><p>Tu aventura comienza ahora.</p><button class="rgo" id="reg-fin">⚔️ Entrar</button>`;
     try{SFX.fanfare()}catch(e){}$('#reg-fin').onclick=()=>{yoUi();onbAvisos()};return}
   if(r&&r.r==='taken')return regShow(`❌ ${n} ya lo tiene otro aventurero. Elige otro.`);
