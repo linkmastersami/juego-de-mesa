@@ -507,6 +507,12 @@ function update(){
   $('cStory').style.display = storyOn.checked ? 'block' : 'none';
   $('cStory').textContent = storyOn.checked ? (storyIn.value || 'Texto de historia...') : '';
   $('cAb').textContent = effectIn.value || 'Escribe el efecto de la carta aquí.';
+  /* si el texto no cabe en la pantalla, se encoge poco a poco */
+  { const sc=$('cAb').parentNode, st=$('cStory'), ab=$('cAb'); let k=1;
+    st.style.fontSize=''; ab.style.fontSize=''; sc.style.gap='';
+    const need=()=>(st.style.display==='none'?0:st.offsetHeight+3*k)+ab.offsetHeight, room=sc.clientHeight-12;
+    while(need()>room && k>.62){ k-=.04;
+      st.style.fontSize=(8.6*k)+'px'; ab.style.fontSize=(10*k)+'px'; sc.style.gap=(3*k)+'px'; } }
   $('cLed1').style.display = iconOn1.checked ? 'flex' : 'none';
   $('cLed1').textContent = iconOn1.checked ? (iconText1.value || '+1') : '';
   $('cLed2').style.display = (isWell && iconOn2.checked) ? 'flex' : 'none';

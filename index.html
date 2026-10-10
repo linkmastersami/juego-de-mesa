@@ -852,8 +852,8 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
           <div class="char-name">Mario</div>
         </div>
         <div class="lob-char" id="lob-p2" data-char="l">
-          <div class="card-wrap"><div class="card" data-id="l19"><img src="personajes/personaje 2/l19.webp" alt="Link" onerror="this.remove()"></div></div>
-          <div class="char-name">Link</div>
+          <div class="card-wrap"><div class="card" data-id="l19"><img src="personajes/personaje 2/l19.webp" alt="Veralyn" onerror="this.remove()"></div></div>
+          <div class="char-name">Veralyn</div>
         </div>
         <div class="lob-char" id="lob-p3" data-char="p">
           <div class="card-wrap"><div class="card" data-id="p19"><img src="personajes/personaje 3/p19.webp" alt="Pikachu" onerror="this.remove()"></div></div>
@@ -1027,7 +1027,7 @@ const shuf=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i
 const imgSrc=id=>id[0]==='m'?`personajes/personaje 1/${id}.webp`:id[0]==='l'?`personajes/personaje 2/${id}.webp`:id[0]==='p'?`personajes/personaje 3/${id}.webp`:`cartas/${id}.webp`;
 const BACKH=c=>`<div class="card ${c}" data-id=""><div class="deck" style="width:100%;height:100%"></div></div>`;
 /* m19 y m20 tienen versión animada (m19a/m20a); la habilidad apagada y "reducir movimiento" usan la imagen fija */
-const ANIMC=new Set(['m19','m20','l19','l20','p19','p20']);
+const ANIMC=new Set(['m19','m20','p19','p20']);
 /* cartas de calabozo animadas (cartas/animaciones/cXX.webp): todas las copias de una carta usan la animación de la primera (c39 no tiene) */
 const ANCAL={};Object.entries({'c01':'c01|c02','c03':'c03|c04','c05':'c05|c06','c07':'c07|c08','c09':'c09|c10','c11':'c11|c12|c13','c14':'c14|c15|c16','c17':'c17|c18|c19','c20':'c20|c21|c22','c23':'c23|c24|c25','c26':'c26|c27|c28','c29':'c29|c30|c31|c32','c33':'c33','c34':'c34','c35':'c35','c36':'c36','c37':'c37','c38':'c38','c40':'c40|c41|c42','c43':'c43|c44|c45','c46':'c46|c47|c48','c49':'c49','c50':'c50','c51':'c51','c52':'c52','c53':'c53','c54':'c54','c55':'c55','c56':'c56','c57':'c57'}).forEach(([a,l])=>l.split('|').forEach(x=>ANCAL[x]=a));
 const animSrc=id=>ANIMC.has(id)?imgSrc(id).replace('.webp','a.webp'):ANCAL[id]?`cartas/animaciones/${ANCAL[id]}.webp`:null;
@@ -1380,7 +1380,7 @@ async function perfMovido(){const n=YO&&YO.n;try{const g=navigator.serviceWorker
   try{PERFK.forEach(k=>localStorage.removeItem(k));localStorage.setItem('mesa-mv',n||'');sessionStorage.clear()}catch(e){}location.reload()}
 
 /* ---------- récords y logros (se guardan en el teléfono) ---------- */
-const PJN={m:'Mario',l:'Link',p:'Pikachu'},PJI={m:'🍄',l:'🗡️',p:'⚡'};
+const PJN={m:'Mario',l:'Veralyn',p:'Pikachu'},PJI={m:'🍄',l:'🗡️',p:'⚡'};
 const stLoad=()=>{try{return JSON.parse(localStorage.getItem('mesa-stats')||'{}')||{}}catch(e){return {}}};
 const stSave=o=>{try{localStorage.setItem('mesa-stats',JSON.stringify(o))}catch(e){}};
 /* cartas que se pueden vencer: copias agrupadas (la primera de cada grupo representa a todas) */
@@ -1393,7 +1393,7 @@ const ACH=[
   ['c1','✅','Primer desafío','Completa tu primer desafío',(o,g)=>g.nc>=1],
   ['w1','🗝️','Primera victoria','Gana tu primera partida',(o,g)=>g.win],
   ['wm','🍄','Héroe de los hongos','Gana con Mario',(o,g)=>g.win&&g.pj==='m'],
-  ['wl','🗡️','Héroe del tiempo','Gana con Link',(o,g)=>g.win&&g.pj==='l'],
+  ['wl','🗡️','Ojo de halcón','Gana con Veralyn',(o,g)=>g.win&&g.pj==='l'],
   ['wp','⚡','Ratón eléctrico','Gana con Pikachu',(o,g)=>g.win&&g.pj==='p'],
   ['fin','🚪','Hasta el fondo','Llega a la batalla final',(o,g)=>g.final],
   ['w5','🥉','Aventurero','Gana 5 partidas',o=>(o.w||0)>=5],
@@ -1472,7 +1472,7 @@ const BOOKS=[
   {id:'cal',t:'Cartas del calabozo',e:'💀',bc:'linear-gradient(135deg,#4a4f5c,#24262e)',img:'libro-calabozo',ids:[...CGRP.filter(g=>g[0][0]==='c').map(g=>g[0]),'c07','c50','c52'].sort()},
   {id:'jef',t:'El jefe final',e:'👹',bc:'linear-gradient(135deg,#5b2a7a,#26102f)',img:'libro-jefe',ids:['j01','j02','j03','j04','g01','g05','g02','g06','g03','g07','g04','g08','k01','k02','k03','k04','k05','k06']},
   {id:'m',t:'Mario',e:'🍄',bc:'linear-gradient(135deg,#c0392b,#5e130c)',img:'libro-fuego',ids:rng('m',1,20)},
-  {id:'l',t:'Link',e:'🗡️',bc:'linear-gradient(135deg,#2e7d32,#0f3312)',img:'libro-espada',ids:rng('l',1,20)},
+  {id:'l',t:'Veralyn',e:'🗡️',bc:'linear-gradient(135deg,#2e7d32,#0f3312)',img:'libro-espada',ids:rng('l',1,20)},
   {id:'p',t:'Pikachu',e:'⚡',bc:'linear-gradient(135deg,#f2b632,#7a5200)',img:'libro-rayo',ids:rng('p',1,20)}];
 const albHas=(o,id)=>!!((o.alb||{})[id]||(o.cards||{})[id]);
 /* gana una estampa (o suma a sus datos): k = v vencida/activada/salió · a acción · s asistencia */
@@ -1775,7 +1775,7 @@ const MC={};'r52,a11,av01,vr42,a21,r21,w21,a21,w31,w31,va31,w31,a21,av22,w32,w42
 MC.m20=['w',5,0];
 /* Personaje 2 (espada en lugar de fuego): datos reales de l01-l18
    Formato: [colores, valor acción, valor asistencia] */
-'w11,vr21,va21,rv21,v22,w54,rv52,ra21,w53,w21,w11,w04,av32,r62,w11,ra01,v32,w21'.split(',').forEach((t,i)=>{const m=t.match(/^([a-z]+)(\d)(\d)$/);MC['l'+pad(i+1)]=[m[1],+m[2],+m[3]]});
+'w11,vr21,va21,rv21,v22,w54,rv52,ra21,w53,w21,w11,w04,av32,r62,w11,ra01,v32,v21'.split(',').forEach((t,i)=>{const m=t.match(/^([a-z]+)(\d)(\d)$/);MC['l'+pad(i+1)]=[m[1],+m[2],+m[3]]});
 /* Personaje 3 (Pikachu, rayo ⚡): p01-p18 */
 'r52,a21,v31,ra21,av32,v11,w21,w01,w63,r21,w12,rv31,w21,w21,w42,w22,w11,w21'.split(',').forEach((t,i)=>{const m=t.match(/^([a-z]+)(\d)(\d)$/);MC['p'+pad(i+1)]=[m[1],+m[2],+m[3]]});
 MC.p20=['w',0,0]; /* Trueno Máximo: su valor es igual a los ⚡ en descartes (sin límite) */
@@ -1791,7 +1791,7 @@ let PICK=1,B=null,SHF=0,M18=0;
 const col=()=>B.col||CH[S.cross[B.i].id].c;
 const okc=id=>{const c=MC[id][0];return c==='w'||c.includes(col())};
 /* color de la asistencia: personaje 1 = todas blancas (asisten a cualquier desafío); personaje 2 = según su carta */
-const ASC={l01:'w',l02:'v',l03:'v',l04:'rv',l05:'w',l06:'w',l07:'rv',l08:'ar',l09:'w',l10:'w',l11:'w',l12:'w',l13:'av',l14:'w',l15:'w',l16:'ra',l17:'v',l18:'w'};
+const ASC={}; /* Veralyn: sus asistencias sirven para cualquier color */
 const oka=id=>{if(/^[mlp]20$/.test(id))return false;const c=ASC[id];return !c||c==='w'||c.includes(col())};
 const ty=()=>TY[S.cross[B.i].id];
 /* equivalentes del personaje 2 a las cartas con bonificación de tipo */
@@ -2006,7 +2006,7 @@ function fanTap(id){if(!id)return;
 /* FI: fuego de acción(0) y asistencia(1) por carta de personaje. índice = número de carta - 1 */
 const FI_M='11,11,00,11,11,11,00,11,00,00,11,00,00,11,11,00,00,00,00,00'.split(',');
 /* Personaje 2: icono de ESPADA (hace el papel del fuego): carta / asistencia */
-const FI_L='11,11,11,11,00,01,11,11,11,11,11,01,00,00,00,00,00,00,00,00'.split(',');
+const FI_L='11,11,00,11,00,00,11,11,11,11,00,00,00,00,00,00,00,00,00,00'.split(',');
 /* Personaje 3: icono de RAYO ⚡ */
 const FI_P='11,11,00,11,11,11,00,11,11,11,00,11,00,11,11,00,00,00,00,00'.split(',');
 const FI_MAP={'m':FI_M,'l':FI_L,'p':FI_P};
@@ -2134,12 +2134,12 @@ function resolve(h,nd){
   if(act==='p11')M18=1;
   if(pfx==='l'){
     if(act==='l01')fx.push(['l01: colocar 2 de progreso en un desafío a tu elección',b=>{pickCh('Elige el desafío (+2 de progreso)',x=>{x.p+=2},b,null,1);return 2}]);
-    if(act==='l02'&&S.hand.some(swd))fx.push(['l02: devolverla a tu mano (te queda una espada en la mano)',()=>{if(!S.hand.some(swd))return;const k=S.disc.lastIndexOf('l02');if(k<0)return;S.disc.splice(k,1);S.hand.push('l02');qFly('l02','#pDm','#tHand','#7dffb0')}]);
+    if(act==='l02'&&S.hand.some(swd))fx.push(['l02: devolverla a tu mano (te queda una 🗡️ en la mano)',()=>{if(!S.hand.some(swd))return;const k=S.disc.lastIndexOf('l02');if(k<0)return;S.disc.splice(k,1);S.hand.push('l02');qFly('l02','#pDm','#tHand','#7dffb0')}]);
     if(act==='l03')fx.push(['l03: robar 2 cartas',()=>draw(2)]);
     if(act==='l06'&&!as.length)fx.push(['l06 (elige): activar tu habilidad o quitar 1 agotamiento activo',b=>{const km=S.mesa.filter(x=>/^k0[245]$/.test(x));ov('l06',[['Activar la carta de habilidad',()=>{S.hab=1;render();b();return 1}],...(km.length?[['Quitar un agotamiento activo (regresa al mazo)',()=>{ov(null,km.map(x=>[x,()=>{S.mesa.splice(S.mesa.indexOf(x),1);S.dK.push(x);shuf(S.dK);render();fxShufK();b();return 1},0,'',x]),'<p>Elige el agotamiento a quitar</p>',1);return 1}]]:[])],'<p>Elige el efecto</p>',1);return 2}]);
     if(act==='l07'&&as.length)fx.push([`l07: sufrir ${as.length} de daño (fue asistida ${as.length} ${as.length>1?'veces':'vez'})`,()=>hurt(as.length)]);
     if(act==='l13')fx.push(['l13 (elige): buscar 1 carta en tu mazo o avanzar 2 de progreso',b=>{ov('l13',[...(S.dM.length?[['Buscar 1 carta en tu mazo',()=>{ov(null,[...S.dM].sort().map(x=>[x,()=>{S.dM.splice(S.dM.indexOf(x),1);S.hand.push(x);shuf(S.dM);fxShufM();render();b();return 1},0,'',x]),'<p>Elige la carta (luego se baraja el mazo)</p>',1);return 1}]]:[]),['Avanzar 2 de progreso en un desafío',()=>{pickCh('Elige el desafío (+2 de progreso)',x=>{x.p+=2},b,null,1);return 1}]],'<p>Elige el efecto</p>',1);return 2}]);
-    if(nf)fx.push([`l19: añadir 1 de progreso por espada (${nf}) a desafíos que no intentaste este turno`,b=>{const go=n=>{if(!n)return b();pickCh(`l19: elige el desafío (+1 de progreso) · quedan ${n}`,x=>{x.p+=1},()=>go(n-1),c,1)};go(nf);return 2}]);
+    if(nf)fx.push([`l19: añadir 1 de progreso por cada 🗡️ (${nf}) a desafíos que no intentaste este turno`,b=>{const go=n=>{if(!n)return b();pickCh(`l19: elige el desafío (+1 de progreso) · quedan ${n}`,x=>{x.p+=1},()=>go(n-1),c,1)};go(nf);return 2}]);
   }
   if(pfx==='p'){
     if(act==='p01')fx.push(['p01: sufrir 1 de daño',()=>hurt(1)]);
@@ -2497,7 +2497,7 @@ function hideLobby(){
 }
 /* ficha del personaje elegido: su carta se anima y se explica cómo juega */
 const PJD={m:['🔥','Juega cartas de fuego: cada 🔥 que usas te hace robar cartas al final del turno para armar combos.'],
-  l:['🗡️','Juega cartas de espada: cada ⚔️ reparte progreso extra a los desafíos que no estás intentando.'],
+  l:['🗡️','Juega cartas con 🗡️: cada una reparte progreso extra a los desafíos que no estás intentando.'],
   p:['⚡','Juega cartas de rayo: cada ⚡ le deja relanzar un dado para no fallar la tirada.']};
 var PJO=['m','l','p'];
 function lobPos(c){const i=PJO.indexOf(c);document.querySelectorAll('.lob-char').forEach(el=>{const k=PJO.indexOf(el.dataset.char);el.classList.remove('pl','pr');el.classList.toggle('sel',k===i);if(k===(i+2)%3)el.classList.add('pl');if(k===(i+1)%3)el.classList.add('pr')});document.querySelectorAll('.lob-dots i').forEach(d=>d.classList.toggle('on',d.dataset.d===c))}
@@ -2535,7 +2535,7 @@ const MP={ws:null,code:null,role:null,peer:null,join:null,cancel:0,tm:null,hb:nu
 /* mensajes numerados: si se corta la conexión, al volver cada lado reenvía lo que el otro no recibió */
 const OUTB=[];let SEQ=0,LASTIN=0;
 const mpReset=()=>{OUTB.length=0;SEQ=0;LASTIN=0};
-const mpEl=$('#mp'),mpNm=c=>c==='l'?'Link':c==='p'?'Pikachu':'Mario';
+const mpEl=$('#mp'),mpNm=c=>c==='l'?'Veralyn':c==='p'?'Pikachu':'Mario';
 const mpShow=v=>{mpEl.className='on '+v};
 const mpLink=()=>location.origin+location.pathname+'?sala='+MP.code;
 const MP_TIPS=['Despertando al servidor…','Encendiendo las antorchas del calabozo…','Afilando las espadas…','Barajando el mazo…','Casi listo, aventurero…'];
@@ -2887,7 +2887,7 @@ async function coopFxRun(d){
   const pc=PC(),fi=getFI(),nf=d.as.reduce((t,x)=>t+ +(fi[+x.slice(1)-1]||'00')[1],0),steps=[];
   if(d.act==='m05')steps.push(n=>{draw(d.as.length);n()});
   if(nf&&pc==='m')steps.push(n=>{draw(nf);n()});
-  if(nf&&pc==='l')steps.push(n=>{const cx=S.cross[d.bi],go=m=>{if(!m)return n();pickCh(`Espada de tu asistencia: elige el desafío (+1 de progreso) · quedan ${m}`,x=>{x.p+=1},()=>{close();go(m-1)},cx,1)};go(nf)});
+  if(nf&&pc==='l')steps.push(n=>{const cx=S.cross[d.bi],go=m=>{if(!m)return n();pickCh(`🗡️ de tu asistencia: elige el desafío (+1 de progreso) · quedan ${m}`,x=>{x.p+=1},()=>{close();go(m-1)},cx,1)};go(nf)});
   const fin=()=>whenFree(()=>{close();SYON=0;SYQ=null;COOPFX=0;OWNER='a';coopUi();render();mpSend({k:'fxDone',ids:S.cross.map(x=>x?x.id:null),p:S.cross.map(x=>x?x.p:null)})});
   const run=i=>{if(i>=steps.length)return fin();steps[i](()=>run(i+1))};run(0);
 }
