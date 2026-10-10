@@ -2451,32 +2451,35 @@ sn.addEventListener('change',()=>{if(SND>0)SFX.pop()});}
 /* música de fondo con su propio volumen (independiente de los efectos) */
 /* música: una pista según la pantalla (menú · álbum y comunidad · batalla · jefe final · victoria · derrota), con fundido entre pistas */
 {const TR={menu:1,comunidad:1,batalla:1,jefe:1,victoria:0,derrota:0}; /* 1 = se repite */
-const AU={};const au=n=>{if(!AU[n]){const a=new Audio('musica/'+n+'.mp3');a.loop=!!TR[n];a.preload='none';AU[n]=a}return AU[n]};
+const AU={};const au=n=>{if(!AU[n]){const a=new Audio('musica/'+n+'.mp3');a.loop=!!TR[n];a.preload='none';AU[n]=a;
+  /* en iPhone el volumen de <audio> no se puede cambiar: la música pasa por un control de volumen propio */
+  try{const A=ac(),g=A.createGain();A.createMediaElementSource(a).connect(g);g.connect(A.destination);g.gain.value=0;a._g=g}catch(e){}}return AU[n]};
+const gv=a=>a._g?a._g.gain.value:a.volume,sv=(a,v)=>{v=Math.max(0,Math.min(1,v));if(a._g)a._g.gain.value=v;else a.volume=v};
 let MV=5;try{const sv=localStorage.getItem('mesa-mus');if(sv!==null)MV=+sv}catch(e){}
 let CUR=null,DONE=null,FD=0;
 const sl=$('#mus'),ic=$('#musIcon'),nm=$('#musNum');
-let DUCK=0;const vol=()=>MV/10*.4*(DUCK?.35:1);
+let DUCK=0;const vol=()=>Math.pow(MV/10,2)*.35*(DUCK?.35:1);
 window.musDuck=on=>{on=on?1:0;if(DUCK===on)return;DUCK=on;try{if(CUR&&!FD){const a=au(CUR);if(!a.paused)fade(a,vol(),300)}}catch(e){}};
-const upd=()=>{sl.style.setProperty('--pct',MV/10*100+'%');nm.textContent=MV;ic.textContent=MV===0?'🔇':'🎵';if(CUR&&!FD)au(CUR).volume=vol()};
+const upd=()=>{sl.style.setProperty('--pct',MV/10*100+'%');nm.textContent=MV;ic.textContent=MV===0?'🔇':'🎵';if(CUR&&!FD)sv(au(CUR),vol())};
 /* qué pista toca ahora */
 const want=()=>{const o=$('#ov');
   if(o&&o.classList.contains('on')){if(o.classList.contains('vic'))return 'victoria';if(o.classList.contains('der'))return 'derrota'}
   if(lobbyOn())return LP!==2?'comunidad':'menu';
   return document.body.classList.contains('finalph')?'jefe':'batalla'};
-const fade=(a,to,ms,end)=>{const v0=a.volume,t0=performance.now();FD++;const st=()=>{const k=Math.min(1,(performance.now()-t0)/ms);try{a.volume=Math.max(0,Math.min(1,v0+(to-v0)*k))}catch(e){}if(k<1)requestAnimationFrame(st);else{FD--;end&&end()}};st()};
+const fade=(a,to,ms,end)=>{const v0=gv(a),t0=performance.now();FD++;const st=()=>{const k=Math.min(1,(performance.now()-t0)/ms);try{sv(a,v0+(to-v0)*k)}catch(e){}if(k<1)requestAnimationFrame(st);else{FD--;end&&end()}};st()};
 let UNL=0;
 function musTick(){if(!UNL||MV<=0||document.hidden||window.BYE){if(CUR&&!au(CUR).paused&&(MV<=0||document.hidden||window.BYE))au(CUR).pause();return}
   const w=want();
   if(w!==CUR){const old=CUR;CUR=w;DONE=null;
     if(old){const o=au(old);fade(o,0,500,()=>{o.pause();try{o.currentTime=0}catch(e){}})}
-    const a=au(w);try{if(!TR[w])a.currentTime=0}catch(e){}a.volume=0;a.play().then(()=>fade(a,vol(),old?700:400)).catch(()=>{CUR=null;if(UNL===2)UNL=0});return}
-  const a=au(CUR);if(a.paused&&!a.ended&&DONE!==CUR){a.volume=vol();a.play().catch(()=>{})}
+    const a=au(w);try{if(!TR[w])a.currentTime=0}catch(e){}sv(a,0);a.play().then(()=>fade(a,vol(),old?700:400)).catch(()=>{CUR=null;if(UNL===2)UNL=0});return}
+  const a=au(CUR);if(a.paused&&!a.ended&&DONE!==CUR){sv(a,vol());a.play().catch(()=>{})}
   if(a.ended)DONE=CUR}
 window.musTick=musTick;
 sl.value=MV;upd();
 sl.addEventListener('input',()=>{MV=+sl.value;upd();try{localStorage.setItem('mesa-mus',MV)}catch(e){}musTick()});
 /* el navegador solo deja sonar tras un toque: se inicia con el primero */
-['pointerdown','pointerup','click','touchend'].forEach(ev=>document.addEventListener(ev,()=>{UNL=1;musTick()},{capture:true,passive:true}));
+['pointerdown','pointerup','click','touchend'].forEach(ev=>document.addEventListener(ev,()=>{UNL=1;try{if(AC&&AC.state!=='running')AC.resume()}catch(e){}musTick()},{capture:true,passive:true}));
 /* la app instalada suele poder sonar sin tocar nada: se intenta al abrir (si el teléfono no lo permite, empieza con el primer toque) */
 setTimeout(()=>{if(!UNL){UNL=2;musTick()}},600);
 document.addEventListener('visibilitychange',musTick);
