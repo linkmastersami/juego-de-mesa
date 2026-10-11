@@ -111,7 +111,7 @@
   "cartas/k04.webp": "b73c153b74b4",
   "cartas/k05.webp": "5541a05e488f",
   "cartas/k06.webp": "9d25324938e4",
-  "cartas/reverso.webp": "7a486fb28f28",
+  "cartas/reverso.webp": "7d57d7b2f124",
   "fondos/album.webp": "41e8d73a2ee9",
   "fondos/comunidad.webp": "b53c237e605c",
   "fondos/derrota.webp": "898296b1038f",
@@ -139,15 +139,15 @@
   "guerreros/paladin-parado.webp": "5963261b0316",
   "guerreros/paladin.webp": "28c8bad34e88",
   "guia/buho.webp": "d1e883253c6f",
-  "icon-192.png": "1832840b96ab",
-  "icon-512.png": "c42de4552324",
+  "icon-192.png": "a0e1e77da46a",
+  "icon-512.png": "fe03cd632f88",
   "iconos/i-album.webp": "7d3fa0ed1b3a",
   "iconos/i-calabozo.webp": "a7cd2d648aa0",
   "iconos/i-comunidad.webp": "e5ffa3d48a3e",
   "iconos/i-records.webp": "3f192fdbc183",
   "iconos/i-tableros.webp": "aad177dc6e2d",
   "index.html": "0589125325a4",
-  "logo.webp": "c79c21426a47",
+  "logo.webp": "a46ce5f9a338",
   "manifest.json": "81bc7f803d05",
   "musica/batalla.mp3": "292447f839b4",
   "musica/comunidad.mp3": "b391508c2683",
@@ -251,5 +251,5 @@
   "voces/16.mp3": "f67abff52fc8",
   "voces/17.mp3": "e55eb23faa86"
  },
- "version": "88576f7490d8"
+ "version": "e5ae89ded9c5"
 }
