@@ -84,6 +84,9 @@ const GWIN = 30, GLOSE = 10, GDAY = 20, GMAXDAY = 400;           /* premios por 
 const gfix = u => { if (typeof u.g !== 'number') u.g = GEM0; if (!Array.isArray(u.inv)) u.inv = [];
   if (PREMIUM.includes(u.a) && !u.inv.includes(u.a)) u.inv.push(u.a); /* quien ya lo usaba antes de la tienda se lo queda */
   return u; };
+/* gacha: cada personaje nuevo trae sus 18 cartas; las repetidas dan orbes; al completarlo se desbloquea */
+const GSETS = { r: 18, n: 18 }, GPRICE = +process.env.GPRECIO || 30, GORB = 10;          /* precio por tirada y gemas por orbe sobrante */
+const gc = (u, s) => { if (!u.gc || typeof u.gc !== 'object') u.gc = {}; const x = u.gc[s] = u.gc[s] || {}; if (!Array.isArray(x.c)) x.c = []; if (typeof x.o !== 'number') x.o = 0; return x; };
 const dayKey = () => new Date(Date.now() - 6 * 3600e3).toISOString().slice(0, 10); /* día de México */
 /* aviso a un jugador en particular (todos sus teléfonos registrados) */
 async function pushTo(name, payload) {
@@ -250,7 +253,7 @@ const server = http.createServer((req, res) => {
       const me = okName(n) && NAMES.get(n);
       if (!me || me.h !== hashK(k)) return out({ r: 'bad' });
       gfix(me);
-      const st = () => ({ r: 'ok', g: me.g, inv: me.inv, shop: SHOP });
+      const st = () => ({ r: 'ok', g: me.g, inv: me.inv, shop: SHOP, gc: me.gc || {}, gp: GPRICE });
       if (url === '/tienda') return out(st());
       /* premio al terminar una partida (cada partida trae su id para no cobrarla dos veces) */
       if (url === '/tienda/ganar') {
@@ -271,6 +274,25 @@ const server = http.createServer((req, res) => {
         if (me.inv.includes(it)) return out({ ...st(), r: 'ya' });
         if (me.g < pr) return out({ ...st(), r: 'pocas' });
         me.g -= pr; me.inv.push(it); saveNames(); return out(st());
+      }
+      if (url === '/tienda/gacha') {
+        const set = String(b.s || ''), tot = GSETS[set];
+        if (!tot) return out({ r: 'bad' });
+        const x = gc(me, set);
+        if (me.inv.includes('pj:' + set)) return out({ ...st(), r: 'ya' });
+        const orbs = Math.max(0, Math.min(5, b.o | 0, x.o));
+        if (me.g < GPRICE) return out({ ...st(), r: 'pocas' });
+        me.g -= GPRICE; x.o -= orbs;
+        const all = Array.from({ length: tot }, (_, i) => set + String(i + 1).padStart(2, '0'));
+        const falta = all.filter(c => !x.c.includes(c));
+        const pNew = Math.max(falta.length / tot, orbs * 0.2);
+        let card, nuevo = false;
+        if (falta.length && Math.random() < pNew) { card = falta[Math.random() * falta.length | 0]; x.c.push(card); nuevo = true; }
+        else { const rep = x.c.length ? x.c : all; card = rep[Math.random() * rep.length | 0]; x.o += 1; }
+        let fin = false, extra = 0;
+        if (x.c.length >= tot) { fin = true; me.inv.push('pj:' + set); extra = x.o * GORB; me.g += extra; x.o = 0; }
+        saveNames();
+        return out({ ...st(), card, nuevo, fin, extra });
       }
       return out({ r: 'bad' });
     });
