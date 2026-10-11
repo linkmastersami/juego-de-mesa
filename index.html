@@ -273,6 +273,7 @@ body.noanim *:not(.blink),body.noanim *::before,body.noanim *::after{animation-d
 
 /* ===== MULTIJUGADOR ===== */
 .lob-friend{margin-top:10px;width:min(86vw,320px);border:0;border-radius:16px;padding:14px;font:700 1.1rem Fredoka,sans-serif;color:#fff;background:linear-gradient(180deg,#4b7cf0,#2f55c4);box-shadow:0 5px 0 #1d3a8a,0 0 22px #4b7cf055;cursor:pointer}
+.lob-quick .lob-onl{display:block;font:600 .62rem Fredoka,sans-serif;letter-spacing:.06em;opacity:.9;margin-top:1px;line-height:1}
 .lob-quick{background:linear-gradient(180deg,#3fcf72,#1f9a4a);box-shadow:0 5px 0 #136a30,0 0 22px #3fcf7255}.lob-quick:not(:disabled):active{box-shadow:0 1px 0 #136a30}.lob-quick.hot,.lob-friend.hot{animation:qpulse 1.2s ease-in-out infinite}@keyframes qpulse{50%{transform:scale(1.05)}}.lob-qb{background:#ff4d4d;border-radius:99px;padding:2px 9px;font-size:.8rem;margin-left:8px;font-weight:700}
 .lob-friend:disabled{opacity:.4;box-shadow:none;cursor:default}
 .lob-friend:not(:disabled):active{transform:translateY(4px);box-shadow:0 1px 0 #1d3a8a}
@@ -965,7 +966,7 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
       </div>
       <div class="lob-row">
         <button class="lob-friend" id="lob-btn-friend" disabled>👥 Con un amigo</button>
-        <button class="lob-friend lob-quick" id="lob-btn-quick">⚡ Partida rápida<b id="lob-q" class="lob-qb" style="display:none"></b></button>
+        <button class="lob-friend lob-quick" id="lob-btn-quick">⚡ Partida rápida<small class="lob-onl">🟢 online</small><b id="lob-q" class="lob-qb" style="display:none"></b></button>
       </div>
       <button class="lob-resume lob-hid" id="lob-btn-notif" style="display:none;margin-top:10px">🔔 Avisarme de partidas y actualizaciones</button>
       <div class="lob-icons lob-hid">
