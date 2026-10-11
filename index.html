@@ -1059,7 +1059,11 @@ const syR=()=>COOP&&(MYT?OWNER==='f':!COOPFX);
 const fresh0=()=>({turn:1,hp:10,personaje:CHAR,dM:shuf(rng(CHAR,1,18)),dK:shuf(rng('k',1,6)),dC:shuf(rng('c',1,57)),hand:[],mesa:[],disc:[],comp:[],cross:[{id:'j01',p:10},null,null,null,null],final:0,hab:0,apart:[],vk:0,nc:0});
 const fresh=()=>{const s=fresh0();s.hand=s.dM.splice(-hN());for(let k=0;k<3;k++)s.disc.push(s.dC.pop());for(let i=1;i<=4;i++){s.cross[i]={id:s.dC.pop(),p:0};if(/^c4[0-8]$/.test(s.cross[i].id))s.cross[0].p=Math.max(0,s.cross[0].p-1)}return s};
 let S=fresh(),NEWG=1;
-try{const v=JSON.parse(localStorage.getItem('mesa-juego')||'null');if(v&&v.cross){S=v;CHAR=v.personaje||'m';NEWG=0}}catch(e){}
+try{const v=JSON.parse(localStorage.getItem('mesa-juego')||'null');if(v&&v.cross){
+  /* partidas guardadas donde el jefe final se descartó por error: vuelve a su lugar */
+  if(v.final&&!v.cross[0]){const d=v.disc||[];let k=-1;for(let q=d.length-1;q>=0;q--)if(/^j0[2-4]$/.test(d[q])){k=q;break}
+    const id=k>=0?d.splice(k,1)[0]:['j02','j03','j04'][Math.floor(Math.random()*3)];v.cross[0]={id,p:0}}
+  S=v;CHAR=v.personaje||'m';NEWG=0}}catch(e){}
 if(S.over){S=fresh();NEWG=1}
 
 const filling=()=>!S.final&&S.dC.length>0&&[1,2,3,4].some(k=>!S.cross[k]);
@@ -1854,7 +1858,7 @@ function entryFx(i){const x=S.cross[i];if(!x||x.id[0]!=='c')return null;const n=
   if(n>=20&&n<=22){if(!S.cross.some((y,k)=>y&&k&&k!==i&&y.p>0))return null;return {txt:'Absorbe el progreso de los demás desafíos',fn:()=>{S.cross.forEach((y,k)=>{if(y&&k&&k!==i){x.p+=y.p;y.p=0}})}}}
   if(n>=40&&n<=48&&S.cross[0])return {kind:'Mini-jefe',txt:'Elimina 1 de progreso del jefe final',fn:()=>{S.cross[0].p=Math.max(0,S.cross[0].p-1)}};
   return null}
-function dropCh(i){const x=S.cross[i];if(i<0||!x)return;
+function dropCh(i){const x=S.cross[i];if(i<=0||!x)return; /* el jefe final (centro de la cruz) nunca se descarta */
   if(x.id[0]==='g'){const n=+x.id.slice(1);if(n<=4&&x.id!=='g03'){S.cross[i]={id:'g'+pad(n+4),p:0};setTimeout(()=>achCard(x.id),900)}return}
   if(x.id==='c33'){x.p+=5;return}
   if(/^c1[456]$/.test(x.id))return;
@@ -2175,15 +2179,15 @@ function resolve(h,nd){
   if(act==='m02')fx.push([`m02: elegir otro desafío y añadirle 1 progreso por fuego en descartes`,b=>{pickCh('Elige el otro desafío',x=>{x.p+=fireDisc()},b,c,1);return 2}]);
   if(act==='m07'&&as.length)fx.push([`m07: alguien asistió, puedes descartar cartas (o ninguna) y el que asistió roba igual número`,b=>{COOP?discDraw(b,1,n=>{if(n)mpSend({k:'draw',n})}):discDraw(b);return 2}]);
   if(act==='m10'&&S.hand.length)fx.push([`m10: poner una carta de tu mano encima del mazo`,b=>{ov(null,S.hand.map(x=>[x,()=>{S.hand.splice(S.hand.indexOf(x),1);S.dM.push(x);qFly(x,'#tHand','#dM','#8ab4ff');render();b();return 1},0,'',x]),'<p>Elige la carta</p>',1);return 2}]);
-  if(act==='p12'&&!w0)fx.push([`p12: descartar el desafío sin sufrir penalización`,()=>dropCh(S.cross.indexOf(c))]);
-  if(act==='m15'&&!w0)fx.push([`m15: descartar el desafío sin sufrir penalización`,()=>dropCh(S.cross.indexOf(c))]);
+  if(act==='p12'&&!w0&&S.cross.indexOf(c)>0)fx.push([`p12: descartar el desafío sin sufrir penalización`,()=>dropCh(S.cross.indexOf(c))]);
+  if(act==='m15'&&!w0&&S.cross.indexOf(c)>0)fx.push([`m15: descartar el desafío sin sufrir penalización`,()=>dropCh(S.cross.indexOf(c))]);
   c.p+=add;const win=c.p>=lv&&id!=='g04'&&!(id[0]==='j'&&S.cross.some(x=>x&&x.id==='g01'));if(win&&CH[id]&&add>2*CH[id].l)S.dbl=1;
   {const L=[...(spec[id]||[[],[]])[win?0:1]];
   if(id==='c35'&&!win)L.push(dmg(B.act?sumB()-B.as.reduce((t,x)=>t+av(x),0):10));
   if(id==='c51'&&!win)L.push(hd(lv-c.p));
   if(id==='c56'&&win&&c.p>lv)L.push([`robar ${c.p-lv} carta(s) por exceso`,()=>draw(c.p-lv)]);
   const dk=!nd&&!SKR&&dice[3].f[dice[3].face]==='negro';
-  if(!win&&S.cross.some(y=>y&&/^c2[678]$/.test(y.id)))L.push(['c26-c28: descartar el desafío fallado',()=>dropCh(S.cross.indexOf(c))]);
+  if(!win&&S.cross.indexOf(c)>0&&S.cross.some(y=>y&&/^c2[678]$/.test(y.id)))L.push(['c26-c28: descartar el desafío fallado',()=>dropCh(S.cross.indexOf(c))]);
   if(!win&&!/^c(29|3[0-2])$/.test(id)&&S.cross.some(y=>y&&/^c(29|3[0-2])$/.test(y.id))){const pen=[...(spec[id]||[[],[]])[1]];if(id==='c35')pen.push(dmg(B.act?sumB()-B.as.reduce((t,x)=>t+av(x),0):10));if(id==='c51')pen.push(hd(lv-c.p));if(pen.length)L.push(...pen.map(p=>['c29–c32: penalización extra · '+p[0],p[1]]))};
   if(!win&&id==='c36')L.push(['c36: descartar este desafío en lugar de sufrir su penalización',()=>dropCh(S.cross.indexOf(c))]);
   if(dk&&S.cross.some(y=>y&&/^c(09|10)$/.test(y.id)))L.push(['trampa: descartar 1 carta por oscuridad',b=>{pickHand(1,b);return 2}]);
