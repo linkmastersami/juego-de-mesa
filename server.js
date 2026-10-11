@@ -61,6 +61,10 @@ const badName = n => { const a = norm(n); return BAD.some(w => a.includes(norm(w
 const saveNames = () => ghPut('nombres.json', () => Object.fromEntries(NAMES));
 (async () => {
   const nm = await ghGet('nombres.json'); if (nm && typeof nm === 'object') Object.entries(nm).forEach(([n, v]) => { if (okName(n) && v && v.h) NAMES.set(n, v); });
+  /* perfiles de prueba que se borran una sola vez (solo los creados antes de esta fecha) */
+  { const BORRAR = ['LUIS', 'YOSI', 'JOSE', 'JORGE'], ANTES = Date.parse('2026-10-11T18:00:00Z'); let n = 0;
+    for (const m of BORRAR) { const v = NAMES.get(m); if (v && (v.t || 0) < ANTES) { NAMES.delete(m); n++; } }
+    if (n) { for (const v of NAMES.values()) { if (Array.isArray(v.f)) v.f = v.f.filter(x => !BORRAR.includes(x)); if (Array.isArray(v.rq)) v.rq = v.rq.filter(x => !BORRAR.includes(x)); } saveNames(); console.log('Perfiles de prueba borrados:', n); } }
   const sb = await ghGet('subs.json'); if (Array.isArray(sb)) { sb.forEach(s => s && s.endpoint && !SUBS.has(s.endpoint) && SUBS.set(s.endpoint, s)); try { fs.writeFileSync(SUBS_FILE, JSON.stringify([...SUBS.values()])); } catch {} }
   console.log('Datos cargados:', NAMES.size, 'nombres,', SUBS.size, 'suscripciones', GH_TOKEN ? '(respaldo en GitHub activo)' : '(sin GH_TOKEN: solo memoria)');
 })();
@@ -80,7 +84,7 @@ const AVS = ['arquera', 'barbaro', 'guerrero', 'mago', 'ninja', 'paladin', 'brun
 const SHOP = { bruno: 150, robi: 150, veralyn: 150, ninja: 120, paladin: 120 };            /* guerreros a la venta */
 const PREMIUM = Object.keys(SHOP);
 const GEM0 = 100;                                                /* regalo de bienvenida */
-const GWIN = 30, GLOSE = 10, GDAY = 20, GMAXDAY = 400;           /* premios por partida y tope diario */
+const GWIN = 30, GLOSE = 10, GDAY = 20, GMAXDAY = 400, GACH = 20, GEST = 5; /* … y por cada logro y estampa nueva */           /* premios por partida y tope diario */
 const gfix = u => { if (typeof u.g !== 'number') u.g = GEM0; if (!Array.isArray(u.inv)) u.inv = [];
   if (PREMIUM.includes(u.a) && !u.inv.includes(u.a)) u.inv.push(u.a); /* quien ya lo usaba antes de la tienda se lo queda */
   return u; };
@@ -268,6 +272,15 @@ const server = http.createServer((req, res) => {
         me.gn = (me.gn || 0) + add; me.g += add; me.gids = [...me.gids, id].slice(-30);
         saveNames(); return out({ ...st(), add, dia: !!(win && add > GWIN) });
       }
+      /* logros y estampas: cada uno paga una sola vez (también los que ya tenías) */
+      if (url === '/tienda/premios') {
+        if (!Array.isArray(me.pa)) me.pa = []; if (!Array.isArray(me.pe)) me.pe = [];
+        const A = (Array.isArray(b.a) ? b.a : []).map(String).filter(x => /^[a-z0-9]{2,8}$/.test(x) && !me.pa.includes(x)).slice(0, 120);
+        const E = (Array.isArray(b.e) ? b.e : []).map(String).filter(x => /^[a-z]\d\d$/.test(x) && !me.pe.includes(x)).slice(0, 400);
+        const add = A.length * GACH + E.length * GEST;
+        if (add) { me.pa.push(...new Set(A)); me.pe.push(...new Set(E)); me.g += add; saveNames(); }
+        return out({ ...st(), add, na: A.length, ne: E.length });
+      }
       if (url === '/tienda/comprar') {
         const it = String(b.it || ''), pr = SHOP[it];
         if (!pr) return out({ r: 'bad' });
@@ -295,7 +308,7 @@ const server = http.createServer((req, res) => {
         return out({ ...st(), card, nuevo, fin, extra });
       }
       return out({ r: 'bad' });
-    });
+    }, 16384);
   }
   if (url === '/health') { res.writeHead(200, { 'Content-Type': 'text/plain' }); return res.end('ok'); }
   /* cuántas salas rápidas están esperando jugador */

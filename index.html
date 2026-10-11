@@ -1537,7 +1537,7 @@ async function achNext(){const a=ATQ.shift();if(!a){ATB=0;return}ATB=1;
   setTimeout(()=>{const i=e.querySelector('.ai');if(i)i.classList.add('go')},120);
   await wait(3600);e.classList.add('out');await wait(450);e.remove();await wait(250);achNext()}
 /* desbloquea en el momento (se guarda en el teléfono y sale la notificación) */
-function achGive(list){if(!list.length||(TUT&&!TUT.give))return;const o=stLoad();o.ach=o.ach||{};S.newAch=S.newAch||[];
+function achGive(list){if(!list.length||(TUT&&!TUT.give))return;try{tndPremios()}catch(e){}const o=stLoad();o.ach=o.ach||{};S.newAch=S.newAch||[];
   setTimeout(()=>{try{recDot()}catch(e){}},300);list.forEach(a=>{if(o.ach[a[0]])return;o.ach[a[0]]=Date.now();S.newAch.push(a[0]);achToast(a);
     try{TABS.filter(x=>x[2]===a[0]).forEach(x=>achToast(['tab:'+x[0],'🎨','Nuevo tablero: '+x[1],'Elígelo en 🎨 Tableros, en el menú',null,null,tabUrl(x[0])]))}catch(e){}});stSave(o)}
 function achScan(win){if(TUT)return;try{const o=stLoad(),A=o.ach||{},g=liveG(win);achGive(ACH.filter(a=>!A[a[0]]&&a[4](o,g)))}catch(e){}}
@@ -1587,7 +1587,7 @@ const BOOKS=[
   {id:'n',t:'Nova',e:'🚀',bc:'linear-gradient(135deg,#2bb3a3,#0f3f45)',img:'libro-rayo',ids:rng('n',1,20)}];
 const albHas=(o,id)=>!!((o.alb||{})[id]||(o.cards||{})[id]);
 /* gana una estampa (o suma a sus datos): k = v vencida/activada/salió · a acción · s asistencia */
-function albGet(id,k){if(TUT)return;try{if(!id)return;const o=stLoad();o.alb=o.alb||{};const nw=!albHas(o,id);const e=o.alb[id]=o.alb[id]||{};
+function albGet(id,k){if(TUT)return;try{if(!id)return;const o=stLoad();o.alb=o.alb||{};const nw=!albHas(o,id);if(nw)setTimeout(()=>{try{tndPremios()}catch(_){}},100);const e=o.alb[id]=o.alb[id]||{};
   if(k)e[k]=(e[k]||0)+1;if(nw){e.n=1;S.newAlb=(S.newAlb||0)+1}stSave(o);
   if(nw)achToast(['alb:'+id,'📖','¡Nueva estampa!',`${BOOKS.find(b=>b.ids.includes(id))?.t||'Álbum'}`,null,id,null,'alb']);albDot()}catch(e){}}
 function albUse(id,how){if(!id)return;if(/^[mlprn]20$/.test(id)){albGet(id,'a');return}if(/^[mlprn]\d\d$/.test(id))albGet(id,how)}
@@ -3448,11 +3448,16 @@ const tndSave=()=>{try{localStorage.setItem('mesa-tnd',JSON.stringify({g:TND.g,i
 const tndSet=j=>{if(!j||typeof j.g!=='number')return;TND.g=j.g;TND.inv=j.inv||[];TND.shop=j.shop||TND.shop;TND.gc=j.gc||TND.gc||{};if(j.gp)TND.gp=j.gp;tndSave();try{lobLocks()}catch(e){}tndPaint();
   if(AV&&!avOk(AV)){AV='guerrero';try{localStorage.setItem('mesa-av',AV)}catch(e){}try{pzMe()}catch(e){}}};
 async function tndSync(f){if(!YO||!navigator.onLine||sinNet())return tndPaint();if(!f&&Date.now()-TND.t<20000)return tndPaint();TND.t=Date.now();
-  const j=await nPost('/tienda',{n:YO.n,k:YO.k});if(j&&j.r==='ok')tndSet(j);else tndPaint()}
+  const j=await nPost('/tienda',{n:YO.n,k:YO.k});if(j&&j.r==='ok'){tndSet(j);tndPremios()}else tndPaint()}
 async function tndGanar(win){if(!YO||!navigator.onLine||sinNet())return;if(!S.gid)S.gid=Date.now().toString(36)+Math.random().toString(36).slice(2,7);
   const j=await nPost('/tienda/ganar',{n:YO.n,k:YO.k,id:S.gid,win:win?1:0});if(!j||j.r!=='ok')return;tndSet(j);
   if(j.add>0)setTimeout(()=>{try{gToast(`<img src="tienda/gema.webp" alt="" style="width:26px;vertical-align:middle"> <b>+${j.add} gemas</b>${j.dia?' · ¡primera victoria del día!':''}`,null,null,4500)}catch(e){}},2600)}
 const gemI='<img class="gi" src="tienda/gema.webp" alt="gemas">';
+/* gemas por logros (20) y estampas (5): el servidor paga cada uno una sola vez */
+let TNDP=0;function tndPremios(){clearTimeout(TNDP);TNDP=setTimeout(async()=>{if(!YO||!navigator.onLine||sinNet()||TUT)return;
+  const o=stLoad(),a=Object.keys(o.ach||{}),e=[...new Set([...Object.keys(o.alb||{}),...Object.keys(o.cards||{})])].filter(x=>/^[a-z]\d\d$/.test(x));
+  const j=await nPost('/tienda/premios',{n:YO.n,k:YO.k,a,e});if(!j||j.r!=='ok')return;tndSet(j);
+  if(j.add>0)try{gToast(`<img src="tienda/gema.webp" alt="" style="width:26px;vertical-align:middle"> <b>+${j.add} gemas</b> · ${[j.na?`${j.na} logro${j.na>1?'s':''}`:'',j.ne?`${j.ne} estampa${j.ne>1?'s':''}`:''].filter(Boolean).join(' y ')}`,null,null,4500)}catch(_){}},2500)}
 function tndPaint(){const g=TND.g===null?'…':TND.g;const a=$('#pz-g');if(a)a.textContent=g;const b=$('#tnd-g');if(b)b.textContent=g;const d=$('#tnd');if(d&&d.classList.contains('on'))tndBody()}
 /* el puesto y Don Trueque en la plaza */
 function pzMerc(){if(!PZ.el)return;if(!PZ.el.querySelector('.puesto')){const p=document.createElement('img');p.className='puesto';p.src='tienda/puesto.webp';p.alt='Tienda';PZ.el.appendChild(p)}
@@ -3478,7 +3483,7 @@ function tndOpen(tab){let d=$('#tnd');if(!d){d=document.createElement('div');d.i
         else if(j&&j.r==='pocas'){tndSet(j);tndSay('Mmm… no te alcanzan las gemas.')}
         else{c.disabled=false;tndSay('No pude hablar con el servidor. Inténtalo de nuevo.')}
         tndBody()}})}
-  if(tab)TNDT=tab;d.classList.add('on');tndSay(['¡Bienvenido, aventurero! Todo aquí se paga con gemas, nunca con dinero.','Gana partidas para conseguir gemas: 30 por victoria y 10 aunque pierdas.','La primera victoria del día trae 20 gemas extra. ¡Vuelve mañana!'][Math.floor(Math.random()*3)]);tndBody();tndSync(1)}
+  if(tab)TNDT=tab;d.classList.add('on');tndSay(['¡Bienvenido, aventurero! Todo aquí se paga con gemas, nunca con dinero.','Gana partidas para conseguir gemas: 30 por victoria y 10 aunque pierdas.','La primera victoria del día trae 20 gemas extra. ¡Vuelve mañana!','Cada logro te da 20 gemas y cada estampa nueva, 5.'][Math.floor(Math.random()*4)]);tndBody();tndSync(1)}
 function tndSay(t){const e=$('#tnd-say');if(e)e.textContent=t}
 function tndBody(){const b=$('#tnd-b');if(!b)return;$('#tnd').querySelectorAll('[data-t]').forEach(x=>x.classList.toggle('on',x.dataset.t===TNDT));
   const g=$('#tnd-g');if(g)g.textContent=TND.g===null?'…':TND.g;
