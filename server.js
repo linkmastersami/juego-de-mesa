@@ -77,11 +77,13 @@ const PERF = new Map(); /* código -> { d: perfil, t } (solo en memoria, 30 min)
 const PLAZA = new Map(); /* NOMBRE -> { a: guerrero, t: última vez visto } (solo en memoria) */
 const AVS = ['arquera', 'barbaro', 'guerrero', 'mago', 'ninja', 'paladin', 'bruno', 'robi', 'veralyn'];
 /* ---- tienda: gemas gratis (nunca dinero real). Se guardan junto al nombre ---- */
-const SHOP = { bruno: 150, robi: 150, veralyn: 150 };            /* guerreros a la venta */
+const SHOP = { bruno: 150, robi: 150, veralyn: 150, ninja: 120, paladin: 120 };            /* guerreros a la venta */
 const PREMIUM = Object.keys(SHOP);
 const GEM0 = 100;                                                /* regalo de bienvenida */
 const GWIN = 30, GLOSE = 10, GDAY = 20, GMAXDAY = 400;           /* premios por partida y tope diario */
-const gfix = u => { if (typeof u.g !== 'number') u.g = GEM0; if (!Array.isArray(u.inv)) u.inv = []; return u; };
+const gfix = u => { if (typeof u.g !== 'number') u.g = GEM0; if (!Array.isArray(u.inv)) u.inv = [];
+  if (PREMIUM.includes(u.a) && !u.inv.includes(u.a)) u.inv.push(u.a); /* quien ya lo usaba antes de la tienda se lo queda */
+  return u; };
 const dayKey = () => new Date(Date.now() - 6 * 3600e3).toISOString().slice(0, 10); /* día de México */
 /* aviso a un jugador en particular (todos sus teléfonos registrados) */
 async function pushTo(name, payload) {
@@ -187,7 +189,7 @@ const server = http.createServer((req, res) => {
       res.writeHead(200, { 'Content-Type': 'application/json' });
       const cur = okName(n) && NAMES.get(n);
       if (!cur || cur.h !== hashK(k)) return res.end(JSON.stringify({ r: 'bad' }));
-      const a = AVS.includes(av) && (!PREMIUM.includes(av) || (cur.inv || []).includes(av)) ? av : (cur.a || 'guerrero'), now = Date.now();
+      gfix(cur); const a = AVS.includes(av) && (!PREMIUM.includes(av) || cur.inv.includes(av)) ? av : (cur.a || 'guerrero'), now = Date.now();
       if (!b.bye && AVS.includes(av) && cur.a !== a && (!PREMIUM.includes(a) || (cur.inv || []).includes(a))) { cur.a = a; saveNames(); } /* el aviso de salida no trae guerrero: no se toca */
       LAST.set(n, now); const old = PLAZA.get(n) || {};
       const em = typeof b.e === 'string' && b.e.length <= 28 ? { e: b.e, et: now } : (old.et && now - old.et < 6000 ? { e: old.e, et: old.et } : {});

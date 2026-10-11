@@ -3225,7 +3225,7 @@ if('serviceWorker' in navigator){
 
 /* ===== PLAZA DE LA COMUNIDAD: tu guerrero y los aventureros conectados ahora ===== */
 const AVN={arquera:'Arquera',barbaro:'Bárbaro',guerrero:'Guerrero',mago:'Mago',ninja:'Ninja',paladin:'Paladín',bruno:'Bruno',robi:'Robi',veralyn:'Veralyn'};
-const AVP=['bruno','robi','veralyn']; /* se compran en la tienda */
+const AVP=['bruno','robi','veralyn','ninja','paladin']; /* se compran en la tienda */
 let AV=null;try{AV=localStorage.getItem('mesa-av');if(!AVN[AV])AV=null}catch(e){}
 const avOk=k=>!AVP.includes(k)||TND.inv.includes(k);
 const PZ={w:new Map(),raf:0,last:0,poll:0,total:1,el:null};
