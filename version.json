@@ -146,7 +146,7 @@
   "iconos/i-comunidad.webp": "e5ffa3d48a3e",
   "iconos/i-records.webp": "3f192fdbc183",
   "iconos/i-tableros.webp": "aad177dc6e2d",
-  "index.html": "9f2b98f77643",
+  "index.html": "cd6351279ed6",
   "logo.webp": "c79c21426a47",
   "manifest.json": "81bc7f803d05",
   "musica/batalla.mp3": "292447f839b4",
@@ -201,9 +201,9 @@
   "personajes/personaje 3/p04.webp": "0da1f99c4139",
   "personajes/personaje 3/p05.webp": "4bca26ceccf8",
   "personajes/personaje 3/p06.webp": "2c4ac23a627c",
-  "personajes/personaje 3/p07.webp": "8274b5784d17",
-  "personajes/personaje 3/p08.webp": "b9e28b8e7ac0",
-  "personajes/personaje 3/p09.webp": "1a3e04cdf5b7",
+  "personajes/personaje 3/p07.webp": "385452061f26",
+  "personajes/personaje 3/p08.webp": "a06098c01a46",
+  "personajes/personaje 3/p09.webp": "cdf34abae008",
   "personajes/personaje 3/p10.webp": "fd1f4e701830",
   "personajes/personaje 3/p11.webp": "96087959f116",
   "personajes/personaje 3/p12.webp": "ab1c074f44bf",
@@ -213,8 +213,8 @@
   "personajes/personaje 3/p16.webp": "c17fdb77da14",
   "personajes/personaje 3/p17.webp": "d405c014bb96",
   "personajes/personaje 3/p18.webp": "6b5ac18dbd69",
-  "personajes/personaje 3/p19.webp": "0e676119dd74",
-  "personajes/personaje 3/p20.webp": "f44a8f708a84",
+  "personajes/personaje 3/p19.webp": "6630d50ce229",
+  "personajes/personaje 3/p20.webp": "0ef920939df8",
   "sonidos/amigo.mp3": "a509390a7514",
   "sonidos/carta.mp3": "c8844d91fefd",
   "sonidos/espada.mp3": "19cce4ce7420",
@@ -251,5 +251,5 @@
   "voces/16.mp3": "f67abff52fc8",
   "voces/17.mp3": "e55eb23faa86"
  },
- "version": "ce1057765b3e"
+ "version": "1931fec8b745"
 }

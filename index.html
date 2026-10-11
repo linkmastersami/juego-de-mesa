@@ -1048,7 +1048,7 @@ setTimeout(()=>{if(navigator.onLine&&CANIM&&!sinNet())[...ANIMC].forEach(id=>fet
 let CHAR='m'; /* se elige en el lobby antes de startGame */
 var TUT=null; /* tutorial guiado en curso */
 const ICO=()=>S.personaje==='l'?'⚔️':S.personaje==='p'?'⚡':'🔥'; /* icono propio de cada personaje (hace el papel del fuego) */
-const HSP=(p,id)=>p==='l'?id==='l17':p==='p'?id==='p10':(id==='m08'||id==='m14'); /* cartas que se pueden descartar al inicio del turno */
+const HSP=(p,id)=>p==='l'?id==='l17':p==='p'?(id==='p10'||id==='p07'):(id==='m08'||id==='m14'); /* cartas que se pueden descartar al inicio del turno */
 const PC=()=>S.personaje||'m';
 let COOP=0,MYT=1,COOPDC=null,COOPDK=null,COOPBUSY=0,COOPCONT=null,COOPL11=null,COOPEND=0;
 /* dueño del control de la fase: 'a' = jugador activo, 'f' = el amigo. COOPFX = el amigo está aplicando los efectos de su asistencia. NOSY = no reflejar la ventana al espectador. CMQ = mensajes de la cinemática. */
@@ -1266,6 +1266,7 @@ function openHand(i){const id=S.hand[i];const ex=[];const pfx=S.personaje||'m';
   if(id==='m08')ex.push(['Descartar al inicio del turno: +1 progreso por fuego a un desafío',()=>{discCard(id);const go=()=>pickCh('Elige el desafío',x=>{x.p+=fireDisc()},()=>sweep(()=>close()),null,1);if(S.mesa.includes('k04')&&S.hand.length)pickHand(1,go,1);else go();return 1}]);
   if(id==='p10')ex.push(['Descartar al inicio del turno: +1 progreso por ⚡ a un desafío',()=>{discCard(id);const go=()=>pickCh('Elige el desafío',x=>{x.p+=fireDisc()},()=>sweep(()=>close()),null,1);if(S.mesa.includes('k04')&&S.hand.length)pickHand(1,go,1);else go();return 1}]);
   if(id==='m14')ex.push(['Descartar al inicio del turno: buscar en el mazo',()=>{discCard(id);const go=()=>{SHF=1;ov(null,[],'<p>Toca una carta</p>'+gridOf(S.dM,'data-sc'))};if(S.mesa.includes('k04')&&S.hand.length)pickHand(1,go,1);else go();return 1}]);
+  if(id==='p07')ex.push(['Descartar al inicio del turno: buscar en el mazo',()=>{discCard(id);const go=()=>{SHF=1;ov(null,[],'<p>Toca una carta</p>'+gridOf(S.dM,'data-sc'))};if(S.mesa.includes('k04')&&S.hand.length)pickHand(1,go,1);else go();return 1}]);
   if(id==='l17')ex.push(['Descartar al inicio del turno: descartar un desafío sin progreso',()=>{discCard(id);const go=()=>pickCh('Elige un desafío sin progreso',x=>dropCh(S.cross.indexOf(x)),()=>sweep(()=>close()),null,0,x=>!x.p);if(S.mesa.includes('k04')&&S.hand.length)pickHand(1,go,1);else go();return 1},![1,2,3,4].some(k=>S.cross[k]&&!S.cross[k].p)]);
   ov(id,PICK?ex:[]);
 }
@@ -1801,7 +1802,7 @@ MC.m20=['w',5,0];
 'w11,vr21,va21,rv21,v22,w54,rv52,ra21,w53,w21,w11,w04,av32,r62,w11,ra01,v32,v21'.split(',').forEach((t,i)=>{const m=t.match(/^([a-z]+)(\d)(\d)$/);MC['l'+pad(i+1)]=[m[1],+m[2],+m[3]]});
 /* Personaje 3 (Volti, rayo ⚡): p01-p18 */
 'r52,a21,v31,ra21,av32,v11,a21,w01,w63,r21,w12,rv31,v21,w21,r42,w22,w11,w21'.split(',').forEach((t,i)=>{const m=t.match(/^([a-z]+)(\d)(\d)$/);MC['p'+pad(i+1)]=[m[1],+m[2],+m[3]]});
-MC.p20=['w',0,0]; /* Trueno Máximo: su valor es igual a los ⚡ en descartes (sin límite) */
+MC.p20=['w',2,0]; /* Tormenta total: vale 2 + los ⚡ en descartes (sin límite) */
 MC.l20=['w',0,0]; /* l20: valor 0 a 7 a elección (ver baseV); l12: valor X, no se juega como acción */
 Object.assign(CH,{j02:{c:'n',l:20},j03:{c:'n',l:30},j04:{c:'n',l:25}});
 const LV0=c=>c.id==='j02'?20+5*S.cross.filter(x=>x&&/^g0[1-4]$/.test(x.id)).length:c.id==='j03'?30+5*S.mesa.filter(k=>k[0]==='k').length:CH[c.id].l;
@@ -1830,7 +1831,8 @@ const nSw=()=>S.hand.filter(x=>x!==B.act&&!B.as.includes(x)&&swd(x)).length; /* 
 const noDice=a=>a==='m03'||a==='l04'||a==='l20'||a==='p08'||a==='p20';
 const baseV=()=>{const a=B.act;if(!a)return 0;let v=MC[a][1];
   if(a==='l20')v=B.v20===undefined?7:B.v20;
-  if(a==='l08'||a==='p08')v+=nSw();
+  if(a==='l08')v+=nSw();
+  if(a==='p08')v+=2*nSw(); /* Mente brillante: +2 por cada ⚡ en la mano */
   if(a==='l14'&&(B.p0!==undefined?B.p0:S.cross[B.i].p)>0)v-=4;
   if(l05on())v+=1;
   return v};
@@ -2169,10 +2171,9 @@ function resolve(h,nd){
     if(act==='p02')fx.push(['p02: robar 1 carta',()=>draw(1)]);
     if(act==='p06')fx.push(['p06: añadir 1 de progreso a otro desafío',b=>{pickCh('p06: elige otro desafío (+1 de progreso)',x=>{x.p+=1},b,c,1);return 2}]);
     if(act==='p07'&&S.dM.length)fx.push(['p07: buscar 1 carta en tu mazo y añadirla a tu mano',b=>{ov(null,[...S.dM].sort().map(x=>[x,()=>{S.dM.splice(S.dM.indexOf(x),1);S.hand.push(x);shuf(S.dM);fxShufM();render();b();return 1},0,'',x]),'<p>Elige la carta (luego se baraja el mazo)</p>',1);return 2}]);
-    if(act==='p09')fx.push(['p09: sufrir 2 de daño',()=>hurt(2)]);
+    if(act==='p09')fx.push(['p09: sufrir 1 de daño',()=>hurt(1)]);
     if(act==='p13')fx.push(['p13: recuperar 2 corazones',()=>{S.hp=Math.min(10,S.hp+2)}]);
     if(act==='p17')fx.push(['p17 (elige): activar tu habilidad o regresar un agotamiento activo al mazo',b=>{const km=S.mesa.filter(x=>/^k0[245]$/.test(x));ov('p17',[['Activar la carta de habilidad',()=>{S.hab=1;render();b();return 1}],...(km.length?[['Quitar un agotamiento activo (regresa al mazo)',()=>{ov(null,km.map(x=>[x,()=>{S.mesa.splice(S.mesa.indexOf(x),1);S.dK.push(x);shuf(S.dK);render();fxShufK();b();return 1},0,'',x]),'<p>Elige el agotamiento a quitar</p>',1);return 1}]]:[])],'<p>Elige el efecto</p>',1);return 2}]);
-    if(act==='p20')fx.push(['p20: sufrir 1 de daño',()=>hurt(1)]);
   }
   const w0=c.p+add>=lv;
   if(S.mesa.includes('k02'))fx.push(['k02: elegir entre 1 de daño o quitar 1 de progreso al jefe final',b=>{ov('k02',[['Sufrir 1 de daño',()=>{hurt(1);render();b();return 1}],['Quitar 1 al jefe final',()=>{S.cross[0].p=Math.max(0,S.cross[0].p-1);render();b();return 1}]],'<p>Elige el efecto</p>',1);return 2}]);
@@ -2296,11 +2297,11 @@ async function cine(color,nd,SP){
       const ca=[...$('#cA').children];
       for(let i=0;i<ca.length;i++){const e=ca[i],r=e.getBoundingClientRect();e.style.visibility='hidden';SFX.pop();await cfly(r,e.innerHTML,Ro.getBoundingClientRect(),550);v+=asv[i];popV(Ro,v);const [rx,ry]=ctr(Ro.getBoundingClientRect()),f=big('+'+asv[i],rx,ry-50,30);f.style.color='#fff';f.style.textShadow='0 2px 6px #000';f.style.fontWeight=700;f.animate([{opacity:1,transform:'translate(-50%,-50%)'},{opacity:0,transform:'translate(-50%,-140%)'}],{duration:700,fill:'forwards'}).finished.then(()=>f.remove());await wait(150)}
       if(ca.length)await wait(300)}
-    /* Volti (p19): una vez por turno, si juegas o asistes con una carta ⚡, relanzas 1 dado (p05: 1 relanzamiento extra) */
+    /* Volti (p19): por cada carta ⚡ que juegues o asistas, relanzas 1 dado (p05: 1 relanzamiento extra) */
     const askDie=n=>new Promise(ok=>{const d=document.createElement('div');d.style.cssText='position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 20px);z-index:43;width:min(92vw,360px);display:flex;flex-direction:column;gap:10px;background:#2f2b37;border-radius:18px;padding:14px;text-align:center;box-shadow:0 10px 40px #000a';
       d.innerHTML=`<div>⚡ Volti: ¿relanzar un dado? (${n} disponible${n>1?'s':''})</div><div class="btns">${dice.map((q,i)=>{const f=q.f[q.face];return `<button data-y="${i}" style="background:${COL[f]};color:${f==='blanco'||f==='verde'?'#111':'#fff'}">${i<3?'Dado '+(i+1):'Dado blanco/negro'} · ${f}</button>`}).join('')}<button class="ghost" data-y="-1">No relanzar</button></div>`;
       d.onclick=e=>{const b=e.target.closest('[data-y]');if(!b)return;d.remove();ok(+b.dataset.y)};document.body.appendChild(d)});
-    let RRN=(!SP&&PC()==='p'&&act)?((ico(act,0)||B.as.some(x=>ico(x,1)))?1:0)+(act==='p05'?1:0):0;
+    let RRN=(!SP&&PC()==='p'&&act)?(ico(act,0)?1:0)+B.as.filter(x=>ico(x,1)).length+(act==='p05'?1:0):0; /* un relanzamiento por cada carta ⚡ jugada o asistida */
     const rrDo=async()=>{
       if(SP){for(;;){const m=await cmWait('rr');if(!m||m.stop)return;await roll(color,null,m.faces,m.i);await wait(500)}}
       while(RRN>0){const i=await askDie(RRN);if(i<0)break;RRN--;
