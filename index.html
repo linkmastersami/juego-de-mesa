@@ -1828,7 +1828,7 @@ const p10=()=>'m10'; /* efecto exclusivo del personaje 1 */
 const p17=()=>'m17'; /* efecto exclusivo del personaje 1 */
 const swd=x=>((getFI()[+x.slice(1)-1]||'00')[0]==='1'); /* ¿la carta lleva icono de espada? */
 const nSw=()=>S.hand.filter(x=>x!==B.act&&!B.as.includes(x)&&swd(x)).length; /* espadas que siguen en tu mano */
-const noDice=a=>a==='m03'||a==='l04'||a==='l20'||a==='p08'||a==='p20';
+const noDice=a=>a==='m03'||a==='l04'||a==='l20'||a==='p08';
 const baseV=()=>{const a=B.act;if(!a)return 0;let v=MC[a][1];
   if(a==='l20')v=B.v20===undefined?7:B.v20;
   if(a==='l08')v+=nSw();
@@ -2342,6 +2342,8 @@ async function cine(color,nd,SP){
         return showSkip()};
       rolls=1;if(await l11())skips++;else await tally();
       await wait(400);
+      /* p20 Tormenta total: se lanzan los dados 3 veces y todos los aciertos se suman */
+      if(act==='p20')for(let k=0;k<2;k++){await doRoll();await rrDo();rolls++;if(await l11())skips++;else await tally();await wait(400)}
       /* l18: contra un OBSTÁCULO, una tirada extra gratis cuyos aciertos se suman */
       if(act==='l18'&&TY[c.id]==='O'&&await (SP?cmWait('l18').then(m=>!!(m&&m.go)):askC('l18: ¿volver a lanzar los dados una vez más, gratis? Los nuevos aciertos se suman.','Volver a lanzar','No').then(g=>{cmSend({t:'l18',go:g?1:0});return g}))){
         await doRoll();await rrDo();
