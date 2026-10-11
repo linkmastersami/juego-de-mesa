@@ -257,7 +257,7 @@ const server = http.createServer((req, res) => {
       const me = okName(n) && NAMES.get(n);
       if (!me || me.h !== hashK(k)) return out({ r: 'bad' });
       gfix(me);
-      const st = () => ({ r: 'ok', g: me.g, inv: me.inv, shop: SHOP, gc: me.gc || {}, gp: GPRICE });
+      const st = () => ({ r: 'ok', g: me.g, inv: me.inv, shop: SHOP, gc: me.gc || {}, gp: GPRICE, pa: me.pa || [], pe: me.pe || [] });
       if (url === '/tienda') return out(st());
       /* premio al terminar una partida (cada partida trae su id para no cobrarla dos veces) */
       if (url === '/tienda/ganar') {
