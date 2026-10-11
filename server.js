@@ -75,7 +75,14 @@ async function pushAll(payload, skip) {
 }
 const PERF = new Map(); /* código -> { d: perfil, t } (solo en memoria, 30 min) */
 const PLAZA = new Map(); /* NOMBRE -> { a: guerrero, t: última vez visto } (solo en memoria) */
-const AVS = ['arquera', 'barbaro', 'guerrero', 'mago', 'ninja', 'paladin'];
+const AVS = ['arquera', 'barbaro', 'guerrero', 'mago', 'ninja', 'paladin', 'bruno', 'robi', 'veralyn'];
+/* ---- tienda: gemas gratis (nunca dinero real). Se guardan junto al nombre ---- */
+const SHOP = { bruno: 150, robi: 150, veralyn: 150 };            /* guerreros a la venta */
+const PREMIUM = Object.keys(SHOP);
+const GEM0 = 100;                                                /* regalo de bienvenida */
+const GWIN = 30, GLOSE = 10, GDAY = 20, GMAXDAY = 400;           /* premios por partida y tope diario */
+const gfix = u => { if (typeof u.g !== 'number') u.g = GEM0; if (!Array.isArray(u.inv)) u.inv = []; return u; };
+const dayKey = () => new Date(Date.now() - 6 * 3600e3).toISOString().slice(0, 10); /* día de México */
 /* aviso a un jugador en particular (todos sus teléfonos registrados) */
 async function pushTo(name, payload) {
   const u = NAMES.get(name); if (!pushOn || !u || !Array.isArray(u.ep)) return 0;
@@ -180,8 +187,8 @@ const server = http.createServer((req, res) => {
       res.writeHead(200, { 'Content-Type': 'application/json' });
       const cur = okName(n) && NAMES.get(n);
       if (!cur || cur.h !== hashK(k)) return res.end(JSON.stringify({ r: 'bad' }));
-      const a = AVS.includes(av) ? av : 'guerrero', now = Date.now();
-      if (!b.bye && AVS.includes(av) && cur.a !== a) { cur.a = a; saveNames(); } /* el aviso de salida no trae guerrero: no se toca */
+      const a = AVS.includes(av) && (!PREMIUM.includes(av) || (cur.inv || []).includes(av)) ? av : (cur.a || 'guerrero'), now = Date.now();
+      if (!b.bye && AVS.includes(av) && cur.a !== a && (!PREMIUM.includes(a) || (cur.inv || []).includes(a))) { cur.a = a; saveNames(); } /* el aviso de salida no trae guerrero: no se toca */
       LAST.set(n, now); const old = PLAZA.get(n) || {};
       const em = typeof b.e === 'string' && b.e.length <= 28 ? { e: b.e, et: now } : (old.et && now - old.et < 6000 ? { e: old.e, et: old.et } : {});
       if (b.bye) PLAZA.delete(n); else PLAZA.set(n, { a, t: now, ...em });
@@ -232,6 +239,38 @@ const server = http.createServer((req, res) => {
       const on = m => now - (LAST.get(m) || 0) < 45000;
       const inv = (INV.get(n) || []).filter(x => invOk(x, n) && me.f.includes(x.de));
       return out({ r: 'ok', f: me.f.map(m => ({ n: m, a: (NAMES.get(m) || {}).a || 'guerrero', on: on(m) })).sort((x, y) => (y.on - x.on) || x.n.localeCompare(y.n)), rq: me.rq.slice(), inv: inv.map(x => ({ de: x.de, c: x.c })) });
+    });
+  }
+  if (req.method === 'POST' && url.startsWith('/tienda')) {
+    return readBody(req, b => {
+      const out = o => { res.writeHead(200, { 'Content-Type': 'application/json' }); res.end(JSON.stringify(o)); };
+      const n = b && String(b.n || '').toUpperCase(), k = b && String(b.k || '');
+      const me = okName(n) && NAMES.get(n);
+      if (!me || me.h !== hashK(k)) return out({ r: 'bad' });
+      gfix(me);
+      const st = () => ({ r: 'ok', g: me.g, inv: me.inv, shop: SHOP });
+      if (url === '/tienda') return out(st());
+      /* premio al terminar una partida (cada partida trae su id para no cobrarla dos veces) */
+      if (url === '/tienda/ganar') {
+        const id = String(b.id || '').slice(0, 40), win = !!b.win, d = dayKey();
+        if (!id) return out({ r: 'bad' });
+        if (me.gd !== d) { me.gd = d; me.gn = 0; me.gw = 0; me.gids = []; }
+        if (!Array.isArray(me.gids)) me.gids = [];
+        if (me.gids.includes(id)) return out({ ...st(), add: 0 });
+        let add = win ? GWIN : GLOSE;
+        if (win && !me.gw) { add += GDAY; me.gw = 1; }              /* primera victoria del día */
+        add = Math.max(0, Math.min(add, GMAXDAY - (me.gn || 0)));
+        me.gn = (me.gn || 0) + add; me.g += add; me.gids = [...me.gids, id].slice(-30);
+        saveNames(); return out({ ...st(), add, dia: !!(win && add > GWIN) });
+      }
+      if (url === '/tienda/comprar') {
+        const it = String(b.it || ''), pr = SHOP[it];
+        if (!pr) return out({ r: 'bad' });
+        if (me.inv.includes(it)) return out({ ...st(), r: 'ya' });
+        if (me.g < pr) return out({ ...st(), r: 'pocas' });
+        me.g -= pr; me.inv.push(it); saveNames(); return out(st());
+      }
+      return out({ r: 'bad' });
     });
   }
   if (url === '/health') { res.writeHead(200, { 'Content-Type': 'text/plain' }); return res.end('ok'); }

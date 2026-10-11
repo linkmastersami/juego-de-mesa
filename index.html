@@ -529,6 +529,34 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
 #ov.vicp .vicimg{display:block;max-width:100%;max-height:calc(100dvh - 130px);margin:0 auto;border-radius:16px;box-shadow:0 10px 40px #000a}
 #ov.vicp .btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}#ov.vicp .btns button{margin:0;padding:11px 8px}#ov.vicp .btns button:first-child{grid-column:1/-1;background:linear-gradient(180deg,#ffd34d,#e0a21a);color:#2b1802;font-weight:800}
 
+
+/* ===== tienda ===== */
+.pzbar button.gem{display:flex;align-items:center;gap:5px;background:linear-gradient(180deg,#53e0f0,#1f8fb0);color:#062a33}
+.pzbar button.gem img{width:20px;height:auto}
+.pz .puesto{position:absolute;left:80%;top:26%;height:30%;max-height:150px;transform:translateX(-50%);z-index:540;filter:drop-shadow(0 6px 6px #000a);pointer-events:auto;cursor:pointer}
+.pz .w.npc .nm{background:#1f8fb0e6;color:#fff}
+#tnd{position:fixed;inset:0;z-index:60;display:none;flex-direction:column;background:linear-gradient(180deg,#0d0a14d9,#0d0a1499 40%,#0d0a14ee),url("tienda/fondo.webp") center/cover no-repeat #0d0a14;color:#f3eefc;font-family:Fredoka,sans-serif;padding:calc(env(safe-area-inset-top,0px) + 10px) 12px calc(env(safe-area-inset-bottom,0px) + 12px)}
+#tnd.on{display:flex}
+#tnd .th{display:flex;align-items:center;gap:10px}#tnd .th>b{flex:1;font-size:1.1rem}
+#tnd .x{width:36px;height:36px;border-radius:12px;border:1px solid #ffffff33;background:#2f2b37;color:#fff;font-size:1rem;cursor:pointer}
+#tnd .gp{display:flex;align-items:center;gap:6px;background:#0d0a14cc;border:1px solid #53e0f088;border-radius:14px;padding:4px 12px;font-size:1.05rem}
+.gi{width:20px;height:auto;vertical-align:middle;margin-right:3px}
+#tnd .tm{display:flex;align-items:flex-end;gap:8px;margin:8px 0 6px}#tnd .tm img{width:84px;height:auto;filter:drop-shadow(0 4px 6px #000a)}
+#tnd .tm p{flex:1;margin:0 0 10px;background:#fff8e8;color:#2b1d05;border-radius:14px 14px 14px 4px;padding:8px 12px;font-size:.9rem;line-height:1.3;box-shadow:0 4px 12px #0008}
+#tnd .tt{display:flex;gap:6px;margin-bottom:8px}#tnd .tt button{flex:1;border:0;border-radius:12px;padding:9px 4px;font:700 .85rem Fredoka,sans-serif;background:#2f2b37cc;color:#e9e4f2;cursor:pointer}
+#tnd .tt button.on{background:var(--gold);color:#2b2208}
+#tnd .tb{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding-bottom:6px}
+#tnd .tn{margin:0;font-size:.85rem;color:#e9e4f2;text-align:center;background:#0d0a14b3;border-radius:10px;padding:4px 8px}
+#tnd .tg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+#tnd .ti{display:flex;flex-direction:column;align-items:center;gap:4px;background:#0d0a14cc;border:1px solid #ffffff22;border-radius:14px;padding:8px 4px}
+#tnd .ti.own{border-color:#ffd34d88}#tnd .ti>img{height:96px;max-width:100%;width:auto;object-fit:contain;filter:drop-shadow(0 4px 4px #000a)}#tnd .ti{min-width:0}#tnd .ti .gi{width:18px;height:auto}
+#tnd .ti button{border:0;border-radius:10px;padding:6px 10px;font:700 .82rem Fredoka,sans-serif;background:var(--gold);color:#2b2208;cursor:pointer;display:flex;align-items:center}
+#tnd .ti button.buy{background:linear-gradient(180deg,#53e0f0,#1f8fb0);color:#062a33}#tnd .ti button.usd{background:#2fae5a;color:#fff}
+#tnd .gac{display:flex;gap:10px;align-items:center;background:#0d0a14cc;border-radius:14px;padding:8px}#tnd .gac img{width:96px;height:auto}#tnd .gac p{margin:0;font-size:.82rem;color:#cfc8da}
+#tnd .soon{display:flex;align-items:center;gap:10px;background:#0d0a14b3;border:1px dashed #ffffff33;border-radius:14px;padding:10px 12px;opacity:.9}
+#tnd .soon i{font-style:normal;font-size:1.6rem}#tnd .soon div{flex:1;display:flex;flex-direction:column}#tnd .soon small{color:#cfc8da;font-size:.75rem}
+#tnd .soon span{font-size:.72rem;font-weight:700;color:#ffd34d;background:#2b2208;border-radius:10px;padding:3px 8px;white-space:nowrap}
+#pz-pick .g button.lk{opacity:.75}#pz-pick .g button.lk img{filter:grayscale(.8) brightness(.7)}
 /* ===== menú de opciones ===== */
 #lobby #lob-yo{position:absolute}
 #lobby #lob-exit{position:absolute;top:calc(env(safe-area-inset-top,0px) + 66px);right:18px;z-index:5;display:grid;place-items:center;width:38px;height:38px;border-radius:12px;border:2px solid #ff6b6b55;background:#2a0d12b3;color:#ff8a8a;font-size:1.15rem;line-height:1;cursor:pointer;box-shadow:0 4px 12px #0008;padding:0}
@@ -1450,7 +1478,7 @@ function achCard(id){if(TUT)return;try{if(COOP&&!MYT)return;const r=CREP[id];if(
   albGet(r,'v');{const o2=stLoad();o2.cards=o2.cards||{};if(!o2.cards[r]){o2.cards[r]=1;stSave(o2)}}if(/^g0[1-4]$/.test(id))albGet('g0'+(+id[2]+4));achScan(0)}catch(e){}}
 /* guarda el resultado una sola vez por partida; devuelve logros nuevos y récords */
 function stRecord(win){if(TUT)return;
-  if(S.rec)return null;S.rec=1;
+  if(S.rec)return null;S.rec=1;try{tndGanar(win)}catch(e){}
   const g=liveG(win);
   const o=stLoad();o.g=(o.g||0)+1;if(win)o.w=(o.w||0)+1;
   o.pj=o.pj||{};const p=o.pj[g.pj]=o.pj[g.pj]||{g:0,w:0};p.g++;
@@ -3196,31 +3224,34 @@ if('serviceWorker' in navigator){
 }
 
 /* ===== PLAZA DE LA COMUNIDAD: tu guerrero y los aventureros conectados ahora ===== */
-const AVN={arquera:'Arquera',barbaro:'Bárbaro',guerrero:'Guerrero',mago:'Mago',ninja:'Ninja',paladin:'Paladín'};
+const AVN={arquera:'Arquera',barbaro:'Bárbaro',guerrero:'Guerrero',mago:'Mago',ninja:'Ninja',paladin:'Paladín',bruno:'Bruno',robi:'Robi',veralyn:'Veralyn'};
+const AVP=['bruno','robi','veralyn']; /* se compran en la tienda */
 let AV=null;try{AV=localStorage.getItem('mesa-av');if(!AVN[AV])AV=null}catch(e){}
+const avOk=k=>!AVP.includes(k)||TND.inv.includes(k);
 const PZ={w:new Map(),raf:0,last:0,poll:0,total:1,el:null};
 const pzOn=()=>{try{return lobbyOn()&&LP===3&&!document.hidden}catch(e){return false}};
 function plazaRender(){const P=$('#pn-com');
   if(!PZ.el||!P.contains(PZ.el)){
     P.innerHTML=`<h2 class="ph">🛡️ Comunidad</h2><div class="pz" id="pz"></div>
       <div class="pzem" id="pz-em">${PZEM.map((e,i)=>`<button data-em="${i}">${e}</button>`).join('')}</div>
-      <div class="pzbar"><span class="on" id="pz-n">🟢 En la plaza</span><button id="pz-am">👥 Amigos<b class="pzb" id="pz-amb"></b></button><button id="pz-av" class="gh">🧙 Guerrero</button></div>
+      <div class="pzbar"><span class="on" id="pz-n">🟢 En la plaza</span><button id="pz-am">👥 Amigos<b class="pzb" id="pz-amb"></b></button><button id="pz-av" class="gh">🧙 Guerrero</button><button id="pz-shop" class="gem"><img src="tienda/gema.webp" alt="">Tienda <b id="pz-g"></b></button></div>
       <p class="pzsoon">Toca el suelo para caminar · toca a un aventurero para agregarlo o invitarlo</p>`;
     $('#pz-am').onclick=()=>amgPanel();
     $('#pz-em').onclick=e=>{const b=e.target.closest('[data-em]');if(!b)return;const t=PZEM[+b.dataset.em];const me=PZ.w.get('@me');if(me)pzBub(me,t);PZ.ems=t;PZ.poll=0;pzPoll();try{SFX.pop()}catch(_){}};
     PZ.el=$('#pz');PZ.w.forEach(w=>w.el.remove());PZ.w.clear();
     PZ.el.addEventListener('click',e=>{const me=PZ.w.get('@me');if(!me)return;const r=PZ.el.getBoundingClientRect();
-      {let best=null,bd=1e9;PZ.w.forEach(w=>{if(w.id==='@me')return;const q=w.b.getBoundingClientRect(),cx=q.left+q.width/2;if(e.clientX>q.left-10&&e.clientX<q.right+10&&e.clientY>q.top-10&&e.clientY<q.bottom+6){const d=Math.abs(e.clientX-cx);if(d<bd){bd=d;best=w}}});if(best){amgCard(best.n,best.a);return}}
+      {let best=null,bd=1e9;PZ.w.forEach(w=>{if(w.id==='@me')return;const q=w.b.getBoundingClientRect(),cx=q.left+q.width/2;if(e.clientX>q.left-10&&e.clientX<q.right+10&&e.clientY>q.top-10&&e.clientY<q.bottom+6){const d=Math.abs(e.clientX-cx);if(d<bd){bd=d;best=w}}});if(best){if(best.npc)tndOpen();else amgCard(best.n,best.a);return}}
+      if(e.target.closest('.puesto')){tndOpen();return}
       const x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;me.tx=Math.min(.94,Math.max(.06,x));me.ty=Math.min(.97,Math.max(.5,y));me.wt=0;
       const t=document.createElement('i');t.className='tgt';t.style.left=me.tx*100+'%';t.style.top=me.ty*100+'%';PZ.el.appendChild(t);setTimeout(()=>t.remove(),700)});
-    $('#pz-av').onclick=()=>pzPick();}
-  pzMe();pzCount();if(!AV)setTimeout(()=>{if(pzOn()&&!AV)pzPick()},400);
+    $('#pz-av').onclick=()=>pzPick();$('#pz-shop').onclick=()=>tndOpen();}
+  pzMe();pzMerc();tndSync();pzCount();if(!AV)setTimeout(()=>{if(pzOn()&&!AV)pzPick()},400);
   pzLoop();pzPoll()}
 function pzMe(){const n=YO?YO.n:'Tú',a=AV||'guerrero';let me=PZ.w.get('@me');
   if(me&&(me.a!==a||me.n!==n)){me.el.remove();PZ.w.delete('@me');me=null}
   if(!me)pzAdd('@me',n,a,1)}
-function pzAdd(id,n,a,mine){const el=document.createElement('div');el.className='w in'+(mine?' me':'');
-  el.innerHTML=`<div class="b"><span class="nm"></span><img class="c" alt="" style="display:none" src="guerreros/${a}-camina.webp"><img class="p" alt="" src="guerreros/${a}-parado.webp"><i class="sh"></i></div>`;
+function pzAdd(id,n,a,mine,base){const el=document.createElement('div');el.className='w in'+(mine?' me':'');base=base||'guerreros/'+a;
+  el.innerHTML=`<div class="b"><span class="nm"></span><img class="c" alt="" style="display:none" src="${base}-camina.webp"><img class="p" alt="" src="${base}-parado.webp"><i class="sh"></i></div>`;
   el.querySelector('.nm').textContent=n;PZ.el.appendChild(el);
   const w={id,n,a,el,x:.15+Math.random()*.7,y:mine?.85:.52+Math.random()*.42,tx:0,ty:0,wt:mine?2.5:Math.random()*3,mv:0,fl:0,
     c:el.querySelector('img.c'),p:el.querySelector('img.p'),b:el.querySelector('.b')};w.tx=w.x;w.ty=w.y;PZ.w.set(id,w);pzPos(w);return w}
@@ -3231,7 +3262,7 @@ function pzMode(w,mv){if(w.mv===mv)return;w.mv=mv;w.c.style.display=mv?'':'none'
 function pzLoop(){if(PZ.raf)return;PZ.last=performance.now();
   const f=t=>{if(!pzOn()){PZ.raf=0;return}const dt=Math.min(.1,(t-PZ.last)/1000);PZ.last=t;const r=PZ.el.getBoundingClientRect();if(!r.width){PZ.raf=requestAnimationFrame(f);return}
     PZ.w.forEach(w=>{const dx=(w.tx-w.x)*r.width,dy=(w.ty-w.y)*r.height,dist=Math.hypot(dx,dy);
-      if(dist<2){pzMode(w,0);w.wt-=dt;if(w.wt<=0&&w.id!=='@me'){w.tx=.06+Math.random()*.88;w.ty=.52+Math.random()*.44;w.wt=2+Math.random()*5}
+      if(dist<2){pzMode(w,0);w.wt-=dt;if(w.wt<=0&&w.npc){w.tx=.58+Math.random()*.34;w.ty=.6+Math.random()*.12;w.wt=3+Math.random()*6}else if(w.wt<=0&&w.id!=='@me'){w.tx=.06+Math.random()*.88;w.ty=.52+Math.random()*.44;w.wt=2+Math.random()*5}
         else if(w.wt<=-8&&w.id==='@me'){w.tx=Math.min(.94,Math.max(.06,w.x+(Math.random()-.5)*.4));w.ty=Math.min(.97,Math.max(.52,w.y+(Math.random()-.5)*.3));w.wt=0}}
       else{pzMode(w,1);const sp=(30+40*w.y)*dt*(w.off?.6:w.rps?2.4:1),k=Math.min(1,sp/dist);w.x+=dx*k/r.width;w.y+=dy*k/r.height;const fl=dx<0;
         if(Math.abs(dx)>1&&fl!==w.fl){w.fl=fl;w.c.classList.toggle('fl',fl);w.p.classList.toggle('fl',fl)}if(dist<2)w.wt=w.id==='@me'?0:2+Math.random()*4}
@@ -3254,7 +3285,7 @@ async function pzPoll(){if(!pzOn()||!YO||!navigator.onLine||sinNet())return pzCo
     (j.o||[]).forEach(o=>{if(!AVN[o.a])o.a='guerrero';const id='u:'+o.n;if(seen.has(id))return;seen.add(id);let w=PZ.w.get(id);
       if(w&&w.a!==o.a){w.el.remove();PZ.w.delete(id);w=null}if(!w)w=pzAdd(id,o.n,o.a,0);w.off=1;w.el.classList.add('off')});
     PZ.reg=j.reg||0;
-    PZ.w.forEach((w,id)=>{if(!seen.has(id)){PZ.w.delete(id);w.el.classList.add('out');setTimeout(()=>w.el.remove(),550)}});
+    PZ.w.forEach((w,id)=>{if(!seen.has(id)&&!w.npc){PZ.w.delete(id);w.el.classList.add('out');setTimeout(()=>w.el.remove(),550)}});
   }catch(e){}pzCount()}
 setInterval(()=>{if(pzOn()){pzPoll();pzLoop()}},2000);
 /* sobre de carta que vuela de un guerrero a otro (solicitud de amistad) */
@@ -3286,10 +3317,57 @@ function pzBub(w,t){let b=w.el.querySelector('.bub');if(!b){b=document.createEle
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&YO&&PZ.poll&&navigator.onLine)try{navigator.sendBeacon&&navigator.sendBeacon(MP_URL+'/plaza',new Blob([JSON.stringify({n:YO.n,k:YO.k,bye:1})],{type:'text/plain'}))}catch(e){}});
 function pzPick(){let d=$('#pz-pick');if(!d){d=document.createElement('div');d.id='pz-pick';document.body.appendChild(d)}
   d.innerHTML=`<h3>Elige tu guerrero</h3><p style="margin:0;color:#cfc8da;text-align:center;font-size:.9rem">Así te verán los demás en la plaza</p>
-    <div class="g">${Object.keys(AVN).map(k=>`<button data-av="${k}" class="${k===AV?'sel':''}"><img src="guerreros/${k}.webp" alt="">${AVN[k]}</button>`).join('')}</div><button class="x">${AV?'Cerrar':'Más tarde'}</button>`;
-  d.onclick=e=>{const b=e.target.closest('[data-av]');if(b){AV=b.dataset.av;try{localStorage.setItem('mesa-av',AV)}catch(_){}try{SFX.pop()}catch(_){}d.classList.remove('on');pzMe();PZ.poll=0;pzPoll();return}
+    <div class="g">${Object.keys(AVN).filter(k=>avOk(k)||AVP.includes(k)).map(k=>avOk(k)?`<button data-av="${k}" class="${k===AV?'sel':''}"><img src="guerreros/${k}.webp" alt="">${AVN[k]}</button>`:`<button data-lock="${k}" class="lk"><img src="guerreros/${k}.webp" alt="">🔒 Tienda</button>`).join('')}</div><button class="x">${AV?'Cerrar':'Más tarde'}</button>`;
+  d.onclick=e=>{if(e.target.closest('[data-lock]')){d.classList.remove('on');tndOpen('gue');return}const b=e.target.closest('[data-av]');if(b){AV=b.dataset.av;try{localStorage.setItem('mesa-av',AV)}catch(_){}try{SFX.pop()}catch(_){}d.classList.remove('on');pzMe();PZ.poll=0;pzPoll();return}
     if(e.target.closest('.x')){d.classList.remove('on');if(!AV){AV='guerrero';try{localStorage.setItem('mesa-av',AV)}catch(_){}}}};
   d.classList.add('on')}
+
+
+/* ===== TIENDA DE DON TRUEQUE: gemas gratis (nunca dinero real) que se ganan jugando ===== */
+const TND={g:null,inv:[],shop:{},t:0};
+try{const c=JSON.parse(localStorage.getItem('mesa-tnd')||'null');if(c){TND.g=c.g;TND.inv=c.inv||[];TND.shop=c.shop||{}}}catch(e){}
+const tndSave=()=>{try{localStorage.setItem('mesa-tnd',JSON.stringify({g:TND.g,inv:TND.inv,shop:TND.shop}))}catch(e){}};
+const tndSet=j=>{if(!j||typeof j.g!=='number')return;TND.g=j.g;TND.inv=j.inv||[];TND.shop=j.shop||TND.shop;tndSave();tndPaint();
+  if(AV&&!avOk(AV)){AV='guerrero';try{localStorage.setItem('mesa-av',AV)}catch(e){}try{pzMe()}catch(e){}}};
+async function tndSync(f){if(!YO||!navigator.onLine||sinNet())return tndPaint();if(!f&&Date.now()-TND.t<20000)return tndPaint();TND.t=Date.now();
+  const j=await nPost('/tienda',{n:YO.n,k:YO.k});if(j&&j.r==='ok')tndSet(j);else tndPaint()}
+async function tndGanar(win){if(!YO||!navigator.onLine||sinNet())return;if(!S.gid)S.gid=Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+  const j=await nPost('/tienda/ganar',{n:YO.n,k:YO.k,id:S.gid,win:win?1:0});if(!j||j.r!=='ok')return;tndSet(j);
+  if(j.add>0)setTimeout(()=>{try{gToast(`<img src="tienda/gema.webp" alt="" style="width:26px;vertical-align:middle"> <b>+${j.add} gemas</b>${j.dia?' · ¡primera victoria del día!':''}`,null,null,4500)}catch(e){}},2600)}
+const gemI='<img class="gi" src="tienda/gema.webp" alt="gemas">';
+function tndPaint(){const g=TND.g===null?'…':TND.g;const a=$('#pz-g');if(a)a.textContent=g;const b=$('#tnd-g');if(b)b.textContent=g;const d=$('#tnd');if(d&&d.classList.contains('on'))tndBody()}
+/* el puesto y Don Trueque en la plaza */
+function pzMerc(){if(!PZ.el)return;if(!PZ.el.querySelector('.puesto')){const p=document.createElement('img');p.className='puesto';p.src='tienda/puesto.webp';p.alt='Tienda';PZ.el.appendChild(p)}
+  if(!PZ.w.has('@merc')){const w=pzAdd('@merc','🛒 Don Trueque','merc',0,'tienda/mercader');w.npc=1;w.x=w.tx=.78;w.y=w.ty=.6;w.wt=2;w.el.classList.add('npc');pzPos(w)}}
+let TNDT='gue';
+function tndOpen(tab){let d=$('#tnd');if(!d){d=document.createElement('div');d.id='tnd';document.body.appendChild(d);
+    d.innerHTML=`<div class="th"><button class="x" aria-label="Cerrar">✕</button><b>Tienda de Don Trueque</b><span class="gp">${gemI}<b id="tnd-g">…</b></span></div>
+      <div class="tm"><img src="tienda/mercader.webp" alt=""><p id="tnd-say"></p></div>
+      <div class="tt"><button data-t="gue">🧙 Guerreros</button><button data-t="gac">🎰 Gacha</button><button data-t="mas">✨ Más</button></div>
+      <div class="tb" id="tnd-b"></div>`;
+    d.addEventListener('click',async e=>{if(e.target.closest('.x')){d.classList.remove('on');return}
+      const t=e.target.closest('[data-t]');if(t){TNDT=t.dataset.t;try{SFX.pop()}catch(_){}tndBody();return}
+      const u=e.target.closest('[data-use]');if(u){AV=u.dataset.use;try{localStorage.setItem('mesa-av',AV)}catch(_){}try{SFX.pop();pzMe()}catch(_){}PZ.poll=0;pzPoll();tndSay(`¡${AVN[AV]} te queda de maravilla!`);tndBody();return}
+      const c=e.target.closest('[data-buy]');if(c){const it=c.dataset.buy,pr=TND.shop[it]||0;
+        if(!YO)return tndSay('Primero registra tu nombre de aventurero y luego hablamos de negocios.');
+        if((TND.g||0)<pr)return tndSay(`Te faltan ${pr-(TND.g||0)} gemas. ¡Gana partidas y vuelve pronto!`);
+        if(c.dataset.ok!=='1'){c.dataset.ok='1';c.innerHTML=`¿Seguro? ${gemI}${pr}`;setTimeout(()=>{if(c.isConnected&&c.dataset.ok==='1'){c.dataset.ok='';c.innerHTML=`${gemI}${pr}`}},3000);return}
+        c.disabled=true;const j=await nPost('/tienda/comprar',{n:YO.n,k:YO.k,it});
+        if(j&&j.r==='ok'){tndSet(j);try{SFX.fanfare()}catch(_){}tndSay(`¡Trato hecho! ${AVN[it]} ya es tuyo. Tócalo para usarlo en la plaza.`)}
+        else if(j&&j.r==='pocas'){tndSet(j);tndSay('Mmm… no te alcanzan las gemas.')}
+        else{c.disabled=false;tndSay('No pude hablar con el servidor. Inténtalo de nuevo.')}
+        tndBody()}})}
+  if(tab)TNDT=tab;d.classList.add('on');tndSay(['¡Bienvenido, aventurero! Todo aquí se paga con gemas, nunca con dinero.','Gana partidas para conseguir gemas: 30 por victoria y 10 aunque pierdas.','La primera victoria del día trae 20 gemas extra. ¡Vuelve mañana!'][Math.floor(Math.random()*3)]);tndBody();tndSync(1)}
+function tndSay(t){const e=$('#tnd-say');if(e)e.textContent=t}
+function tndBody(){const b=$('#tnd-b');if(!b)return;$('#tnd').querySelectorAll('[data-t]').forEach(x=>x.classList.toggle('on',x.dataset.t===TNDT));
+  const g=$('#tnd-g');if(g)g.textContent=TND.g===null?'…':TND.g;
+  const soon=(ic,t,d)=>`<div class="soon"><i>${ic}</i><div><b>${t}</b><small>${d}</small></div><span>Próximamente</span></div>`;
+  if(!YO){b.innerHTML=`<p class="tn">📜 Registra tu nombre de aventurero para guardar tus gemas.</p>`;return}
+  if(TNDT==='gue'){b.innerHTML=`<p class="tn">Guerreros para pasear por la plaza. Los demás te verán con él.</p><div class="tg">${AVP.map(k=>{const own=TND.inv.includes(k),pr=TND.shop[k]||150;
+      return `<div class="ti${own?' own':''}"><img src="guerreros/${k}.webp" alt=""><b>${AVN[k]}</b>${own?(AV===k?'<button class="usd" disabled>✔ Usando</button>':`<button data-use="${k}">Usar</button>`):`<button class="buy" data-buy="${k}">${gemI}${pr}</button>`}</div>`}).join('')}</div>`;return}
+  if(TNDT==='gac'){b.innerHTML=`<div class="gac"><img src="tienda/gacha.webp" alt=""><p>Cada tirada da una carta al azar del mazo. Las repetidas se vuelven orbes que suben la suerte de sacar una nueva. ¡Completa el mazo para jugar con él!</p></div>
+      ${soon('🤖','Robi, el niño robot','Gacha de personaje')}${soon('🚀','Nova, la cazadora estelar','Gacha de personaje')}${soon('👻','La Mansión Embrujada','Gacha de calabozo')}`;return}
+  b.innerHTML=`${soon('🂠','Reversos de cartas','Cambia el diseño de atrás de tus cartas')}${soon('🖼️','Marcos','Un marco especial para tu perfil')}${soon('🗺️','Tableros','Fondos nuevos para tus partidas')}${soon('😄','Emojis y frases','Más reacciones para la plaza')}${soon('🏷️','Títulos','Un título bajo tu nombre')}${soon('🎁','Regalos','Envía gemas a tus amigos')}`}
 
 /* ===== eliminar el perfil por completo: nombre, progreso, logros, álbum, partida guardada… y empezar como jugador nuevo ===== */
 $('#o-del').addEventListener('click',()=>{let d=$('#delp');if(!d){d=document.createElement('div');d.id='delp';document.body.appendChild(d)}let step=0;
