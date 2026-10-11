@@ -581,6 +581,33 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
 #gch .gbt{display:flex;gap:8px}#gch .gmsg button{border:0;border-radius:12px;padding:9px 16px;font:700 .9rem Fredoka,sans-serif;background:#2f2b37;color:#fff;cursor:pointer;display:flex;align-items:center;gap:4px}
 #gch .gmsg button[data-otra]{background:linear-gradient(180deg,#ffd34d,#e0a21a);color:#2b1802}
 .lob-char.lk .card-wrap{filter:grayscale(.85) brightness(.55)}.lob-char.lk .char-name::after{content:' 🔒'}
+
+#tnd .gs2{display:flex;gap:10px;align-items:stretch;background:#0d0a14cc;border:1px solid #ffffff22;border-radius:14px;padding:10px}
+#tnd .gs2.own{border-color:#2fae5a88}
+#tnd .gs2 .gpj{width:34%;max-width:130px;aspect-ratio:696/1015;object-fit:cover;border-radius:9px;align-self:center;box-shadow:0 6px 16px #000a}
+#tnd .gs2 .grt{flex:1;display:flex;flex-direction:column;gap:7px;min-width:0}
+#tnd .gs2 .grt>b{font-size:1rem;line-height:1.15}#tnd .gs2 small{color:#cfc8da;font-size:.78rem}
+#tnd .gver{border:1px solid #ffffff33;border-radius:12px;padding:8px;font:700 .85rem Fredoka,sans-serif;background:#2f2b37;color:#e9e4f2;cursor:pointer}
+#gcol{position:fixed;inset:0;z-index:66;display:none;align-items:center;justify-content:center;background:#000b;padding:14px}#gcol.on{display:flex}
+#gcol .bx{width:min(100%,460px);max-height:100%;overflow-y:auto;background:#1d1828;border:1px solid #ffffff22;border-radius:18px;padding:12px;color:#f3eefc;font-family:Fredoka,sans-serif}
+#gcol .hd{display:flex;align-items:center;gap:8px;margin-bottom:10px}#gcol .hd b{flex:1}#gcol .hd span{color:#ffd34d;font-weight:700}
+#gcol .x{width:34px;height:34px;border-radius:10px;border:0;background:#2f2b37;color:#fff;cursor:pointer}
+#gcol .gr{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+#gcol .gr img,#gcol .gr span{width:100%;aspect-ratio:696/1015;border-radius:6px;object-fit:cover}
+#gcol .gr span{display:grid;place-items:center;background:#ffffff10;color:#ffffff55;font-size:1.3rem;border:1px dashed #ffffff22}
+#gcol p{font-size:.78rem;color:#cfc8da;text-align:center;margin:10px 0 0}
+#gch .gsp{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+#gch .gsp i{position:absolute;width:calc(10px*var(--s));height:calc(10px*var(--s));background:radial-gradient(circle,#fff 0,#ffe08a 35%,transparent 70%);border-radius:50%;opacity:0;animation:gtw 2s ease-in-out infinite}
+#gch .gsp i::before,#gch .gsp i::after{content:'';position:absolute;left:50%;top:50%;width:300%;height:2px;background:linear-gradient(90deg,transparent,#fff8,transparent);transform:translate(-50%,-50%)}
+#gch .gsp i::after{transform:translate(-50%,-50%) rotate(90deg)}
+@keyframes gtw{0%,100%{opacity:0;transform:scale(.3)}50%{opacity:1;transform:scale(1.2)}}
+#gch .gray{position:absolute;left:50%;top:42%;width:160vmax;height:160vmax;transform:translate(-50%,-50%);pointer-events:none;background:repeating-conic-gradient(from 0deg,#ffd34d22 0 8deg,transparent 8deg 20deg);animation:grot 18s linear infinite;-webkit-mask:radial-gradient(circle,#000 0,transparent 55%);mask:radial-gradient(circle,#000 0,transparent 55%)}
+@keyframes grot{to{transform:translate(-50%,-50%) rotate(360deg)}}
+#gch .gcard,#gch .gmsg{position:relative;z-index:1}
+#gch .gbeat{animation:gbeat 1.3s ease-in-out .8s infinite}
+#gch .gbeat img{animation:gglow 1.3s ease-in-out .8s infinite}
+@keyframes gbeat{0%,100%{transform:scale(1)}15%{transform:scale(1.06)}30%{transform:scale(.99)}45%{transform:scale(1.035)}60%{transform:scale(1)}}
+@keyframes gglow{0%,100%{box-shadow:0 0 0 2px #ffd34d,0 0 22px 4px #ffd34d88,0 10px 40px #000c}20%{box-shadow:0 0 0 3px #fff3c4,0 0 50px 14px #ffd34dcc,0 10px 40px #000c}}
 /* ===== menú de opciones ===== */
 #lobby #lob-yo{position:absolute}
 #lobby #lob-exit{position:absolute;top:calc(env(safe-area-inset-top,0px) + 66px);right:18px;z-index:5;display:grid;place-items:center;width:38px;height:38px;border-radius:12px;border:2px solid #ff6b6b55;background:#2a0d12b3;color:#ff8a8a;font-size:1.15rem;line-height:1;cursor:pointer;box-shadow:0 4px 12px #0008;padding:0}
@@ -3440,6 +3467,7 @@ function tndOpen(tab){let d=$('#tnd');if(!d){d=document.createElement('div');d.i
       const t=e.target.closest('[data-t]');if(t){TNDT=t.dataset.t;try{SFX.pop()}catch(_){}tndBody();return}
       const om=e.target.closest('[data-om],[data-op]');if(om){const k=om.dataset.om||om.dataset.op,x=TND.gc[k]||{o:0};GOR[k]=Math.max(0,Math.min(5,x.o||0,(GOR[k]||0)+(om.dataset.op?1:-1)));try{SFX.tick()}catch(_){}tndBody();return}
       const tr=e.target.closest('[data-tir]');if(tr){gchTirar(tr.dataset.tir);return}
+      const vr=e.target.closest('[data-ver]');if(vr){gchVer(vr.dataset.ver);return}
       const u=e.target.closest('[data-use]');if(u){AV=u.dataset.use;try{localStorage.setItem('mesa-av',AV)}catch(_){}try{SFX.pop();pzMe()}catch(_){}PZ.poll=0;pzPoll();tndSay(`¡${AVN[AV]} te queda de maravilla!`);tndBody();return}
       const c=e.target.closest('[data-buy]');if(c){const it=c.dataset.buy,pr=TND.shop[it]||0;
         if(!YO)return tndSay('Primero registra tu nombre de aventurero y luego hablamos de negocios.');
@@ -3458,36 +3486,45 @@ function tndBody(){const b=$('#tnd-b');if(!b)return;$('#tnd').querySelectorAll('
   if(!YO){b.innerHTML=`<p class="tn">📜 Registra tu nombre de aventurero para guardar tus gemas.</p>`;return}
   if(TNDT==='gue'){b.innerHTML=`<p class="tn">Guerreros para pasear por la plaza. Los demás te verán con él.</p><div class="tg">${AVP.map(k=>{const own=TND.inv.includes(k),pr=TND.shop[k]||150;
       return `<div class="ti${own?' own':''}"><img src="guerreros/${k}.webp" alt=""><b>${AVN[k]}</b>${own?(AV===k?'<button class="usd" disabled>✔ Usando</button>':`<button data-use="${k}">Usar</button>`):`<button class="buy" data-buy="${k}">${gemI}${pr}</button>`}</div>`}).join('')}</div>`;return}
-  if(TNDT==='gac'){b.innerHTML=`<div class="gac"><img src="tienda/gacha.webp" alt=""><p>Cada tirada cuesta ${gemI}${TND.gp} y da una carta al azar del mazo. Las repetidas se vuelven <b>orbes</b>: úsalos para subir la suerte de sacar una nueva (1 orbe = 20 %, 5 = 100 %). ¡Completa el mazo para jugar con él!</p></div>
+  if(TNDT==='gac'){b.innerHTML=`<div class="gac"><img src="tienda/gacha.webp" alt=""><p>Cada tirada da una carta al azar. Las repetidas dan <b>🔮 orbes</b>: cada uno sube 20 % la suerte de sacar una nueva. ¡Completa el mazo para jugar con él!</p></div>
       ${Object.keys(GSET).map(k=>{const G=GSET[k],x=TND.gc[k]||{c:[],o:0},n=(x.c||[]).length,own=TND.inv.includes('pj:'+k);
-        if(own)return `<div class="gs own"><i>${G.ic}</i><div><b>${G.nm}</b><small>✔ Mazo completo · ya puedes jugar con él</small></div></div>`;
         const o=Math.min(GOR[k]||0,x.o||0,5),pr=Math.round(Math.max((18-n)/18,o*.2)*100);
-        return `<div class="gs"><div class="gh"><i>${G.ic}</i><div><b>${G.nm}</b><small>${n} de 18 cartas · ${x.o||0} orbe${x.o===1?'':'s'}</small></div></div>
-          <div class="gbar"><span style="width:${n/18*100}%"></span></div>
-          <div class="gmini">${Array.from({length:18},(_,i)=>{const id=k+String(i+1).padStart(2,'0');return (x.c||[]).includes(id)?`<img src="${imgSrc(id)}" alt="">`:'<span>?</span>'}).join('')}</div>
-          <div class="grow"><span class="gorb">🔮 Orbes a usar <button data-om="${k}">−</button><b>${o}</b><button data-op="${k}">+</button></span><span class="gpr">Carta nueva: <b>${pr} %</b></span></div>
-          <button class="gtir" data-tir="${k}">Tirar ${gemI}${TND.gp}</button></div>`}).join('')}
+        return `<div class="gs2${own?' own':''}"><img class="gpj" src="${imgSrc(k+'19')}" alt="">
+          <div class="grt"><b>${G.ic} ${G.nm}</b><small>${own?'✔ Mazo completo · ya puedes jugar':`${n} de 18 cartas · 🔮 ${x.o||0} orbe${x.o===1?'':'s'}`}</small>
+            <div class="gbar"><span style="width:${n/18*100}%"></span></div>
+            ${own?'':`<div class="grow"><span class="gorb">🔮 <button data-om="${k}">−</button><b>${o}</b><button data-op="${k}">+</button></span><span class="gpr">Nueva: <b>${pr} %</b></span></div>
+            <button class="gtir" data-tir="${k}">Tirar ${gemI}${TND.gp}</button>`}
+            <button class="gver" data-ver="${k}">🃏 Ver cartas (${n}/18)</button></div></div>`}).join('')}
       ${soon('👻','La Mansión Embrujada','Gacha de calabozo')}`;return}
   b.innerHTML=`${soon('🂠','Reversos de cartas','Cambia el diseño de atrás de tus cartas')}${soon('🖼️','Marcos','Un marco especial para tu perfil')}${soon('🗺️','Tableros','Fondos nuevos para tus partidas')}${soon('😄','Emojis y frases','Más reacciones para la plaza')}${soon('🏷️','Títulos','Un título bajo tu nombre')}${soon('🎁','Regalos','Envía gemas a tus amigos')}`}
 
 
+/* colección del gacha en su propia ventana */
+function gchVer(k){let d=$('#gcol');if(!d){d=document.createElement('div');d.id='gcol';document.body.appendChild(d);
+    d.addEventListener('click',e=>{if(e.target.closest('.x')||e.target===d){d.classList.remove('on');return}const c=e.target.closest('[data-cv]');if(c)ov(c.dataset.cv,[])})}
+  const x=TND.gc[k]||{c:[]},G=GSET[k];
+  d.innerHTML=`<div class="bx"><div class="hd"><b>${G.ic} ${G.nm}</b><span>${(x.c||[]).length} de 18</span><button class="x">✕</button></div>
+    <div class="gr">${Array.from({length:18},(_,i)=>{const id=k+String(i+1).padStart(2,'0');return (x.c||[]).includes(id)?`<img data-cv="${id}" src="${imgSrc(id)}" alt="">`:'<span>?</span>'}).join('')}</div>
+    <p>Al completar las 18 cartas recibes también su carta de personaje y su habilidad.</p></div>`;d.classList.add('on')}
+let GVIC=null;const gchVicStop=()=>{try{if(GVIC){GVIC.pause();GVIC=null}}catch(e){}};
 /* tirada del gacha: la máquina gira, sale el pergamino y aparece la carta */
 async function gchTirar(k){if(!YO)return tndSay('Primero registra tu nombre de aventurero.');
   if((TND.g||0)<TND.gp)return tndSay(`Te faltan ${TND.gp-(TND.g||0)} gemas para una tirada. ¡Juega y vuelve!`);
   const o=Math.min(GOR[k]||0,(TND.gc[k]||{}).o||0,5);
   let d=$('#gch');if(!d){d=document.createElement('div');d.id='gch';document.body.appendChild(d)}
-  d.innerHTML=`<video id="gch-v" src="tienda/gacha.m4v" playsinline preload="auto"></video><div class="gres" id="gch-r"></div><p class="gskip">Toca para saltar</p>`;d.classList.add('on');
+  gchVicStop();d.innerHTML=`<video id="gch-v" src="tienda/gacha.m4v" playsinline preload="auto"></video><div class="gres" id="gch-r"></div><p class="gskip">Toca para saltar</p>`;d.classList.add('on');
   const v=$('#gch-v');try{musDuck(1)}catch(_){}v.playbackRate=1.6;v.volume=Math.min(1,(SND||0)/10);if(!SND)v.muted=true;
   const req=nPost('/tienda/gacha',{n:YO.n,k:YO.k,s:k,o});let shown=0;
   const show=async()=>{if(shown)return;shown=1;const j=await req;d.querySelector('.gskip').style.display='none';const r=$('#gch-r');
     if(!j||j.r!=='ok'){try{v.pause()}catch(_){}r.innerHTML=`<div class="gmsg"><b>${j&&j.r==='pocas'?'No te alcanzan las gemas':'No se pudo hacer la tirada'}</b><button data-x>Cerrar</button></div>`;if(j)tndSet(j);r.classList.add('on');return}
     GOR[k]=0;tndSet(j);const G=GSET[k];
-    r.innerHTML=`<div class="gcard${j.nuevo?' nw':''}"><img src="${imgSrc(j.card)}" alt=""></div>
+    r.innerHTML=`<div class="gsp">${Array.from({length:26},()=>`<i style="left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${(Math.random()*2).toFixed(2)}s;--s:${(.5+Math.random()*1.2).toFixed(2)}"></i>`).join('')}</div><div class="gray"></div>
+      <div class="gcard${j.nuevo?' nw':''}"><div class="gbeat"><img src="${imgSrc(j.card)}" alt=""></div></div>
       <div class="gmsg"><b>${j.nuevo?'✨ ¡Carta nueva!':'Repetida · +1 orbe 🔮'}</b>${j.fin?`<p>🎉 ¡Completaste el mazo! Ya puedes jugar con <b>${G.nm}</b>.${j.extra?` Tus orbes sobrantes se volvieron ${gemI}${j.extra}.`:''}</p>`:`<p>${(j.gc[k].c||[]).length} de 18 cartas</p>`}
       <div class="gbt">${j.fin?'':`<button data-otra="${k}">Otra ${gemI}${TND.gp}</button>`}<button data-x>Listo</button></div></div>`;
-    r.classList.add('on');try{j.nuevo?SFX.fanfare():SFX.pop()}catch(_){}try{albGet&&albGet(j.card,'v')}catch(_){}};
+    r.classList.add('on');try{if(SND){const a=new Audio('musica/victoria.mp3');a.loop=false;a.volume=Math.min(1,SND/10*.8);a.play().catch(()=>{});GVIC=a}else{j.nuevo?SFX.fanfare():SFX.pop()}}catch(_){}try{albGet&&albGet(j.card,'v')}catch(_){}};
   v.ontimeupdate=()=>{if(v.currentTime>=8.6)show()};v.onended=show;v.onerror=show;
-  d.onclick=e=>{if(e.target.closest('[data-x]')){d.classList.remove('on');try{v.pause()}catch(_){}try{musDuck(0)}catch(_){}tndBody();return}
+  d.onclick=e=>{if(e.target.closest('[data-x]')){d.classList.remove('on');gchVicStop();try{v.pause()}catch(_){}try{musDuck(0)}catch(_){}tndBody();return}
     const ot=e.target.closest('[data-otra]');if(ot){gchTirar(ot.dataset.otra);return}
     if(!shown&&v.currentTime<8.4){try{v.currentTime=8.4}catch(_){}}};
   try{await v.play()}catch(_){show()}}
