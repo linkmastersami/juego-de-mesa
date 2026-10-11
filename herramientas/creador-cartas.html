@@ -209,8 +209,8 @@
 
     <label for="type">Tipo de carta</label>
     <select id="type">
-      <option value="seeker">Seeker (skill card)</option>
-      <option value="well">Desafío (Well Master)</option>
+      <option value="seeker">Personaje</option>
+      <option value="well">Enfrentamiento</option>
       <option value="exhausted">Agotamiento</option>
     </select>
 
@@ -218,13 +218,13 @@
     <input type="text" id="name" placeholder="Ej: Fireball">
 
     <div id="challengeTypeWrap" style="display:none;">
-      <label for="rank">Rango del desafío</label>
+      <label for="rank">Rango del enfrentamiento</label>
       <select id="rank">
         <option value="">Normal</option>
         <option value="Guardián">Guardián</option>
         <option value="Jefe final">Jefe final</option>
       </select>
-      <label for="challengeType">Tipo de desafío</label>
+      <label for="challengeType">Tipo de enfrentamiento</label>
       <select id="challengeType">
         <option value="">Sin especificar</option>
         <option value="Combate">Combate</option>
@@ -439,7 +439,7 @@ function update(){
   $('challengeTypeWrap').style.display = isWell ? 'block' : 'none';
   $('fsIcon2').style.display = isWell ? 'block' : 'none';
 
-  $('valueLegendText').textContent = isWell ? 'Dificultad y color indicador' : 'Valor y color indicador';
+  $('valueLegendText').textContent = isWell ? 'Puntos de vida y color indicador' : 'Valor y color indicador';
   $('valueLabelText').textContent = isWell ? 'Dificultad' : 'Valor';
   $('icon1LegendText').textContent = isWell ? 'Icono de recompensa (opcional)' : 'Icono de efecto (opcional)';
   $('icon1LabelText').textContent = isWell ? 'Número, +/- y emoticón de la recompensa' : 'Número, +/- y emoticón del icono';
@@ -493,7 +493,7 @@ function update(){
   $('cType').textContent = tyTxt;
   $('cGemA').style.display = valueOn.checked ? 'flex' : 'none';
   $('cLabA').style.display = valueOn.checked ? 'block' : 'none';
-  $('cLabA').textContent = isWell ? 'DIFICULTAD' : 'ACCIÓN';
+  $('cLabA').textContent = isWell ? 'VIDA' : 'PODER';
   $('cLabB').style.display = boostOn.checked ? 'block' : 'none';
   $('cBonus').style.display = (!isWell && $('bonusTy').value) ? 'block' : 'none';
   $('cBonus').textContent = '+3 vs ' + $('bonusTy').value.toUpperCase();
