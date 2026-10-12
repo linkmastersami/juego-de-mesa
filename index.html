@@ -824,6 +824,10 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
 #tut{position:fixed;inset:0;z-index:6;pointer-events:none;display:none}
 #tut.on{display:block}
 #tut svg{position:absolute;inset:0;width:100%;height:100%}
+#tut.hi{z-index:46}#tut.in svg{display:none}
+#tutsc{position:absolute;left:0;right:0;top:calc(env(safe-area-inset-top,0px) + 14px);display:flex;flex-wrap:wrap;justify-content:center;gap:8px;padding:0 12px}#tutsc:empty{display:none}
+#tutsc img{width:min(58vw,270px);aspect-ratio:696/1015;border-radius:10px;box-shadow:0 10px 30px #000c;animation:tpop .3s cubic-bezier(.2,.9,.3,1.3)}
+#tutsc.n img{width:min(29vw,150px)}#tutsc.n5 img{width:min(28vw,118px)}
 #tut .tring{position:absolute;border:3px solid #ffd34d;border-radius:14px;box-shadow:0 0 18px #ffd34daa,inset 0 0 12px #ffd34d55;animation:tring 1.1s ease-in-out infinite alternate;transition:all .3s cubic-bezier(.2,.8,.3,1)}
 @keyframes tring{to{box-shadow:0 0 30px #ffd34d,inset 0 0 18px #ffd34d88;border-color:#fff3b0}}
 #tut .tbub{position:absolute;left:50%;transform:translateX(-50%);width:min(94vw,440px);display:flex;gap:10px;align-items:flex-end;pointer-events:auto;transition:top .3s,bottom .3s}
@@ -1011,7 +1015,7 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
   <div class="sdecks">
     <div>Personaje<div class="deck" data-dk="M" id="dM"></div></div>
     <div>Sombras<div class="deck" data-dk="K" id="dK"></div></div>
-    <div>Calabozo<div class="deck" data-dk="C" id="dC"></div></div>
+    <div>Torre<div class="deck" data-dk="C" id="dC"></div></div>
   </div>
   <div class="piles">
     <div data-pile="disc">Descartes torre<div class="deck" id="pDisc"></div></div>
@@ -2617,10 +2621,12 @@ function startGame(){
   $('#bt').classList.remove('on');$('#sh-st').classList.remove('on');$('#tTurn').textContent='Turno';hits.textContent='';
   SL=1;INTRO=1;render();
   fxPlay(async L=>{try{
-    await jShuf('m',1)(L);                                   /* 1) barajar mazo de personaje */
-    const h=S.dM.splice(-hN());S.hand=h;render();await jDraw(h,1)(L);   /* 2) 8 cartas a la mano */
-    await jShuf('k',1)(L);await jShuf('c',1)(L);                                   /* 3) barajar mazo de calabozo */
-    const t=S.dC.length;for(let k=0;k<2;k++)S.disc.push(S.dC.pop());SL=0;render();await jDd(2,t)(L);  /* 4) descartar 2 */
+    /* en el tutorial, el Búho narra cada paso y espera a que toques «Siguiente» */
+    const tw=async n=>{if(TUT)await tutWait(n)};
+    await tw(1);await jShuf('m',1)(L);await tw(2);                  /* 1) barajar mazo de personaje */
+    const h=S.dM.splice(-hN());S.hand=h;render();await jDraw(h,1)(L);await tw(3);   /* 2) 8 cartas a la mano */
+    await jShuf('k',1)(L);await tw(4);await jShuf('c',1)(L);await tw(5);           /* 3) barajar sombras y torre */
+    const t=S.dC.length;for(let k=0;k<2;k++)S.disc.push(S.dC.pop());SL=0;render();await jDd(2,t)(L);await tw(6);  /* 4) descartar 2 */
   }catch(e){}finally{SL=0;render()}});                       /* 5) autoFill pone 4 enfrentamientos en la cruz y luego sale TURNO 1 */
 }
 
@@ -3600,8 +3606,8 @@ function byeGo(){window.BYE=1;try{vzStop()}catch(e){}try{document.querySelectorA
 
 /* ===== TUTORIAL GUIADO: el Búho enseña a jugar con una partida de práctica arreglada (Mario) ===== */
 const OWL='<img src="guia/buho.webp" alt="" onerror="this.replaceWith(document.createTextNode(\'🦉\'))">';
-document.body.insertAdjacentHTML('beforeend',`<div id="tut"><svg><defs><mask id="tutm"><rect width="100%" height="100%" fill="#fff"/><g id="tuth"></g></mask></defs><rect width="100%" height="100%" fill="#05030aa8" mask="url(#tutm)"/></svg><div id="tutr"></div><div class="tbub bot" id="tutb"></div><div class="thand" id="tutp">👆</div></div><div id="tutq"></div>`);
-/* partida arreglada: mano y desafíos fijos (Mario) */
+document.body.insertAdjacentHTML('beforeend',`<div id="tut"><div id="tutsc"></div><svg><defs><mask id="tutm"><rect width="100%" height="100%" fill="#fff"/><g id="tuth"></g></mask></defs><rect width="100%" height="100%" fill="#05030aa8" mask="url(#tutm)"/></svg><div id="tutr"></div><div class="tbub bot" id="tutb"></div><div class="thand" id="tutp">👆</div></div><div id="tutq"></div>`);
+/* partida arreglada: mano y enfrentamientos fijos (Bruno) */
 function tutDeck(){const H=['m16','m02','m12','m09','m06','m15','m11','m17'],R=['t16','t10'],C=['t28','t02','t15','t30'],D=['t09','t18'],A=[...R,...C,...D];
   /* se saca desde el final: D = 2 descartes iniciales, C = 4 desafíos, R = 1 que descarta la recompensa y el que rellena el hueco */
   S.dM=S.dM.filter(x=>!H.includes(x)).concat(H);S.dC=S.dC.filter(x=>!A.includes(x)).concat(A)}
@@ -3610,37 +3616,73 @@ const tutIdle=()=>!B&&!CAD&&PICK&&!CINE&&!RUNFX&&!RES2&&!INTRO&&!SL&&!boardBusy(
 /* dados: h aciertos exactos para el color del desafío */
 function tutRig(h){const cf={verde:0,rojo:1,azul:2}[COLN[col()]],miss=[0,1,2].find(k=>k!==cf);const F=[0,1,2].map(k=>k<Math.min(h,3)?cf:miss);F.push(h>3?0:1);TUT.dice=[F]}
 const el=s=>typeof s==='string'?$(s):s;
+/* partes de una carta (en % de la carta) para iluminarlas una por una */
+const TPART={nom:[.07,.03,.93,.15],pen:[.08,.155,.28,.265],rec:[.72,.155,.93,.265],vida:[.02,.52,.29,.715],asis:[.71,.52,.98,.715],ico:[.72,.155,.93,.265],efe:[.04,.705,.96,.955],todo:[0,0,1,1]};
+const tutPart=(k,n=0)=>{const e=document.querySelectorAll('#tutsc img')[n];if(!e)return null;const [a,b,c,d]=TPART[k];return {getBoundingClientRect:()=>{const r=e.getBoundingClientRect();return {left:r.left+r.width*a,top:r.top+r.height*b,width:r.width*(c-a),height:r.height*(d-b)}}}};
+const tutShowAll=()=>document.querySelectorAll('#tutsc img');
+const tutWait=n=>new Promise(ok=>{const t=setInterval(()=>{if(!TUT||TUT.i>=n){clearInterval(t);ok()}},120)});
 const STEPS=[
-  {when:()=>S.cross.slice(1).every(Boolean)&&tutIdle(),txt:'¡Hola, aventurero! Soy el <b>Búho</b> y te voy a enseñar a jugar en un momento. ¿Listo?',btn:'¡Vamos!'},
-  {tgt:()=>cellOf(0),txt:'Este es el <b>Jefe Final</b>. Su progreso es como tu <b>reloj</b>: si llega a 0, pierdes. Cuando acabes el <b>mazo del calabozo</b> aparecerá el verdadero jefe… ¡y si lo vences, ganas!',btn:'Siguiente'},
-  {tgt:()=>$('#hud .hhp'),txt:'Estos son tus <b>corazones</b>. Fallar desafíos te quita corazones. Si llegan a 0, pierdes.',btn:'Siguiente'},
-  {tgt:()=>cellOf(tutCell('t30')),txt:'Estos son los <b>desafíos</b>. El número de arriba es lo que necesitas para vencerlo y su color indica qué dados te ayudan. Debajo vienen su <b>recompensa</b> y su <b>penalización</b>.',btn:'Siguiente'},
+  /* 1. bienvenida y preparación (se ven durante la animación de inicio) */
+  {intro:1,txt:'¡Hola, aventurero! Soy el <b>Búho</b>. Vamos a jugar una <b>partida de práctica</b> y te explico todo paso a paso. ¿Listo?',btn:'¡Vamos!'},
+  {intro:1,txt:'Primero <b>barajamos tu mazo de personaje</b>: son las cartas de tu héroe, <b>Bruno</b>.',btn:'Siguiente'},
+  {intro:1,txt:'Ahora <b>robas 8 cartas</b>. Esa es tu <b>mano</b>.',btn:'Siguiente'},
+  {intro:1,txt:'Después barajamos el <b>mazo de sombras</b>. Las sombras son cartas malas que te llevas cuando cambias tu mano por una nueva.',btn:'Siguiente'},
+  {intro:1,txt:'Y barajamos el <b>mazo de la torre</b>: 31 enfrentamientos entre tú y el jefe.',btn:'Siguiente'},
+  {intro:1,txt:'Para empezar, se <b>descartan 2 cartas</b> de la torre…',btn:'Siguiente'},
+  {when:()=>S.cross.slice(1).every(Boolean)&&tutIdle(),tgt:()=>[1,2,3,4].map(cellOf),txt:'…y se ponen <b>4 enfrentamientos</b> en la cruz. ¡Ya estamos listos!',btn:'Siguiente'},
+  /* 2. el tablero */
+  {tgt:()=>cellOf(0),txt:'En el centro está el <b>reloj del eclipse</b>. Empieza en 7. Las sombras y los mini-jefes le quitan, y si llega a 0, el eclipse es total y <b>pierdes</b>.',btn:'Siguiente'},
+  {tgt:()=>$('#hud .hhp'),txt:'Estos son tus <b>corazones</b>. Tienes 10. Fallar enfrentamientos te quita corazones, y si llegan a 0, <b>pierdes</b>.',btn:'Siguiente'},
+  {tgt:()=>$('#tSt'),txt:'Aquí ves <b>cuántas cartas quedan en la torre</b>. Cuando lleguen a 0 subirás a la cima, donde te espera el <b>jefe final</b>.',btn:'Siguiente'},
+  /* 3. las cartas de enfrentamiento */
+  {show:['t30'],tgt:()=>tutPart('nom'),txt:'Veamos una <b>carta de enfrentamiento</b>. Arriba están su <b>nombre</b> y su <b>tipo</b>: Combate, Trampa, Puzle u Obstáculo. Algunas cartas de tu héroe son más fuertes contra un tipo.',btn:'Siguiente'},
+  {show:['t30'],tgt:()=>tutPart('vida'),txt:'Este número es su <b>vida</b>. Cada punto de daño le quita 1, y cuando llega a 0, lo vences. En la cruz verás un <b>corazón rojo</b> con la vida que le queda.',btn:'Siguiente'},
+  {show:['t30'],tgt:()=>tutPart('todo'),txt:'Su <b>color</b> dice qué cartas puedes usar contra él y qué dados te ayudan.',btn:'Siguiente'},
+  {show:['t30'],tgt:()=>tutPart('rec'),txt:'Arriba a la derecha está la <b>recompensa</b>: lo que ganas al vencerlo. Esta carta 🃏 significa <b>descartar cartas de la torre</b>, para subir más rápido.',btn:'Siguiente'},
+  {show:['t30'],tgt:()=>tutPart('pen'),txt:'Arriba a la izquierda está la <b>penalización</b>: lo que sufres si fallas, como perder corazones ❤️ o descartar cartas de tu mano ✋.',btn:'Siguiente'},
+  {show:['t03'],tgt:()=>tutPart('efe'),txt:'Abajo viene su <b>efecto</b>. Si dice <b>«efecto continuo»</b>, funciona todo el tiempo mientras la carta esté en la cruz. ¡Léelo bien!',btn:'Siguiente'},
+  {show:['t24'],tgt:()=>tutPart('todo'),txt:'Las cartas negras son <b>eventos</b>: no se enfrentan. <b>Tócalos para activarlos</b>. Algunos te ayudan, como esta fuente que te cura.',btn:'Siguiente'},
+  /* 4. las cartas de personaje */
   {tgt:()=>$('#tHand'),allow:'#tHand',hand:'hold',txt:'Esta es tu <b>mano</b>. <b>Mantén el dedo</b> sobre las cartas para verlas en grande y <b>desliza</b> a los lados para recorrerlas.',done:()=>TUT.browsed&&!FAN.st},
+  {show:['m02'],tgt:()=>tutPart('vida'),txt:'Esta es una <b>carta de personaje</b>. Este número es su <b>poder</b>: el daño que hace cuando la juegas.',btn:'Siguiente'},
+  {show:['m02'],tgt:()=>tutPart('asis'),txt:'Este otro es su <b>asistencia</b>: lo que suma cuando la pones encima de otra carta para ayudarla.',btn:'Siguiente'},
+  {show:['m02'],tgt:()=>tutPart('ico'),txt:'Este 🔥 es el <b>símbolo de Bruno</b>. Algunas cartas se hacen más fuertes por cada 🔥 en tu pila de descartes.',btn:'Siguiente'},
+  {show:['m02'],tgt:()=>tutPart('efe'),txt:'Abajo viene su <b>efecto</b>: algo extra que pasa cuando la usas.',btn:'Siguiente'},
+  {show:['m02','m04','m07'],tgt:()=>tutShowAll(),txt:'El <b>color</b> importa: solo la puedes jugar contra enfrentamientos de su color. Las cartas de <b>dos colores</b> sirven para los dos, y las <b>blancas</b> sirven para cualquier color.',btn:'Siguiente'},
+  /* 5. la batalla */
   {on:()=>{TUT.card='m16';TUT.only={id:'m16',cell:tutCell('t30')}},tgt:()=>[$('#tHand'),cellOf(tutCell('t30'))],allow:'#tHand',hand:'drag',from:()=>tutFc('m16'),to:()=>cellOf(tutCell('t30')),
-    txt:'¡Ahora a jugar! Toma la carta que brilla y <b>arrástrala hacia arriba</b> hasta el desafío que brilla.',done:()=>B&&B.act==='m16'},
-  {on:()=>{TUT.card=null;TUT.only=null},tgt:()=>document.querySelectorAll('#bt .orb'),txt:'¡Comienza la batalla! En <b>amarillo</b> lo que falta para vencer el desafío y en <b>azul</b> tu progreso.',btn:'Siguiente'},
+    txt:'¡A jugar! Toma la carta que brilla y <b>arrástrala hacia arriba</b> hasta el enfrentamiento que brilla.',done:()=>B&&B.act==='m16'},
+  {on:()=>{TUT.card=null;TUT.only=null},tgt:()=>document.querySelectorAll('#bt .orb'),txt:'¡Comienza la batalla! En <b>amarillo</b>, la vida que le queda al enfrentamiento. En <b>azul</b>, tu poder.',btn:'Siguiente'},
   {on:()=>{TUT.card='m02';TUT.onlyAs='m02';fanRender()},tgt:()=>[$('#tHand'),$('#bact')],allow:'#tHand',hand:'drag',from:()=>tutFc('m02'),to:()=>$('#bact'),
     txt:'Puedes reforzar tu carta con hasta <b>2 asistencias</b>. Arrastra la carta que brilla <b>encima de tu carta</b>.',done:()=>B&&B.as.includes('m02')},
   {on:()=>{TUT.card=null;TUT.onlyAs=null;fanRender();const c=S.cross[B.i];tutRig(Math.max(1,LV(c)-c.p-totB()))},tgt:()=>$('#go'),allow:'#go',hand:'tap',to:()=>$('#go'),
-    txt:'Aún te falta un poco… ¡a la suerte! Cada dado del <b>color del desafío</b> suma 1, y el dado <b>blanco</b> también. ¡Lanza los dados!',done:()=>CINE||!TUT.dice.length},
-  {when:tutIdle,txt:'¡<b>Desafío completado</b>! Recibiste su <b>recompensa</b>: descartar cartas del mazo del calabozo, ¡así llegas más rápido al verdadero jefe!',btn:'Siguiente'},
+    txt:'Te falta poco… ¡a los dados! Hay <b>3 dados de color</b> y uno <b>blanco y negro</b>. Cada dado del color del enfrentamiento suma 1, y el blanco también. ¡Lánzalos!',done:()=>CINE||!TUT.dice.length},
+  {when:tutIdle,txt:'¿Viste el dado negro? Es <b>oscuridad</b>: no suma, y algunas cartas te castigan si sale. ¡Cuidado con él!',btn:'Siguiente'},
+  {txt:'¡<b>Enfrentamiento vencido</b>! Ganaste su <b>recompensa</b>: descartar cartas de la torre. ¡Así llegas más rápido a la cima!',btn:'Siguiente'},
+  {tgt:()=>cellOf(tutCell('t16')),txt:'Cuando queda un hueco en la cruz, <b>sale una carta nueva</b> de la torre. Después empieza un <b>turno nuevo</b>.',btn:'Siguiente'},
+  /* 6. cuando fallas */
   {when:()=>tutIdle()&&tutCell('t02')>0&&S.hand.includes('m12'),on:()=>{TUT.card='m12';TUT.only={id:'m12',cell:tutCell('t02')}},tgt:()=>[$('#tHand'),cellOf(tutCell('t02'))],allow:'#tHand',hand:'drag',from:()=>tutFc('m12'),to:()=>cellOf(tutCell('t02')),
-    txt:'Nuevo turno. Probemos con otro: arrastra esta carta al <b>desafío azul</b>.',done:()=>B&&B.act==='m12'},
-  {on:()=>{TUT.card=null;TUT.only=null;tutRig(0)},tgt:()=>$('#go'),allow:'#go',hand:'tap',to:()=>$('#go'),txt:'Te falta solo 1. ¿Tendrás suerte esta vez? ¡Lanza los dados!',done:()=>CINE||!TUT.dice.length},
-  {when:tutIdle,tgt:()=>$('#hud .hhp'),txt:'Esta vez <b>fallaste</b>. Cuando fallas sufres la <b>penalización</b> del desafío: aquí perdiste un corazón. ¡No pasa nada, así se aprende!',btn:'Siguiente'},
-  {when:tutIdle,tgt:()=>$('.pjs'),txt:'Esta es tu <b>carta de personaje</b> y arriba su <b>habilidad</b>. Cuando la habilidad se activa, también la puedes arrastrar a un desafío.',btn:'Siguiente'},
-  {when:tutIdle,tgt:()=>$('#tSt'),allow:'#tSt',hand:'tap',to:()=>$('#tSt'),txt:'Toca esta carta para ver el <b>Estado</b>: tus mazos y descartes.',done:()=>$('#sh-st').classList.contains('on')},
-  {tgt:()=>$('#sh-st'),txt:'Aquí ves tus mazos. Si te quedas <b>sin cartas</b>, toca el mazo de <b>Agotamiento</b> para robar una mano nueva (pero cuidado con su efecto).',btn:'Entendido',next:()=>{$('#sh-st').classList.remove('on');$('#tSt').classList.remove('on')}},
-  {txt:'¡Listo, aventurero! Ya sabes lo básico. Te ganaste la medalla <b>🎓 Aprendiz</b>. ¡Mucha suerte en el calabozo!',btn:'Terminar',next:()=>tutEnd(1)}];
+    txt:'Probemos con otro. Arrastra esta carta al <b>enfrentamiento azul</b>.',done:()=>B&&B.act==='m12'},
+  {on:()=>{TUT.card=null;TUT.only=null;tutRig(0)},tgt:()=>$('#go'),allow:'#go',hand:'tap',to:()=>$('#go'),txt:'Te falta un poco más. ¿Tendrás suerte? ¡Lanza los dados!',done:()=>CINE||!TUT.dice.length},
+  {when:tutIdle,tgt:()=>[$('#hud .hhp'),cellOf(tutCell('t02'))],txt:'Esta vez <b>fallaste</b> y sufriste la <b>penalización</b>: perdiste un corazón. Pero el daño que le hiciste se queda, así que la próxima vez será más fácil.',btn:'Siguiente'},
+  /* 7. habilidad, estado y sombras */
+  {when:tutIdle,tgt:()=>$('.pjs'),txt:'Esta es tu <b>carta de personaje</b> y arriba su <b>habilidad</b>. Algunas recompensas la activan, y entonces también la puedes arrastrar a un enfrentamiento.',btn:'Siguiente'},
+  {when:tutIdle,tgt:()=>$('#tSt'),allow:'#tSt',hand:'tap',to:()=>$('#tSt'),txt:'Toca esta carta para ver el <b>estado</b>: tus mazos y tus descartes.',done:()=>$('#sh-st').classList.contains('on')},
+  {tgt:()=>$('#dK'),txt:'Cuando quieras, toca el <b>mazo de sombras</b>: descartas tu mano y robas una nueva, pero también te llevas una <b>sombra</b> con un efecto malo.',btn:'Entendido',next:()=>{$('#sh-st').classList.remove('on');$('#tSt').classList.remove('on')}},
+  /* 8. la batalla final (solo se explica) */
+  {show:['j02','g01','g02','g03','g04'],tgt:()=>tutShowAll(),txt:'Cuando se acaba la torre llega la <b>batalla final</b>: sale uno de los 3 jefes y, alrededor, <b>4 guardianes</b>: blanco, rojo, azul y verde.',btn:'Siguiente'},
+  {show:['g03','g07'],tgt:()=>tutShowAll(),txt:'Si al pelear contra un guardián <b>no sale su color</b> en los dados, pierdes 2 de poder. Cuando lo vences <b>se voltea</b> y te deja atacar al jefe con su color.',btn:'Siguiente'},
+  {txt:'¡Vence al jefe y salvarás el sol! Te ganaste la medalla <b>🎓 Aprendiz</b>. ¡Mucha suerte en la torre!',btn:'Terminar',next:()=>tutEnd(1)}];
 const tutFc=id=>{const c=[...document.querySelectorAll('#tHand .fc')].find(x=>{const k=x.querySelector('.card');return k&&k.dataset.id===id});return c};
-/* voz del Búho: voces/00.mp3 (invitación) y 01…17 (un audio por paso). La música baja mientras habla */
+/* voz del Búho: voces/00.mp3 (invitación). Las voces de los pasos (una por frase del guion nuevo) se activan con TUTVOZ cuando estén grabadas */
+const TUTVOZ=0;
 let VZA=null;const vzOn=()=>{try{return localStorage.getItem('mesa-tutvoz')!=='0'}catch(e){return true}};
 function vzStop(){if(VZA){try{VZA.pause()}catch(e){}VZA=null}try{musDuck(0)}catch(e){}}
 function vz(n){vzStop();if(!vzOn()||!SND)return;const a=new Audio('voces/'+String(n).padStart(2,'0')+'.mp3');a.volume=Math.min(1,SND/10*1.3);
   a.onended=()=>{if(VZA===a){VZA=null;try{musDuck(0)}catch(e){}}};VZA=a;a.play().then(()=>{if(VZA===a)try{musDuck(1)}catch(e){}}).catch(()=>{if(VZA===a)VZA=null})}
 document.addEventListener('visibilitychange',()=>{if(document.hidden)vzStop()});
 function tutAsk(fz){if(TUT||COOP)return false;const o=stLoad();if(!fz&&(!YO||o.tut||(o.g||0)>0||$('#lob-btn-resume').style.display!=='none'))return false;
-  const q=$('#tutq');q.innerHTML=`<div class="bx"><div class="ow">${OWL}</div><h3>¿Quieres aprender a jugar?</h3><p>Te enseño lo básico en una partida de práctica (unos 2 minutos).</p><button class="y">Sí, enséñame</button><button class="n">Ahora no</button></div>`;
+  const q=$('#tutq');q.innerHTML=`<div class="bx"><div class="ow">${OWL}</div><h3>¿Quieres aprender a jugar?</h3><p>Te enseño a jugar en una partida de práctica (unos 5 minutos).</p><button class="y">Sí, enséñame</button><button class="n">Ahora no</button></div>`;
   vz(0);
   q.onclick=e=>{if(e.target.closest('.y')||e.target.closest('.n'))vzStop();if(e.target.closest('.y')){q.classList.remove('on');tutStart()}else if(e.target.closest('.n')){q.classList.remove('on');if(fz)return;const o2=stLoad();o2.tut='no';stSave(o2);$('#lob-btn-start').click()}};
   q.classList.add('on');return true}
@@ -3660,7 +3702,9 @@ function tutRects(t){if(!t)return[];const L=(t instanceof NodeList||Array.isArra
 function tutDraw(force){const T=$('#tut');if(!TUT||!TUT.prev){T.classList.remove('on');return}
   const st=STEPS[TUT.i];if(!st){T.classList.remove('on');return}
   if(TUT.shown&&st.done&&st.done()){tutNext();return}
-  if(tutHide()||(st.when&&!st.when()&&!TUT.shown)){T.classList.remove('on');return}
+  if((!st.intro&&tutHide())||(st.when&&!st.when()&&!TUT.shown)){T.classList.remove('on');return}
+  T.classList.toggle('hi',!!st.intro||!!st.show);T.classList.toggle('in',!!st.intro);
+  {const sc=$('#tutsc'),k=(st.show||[]).join(',');if(sc.dataset.k!==k){sc.dataset.k=k;sc.className=st.show&&st.show.length>1?(st.show.length>3?'n5':'n'):'';sc.innerHTML=(st.show||[]).map(id=>`<img src="${imgSrc(id)}" alt="">`).join('')}}
   if(!TUT.shown){TUT.shown=1;if(st.when&&st.on)st.on();force=1}
   if(st.done&&st.done()){tutNext();return}
   T.classList.add('on');
@@ -3668,7 +3712,7 @@ function tutDraw(force){const T=$('#tut');if(!TUT||!TUT.prev){T.classList.remove
   $('#tuth').innerHTML=rs.map(r=>`<rect x="${r.left-pad}" y="${r.top-pad}" width="${r.width+pad*2}" height="${r.height+pad*2}" rx="14" fill="#000"/>`).join('');
   $('#tutr').innerHTML=rs.map(r=>`<div class="tring" style="left:${r.left-pad}px;top:${r.top-pad}px;width:${r.width+pad*2}px;height:${r.height+pad*2}px"></div>`).join('');
   const b=$('#tutb');
-  if(force||b.dataset.i!=TUT.i){b.dataset.i=TUT.i;b.innerHTML=`<div class="towl">${OWL}</div><div class="tbx"><button class="tvz" aria-label="Voz del Búho">${vzOn()?'🔊':'🔇'}</button>${st.txt}<div class="tbtn">${TUT.i<STEPS.length-1?'<button class="tsk">Saltar tutorial</button>':''}${st.btn?`<button class="tn">${st.btn}</button>`:''}</div></div>`;try{SFX.pop()}catch(e){}if(TUT.vi!==TUT.i){TUT.vi=TUT.i;vz(TUT.i+1)}}
+  if(force||b.dataset.i!=TUT.i){b.dataset.i=TUT.i;b.innerHTML=`<div class="towl">${OWL}</div><div class="tbx">${TUTVOZ?`<button class="tvz" aria-label="Voz del Búho">${vzOn()?'🔊':'🔇'}</button>`:''}${st.txt}<div class="tbtn">${TUT.i<STEPS.length-1?'<button class="tsk">Saltar tutorial</button>':''}${st.btn?`<button class="tn">${st.btn}</button>`:''}</div></div>`;try{SFX.pop()}catch(e){}if(TUT.vi!==TUT.i){TUT.vi=TUT.i;if(TUTVOZ)vz(TUT.i+1)}}
   /* globo arriba si lo importante está abajo */
   const main=rs[rs.length-1],low=rs.some(r=>r.top+r.height/2>innerHeight*.5)&&!rs.some(r=>r.top<innerHeight*.35);
   b.classList.toggle('top',!!main&&(low||st.allow==='#tHand'));b.classList.toggle('bot',!(!!main&&(low||st.allow==='#tHand')));
@@ -3694,7 +3738,7 @@ setInterval(()=>{if(!TUT||!TUT.prev)return;try{tutDraw();
 addEventListener('resize',()=>{if(TUT)tutDraw(1)});
 addEventListener('scroll',()=>{if(scrollX||scrollY)scrollTo(0,0);for(const e of [document.documentElement,document.body])if(e.scrollLeft||e.scrollTop){e.scrollLeft=0;e.scrollTop=0}},{passive:true,capture:true});
 $('#tutb').addEventListener('click',e=>{if(!TUT)return;
-  const vb=e.target.closest('.tvz');if(vb){const on=!vzOn();try{localStorage.setItem('mesa-tutvoz',on?'1':'0')}catch(_){}vb.textContent=on?'🔊':'🔇';if(on)vz(TUT.i+1);else vzStop();return}if(e.target.closest('.tn')){tutNext();return}if(e.target.closest('.tsk'))tutEnd(0)});
+  const vb=e.target.closest('.tvz');if(vb){const on=!vzOn();try{localStorage.setItem('mesa-tutvoz',on?'1':'0')}catch(_){}vb.textContent=on?'🔊':'🔇';if(on&&TUTVOZ)vz(TUT.i+1);else vzStop();return}if(e.target.closest('.tn')){tutNext();return}if(e.target.closest('.tsk'))tutEnd(0)});
 /* mientras el Búho habla, solo responde lo que señala */
 ['pointerdown','click'].forEach(ev=>document.addEventListener(ev,e=>{if(!TUT||!TUT.prev||!$('#tut').classList.contains('on'))return;
   if(e.target.closest('#tutb,#tutq'))return;const st=STEPS[TUT.i];if(st&&st.allow&&e.target.closest(st.allow))return;
