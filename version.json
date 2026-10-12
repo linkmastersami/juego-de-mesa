@@ -273,6 +273,21 @@
   "sonidos/logro.mp3": "29a42962db9e",
   "sonidos/pagina.mp3": "bece14788d80",
   "sonidos/pestana.mp3": "c262f055256b",
+  "t01.jpg": "8341899af87e",
+  "t02.jpg": "f2c3f5cd86fb",
+  "t03.jpg": "fbb434000d99",
+  "t04.jpg": "1171958e07ed",
+  "t05.jpg": "d84f70a9b920",
+  "t06.jpg": "986c5f9a6afa",
+  "t07.jpg": "4d34750acb9b",
+  "t08.jpg": "7bc177a07af1",
+  "t09.jpg": "a336ce0e464e",
+  "t10.jpg": "7ecd55bd80e1",
+  "t11.jpg": "3a3a4e7d0c7e",
+  "t12.jpg": "848ffc18c9b9",
+  "t13.jpg": "23baaa4550bf",
+  "t14.jpg": "56fe7e429870",
+  "t15.jpg": "aad8bc35800a",
   "tableros/t01.webp": "2c4477bdcd87",
   "tableros/t02.webp": "513dae1464e2",
   "tableros/t03.webp": "7312f7623e55",
@@ -307,5 +322,5 @@
   "voces/16.mp3": "f67abff52fc8",
   "voces/17.mp3": "e55eb23faa86"
  },
- "version": "b1263d45d74d"
+ "version": "a2ff3e391383"
 }
