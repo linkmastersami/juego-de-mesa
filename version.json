@@ -24,6 +24,8 @@
   "cartas/k04.webp": "1ed6d79c53bc",
   "cartas/k05.webp": "612dd9904d54",
   "cartas/k06.webp": "41f67d4c44ad",
+  "cartas/reverso-personaje.webp": "67f77c3fd847",
+  "cartas/reverso-sombra.webp": "04ea176fec00",
   "cartas/reverso.webp": "7d57d7b2f124",
   "cartas/t01.webp": "5aee8037df55",
   "cartas/t02.webp": "286235fc5d8f",
@@ -99,7 +101,7 @@
   "iconos/i-comunidad.webp": "e5ffa3d48a3e",
   "iconos/i-records.webp": "3f192fdbc183",
   "iconos/i-tableros.webp": "aad177dc6e2d",
-  "index.html": "5333c1591271",
+  "index.html": "6dc3f0f15b96",
   "logo.webp": "a46ce5f9a338",
   "manifest.json": "81bc7f803d05",
   "musica/batalla.mp3": "292447f839b4",
@@ -251,5 +253,5 @@
   "voces/16.mp3": "f67abff52fc8",
   "voces/17.mp3": "e55eb23faa86"
  },
- "version": "21ee1ebf5a25"
+ "version": "fb2e66327d69"
 }
