@@ -1736,7 +1736,7 @@ function showVictory(msg){
 }
 function exitGame(){toMenu(1)}
 /* póster de victoria para compartir (1080×1920, tamaño de estados) */
-const BNM={j02:"Látigos de Majora's",j03:"Máscara de Majora's",j04:"Encarnación de Majora's"};
+const BNM={j02:'El Hechicero del Eclipse',j03:'La Araña del Vacío',j04:'La Esfinge sin rostro'};
 let VICCV=null;
 async function vicPoster(st){
   try{
@@ -1905,9 +1905,11 @@ function roll(color,cb,faces,only){
 }
 
 /* ---------- turno: batalla ---------- */
-const CH={},COLN={r:'rojo',v:'verde',a:'azul'};
+const CH={},COLN={r:'rojo',v:'verde',a:'azul',b:'blanco'};
 [[1,2,'r',8],[3,4,'a',7],[5,6,'v',8],[9,10,'a',8],[11,13,'a',8],[14,16,'v',7],[17,19,'v',8],[20,22,'r',5],[23,25,'v',7],[26,28,'a',6],[29,32,'r',8],[33,33,'r',20],[35,35,'v',7],[36,36,'a',13],[37,37,'r',6],[38,38,'a',8],[39,39,'a',12],[40,42,'a',7],[43,45,'v',7],[46,48,'r',7],[49,49,'v',11],[51,51,'r',8],[53,53,'a',13],[54,54,'a',7],[55,55,'r',9],[56,56,'v',7],[57,57,'r',7]].forEach(([a,b,c,l])=>{for(let i=a;i<=b;i++)CH['c'+pad(i)]={c,l}});
-Object.assign(CH,{g01:{c:'v',l:10},g02:{c:'a',l:9},g03:{c:'r',l:9},g04:{c:'v',l:99}});
+Object.assign(CH,{g01:{c:'b',l:10},g02:{c:'a',l:9},g03:{c:'r',l:9},g04:{c:'v',l:99}});
+/* regla de todos los guardianes (de cualquier calabozo): al lanzar los dados, si no sale su color, −2 al poder total de la batalla. Blanco = solo cuenta el dado blanco */
+const GCOL={g01:'blanco',g02:'azul',g03:'rojo',g04:'verde'};
 const MC={};'r52,a11,av01,vr42,a21,r21,w21,a21,w31,w31,va31,w31,a21,av22,w32,w42,vr01,w21'.split(',').forEach((t,i)=>{const m=t.match(/^([a-z]+)(\d)(\d)$/);MC['m'+pad(i+1)]=[m[1],+m[2],+m[3]]});
 MC.m20=['w',5,0];
 /* Personaje 2 (espada en lugar de fuego): datos reales de l01-l18
@@ -1931,10 +1933,10 @@ Object.assign(TY,{g01:'O',g05:'O',g02:'P',g06:'P',g03:'C',g07:'C',g04:'T',g08:'T
 TY.j02='C';TY.j03='T';TY.j04='P';
 let PICK=1,B=null,SHF=0,M18=0,MALL=0;
 const col=()=>B.col||CH[S.cross[B.i].id].c;
-const okc=id=>{const c=MC[id][0];return c==='w'||c.includes(col())};
+const okc=id=>{const c=MC[id][0],k=col();return c==='w'||k==='b'||c.includes(k)};
 /* color de la asistencia: personaje 1 = todas blancas (asisten a cualquier enfrentamiento); personaje 2 = según su carta */
 const ASC={}; /* Veralyn: sus asistencias sirven para cualquier color */
-const oka=id=>{if(/^[mlprn]20$/.test(id))return false;const c=ASC[id];return !c||c==='w'||c.includes(col())};
+const oka=id=>{if(/^[mlprn]20$/.test(id))return false;const c=ASC[id];return !c||c==='w'||col()==='b'||c.includes(col())};
 const ty=()=>TY[S.cross[B.i].id];
 /* equivalentes del personaje 2 a las cartas con bonificación de tipo */
 const BONUS_TY={m09:'O',m10:'T',m12:'P',m18:'C',l01:'O',l10:'C',l11:'P',l15:'T',p16:'O',p11:'T',p14:'C',p08:'P',r09:'O',r10:'T',r11:'P',r12:'C',n09:'T',n10:'O',n11:'P',n12:'C'}; /* cada personaje tiene 4 cartas blancas: +3 contra Obstáculo, Trampa, Puzle y Combate (como acción y como asistencia) */
@@ -2008,7 +2010,7 @@ function openBat(i,k0,act){const go=k=>{PICK=0;B={i,act:act||null,as:[],col:k,m1
 let BIN=0;
 function rb(){
   const c=S.cross[B.i],cin=BIN;BIN=0;dockVar();
-  const hint=!B.act?'Arrastra una carta de tu mano hasta aquí':COOP?'Al lanzar los dados, tu amigo podrá asistirte':B.as.length<2?'Arrastra cartas a tu carta para asistirla (máx. 2) · tócalas para quitarlas':'Ya tienes 2 asistencias';
+  const hint=(GCOL[c.id]?`🛡️ Guardián: si en los dados no sale ${GCOL[c.id]}, −2 al poder · `:'')+(!B.act?'Arrastra una carta de tu mano hasta aquí':COOP?'Al lanzar los dados, tu amigo podrá asistirte':B.as.length<2?'Arrastra cartas a tu carta para asistirla (máx. 2) · tócalas para quitarlas':'Ya tienes 2 asistencias');
   $('#bt').innerHTML=`<div class="bf${cin?' in':''}"><div class="bc"><div class="cw">${card(c.id)}</div><div class="orb">${Math.max(0,LV(c)-c.p)}</div><small>falta</small></div><b class="vsx">VS</b>
     <div class="bc"><div class="cw${B.act?'':' drop'}" id="bact">${B.act?`<div data-bp="a" class="ca">${card(B.act)}</div>`:'<span>Arrastra aquí<br>tu carta</span>'}<div class="ass">${B.as.map((x,k)=>`<div data-bp="s${k}">${card(x)}</div>`).join('')}</div></div><div class="orb p">${totB()}</div><small>tu ataque${l05on()?' · +1':''}</small></div></div>
   <div class="bhint">${hint}</div>
@@ -2043,7 +2045,7 @@ $('#bt').onclick=e=>{
    · mantener el dedo: el abanico se abre y la carta bajo el dedo se ve en grande; deslizar recorre las cartas
    · arrastrar una carta hacia arriba: se juega (al enfrentamiento que brilla, o a tu carta en la batalla para asistir)
    · toque corto: ver la carta y sus opciones */
-const okcC=(id,c)=>{const m=MC[id];if(!m)return false;return m[0]==='w'||m[0].includes(c)};
+const okcC=(id,c)=>{const m=MC[id];if(!m)return false;return m[0]==='w'||c==='b'||m[0].includes(c)};
 function dkRect(){const sh=$('#sh-st');if(sh.classList.contains('on')){const r=$('#dC').getBoundingClientRect();if(r.width)return r}
   const t=$('#tSt').getBoundingClientRect();return t.width?t:{left:innerWidth-60,top:innerHeight-200,width:44,height:64}}
 function dockVar(){try{const d=$('#dock'),t=d?d.getBoundingClientRect().top:0;if(t>80)document.documentElement.style.setProperty('--dockt',Math.round(t-4)+'px');
@@ -2273,7 +2275,7 @@ function discDraw(back,nd,cb,can){const sel=new Set();let mine=null;
 function resolve(h,nd){
   M18=0;MALL=0;const c=S.cross[B.i],lv=LV(c),id=c.id,bi=B.i;
   const pfx=S.personaje||'m',fi=getFI();
-  const m06b=B.act===p06()?2*fireDisc():0,add=sumB()+h+m06b;B.p0=c.p;
+  const m06b=B.act===p06()?2*fireDisc():0,add=Math.max(0,sumB()+h+m06b);B.p0=c.p;
   [B.act,...(COOP?[]:B.as)].filter(Boolean).forEach(x=>{if(x===p20()){S.hab=0;return}S.hand.splice(S.hand.indexOf(x),1);S.disc.push(x)});
   try{albUse(B.act,'a');if(!COOP)B.as.forEach(x=>albUse(x,'s'))}catch(e){}
   const act=B.act,as=B.as.slice(),fx=[];
@@ -2346,7 +2348,7 @@ function resolve(h,nd){
   if(!win&&id==='c36')L.push(['c36: descartar este enfrentamiento en lugar de sufrir su penalización',()=>dropCh(S.cross.indexOf(c))]);
   if(dk&&S.cross.some(y=>y&&/^c(09|10)$/.test(y.id)))L.push(['trampa: descartar 1 carta por oscuridad',b=>{pickHand(1,b);return 2}]);
   if(dk&&!win&&id!=='c49'&&S.cross.some(y=>y&&y.id==='c49'))L.push(['c49: sufrir 1 de daño por oscuridad',()=>hurt(1)]);
-  if(dk&&!win&&id==='j04'&&S.hand.length)L.push(['j04: descartar una carta al azar y sufrir daño igual a su valor',()=>{const x=S.hand[Math.floor(Math.random()*S.hand.length)];S.hand.splice(S.hand.indexOf(x),1);S.disc.push(x);hurt(MC[x][1])}]);
+  if(dk&&!win&&S.cross[0]&&S.cross[0].id==='j04'&&S.hand.length)L.push(['j04: descartar una carta al azar y sufrir daño igual a su valor',()=>{const x=S.hand[Math.floor(Math.random()*S.hand.length)];S.hand.splice(S.hand.indexOf(x),1);S.disc.push(x);hurt(MC[x][1])}]);
   let L2=(act==='m11'||act==='m15'||act==='p12'||act==='r14'||act==='r15'||act==='n06'||act==='n15'||(act==='l10'&&TY[id]==='C')||(act==='p03'&&TY[id]==='C'))&&!win?[]:L;
   if(act==='l16'&&win&&TY[id]==='C')L2=[...L2,...[...(spec[id]||[[],[]])[0]].map(q=>['l16 (duplicar recompensa): '+q[0],q[1]])];
   fx.unshift(...L2)}
@@ -2470,8 +2472,8 @@ async function cine(color,nd,SP){
     if(!nd){
       spins.forEach(x=>x.cancel());
       await doRoll();await rrDo();
-      const tg=R?Ro:Lo;let v=+tg.textContent,dcd=0;
-      const tally=async()=>{for(let i=0;i<4;i++){const d=dice[i],f=d.f[d.face];if(!(i<3?f===color:f==='blanco'))continue;h++;const dec=!dcd&&c.p+tot+h>=lv;if(dec)dcd=1;
+      const tg=R?Ro:Lo;let v=+tg.textContent,dcd=0;const gc=GCOL[c.id];let gs=0;
+      const tally=async()=>{if(gc&&dice.some((q,i)=>{const f=q.f[q.face];return gc==='blanco'?i===3&&f==='blanco':i<3&&f===gc}))gs=1;for(let i=0;i<4;i++){const d=dice[i],f=d.f[d.face];if(!(i<3?f===color:f==='blanco'))continue;h++;const dec=!dcd&&c.p+tot+h>=lv;if(dec)dcd=1;
         const r=d.slot.getBoundingClientRect(),[sx,sy]=ctr(r),[tx,ty]=ctr(tg.getBoundingClientRect()),sp=document.createElement('div');
         sp.className='cspk';sp.style.cssText=`left:${sx}px;top:${sy}px;--c:${COL[f]}`;document.body.appendChild(sp);ring(sx,sy,COL[f]);
         d.slot.animate([{filter:'none'},{filter:`drop-shadow(0 0 18px ${COL[f]}) brightness(1.5)`},{filter:'none'}],{duration:500});
@@ -2505,7 +2507,13 @@ async function cine(color,nd,SP){
       if(act==='l18'&&TY[c.id]==='O'&&await (SP?cmWait('l18').then(m=>!!(m&&m.go)):askC('l18: ¿volver a lanzar los dados una vez más, gratis? Los nuevos aciertos se suman.','Volver a lanzar','No').then(g=>{cmSend({t:'l18',go:g?1:0});return g}))){
         await doRoll();await rrDo();
         rolls++;if(await l11())skips++;else await tally();
-        await wait(400)}}
+        await wait(400)}
+      /* guardianes: si en la tirada no salió su color, −2 al poder total de esta batalla */
+      if(gc&&rolls>skips&&!gs){h-=2;v=R?Math.max(0,v-2):v+2;popV(tg,v);try{SFX.down()}catch(e){}
+        const [gx,gy]=ctr(tg.getBoundingClientRect()),g=big('−2',gx,gy-54,40);g.style.color='#ff5c5c';g.style.fontWeight=700;g.style.textShadow='0 2px 8px #000';
+        const gt=big('No salió '+gc+': −2 al poder',gx,gy+70,18);gt.style.color='#fff';gt.style.fontWeight=700;gt.style.textShadow='0 2px 8px #000';
+        [g,gt].forEach(e=>e.animate([{opacity:0,transform:'translate(-50%,-50%) scale(.5)'},{opacity:1,transform:'translate(-50%,-50%) scale(1.1)',offset:.25},{opacity:1,offset:.75},{opacity:0,transform:'translate(-50%,-50%) scale(1)'}],{duration:1500,fill:'forwards'}).finished.then(()=>e.remove()));
+        await wait(1300)}}
     /* golpe */
     let win=c.p+tot+h>=lv&&c.id!=='g04'&&!(c.id[0]==='j'&&S.cross.some(x=>x&&x.id==='g01'));
     if(SP){const m=await cmWait('win');if(m)win=!!m.win}else cmSend({t:'win',win:win?1:0});
@@ -3023,7 +3031,7 @@ function coopAsk(){
   coopWait('Tu amigo está eligiendo cartas para asistirte…');
 }
 /* amigo: solo cartas del color del enfrentamiento (la blanca sirve para cualquiera) */
-const okaC=(id,c)=>{if(/^[mlprn]20$/.test(id))return false;const a=ASC[id];return !a||a==='w'||a.includes(c)};
+const okaC=(id,c)=>{if(/^[mlprn]20$/.test(id))return false;const a=ASC[id];return !a||a==='w'||c==='b'||a.includes(c)};
 const avF=(x,cid)=>(BONUS_TY[x]&&BONUS_TY[x]===TY[cid]?3:MC[x][2]);
 const hgc=n=>'hgrid';
 let CAD=null; /* datos de la petición de asistencia activa */
