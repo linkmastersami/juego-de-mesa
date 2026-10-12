@@ -99,7 +99,7 @@
   "iconos/i-comunidad.webp": "e5ffa3d48a3e",
   "iconos/i-records.webp": "3f192fdbc183",
   "iconos/i-tableros.webp": "aad177dc6e2d",
-  "index.html": "235245909bb5",
+  "index.html": "bd9fa85a7691",
   "logo.webp": "a46ce5f9a338",
   "manifest.json": "81bc7f803d05",
   "musica/batalla.mp3": "292447f839b4",
@@ -166,7 +166,7 @@
   "personajes/personaje 3/p16.webp": "2294aaff5d0b",
   "personajes/personaje 3/p17.webp": "d9cb215f8c7b",
   "personajes/personaje 3/p18.webp": "d06e05ba34fc",
-  "personajes/personaje 3/p19.webp": "6630d50ce229",
+  "personajes/personaje 3/p19.webp": "b72edefd95f7",
   "personajes/personaje 3/p20.webp": "820de50e965e",
   "personajes/personaje 4/r01.webp": "c2fa53ced1d4",
   "personajes/personaje 4/r02.webp": "b7137fa9d499",
@@ -251,5 +251,5 @@
   "voces/16.mp3": "f67abff52fc8",
   "voces/17.mp3": "e55eb23faa86"
  },
- "version": "b4d3ae22e2d3"
+ "version": "26d6f96a5af3"
 }

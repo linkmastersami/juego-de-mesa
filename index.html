@@ -2461,16 +2461,17 @@ async function cine(color,nd,SP){
       const ca=[...$('#cA').children];
       for(let i=0;i<ca.length;i++){const e=ca[i],r=e.getBoundingClientRect();e.style.visibility='hidden';SFX.pop();await cfly(r,e.innerHTML,Ro.getBoundingClientRect(),550);v+=asv[i];popV(Ro,v);const [rx,ry]=ctr(Ro.getBoundingClientRect()),f=big('+'+asv[i],rx,ry-50,30);f.style.color='#fff';f.style.textShadow='0 2px 6px #000';f.style.fontWeight=700;f.animate([{opacity:1,transform:'translate(-50%,-50%)'},{opacity:0,transform:'translate(-50%,-140%)'}],{duration:700,fill:'forwards'}).finished.then(()=>f.remove());await wait(150)}
       if(ca.length)await wait(300)}
-    /* Volti (p19): por cada carta ⚡ que juegues o asistas, relanzas 1 dado (p05: 1 relanzamiento extra) */
+    /* Volti (p19), dado cargado: por cada carta ⚡ que juegues o asistas, eliges 1 dado y lo giras a tu favor (cae en el color del enfrentamiento; el blanco y negro cae en blanco). p05: 1 giro extra */
     const askDie=(n,only)=>new Promise(ok=>{const d=document.createElement('div');d.style.cssText='position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 20px);z-index:43;width:min(92vw,360px);display:flex;flex-direction:column;gap:10px;background:#2f2b37;border-radius:18px;padding:14px;text-align:center;box-shadow:0 10px 40px #000a';
-      d.innerHTML=`<div>${only!==undefined?'🐶 Salto de Tuerca: ¿volver a lanzar el dado blanco y negro?':`⚡ Volti: ¿relanzar un dado? (${n} disponible${n>1?'s':''})`}</div><div class="btns">${dice.map((q,i)=>{if(only!==undefined&&i!==only)return '';const f=q.f[q.face];return `<button data-y="${i}" style="background:${COL[f]};color:${f==='blanco'||f==='verde'?'#111':'#fff'}">${i<3?'Dado '+(i+1):'Dado blanco/negro'} · ${f}</button>`}).join('')}<button class="ghost" data-y="-1">No relanzar</button></div>`;
+      d.innerHTML=`<div>${only!==undefined?'🐶 Salto de Tuerca: ¿volver a lanzar el dado blanco y negro?':`⚡ Dado cargado: elige un dado y gíralo a tu favor (${n} disponible${n>1?'s':''})`}</div><div class="btns">${dice.map((q,i)=>{if(only!==undefined&&i!==only)return '';const f=q.f[q.face],t=only===undefined?favF(i):-1,ok=only!==undefined||(t>=0&&t!==q.face);return `<button data-y="${i}"${ok?'':' disabled'} style="background:${COL[f]};color:${f==='blanco'||f==='verde'?'#111':'#fff'}${ok?'':';opacity:.35'}">${i<3?'Dado '+(i+1):'Dado blanco/negro'} · ${f}${only===undefined&&ok?' → '+q.f[t]:''}</button>`}).join('')}<button class="ghost" data-y="-1">${only!==undefined?'No relanzar':'No usar'}</button></div>`;
       d.onclick=e=>{const b=e.target.closest('[data-y]');if(!b)return;d.remove();ok(+b.dataset.y)};document.body.appendChild(d)});
+    const favF=i=>dice[i].f.findIndex(f=>i<3?f===color:f==='blanco'); /* cara a favor de cada dado (-1 si no tiene) */
     let RRW=(!SP&&act==='r06')?1:0;let RRN=(!SP&&PC()==='p'&&act)?(ico(act,0)?1:0)+B.as.filter(x=>ico(x,1)).length+(act==='p05'?1:0):0; /* un relanzamiento por cada carta ⚡ jugada o asistida */
     const rrDo=async()=>{
       if(SP){for(;;){const m=await cmWait('rr');if(!m||m.stop)return;await roll(color,null,m.faces,m.i);await wait(500)}}
       while(RRW>0){const i=await askDie(1,3);RRW=0;if(i<0)break;const F=dice.map(d=>d.face);F[i]=Math.floor(Math.random()*6);cmSend({t:'rr',i,faces:F});const tk=setInterval(()=>SFX.tick(),130);try{await roll(color,null,F,i)}finally{clearInterval(tk)}await wait(500)}
-      while(RRN>0){const i=await askDie(RRN);if(i<0)break;RRN--;
-        const F=dice.map(d=>d.face);F[i]=Math.floor(Math.random()*6);cmSend({t:'rr',i,faces:F});
+      while(RRN>0&&dice.some((q,k)=>{const t=favF(k);return t>=0&&t!==q.face})){const i=await askDie(RRN);if(i<0)break;RRN--;
+        const F=dice.map(d=>d.face);F[i]=favF(i);cmSend({t:'rr',i,faces:F});
         const tk=setInterval(()=>SFX.tick(),130);try{await roll(color,null,F,i)}finally{clearInterval(tk)}await wait(500)}
       cmSend({t:'rr',stop:1})};
     const doRoll=async()=>{let F;if(SP){const m=await cmWait('roll');F=m&&m.faces}else{F=(TUT&&TUT.dice&&TUT.dice.length)?TUT.dice.shift():dice.map(()=>Math.floor(Math.random()*6));cmSend({t:'roll',faces:F})}
@@ -2699,7 +2700,7 @@ function hideLobby(){
 /* ficha del personaje elegido: su carta se anima y se explica cómo juega */
 const PJD={m:['🔥','Juega cartas de fuego: cada 🔥 que usas te hace robar cartas al final del turno para armar combos.'],
   l:['🗡️','Juega cartas con 🗡️: cada una quita PV extra a los enfrentamientos que no estás intentando.'],
-  p:['⚡','Juega cartas de rayo: cada ⚡ le deja relanzar un dado para no fallar la tirada.'],
+  p:['⚡','Juega cartas de rayo: cada ⚡ le deja girar un dado a su favor para no fallar la tirada.'],
   r:['🏮','Vence Combates con cartas 🏮 para cobrar su recompensa dos veces; su Arma copiada crece con cada Combate.'],
   n:['🚀','Cada vez que falla, Nova carga su disparo: la siguiente batalla con 🚀 suma toda la carga.']};
 var PJO=['m','l','p','r','n'];
