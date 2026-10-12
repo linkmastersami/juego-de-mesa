@@ -167,6 +167,7 @@ button{font-family:inherit}
 .pjs>.habc.hdrag{opacity:.35}
 .pjs.rt{position:absolute;right:0;bottom:0;height:84%;pointer-events:none;z-index:4}
 .pjs>.stc{position:absolute;width:62%;aspect-ratio:696/1015;right:-4%;top:-46%;transform:rotate(8deg);border-radius:7px;background:#0b1730 url(cartas/reverso.webp) center/100% 100% no-repeat;box-shadow:0 0 0 1px #4fc3ff55,0 4px 8px #000c;cursor:pointer;pointer-events:auto;transition:transform .15s}
+.pjs>.stc .stn{position:absolute;left:50%;bottom:8%;transform:translateX(-50%);min-width:64%;padding:2px 6px 3px;border-radius:10px;background:#0d0a14e0;box-shadow:0 0 0 2px #4fc3ff99,0 2px 6px #000c;color:#fff;font:700 1.25rem/1 Fredoka,sans-serif;text-align:center;pointer-events:none}.pjs>.stc .stn small{display:block;font-size:.5rem;letter-spacing:.08em;text-transform:uppercase;color:#9fdcff;margin-bottom:1px}
 .pjs>.stc:active{transform:rotate(8deg) scale(.94)}
 .pjs>.stc.on{box-shadow:0 0 0 2px var(--gold),0 0 14px #ffd34d99}
 .dock img{-webkit-user-drag:none;user-select:none;-webkit-touch-callout:none}.pjs .card{pointer-events:none}
@@ -1186,6 +1187,7 @@ function render(){
   $('#dM').innerHTML=`<span>Personaje<b>${S.dM.length}</b></span>`;
   $('#dK').innerHTML=`<span>Sombras<b>${S.dK.length}</b></span>`;{const nk=!!(PICK&&!S.hand.length&&S.dK.length&&!S.over);$('#dK').classList.toggle('blink',nk);$('#tSt').classList.toggle('blink',nk)}
   $('#dC').innerHTML=`<span>Torre<b>${S.dC.length}</b></span>`;
+  $('#tSt').innerHTML=`<b class="stn"><small>Torre</small>${S.final?'👹':S.dC.length}</b>`; /* cartas que quedan en el mazo de la torre, siempre a la vista */
   $('#pDisc').innerHTML=`<span><b>${S.disc.filter(x=>x[0]==='t').length}</b></span>`;
   {const pfxR=S.personaje||'m';const dm=S.disc.filter(x=>x[0]===pfxR);$('#pDm').innerHTML=(dm.length?card(dm[dm.length-1]):'<div class="card" style="opacity:.4"></div>')+`<span class="cn">${dm.length}</span>`;$('#pFire').textContent=ICO()+' '+fireDisc()}
   $('#pComp').innerHTML=S.comp.length?card(S.comp[S.comp.length-1]):'<div class="card" style="opacity:.4"></div>';
