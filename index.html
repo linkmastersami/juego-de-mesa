@@ -1363,7 +1363,7 @@ const msg=t=>{ov(null,[],`<p>${t}</p>`);return 1};
 const gridOf=(ids,attr)=>`<div class="grid">${ids.map((id,i)=>`<div ${attr}="${i}">${card(id)}</div>`).join('')}</div>`;
 
 /* ---------- cartas del tablero ---------- */
-function openCross(i){const c=S.cross[i],id=c.id;if(/^c(07|08|50|52)$/.test(id))return evt(i);ov(id,[],`<div class="pv">PV: ${pgV(i,c.id,c.p)}</div>`)}
+function openCross(i){const c=S.cross[i],id=c.id;if(/^t(04|24|26)$/.test(id))return evt(i);ov(id,[],`<div class="pv">PV: ${pgV(i,c.id,c.p)}</div>`)}
 function openHand(i){const id=S.hand[i];const ex=[];const pfx=S.personaje||'m';
   if(id==='m08')ex.push(['Descartar al inicio del turno: −1 PV por cada 🔥 a un enfrentamiento',()=>{discCard(id);const go=()=>pickCh('Elige el enfrentamiento',x=>{x.p+=fireDisc()},()=>sweep(()=>close()),null,1);if(S.mesa.includes('k04')&&S.hand.length)pickHand(1,go,1);else go();return 1}]);
   if(id==='p10')ex.push(['Descartar al inicio del turno: −1 PV por cada ⚡ a un enfrentamiento',()=>{discCard(id);const go=()=>pickCh('Elige el enfrentamiento',x=>{x.p+=fireDisc()},()=>sweep(()=>close()),null,1);if(S.mesa.includes('k04')&&S.hand.length)pickHand(1,go,1);else go();return 1}]);
@@ -1632,7 +1632,7 @@ function albFlip(d){const b=BOOKS.find(x=>x.id===ALB.b);if(!b)return;const np=Ma
   ALB.fx={a,cl,nw};a.finished.then(albEnd,albEnd)}
 /* termina al instante la vuelta de hoja que esté en curso */
 function albEnd(){const f=ALB.fx;if(!f)return;ALB.fx=null;try{f.a.cancel()}catch(e){}f.cl.remove();f.nw.style.zIndex=''}
-function albShow(id){const o=stLoad(),e=(o.alb||{})[id]||{},v=$('#alb-view'),pj=/^[mlprn]\d\d$/.test(id),k=/^k/.test(id),ev=/^c(07|50|52)$/.test(id);
+function albShow(id){const o=stLoad(),e=(o.alb||{})[id]||{},v=$('#alb-view'),pj=/^[mlprn]\d\d$/.test(id),k=/^k/.test(id),ev=/^t(04|24|26)$/.test(id);
   const rows=pj?[['Veces usada',(e.a||0)+(e.s||0)],['Como acción',e.a||0],['Como asistencia',e.s||0]]:k?[['Veces que te salió',e.v||0]]:ev?[['Veces activada',e.v||0]]:id==='j01'?[['Partidas jugadas',o.g||0]]:[['Veces vencida',e.v||0]];
   v.innerHTML=`${card(id)}<div class="av">${rows.map(([a,b])=>`<div><span>${a}</span><b>${b}</b></div>`).join('')}</div>${albHas(o,id)&&/^[a-z]\d\d$/.test(id)?cobHtml('e',id,5):''}<button id="alb-vx">Cerrar</button>`;v.classList.add('on')}
 document.body.insertAdjacentHTML('beforeend','<div id="alb-view"></div>');
@@ -3217,7 +3217,7 @@ const getMap=()=>{try{return JSON.parse(localStorage.getItem('mesa-files')||'{}'
 const setMap=m=>{try{localStorage.setItem('mesa-files',JSON.stringify(m))}catch(e){}};
 /* respaldo si no hay version.json */
 const offList=async()=>{
-  const L=[...rng('c',1,57),...rng('g',1,8),...rng('j',1,4),...rng('k',1,6)].map(id=>abU(`cartas/${id}.webp`));
+  const L=[...rng('t',1,31),...rng('g',1,8),...rng('j',1,4),...rng('k',1,6)].map(id=>abU(`cartas/${id}.webp`));
   rng('m',1,20).forEach(id=>L.push(abU(`personajes/personaje 1/${id}.webp`)));
   rng('l',1,20).forEach(id=>L.push(abU(`personajes/personaje 2/${id}.webp`)));
   rng('p',1,20).forEach(id=>L.push(abU(`personajes/personaje 3/${id}.webp`)));
