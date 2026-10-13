@@ -976,6 +976,7 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
         <button class="lob-friend" id="lob-btn-friend" disabled>👥 Con un amigo</button>
         <button class="lob-friend lob-quick" id="lob-btn-quick">⚡ Partida rápida<small class="lob-onl">🟢 online</small><b id="lob-q" class="lob-qb" style="display:none"></b></button>
       </div>
+      <button class="lob-friend lob-duel" id="lob-btn-duel">🦉 Duelo contra el Búho</button>
       <button class="lob-resume lob-hid" id="lob-btn-notif" style="display:none;margin-top:10px">🔔 Avisarme de partidas y actualizaciones</button>
       <div class="lob-icons lob-hid">
         <button id="lob-recs"><i>🏆</i><span>Récords</span></button>
@@ -3745,6 +3746,121 @@ $('#tutb').addEventListener('click',e=>{if(!TUT)return;
   if(e.target.closest('#tutb,#tutq'))return;const st=STEPS[TUT.i];if(st&&st.allow&&e.target.closest(st.allow))return;
   e.stopPropagation();e.preventDefault()},true));
 $('#o-tut').addEventListener('click',()=>{hideOpts();if(COOP){alert('El tutorial no está disponible en una partida con amigo.');return}tutAsk(1)});
+
+/* ===== MODO DUELO (contra el Búho): cada uno elige 2 cartas en secreto, se voltean, cada uno elige con cuál pelea
+   (la otra asiste), se lanzan los dados (cada dado del color de tu carta suma 1; la blanca solo cuenta el dado blanco)
+   y quien sume más hace 3 de daño (un color), 2 (dos colores) o 1 (blanca). 12 corazones cada uno. ===== */
+document.head.insertAdjacentHTML('beforeend',`<style>
+#duel{position:fixed;inset:0;z-index:70;display:none;flex-direction:column;background:radial-gradient(120% 70% at 50% 45%,#3a2a55,#160f22 70%);color:#f3eefc;font-family:Fredoka,sans-serif;padding:calc(env(safe-area-inset-top,0px) + 8px) 12px calc(env(safe-area-inset-bottom,0px) + 10px);overflow:hidden;user-select:none}
+#duel.on{display:flex}
+#duel .dtop,#duel .dbot{display:flex;align-items:center;gap:8px}
+#duel .dav{width:44px;height:44px;flex:none;display:grid;place-items:center;font-size:1.8rem}#duel .dav img{width:100%;height:100%;object-fit:contain}
+#duel .dnm{font-weight:700;font-size:1rem;line-height:1.1}#duel .dnm small{display:block;font-weight:500;font-size:.75rem;color:#c9bfe0}
+#duel .dtop .dhp{margin-right:42px}#duel .dhp{margin-left:auto;display:flex;align-items:center;gap:4px;font-weight:800;font-size:1.25rem}#duel .dhp i{font-style:normal;color:#ff4d5e}
+#duel .dbar{height:8px;border-radius:6px;background:#0006;overflow:hidden;margin:4px 0 6px}#duel .dbar b{display:block;height:100%;background:linear-gradient(90deg,#ff4d5e,#ff8a5c);transition:width .5s}
+#duel .dx{position:absolute;top:calc(env(safe-area-inset-top,0px) + 8px);right:10px;border:0;background:#0006;color:#fff;border-radius:50%;width:34px;height:34px;font-size:1rem}
+#duel .dmid{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:8px;min-height:0}
+#duel .drow{display:flex;justify-content:center;gap:10px;align-items:flex-end}
+#duel .dc{position:relative;width:min(30vw,128px);aspect-ratio:696/1015;border-radius:9px;transition:transform .25s,opacity .25s,width .3s;flex:none}
+#duel .dc img{width:100%;height:100%;border-radius:9px;display:block}
+#duel .dc::after{content:'';position:absolute;inset:0;border-radius:9px;background:var(--tint);opacity:.2;pointer-events:none;mix-blend-mode:color}
+#duel .dc{box-shadow:0 0 0 3px var(--c1),0 0 14px 2px var(--c1)}
+#duel .dc.c2{box-shadow:-3px 0 0 0 var(--c1),3px 0 0 0 var(--c2),0 -3px 0 0 var(--c1),0 3px 0 0 var(--c2),0 0 16px 2px var(--c1)}
+#duel .dc.back{box-shadow:0 4px 12px #000a}#duel .dc.back::after{display:none}
+#duel .dc.sel{transform:translateY(-10px) scale(1.05);box-shadow:0 0 0 4px #ffd34d,0 0 22px 6px #ffd34daa}#duel .dc.sel::before{content:'✓';position:absolute;top:-10px;right:-8px;z-index:2;width:26px;height:26px;border-radius:50%;background:#ffd34d;color:#3a2808;display:grid;place-items:center;font-weight:900;box-shadow:0 2px 6px #000a}
+#duel .dc.fight{width:min(36vw,150px)}#duel .dc.asst{width:min(22vw,92px);opacity:.85}
+#duel .dc .dtag{position:absolute;left:50%;bottom:-10px;transform:translateX(-50%);white-space:nowrap;background:#0d0a14ee;border-radius:10px;padding:2px 8px;font-size:.72rem;font-weight:700;box-shadow:0 0 0 1px #ffffff33}
+#duel .dhand{display:grid;grid-template-columns:repeat(3,1fr);gap:10px 8px;justify-items:center;margin:6px 0 4px}
+#duel .dhand .dc{width:min(27vw,112px)}
+#duel .dmsg{text-align:center;font-weight:600;font-size:1rem;min-height:1.3em;padding:0 6px}
+#duel .dgo{border:0;border-radius:14px;padding:12px 18px;font:800 1.05rem Fredoka,sans-serif;background:linear-gradient(180deg,#ffe07a,#e0a92a);color:#3a2808;box-shadow:0 4px 0 #8a5c12;min-width:60%}
+#duel .dgo:disabled{filter:grayscale(1);opacity:.5}
+#duel .ddice{display:flex;gap:8px;justify-content:center}
+#duel .ddie{width:38px;height:38px;border-radius:9px;box-shadow:inset 0 -4px 0 #0004,0 3px 8px #0008;border:2px solid #fff6}
+#duel .dtot{display:flex;justify-content:space-around;width:100%;max-width:380px;font-size:.85rem;text-align:center}
+#duel .dtot b{display:block;font-size:1.6rem}
+#duel .dtot .w b{color:#ffd34d;text-shadow:0 0 12px #ffd34d}
+#duel .dbig{position:fixed;inset:0;z-index:72;background:#000c;display:grid;place-items:center}#duel .dbig img{width:min(78vw,340px);border-radius:14px}
+#duel .dend{text-align:center}#duel .dend h2{font-size:2rem;margin:0 0 6px}
+#duel .dsmall{font-size:.75rem;color:#c9bfe0;text-align:center}
+.lob-duel{width:100%!important;max-width:420px;margin-top:10px!important;background:linear-gradient(180deg,#a36bff,#6b3cc9)!important;box-shadow:0 5px 0 #43207f,0 0 22px #a36bff55!important}
+</style>`);
+document.body.insertAdjacentHTML('beforeend','<div id="duel"></div>');
+const DCOL={r:'#ff3b46',a:'#2f7bff',v:'#22c35a',w:'#f4f1ea'},DCN={r:'rojo',a:'azul',v:'verde'};
+let D=null;
+const dCols=id=>MC[id][0]==='w'?['w']:MC[id][0].split(''); /* colores de la carta */
+const dDmg=id=>MC[id][0]==='w'?1:MC[id][0].length>1?2:3;
+const dExp=id=>MC[id][0]==='w'?.5:dCols(id).length; /* aciertos esperados con los dados */
+const dCard=(id,cls='',tag='')=>{if(!id)return `<div class="dc back ${cls}"><img src="cartas/reverso-personaje.webp" alt=""></div>`;const c=dCols(id),c1=DCOL[c[0]],c2=DCOL[c[1]||c[0]];
+  return `<div class="dc ${c.length>1?'c2':''} ${cls}" data-id="${id}" style="--c1:${c1};--c2:${c2};--tint:${c.length>1?`linear-gradient(90deg,${c1},${c2})`:c1}"><img src="${imgSrc(id)}" alt="">${tag?`<span class="dtag">${tag}</span>`:''}</div>`};
+function dDraw(k,n){const P=D.p[k];for(let i=0;i<n;i++){if(!P.deck.length){P.deck=shuf(P.disc);P.disc=[]}if(P.deck.length)P.hand.push(P.deck.pop())}}
+function duelStart(){const pj=pjOk(CHAR)?CHAR:'m',ops=PJO.filter(x=>x!==pj),bj=ops[Math.floor(Math.random()*ops.length)];
+  const mk=c=>({pj:c,hp:12,deck:shuf(rng(c,1,18)),hand:[],disc:[],two:[],fight:null});
+  D={p:[mk(pj),mk(bj)],ph:'pick2',sel:[],round:1,dice:null,res:null};dDraw(0,6);dDraw(1,6);
+  $('#duel').classList.add('on');try{SFX.shuffle()}catch(e){}dRender()}
+function duelExit(){D=null;$('#duel').classList.remove('on');$('#duel').innerHTML=''}
+/* el Búho: elige las 2 cartas con mejor combinación (poder de una + asistencia de la otra) y un poco de suerte */
+function owlPick2(){const H=D.p[1].hand;let best=null,bv=-1e9;
+  for(let i=0;i<H.length;i++)for(let j=i+1;j<H.length;j++){const a=H[i],b=H[j];const v=Math.max(MC[a][1]+MC[b][2]+dExp(a)+dDmg(a)*.6,MC[b][1]+MC[a][2]+dExp(b)+dDmg(b)*.6)+Math.random()*2.2;if(v>bv){bv=v;best=[a,b]}}
+  return best}
+const dTot=(f,o)=>MC[f][1]+MC[o][2]+dExp(f);
+function owlPick1(){const [a,b]=D.p[1].two,[x,y]=D.p[0].two;const me=Math.max(dTot(x,y),dTot(y,x));
+  const sc=(f,o)=>(dTot(f,o)-me)+dDmg(f)*.5+Math.random()*1.6;return sc(a,b)>=sc(b,a)?a:b}
+function dHearts(k){const P=D.p[k];return `<div class="dhp"><i>❤</i>${Math.max(0,P.hp)}</div>`}
+function dRender(){if(!D)return;const me=D.p[0],ow=D.p[1],E=$('#duel');
+  const head=`<button class="dx" id="dx">✕</button><div class="dtop"><div class="dav">${OWL}</div><div class="dnm">El Búho<small>con ${PJN[ow.pj]} ${PJI[ow.pj]}</small></div>${dHearts(1)}</div><div class="dbar"><b style="width:${Math.max(0,ow.hp)/12*100}%"></b></div>`;
+  const foot=`<div class="dbar"><b style="width:${Math.max(0,me.hp)/12*100}%"></b></div><div class="dbot"><div class="dav">${PJI[me.pj]}</div><div class="dnm">${YO?YO.n:'Tú'}<small>con ${PJN[me.pj]}</small></div>${dHearts(0)}</div>`;
+  let mid='';
+  if(D.ph==='pick2'){
+    mid=`<div class="drow">${dCard(null)}${dCard(null)}</div><div class="dsmall">El Búho ya eligió sus 2 cartas</div>
+      <div class="dmsg">Ronda ${D.round} · Elige <b>2 cartas</b> en secreto</div>
+      <div class="dhand">${me.hand.map(id=>dCard(id,D.sel.includes(id)?'sel':'')).join('')}</div>
+      <button class="dgo" id="dgo" ${D.sel.length===2?'':'disabled'}>Voltear mis 2 cartas</button><div class="dsmall">Mantén el dedo sobre una carta para verla en grande</div>`}
+  else if(D.ph==='pick1'){
+    mid=`<div class="drow">${ow.two.map(id=>dCard(id)).join('')}</div>
+      <div class="dmsg">Elige <b>con cuál peleas</b>. La otra te asiste con su número de asistencia.</div>
+      <div class="drow">${me.two.map(id=>dCard(id,D.sel[0]===id?'sel':'')).join('')}</div>
+      <button class="dgo" id="dgo" ${D.sel.length===1?'':'disabled'}>⚔️ Pelear con esta</button>`}
+  else if(D.ph==='fight'||D.ph==='done'){const r=D.res;
+    const side=k=>{const P=D.p[k],o=P.two.find(x=>x!==P.fight);return `<div class="drow">${dCard(P.fight,'fight',`Poder ${MC[P.fight][1]}`)}${dCard(o,'asst',`+${MC[o][2]} asist.`)}</div>`};
+    const dice=D.dice?`<div class="ddice">${D.dice.map(f=>`<div class="ddie" style="background:${COL[f]}"></div>`).join('')}</div>`:'';
+    const tot=r?`<div class="dtot"><div class="${r.win===0?'w':''}">${YO?YO.n:'Tú'}<b>${r.t[0]}</b>${r.h[0]} de dados</div><div class="${r.win===1?'w':''}">Búho<b>${r.t[1]}</b>${r.h[1]} de dados</div></div>`:'';
+    mid=`${side(1)}${dice}${tot}<div class="dmsg">${D.msg||''}</div>${side(0)}${D.ph==='done'?`<button class="dgo" id="dgo">${me.hp<=0||ow.hp<=0?'Ver resultado':'Siguiente ronda'}</button>`:''}`}
+  else if(D.ph==='end'){const w=ow.hp<=0;
+    mid=`<div class="dend"><div class="dav" style="width:110px;height:110px;margin:0 auto">${w?PJI[me.pj]:OWL}</div><h2>${w?'¡Ganaste el duelo!':'El Búho ganó'}</h2><p>${w?`Le quitaste todos los corazones al Búho en ${D.round} rondas.`:'¡Casi! Pide la revancha.'}</p>
+      <button class="dgo" id="dre">🔁 Revancha</button><p></p><button class="dgo" id="dxx" style="background:#4a4458;color:#fff;box-shadow:0 4px 0 #2a2633">Salir</button></div>`}
+  E.innerHTML=head+`<div class="dmid">${mid}</div>`+foot}
+async function dFight(){const me=D.p[0],ow=D.p[1];D.ph='fight';D.dice=null;D.res=null;D.msg='Volteando…';dRender();try{SFX.swoosh()}catch(e){}
+  await wait(900);D.msg='🎲 Lanzando los dados…';dRender();
+  const faces=()=>[0,1,2].map(()=>['verde','rojo','azul'][Math.floor(Math.random()*3)]).concat([Math.random()<.5?'blanco':'negro']);
+  for(let k=0;k<10;k++){D.dice=faces();dRender();try{SFX.tick()}catch(e){}await wait(70+k*12)}
+  const hits=id=>{const c=dCols(id);return c[0]==='w'?(D.dice[3]==='blanco'?1:0):D.dice.slice(0,3).filter(f=>c.some(x=>DCN[x]===f)).length};
+  const t=[0,1].map(k=>{const P=D.p[k],o=P.two.find(x=>x!==P.fight);return MC[P.fight][1]+MC[o][2]+hits(P.fight)}),h=[hits(me.fight),hits(ow.fight)];
+  const win=t[0]>t[1]?0:t[1]>t[0]?1:-1;D.res={t,h,win};
+  if(win<0){D.msg='¡Empate! Nadie recibe daño.';try{SFX.fail()}catch(e){}}
+  else{const dm=dDmg(D.p[win].fight);D.p[1-win].hp-=dm;D.msg=win===0?`¡Ganas la ronda! El Búho pierde ${dm} ❤`:`El Búho gana la ronda. Pierdes ${dm} ❤`;try{win===0?SFX.hit():SFX.down()}catch(e){}}
+  D.ph='done';dRender()}
+function dNext(){const me=D.p[0],ow=D.p[1];if(me.hp<=0||ow.hp<=0){D.ph='end';try{ow.hp<=0?SFX.win():SFX.fail()}catch(e){}
+    try{const o=stLoad();o.duel=o.duel||{w:0,l:0};o.duel[ow.hp<=0?'w':'l']++;stSave(o)}catch(e){}dRender();return}
+  [0,1].forEach(k=>{const P=D.p[k];P.disc.push(...P.two);P.two=[];P.fight=null;dDraw(k,2)});
+  D.round++;D.sel=[];D.dice=null;D.res=null;D.msg='';D.ph='pick2';try{SFX.draw()}catch(e){}dRender()}
+$('#duel').addEventListener('click',e=>{if(!D)return;const t=e.target;
+  if(t.closest('#dx')||t.closest('#dxx')){duelExit();return}
+  if(t.closest('#dre')){duelStart();return}
+  if(t.closest('.dbig')){t.closest('.dbig').remove();D.lp=0;return}
+  const c=t.closest('.dc[data-id]');
+  if(c&&D.ph==='pick2'&&c.closest('.dhand')){const id=c.dataset.id,i=D.sel.indexOf(id);if(i>=0)D.sel.splice(i,1);else if(D.sel.length<2)D.sel.push(id);try{SFX.pop()}catch(_){}dRender();return}
+  if(c&&D.ph==='pick1'&&D.p[0].two.includes(c.dataset.id)){D.sel=[c.dataset.id];try{SFX.pop()}catch(_){}dRender();return}
+  if(t.closest('#dgo')){
+    if(D.ph==='pick2'&&D.sel.length===2){const me=D.p[0],ow=D.p[1];me.two=D.sel.slice();me.hand=me.hand.filter(x=>!me.two.includes(x));ow.two=owlPick2();ow.hand=ow.hand.filter(x=>!ow.two.includes(x));D.sel=[];D.ph='pick1';try{SFX.swoosh()}catch(_){}dRender();return}
+    if(D.ph==='pick1'&&D.sel.length===1){D.p[0].fight=D.sel[0];D.p[1].fight=owlPick1();D.sel=[];dFight();return}
+    if(D.ph==='done'){dNext();return}}});
+/* mantener el dedo: ver la carta en grande (el toque que suelta no cuenta como selección) */
+{let tm=null;$('#duel').addEventListener('pointerdown',e=>{const c=e.target.closest('.dc[data-id]');if(!c||!D)return;tm=setTimeout(()=>{tm=null;D.lp=1;$('#duel').insertAdjacentHTML('beforeend',`<div class="dbig"><img src="${imgSrc(c.dataset.id)}" alt=""></div>`)},450)});
+ ['pointerup','pointercancel','pointerleave'].forEach(ev=>$('#duel').addEventListener(ev,()=>{if(tm){clearTimeout(tm);tm=null}}));
+ $('#duel').addEventListener('click',e=>{if(D&&D.lp&&!e.target.closest('.dbig')){D.lp=0;e.stopImmediatePropagation()}},true);
+ $('#duel').addEventListener('contextmenu',e=>e.preventDefault())}
+$('#lob-btn-duel').addEventListener('click',()=>{try{SFX.pop()}catch(e){}duelStart()});
 
 /* ===== aviso: la red actual no deja llegar al servidor del juego (se queda la versión guardada) ===== */
 async function netProbe(){if(!navigator.onLine||sinNet())return;const t0=Date.now();let err='';
