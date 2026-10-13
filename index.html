@@ -3747,113 +3747,197 @@ $('#tutb').addEventListener('click',e=>{if(!TUT)return;
   e.stopPropagation();e.preventDefault()},true));
 $('#o-tut').addEventListener('click',()=>{hideOpts();if(COOP){alert('El tutorial no está disponible en una partida con amigo.');return}tutAsk(1)});
 
-/* ===== MODO DUELO (contra el Búho): cada uno elige 2 cartas en secreto, se voltean, cada uno elige con cuál pelea
-   (la otra asiste), se lanzan los dados (cada dado del color de tu carta suma 1; la blanca solo cuenta el dado blanco)
-   y quien sume más hace 3 de daño (un color), 2 (dos colores) o 1 (blanca). 12 corazones cada uno. ===== */
+/* ===== MODO DUELO (contra el Búho) =====
+   Cada ronda: cada uno elige 2 cartas en secreto → se voltean → cada uno elige con cuál pelea (la otra asiste)
+   → ventaja de color: rojo vence a verde, verde a azul y azul a rojo (+3 de poder; con una blanca nadie gana ventaja)
+   → dados: cada dado del color de tu carta suma 1; la carta blanca suma con los 3 dados de color y con el blanco (el negro nunca suma)
+   → quien sume más hace 3 de daño (un color), 2 (dos colores) o 1 (blanca). 12 corazones cada uno. */
 document.head.insertAdjacentHTML('beforeend',`<style>
-#duel{position:fixed;inset:0;z-index:70;display:none;flex-direction:column;background:radial-gradient(120% 70% at 50% 45%,#3a2a55,#160f22 70%);color:#f3eefc;font-family:Fredoka,sans-serif;padding:calc(env(safe-area-inset-top,0px) + 8px) 12px calc(env(safe-area-inset-bottom,0px) + 10px);overflow:hidden;user-select:none}
-#duel.on{display:flex}
-#duel .dtop,#duel .dbot{display:flex;align-items:center;gap:8px}
-#duel .dav{width:44px;height:44px;flex:none;display:grid;place-items:center;font-size:1.8rem}#duel .dav img{width:100%;height:100%;object-fit:contain}
-#duel .dnm{font-weight:700;font-size:1rem;line-height:1.1}#duel .dnm small{display:block;font-weight:500;font-size:.75rem;color:#c9bfe0}
-#duel .dtop .dhp{margin-right:42px}#duel .dhp{margin-left:auto;display:flex;align-items:center;gap:4px;font-weight:800;font-size:1.25rem}#duel .dhp i{font-style:normal;color:#ff4d5e}
-#duel .dbar{height:8px;border-radius:6px;background:#0006;overflow:hidden;margin:4px 0 6px}#duel .dbar b{display:block;height:100%;background:linear-gradient(90deg,#ff4d5e,#ff8a5c);transition:width .5s}
-#duel .dx{position:absolute;top:calc(env(safe-area-inset-top,0px) + 8px);right:10px;border:0;background:#0006;color:#fff;border-radius:50%;width:34px;height:34px;font-size:1rem}
-#duel .dmid{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:8px;min-height:0}
-#duel .drow{display:flex;justify-content:center;gap:10px;align-items:flex-end}
-#duel .dc{position:relative;width:min(30vw,128px);aspect-ratio:696/1015;border-radius:9px;transition:transform .25s,opacity .25s,width .3s;flex:none}
-#duel .dc img{width:100%;height:100%;border-radius:9px;display:block}
-#duel .dc::after{content:'';position:absolute;inset:0;border-radius:9px;background:var(--tint);opacity:.2;pointer-events:none;mix-blend-mode:color}
-#duel .dc{box-shadow:0 0 0 3px var(--c1),0 0 14px 2px var(--c1)}
-#duel .dc.c2{box-shadow:-3px 0 0 0 var(--c1),3px 0 0 0 var(--c2),0 -3px 0 0 var(--c1),0 3px 0 0 var(--c2),0 0 16px 2px var(--c1)}
-#duel .dc.back{box-shadow:0 4px 12px #000a}#duel .dc.back::after{display:none}
-#duel .dc.sel{transform:translateY(-10px) scale(1.05);box-shadow:0 0 0 4px #ffd34d,0 0 22px 6px #ffd34daa}#duel .dc.sel::before{content:'✓';position:absolute;top:-10px;right:-8px;z-index:2;width:26px;height:26px;border-radius:50%;background:#ffd34d;color:#3a2808;display:grid;place-items:center;font-weight:900;box-shadow:0 2px 6px #000a}
-#duel .dc.fight{width:min(36vw,150px)}#duel .dc.asst{width:min(22vw,92px);opacity:.85}
-#duel .dc .dtag{position:absolute;left:50%;bottom:-10px;transform:translateX(-50%);white-space:nowrap;background:#0d0a14ee;border-radius:10px;padding:2px 8px;font-size:.72rem;font-weight:700;box-shadow:0 0 0 1px #ffffff33}
-#duel .dhand{display:grid;grid-template-columns:repeat(3,1fr);gap:10px 8px;justify-items:center;margin:6px 0 4px}
-#duel .dhand .dc{width:min(27vw,112px)}
-#duel .dmsg{text-align:center;font-weight:600;font-size:1rem;min-height:1.3em;padding:0 6px}
-#duel .dgo{border:0;border-radius:14px;padding:12px 18px;font:800 1.05rem Fredoka,sans-serif;background:linear-gradient(180deg,#ffe07a,#e0a92a);color:#3a2808;box-shadow:0 4px 0 #8a5c12;min-width:60%}
-#duel .dgo:disabled{filter:grayscale(1);opacity:.5}
-#duel .ddice{display:flex;gap:8px;justify-content:center}
-#duel .ddie{width:38px;height:38px;border-radius:9px;box-shadow:inset 0 -4px 0 #0004,0 3px 8px #0008;border:2px solid #fff6}
-#duel .dtot{display:flex;justify-content:space-around;width:100%;max-width:380px;font-size:.85rem;text-align:center}
-#duel .dtot b{display:block;font-size:1.6rem}
-#duel .dtot .w b{color:#ffd34d;text-shadow:0 0 12px #ffd34d}
-#duel .dbig{position:fixed;inset:0;z-index:72;background:#000c;display:grid;place-items:center}#duel .dbig img{width:min(78vw,340px);border-radius:14px}
-#duel .dend{text-align:center}#duel .dend h2{font-size:2rem;margin:0 0 6px}
-#duel .dsmall{font-size:.75rem;color:#c9bfe0;text-align:center}
+#duel{position:fixed;inset:0;z-index:70;display:none;color:#f3eefc;font-family:Fredoka,sans-serif;overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+#duel.on{display:block}
+#duel .dbg{position:absolute;inset:0;background:var(--dtab,radial-gradient(120% 70% at 50% 45%,#3a2a55,#160f22 70%)) center/cover no-repeat;filter:brightness(.62)}
+#duel .dbg::after{content:'';position:absolute;inset:0;background:radial-gradient(90% 60% at 50% 42%,transparent,#0d0a14cc)}
+#duel .dhud{position:absolute;left:10px;right:10px;display:flex;align-items:center;gap:8px;z-index:3}
+#duel .dhud.top{top:calc(env(safe-area-inset-top,0px) + 8px);padding-right:44px}
+#duel .dhud.bot{bottom:calc(env(safe-area-inset-bottom,0px) + min(44vw,190px) + 4px);}
+#duel .dnm{font-weight:700;font-size:.95rem;line-height:1.1;text-shadow:0 2px 4px #000}#duel .dnm small{display:block;font-weight:500;font-size:.72rem;color:#d9cff0}
+#duel .dhearts{margin-left:auto;display:grid;grid-template-columns:repeat(6,auto);gap:1px 2px;font-size:15px;line-height:1}
+#duel .dhearts i{font-style:normal;color:#ff3f55;text-shadow:0 0 6px #ff3f5599,0 1px 1px #000;display:inline-block}
+#duel .dhearts i.off{color:#3a3346;text-shadow:none}
+#duel .dhearts i.brk{animation:dbrk .9s forwards}
+@keyframes dbrk{0%{transform:scale(1)}25%{transform:scale(1.9);color:#fff}60%{transform:scale(1.3) rotate(-18deg);opacity:1}100%{transform:translateY(26px) rotate(30deg) scale(.6);opacity:0}}
+#duel .dx{position:absolute;top:calc(env(safe-area-inset-top,0px) + 6px);right:8px;z-index:5;border:0;background:#0008;color:#fff;border-radius:50%;width:36px;height:36px;font-size:1rem}
+#duel .dfoe,#duel .dhero{position:absolute;z-index:2;pointer-events:none;filter:drop-shadow(0 8px 10px #000a)}
+#duel .dfoe{right:4vw;top:calc(env(safe-area-inset-top,0px) + 54px);width:min(26vw,110px)}
+#duel .dhero{left:2vw;bottom:calc(env(safe-area-inset-bottom,0px) + min(44vw,190px) + 40px);width:min(24vw,100px)}
+#duel .dfoe img,#duel .dhero img{width:100%;display:block}
+#duel .dfoe{animation:dfloat 2.6s ease-in-out infinite}@keyframes dfloat{50%{transform:translateY(-8px)}}
+#duel .dtable{position:absolute;left:0;right:0;top:calc(env(safe-area-inset-top,0px) + 54px);bottom:calc(env(safe-area-inset-bottom,0px) + min(44vw,190px) + 40px);display:flex;flex-direction:column;justify-content:space-between;align-items:center;z-index:2;padding:4px 0}
+#duel .dslot{display:flex;gap:8px;justify-content:center;align-items:flex-end;min-height:min(31vw,135px)}
+#duel .dslot.foe{padding-right:18vw}#duel .dslot.me{padding-left:18vw}
+#duel .dmsg{text-align:center;font-weight:700;font-size:1.02rem;text-shadow:0 2px 6px #000;padding:6px 12px;border-radius:14px;background:#0d0a14aa;max-width:88vw}
+#duel .dmsg:empty{display:none}
+#duel .dc{position:relative;width:min(21vw,92px);aspect-ratio:696/1015;border-radius:8px;flex:none;transition:transform .25s,box-shadow .25s}
+#duel .dc img{width:100%;height:100%;border-radius:8px;display:block}
+#duel .dc::after{content:'';position:absolute;inset:0;border-radius:8px;background:var(--tint);opacity:.22;pointer-events:none;mix-blend-mode:color}
+#duel .dc{box-shadow:0 0 0 3px var(--c1),0 0 14px 2px var(--c1),0 6px 12px #000a}
+#duel .dc.c2{box-shadow:-3px 0 0 0 var(--c1),3px 0 0 0 var(--c2),0 -3px 0 0 var(--c1),0 3px 0 0 var(--c2),0 0 16px 2px var(--c1),0 6px 12px #000a}
+#duel .dc.back{box-shadow:0 6px 12px #000a}#duel .dc.back::after{display:none}
+#duel .dc.pk{cursor:pointer}#duel .dc.sel{transform:translateY(-12px) scale(1.06);box-shadow:0 0 0 4px #ffd34d,0 0 24px 8px #ffd34daa}
+#duel .dc .dtag{position:absolute;left:50%;bottom:-9px;transform:translateX(-50%);white-space:nowrap;background:#0d0a14ee;border-radius:10px;padding:1px 7px;font-size:.66rem;font-weight:700;box-shadow:0 0 0 1px #ffffff33}
+#duel .dfan{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 4px);height:min(44vw,190px);z-index:4}
+#duel .dfan .dc{position:absolute;left:50%;bottom:6px;width:min(25vw,112px);margin-left:calc(min(25vw,112px)/-2);transform-origin:50% 120%;transition:transform .3s cubic-bezier(.2,.9,.3,1.2)}
+#duel .dfan .dc.sel{z-index:9}
+#duel .dfan .dc.in{animation:ddeal .5s cubic-bezier(.2,.9,.3,1.2) both}@keyframes ddeal{from{transform:translate(40vw,30px) rotate(30deg) scale(.6);opacity:0}}
+#duel .dact{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;z-index:6;pointer-events:none;min-height:44px}
+#duel .dact>*{pointer-events:auto}
+#duel .dgo{border:0;border-radius:14px;padding:10px 18px;font:800 1rem Fredoka,sans-serif;background:linear-gradient(180deg,#ffe07a,#e0a92a);color:#3a2808;box-shadow:0 4px 0 #8a5c12,0 0 18px #ffd34d66}
+#duel .dgo:disabled{filter:grayscale(1);opacity:.5;box-shadow:0 4px 0 #555}
+#duel .dcol{border:0;border-radius:12px;padding:8px 12px;font:800 .9rem Fredoka,sans-serif;color:#fff;box-shadow:0 3px 0 #0006;opacity:.55}#duel .dcol.on{opacity:1;box-shadow:0 0 0 3px #fff,0 3px 0 #0006}
+#duel .dbig{position:absolute;inset:0;z-index:20;background:#000c;display:grid;place-items:center}#duel .dbig img{width:min(80vw,340px);border-radius:14px}
+#duel .dcine{position:absolute;inset:0;z-index:12;background:#05030aee;display:none;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px}
+#duel .dcine.on{display:flex}
+#duel .dcine .dvs{display:flex;align-items:center;justify-content:center;gap:4vw;width:100%}
+#duel .dcine .dside{display:flex;flex-direction:column;align-items:center;gap:8px;width:40vw;max-width:190px}
+#duel .dcine .dside .dc{width:100%}
+#duel .dcine .dvsx{font:900 2rem Fredoka,sans-serif;color:#ffd34d;text-shadow:0 0 18px #ffd34d}
+#duel .dorb{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;font:800 1.9rem Fredoka,sans-serif;background:radial-gradient(circle at 35% 30%,#8fd0ff,#2f6fe0 70%);box-shadow:0 0 18px #4fa8ff99;color:#fff}
+#duel .dorb.foe{background:radial-gradient(circle at 35% 30%,#d4b0ff,#7a3cc9 70%);box-shadow:0 0 18px #b47cff99}
+#duel .dorb.w{animation:dwin .8s ease-in-out infinite alternate;box-shadow:0 0 30px 10px #ffd34d}@keyframes dwin{to{transform:scale(1.15)}}
+#duel .dchips{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;font-size:.72rem;font-weight:700}#duel .dchips span{background:#ffffff1f;border-radius:8px;padding:2px 7px}#duel .dchips .bon{background:#ffd34d;color:#3a2808;animation:dpop .5s cubic-bezier(.2,.9,.3,1.4)}
+@keyframes dpop{from{transform:scale(0)}}
+#duel #ddice{position:relative;display:flex;justify-content:center;align-items:center;gap:2vw;--s:min(16vw,72px);perspective:700px;height:calc(var(--s)*1.5);width:100%;max-width:460px}
+#duel #ddice .slot{flex:none}
+#duel .dres{font:900 1.6rem Fredoka,sans-serif;text-shadow:0 2px 10px #000;min-height:2rem;text-align:center}
+#duel .dfx{position:absolute;z-index:30;pointer-events:none;font:900 2.4rem Fredoka,sans-serif;color:#ff4d5e;text-shadow:0 0 14px #ff4d5e,0 3px 0 #000;transform:translate(-50%,-50%)}
+#duel .dspk{position:absolute;z-index:30;width:24px;height:24px;margin:-12px 0 0 -12px;border-radius:50%;background:radial-gradient(#fff 25%,var(--c) 62%,transparent 72%);box-shadow:0 0 14px 6px var(--c);pointer-events:none}
+#duel .dflash{position:absolute;inset:0;z-index:25;pointer-events:none;background:radial-gradient(circle,transparent 40%,#ff1a3088);opacity:0}
+#duel .dend{position:absolute;inset:0;z-index:15;background:#05030add;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:20px}
+#duel .dend h2{font-size:2rem;margin:0}#duel .dend img{width:min(40vw,170px)}
 .lob-duel{width:100%!important;max-width:420px;margin-top:10px!important;background:linear-gradient(180deg,#a36bff,#6b3cc9)!important;box-shadow:0 5px 0 #43207f,0 0 22px #a36bff55!important}
 </style>`);
 document.body.insertAdjacentHTML('beforeend','<div id="duel"></div>');
-const DCOL={r:'#ff3b46',a:'#2f7bff',v:'#22c35a',w:'#f4f1ea'},DCN={r:'rojo',a:'azul',v:'verde'};
+const DCOL={r:'#ff3b46',a:'#2f7bff',v:'#22c35a',w:'#f4f1ea'},DCN={r:'rojo',a:'azul',v:'verde'},DBEAT={r:'v',v:'a',a:'r'},DEMO={r:'🔴',a:'🔵',v:'🟢'};
 let D=null;
-const dCols=id=>MC[id][0]==='w'?['w']:MC[id][0].split(''); /* colores de la carta */
+const dCols=id=>MC[id][0]==='w'?['w']:MC[id][0].split('');
 const dDmg=id=>MC[id][0]==='w'?1:MC[id][0].length>1?2:3;
-const dExp=id=>MC[id][0]==='w'?.5:dCols(id).length; /* aciertos esperados con los dados */
-const dCard=(id,cls='',tag='')=>{if(!id)return `<div class="dc back ${cls}"><img src="cartas/reverso-personaje.webp" alt=""></div>`;const c=dCols(id),c1=DCOL[c[0]],c2=DCOL[c[1]||c[0]];
-  return `<div class="dc ${c.length>1?'c2':''} ${cls}" data-id="${id}" style="--c1:${c1};--c2:${c2};--tint:${c.length>1?`linear-gradient(90deg,${c1},${c2})`:c1}"><img src="${imgSrc(id)}" alt="">${tag?`<span class="dtag">${tag}</span>`:''}</div>`};
+const dExp=id=>MC[id][0]==='w'?3.5:dCols(id).length; /* aciertos esperados con los dados */
+const dSprite=pj=>({m:'bruno',l:'veralyn',r:'robi'})[pj]||AV||'guerrero';
+const dCard=(id,cls='',tag='',sty='')=>{if(!id)return `<div class="dc back ${cls}" style="${sty}"><img src="cartas/reverso-personaje.webp" alt=""></div>`;const c=dCols(id),c1=DCOL[c[0]],c2=DCOL[c[1]||c[0]];
+  return `<div class="dc ${c.length>1?'c2':''} ${cls}" data-id="${id}" style="${sty}--c1:${c1};--c2:${c2};--tint:${c.length>1?`linear-gradient(90deg,${c1},${c2})`:c1}"><img src="${imgSrc(id)}" alt="">${tag?`<span class="dtag">${tag}</span>`:''}</div>`};
 function dDraw(k,n){const P=D.p[k];for(let i=0;i<n;i++){if(!P.deck.length){P.deck=shuf(P.disc);P.disc=[]}if(P.deck.length)P.hand.push(P.deck.pop())}}
+/* ventaja de color: +3 si tu color vence al del rival (con una blanca, nadie) */
+const dBonus=(ca,cb)=>!ca||!cb||ca==='w'||cb==='w'?0:DBEAT[ca]===cb?3:0;
+const dHits=(id,F)=>{const c=dCols(id),fc=F.map((f,i)=>DICE[i][f]);if(c[0]==='w')return fc.filter(x=>x!=='negro').length;return fc.slice(0,3).filter(f=>c.some(x=>DCN[x]===f)).length};
 function duelStart(){const pj=pjOk(CHAR)?CHAR:'m',ops=PJO.filter(x=>x!==pj),bj=ops[Math.floor(Math.random()*ops.length)];
-  const mk=c=>({pj:c,hp:12,deck:shuf(rng(c,1,18)),hand:[],disc:[],two:[],fight:null});
-  D={p:[mk(pj),mk(bj)],ph:'pick2',sel:[],round:1,dice:null,res:null};dDraw(0,6);dDraw(1,6);
-  $('#duel').classList.add('on');try{SFX.shuffle()}catch(e){}dRender()}
-function duelExit(){D=null;$('#duel').classList.remove('on');$('#duel').innerHTML=''}
-/* el Búho: elige las 2 cartas con mejor combinación (poder de una + asistencia de la otra) y un poco de suerte */
+  const mk=c=>({pj:c,hp:12,deck:shuf(rng(c,1,18)),hand:[],disc:[],two:[],fight:null,col:null});
+  D={p:[mk(pj),mk(bj)],ph:'pick2',sel:[],round:1,msg:'',deal:1};dDraw(0,6);dDraw(1,6);
+  let t='t00';try{t=localStorage.getItem('mesa-tab')||'t00'}catch(e){}if(!tabOk(t))t='t00';
+  const E=$('#duel');E.style.setProperty('--dtab',t!=='t00'?`url("${tabUrl(t)}")`:'');
+  E.innerHTML=`<div class="dbg"></div><div class="dflash"></div><button class="dx" id="dx">✕</button>
+    <div class="dhud top"><div class="dnm">El Búho<small>con el mazo de ${PJN[bj]} ${PJI[bj]}</small></div><div class="dhearts" id="dh1"></div></div>
+    <div class="dfoe" id="dfoe">${OWL}</div><div class="dtable"><div class="dslot foe" id="dsf"></div><div style="display:flex;flex-direction:column;align-items:center;gap:8px"><div class="dmsg" id="dmsg"></div><div class="dact" id="dact"></div></div><div class="dslot me" id="dsm"></div></div>
+    <div class="dhero" id="dhero"><img src="guerreros/${dSprite(pj)}-parado.webp" alt=""></div>
+    <div class="dhud bot"><div class="dnm">${YO?YO.n:'Tú'}<small>con ${PJN[pj]} ${PJI[pj]}</small></div><div class="dhearts" id="dh0"></div></div>
+    <div class="dfan" id="dfan"></div><div class="dcine" id="dcine"></div>`;
+  E.classList.add('on');try{SFX.shuffle()}catch(e){}dRender()}
+function duelExit(){D=null;const E=$('#duel');E.classList.remove('on');E.innerHTML=''}
+function dHeartsHtml(hp,brk=0){let h='';for(let i=0;i<12;i++)h+=`<i class="${i>=hp+brk?'off':i>=hp?'brk':''}">❤</i>`;return h}
+function dFan(){const H=D.p[0].hand,n=H.length,F=$('#dfan');if(!F)return;
+  const pick=D.ph==='pick2';
+  F.innerHTML=H.map((id,i)=>{const m=i-(n-1)/2,sel=D.sel.includes(id);
+    const tr=`translateX(${m*12.5}vw) translateY(${m*m*4-(sel?30:0)}px) rotate(${m*6}deg)`;
+    return dCard(id,`${pick?'pk':''} ${sel?'sel':''} ${D.deal?'in':''}`,'',`transform:${tr};z-index:${i+1};animation-delay:${i*70}ms;`)}).join('');
+  D.deal=0}
+function dRender(){if(!D)return;const me=D.p[0],ow=D.p[1];
+  $('#dh0').innerHTML=dHeartsHtml(me.hp);$('#dh1').innerHTML=dHeartsHtml(ow.hp);
+  const sf=$('#dsf'),sm=$('#dsm'),A=$('#dact');
+  if(D.ph==='pick2'){sf.innerHTML=dCard(null)+dCard(null);sm.innerHTML='';$('#dmsg').textContent=D.msg||`Ronda ${D.round} · Elige 2 cartas de tu mano en secreto`;
+    A.innerHTML=`<button class="dgo" id="dgo" ${D.sel.length===2?'':'disabled'}>Voltear mis 2 cartas (${D.sel.length}/2)</button>`}
+  else if(D.ph==='pick1'){sf.innerHTML=ow.two.map(id=>dCard(id)).join('');sm.innerHTML=me.two.map(id=>dCard(id,'pk '+(D.sel[0]===id?'sel':''))).join('');
+    $('#dmsg').innerHTML='Elige <b>con cuál peleas</b>. La otra te asiste.';
+    const f=D.sel[0],c=f?dCols(f):[];
+    A.innerHTML=(c.length>1?c.map(k=>`<button class="dcol ${D.col===k?'on':''}" data-col="${k}" style="background:${DCOL[k]}">${DEMO[k]} ${DCN[k]}</button>`).join(''):'')+`<button class="dgo" id="dgo" ${f?'':'disabled'}>⚔️ Pelear</button>`}
+  else if(D.ph==='done'){A.innerHTML=`<button class="dgo" id="dgo">${me.hp<=0||ow.hp<=0?'Ver resultado':'Siguiente ronda'}</button>`}
+  else A.innerHTML='';
+  dFan()}
+/* el Búho: elige sus 2 cartas y luego con cuál pelea (mirando tus 2 cartas, sin saber cuál elegiste) */
 function owlPick2(){const H=D.p[1].hand;let best=null,bv=-1e9;
-  for(let i=0;i<H.length;i++)for(let j=i+1;j<H.length;j++){const a=H[i],b=H[j];const v=Math.max(MC[a][1]+MC[b][2]+dExp(a)+dDmg(a)*.6,MC[b][1]+MC[a][2]+dExp(b)+dDmg(b)*.6)+Math.random()*2.2;if(v>bv){bv=v;best=[a,b]}}
+  for(let i=0;i<H.length;i++)for(let j=i+1;j<H.length;j++){const a=H[i],b=H[j];const v=Math.max(MC[a][1]+MC[b][2]+dExp(a)+dDmg(a)*.7,MC[b][1]+MC[a][2]+dExp(b)+dDmg(b)*.7)+Math.random()*2.5;if(v>bv){bv=v;best=[a,b]}}
   return best}
-const dTot=(f,o)=>MC[f][1]+MC[o][2]+dExp(f);
-function owlPick1(){const [a,b]=D.p[1].two,[x,y]=D.p[0].two;const me=Math.max(dTot(x,y),dTot(y,x));
-  const sc=(f,o)=>(dTot(f,o)-me)+dDmg(f)*.5+Math.random()*1.6;return sc(a,b)>=sc(b,a)?a:b}
-function dHearts(k){const P=D.p[k];return `<div class="dhp"><i>❤</i>${Math.max(0,P.hp)}</div>`}
-function dRender(){if(!D)return;const me=D.p[0],ow=D.p[1],E=$('#duel');
-  const head=`<button class="dx" id="dx">✕</button><div class="dtop"><div class="dav">${OWL}</div><div class="dnm">El Búho<small>con ${PJN[ow.pj]} ${PJI[ow.pj]}</small></div>${dHearts(1)}</div><div class="dbar"><b style="width:${Math.max(0,ow.hp)/12*100}%"></b></div>`;
-  const foot=`<div class="dbar"><b style="width:${Math.max(0,me.hp)/12*100}%"></b></div><div class="dbot"><div class="dav">${PJI[me.pj]}</div><div class="dnm">${YO?YO.n:'Tú'}<small>con ${PJN[me.pj]}</small></div>${dHearts(0)}</div>`;
-  let mid='';
-  if(D.ph==='pick2'){
-    mid=`<div class="drow">${dCard(null)}${dCard(null)}</div><div class="dsmall">El Búho ya eligió sus 2 cartas</div>
-      <div class="dmsg">Ronda ${D.round} · Elige <b>2 cartas</b> en secreto</div>
-      <div class="dhand">${me.hand.map(id=>dCard(id,D.sel.includes(id)?'sel':'')).join('')}</div>
-      <button class="dgo" id="dgo" ${D.sel.length===2?'':'disabled'}>Voltear mis 2 cartas</button><div class="dsmall">Mantén el dedo sobre una carta para verla en grande</div>`}
-  else if(D.ph==='pick1'){
-    mid=`<div class="drow">${ow.two.map(id=>dCard(id)).join('')}</div>
-      <div class="dmsg">Elige <b>con cuál peleas</b>. La otra te asiste con su número de asistencia.</div>
-      <div class="drow">${me.two.map(id=>dCard(id,D.sel[0]===id?'sel':'')).join('')}</div>
-      <button class="dgo" id="dgo" ${D.sel.length===1?'':'disabled'}>⚔️ Pelear con esta</button>`}
-  else if(D.ph==='fight'||D.ph==='done'){const r=D.res;
-    const side=k=>{const P=D.p[k],o=P.two.find(x=>x!==P.fight);return `<div class="drow">${dCard(P.fight,'fight',`Poder ${MC[P.fight][1]}`)}${dCard(o,'asst',`+${MC[o][2]} asist.`)}</div>`};
-    const dice=D.dice?`<div class="ddice">${D.dice.map(f=>`<div class="ddie" style="background:${COL[f]}"></div>`).join('')}</div>`:'';
-    const tot=r?`<div class="dtot"><div class="${r.win===0?'w':''}">${YO?YO.n:'Tú'}<b>${r.t[0]}</b>${r.h[0]} de dados</div><div class="${r.win===1?'w':''}">Búho<b>${r.t[1]}</b>${r.h[1]} de dados</div></div>`:'';
-    mid=`${side(1)}${dice}${tot}<div class="dmsg">${D.msg||''}</div>${side(0)}${D.ph==='done'?`<button class="dgo" id="dgo">${me.hp<=0||ow.hp<=0?'Ver resultado':'Siguiente ronda'}</button>`:''}`}
-  else if(D.ph==='end'){const w=ow.hp<=0;
-    mid=`<div class="dend"><div class="dav" style="width:110px;height:110px;margin:0 auto">${w?PJI[me.pj]:OWL}</div><h2>${w?'¡Ganaste el duelo!':'El Búho ganó'}</h2><p>${w?`Le quitaste todos los corazones al Búho en ${D.round} rondas.`:'¡Casi! Pide la revancha.'}</p>
-      <button class="dgo" id="dre">🔁 Revancha</button><p></p><button class="dgo" id="dxx" style="background:#4a4458;color:#fff;box-shadow:0 4px 0 #2a2633">Salir</button></div>`}
-  E.innerHTML=head+`<div class="dmid">${mid}</div>`+foot}
-async function dFight(){const me=D.p[0],ow=D.p[1];D.ph='fight';D.dice=null;D.res=null;D.msg='Volteando…';dRender();try{SFX.swoosh()}catch(e){}
-  await wait(900);D.msg='🎲 Lanzando los dados…';dRender();
-  const faces=()=>[0,1,2].map(()=>['verde','rojo','azul'][Math.floor(Math.random()*3)]).concat([Math.random()<.5?'blanco':'negro']);
-  for(let k=0;k<10;k++){D.dice=faces();dRender();try{SFX.tick()}catch(e){}await wait(70+k*12)}
-  const hits=id=>{const c=dCols(id);return c[0]==='w'?(D.dice[3]==='blanco'?1:0):D.dice.slice(0,3).filter(f=>c.some(x=>DCN[x]===f)).length};
-  const t=[0,1].map(k=>{const P=D.p[k],o=P.two.find(x=>x!==P.fight);return MC[P.fight][1]+MC[o][2]+hits(P.fight)}),h=[hits(me.fight),hits(ow.fight)];
+function owlPick1(){const [a,b]=D.p[1].two,[x,y]=D.p[0].two;
+  const myOpts=[[x,y],[y,x]].map(([f,o])=>({f,o,c:dCols(f)}));
+  let best=null,bv=-1e9;
+  [[a,b],[b,a]].forEach(([f,o])=>dCols(f).forEach(col=>{
+    let s=0;myOpts.forEach(m=>{const mc=m.c[0];const mine=MC[f][1]+MC[o][2]+dExp(f)+dBonus(col,mc),his=MC[m.f][1]+MC[m.o][2]+dExp(m.f)+Math.max(...m.c.map(k=>dBonus(k,col)));s+=(mine-his)+(mine>his?dDmg(f)*.6:0)});
+    s=s/2+Math.random()*1.8;if(s>bv){bv=s;best={f,col}}}));
+  return best}
+const dRect=el=>el.getBoundingClientRect(),dCtr=el=>{const r=dRect(el);return [r.left+r.width/2,r.top+r.height/2]};
+function dFloat(t,x,y,col){const e=document.createElement('div');e.className='dfx';e.textContent=t;e.style.left=x+'px';e.style.top=y+'px';if(col)e.style.color=col;$('#duel').appendChild(e);
+  e.animate([{transform:'translate(-50%,-50%) scale(.4)',opacity:0},{transform:'translate(-50%,-90%) scale(1.2)',opacity:1,offset:.3},{transform:'translate(-50%,-190%) scale(1)',opacity:0}],{duration:1300,fill:'forwards'}).finished.then(()=>e.remove())}
+async function dFight(){const me=D.p[0],ow=D.p[1],C=$('#dcine');D.ph='fight';dRender();
+  const oth=P=>P.two.find(x=>x!==P.fight);
+  const bon=[dBonus(me.col,ow.col),dBonus(ow.col,me.col)];
+  const base=[0,1].map(k=>{const P=D.p[k];return MC[P.fight][1]+MC[oth(P)][2]+bon[k]});
+  const chips=k=>{const P=D.p[k];return `<span>Poder ${MC[P.fight][1]}</span><span>+${MC[oth(P)][2]} asist.</span>${P.col!=='w'?`<span>${DEMO[P.col]} ${DCN[P.col]}</span>`:'<span>⚪ blanca</span>'}`};
+  C.innerHTML=`<div class="dres" id="dres">¡Batalla!</div><div class="dvs"><div class="dside" id="dsL">${dCard(me.fight)}<div class="dchips" id="dcL">${chips(0)}</div><div class="dorb" id="doL">${MC[me.fight][1]+MC[oth(me)][2]}</div></div><div class="dvsx">VS</div><div class="dside" id="dsR">${dCard(ow.fight)}<div class="dchips" id="dcR">${chips(1)}</div><div class="dorb foe" id="doR">${MC[ow.fight][1]+MC[oth(ow)][2]}</div></div></div><div id="ddice"></div>`;
+  C.classList.add('on');try{SFX.swoosh()}catch(e){}
+  await Promise.all([AN($('#dsL'),[{transform:'translateX(-60vw)'},{transform:'none'}],{duration:500,easing:'cubic-bezier(.2,.9,.3,1.2)'}),AN($('#dsR'),[{transform:'translateX(60vw)'},{transform:'none'}],{duration:500,easing:'cubic-bezier(.2,.9,.3,1.2)'})]);
+  await wait(400);
+  /* ventaja de color */
+  for(const k of [0,1])if(bon[k]){const o=$(k?'#doR':'#doL');$(k?'#dcR':'#dcL').insertAdjacentHTML('beforeend',`<span class="bon">¡Ventaja de color! +3</span>`);o.textContent=+o.textContent+3;o.animate([{transform:'scale(1.5)'},{transform:'scale(1)'}],{duration:400});try{SFX.charge()}catch(e){}await wait(700)}
+  if(!bon[0]&&!bon[1]&&me.col!=='w'&&ow.col!=='w'){$('#dres').textContent='Sin ventaja de color';await wait(500)}
+  if(me.col==='w'||ow.col==='w'){$('#dres').textContent='Con carta blanca nadie tiene ventaja';await wait(700)}
+  /* dados de verdad */
+  $('#dres').textContent='🎲 ¡Dados!';const dd=$('#ddice');dice.forEach(d=>dd.appendChild(d.slot));
+  const F=dice.map(()=>Math.floor(Math.random()*6));const tk=setInterval(()=>{try{SFX.tick()}catch(e){}},130);
+  try{await roll(null,null,F)}finally{clearInterval(tk)}await wait(300);
+  const h=[0,0],t=base.slice();
+  for(let i=0;i<4;i++){const f=DICE[i][F[i]];
+    for(const k of [0,1]){const P=D.p[k],c=dCols(P.fight);const ok=c[0]==='w'?f!=='negro':(i<3&&c.some(x=>DCN[x]===f));if(!ok)continue;
+      h[k]++;t[k]++;const o=$(k?'#doR':'#doL'),[sx,sy]=dCtr(dice[i].slot),[tx,ty]=dCtr(o),sp=document.createElement('div');sp.className='dspk';sp.style.cssText=`left:${sx}px;top:${sy}px;--c:${COL[f]}`;$('#duel').appendChild(sp);
+      try{SFX.combo(h[k])}catch(e){}await AN(sp,[{transform:'scale(.5)'},{transform:`translate(${tx-sx}px,${ty-sy}px) scale(.9)`}],{duration:520,easing:'ease-in'});sp.remove();o.textContent=t[k];o.animate([{transform:'scale(1.5)'},{transform:'scale(1)'}],{duration:300})}}
   const win=t[0]>t[1]?0:t[1]>t[0]?1:-1;D.res={t,h,win};
-  if(win<0){D.msg='¡Empate! Nadie recibe daño.';try{SFX.fail()}catch(e){}}
-  else{const dm=dDmg(D.p[win].fight);D.p[1-win].hp-=dm;D.msg=win===0?`¡Ganas la ronda! El Búho pierde ${dm} ❤`:`El Búho gana la ronda. Pierdes ${dm} ❤`;try{win===0?SFX.hit():SFX.down()}catch(e){}}
-  D.ph='done';dRender()}
-function dNext(){const me=D.p[0],ow=D.p[1];if(me.hp<=0||ow.hp<=0){D.ph='end';try{ow.hp<=0?SFX.win():SFX.fail()}catch(e){}
-    try{const o=stLoad();o.duel=o.duel||{w:0,l:0};o.duel[ow.hp<=0?'w':'l']++;stSave(o)}catch(e){}dRender();return}
-  [0,1].forEach(k=>{const P=D.p[k];P.disc.push(...P.two);P.two=[];P.fight=null;dDraw(k,2)});
-  D.round++;D.sel=[];D.dice=null;D.res=null;D.msg='';D.ph='pick2';try{SFX.draw()}catch(e){}dRender()}
+  await wait(350);
+  if(win<0){$('#dres').textContent='¡Empate!';try{SFX.fail()}catch(e){}await wait(1100)}
+  else{$(win?'#doR':'#doL').classList.add('w');$('#dres').textContent=win===0?'¡Ganas la ronda!':'Gana el Búho';try{win===0?SFX.win():SFX.fail()}catch(e){}
+    $(win?'#dsL':'#dsR').animate([{transform:'none',opacity:1},{transform:'translateY(14px) rotate('+(win?-8:8)+'deg)',opacity:.45}],{duration:500,fill:'forwards'});await wait(1300)}
+  C.classList.remove('on');document.querySelectorAll('#duel .dspk').forEach(x=>x.remove());
+  /* golpe en el tablero */
+  if(win>=0){const dm=dDmg(D.p[win].fight),atk=win===0?$('#dhero'):$('#dfoe'),def=win===0?$('#dfoe'):$('#dhero');
+    const [ax,ay]=dCtr(atk),[bx,by]=dCtr(def);
+    if(win===0){const im=atk.querySelector('img');if(im)im.src=`guerreros/${dSprite(me.pj)}-camina.webp`}
+    try{SFX.slash()}catch(e){}
+    await AN(atk,[{transform:'none'},{transform:`translate(${(bx-ax)*.75}px,${(by-ay)*.75}px) scale(1.1)`,offset:.55},{transform:'none'}],{duration:700,easing:'cubic-bezier(.5,0,.5,1)'});
+    if(win===0){const im=atk.querySelector('img');if(im)im.src=`guerreros/${dSprite(me.pj)}-parado.webp`}
+    try{SFX.boom()}catch(e){}def.animate([{transform:'none',filter:'brightness(1)'},{transform:'translateX(-10px)',filter:'brightness(3) saturate(0)'},{transform:'translateX(10px)'},{transform:'translateX(-6px)'},{transform:'none',filter:'brightness(1)'}],{duration:450});
+    $('#duel .dflash').animate([{opacity:0},{opacity:1},{opacity:0}],{duration:500});
+    $('#duel').animate([{transform:'none'},{transform:'translate(6px,-4px)'},{transform:'translate(-6px,3px)'},{transform:'none'}],{duration:300});
+    const L=D.p[1-win],h0=L.hp;L.hp=Math.max(0,L.hp-dm);
+    $(win===0?'#dh1':'#dh0').innerHTML=dHeartsHtml(L.hp,h0-L.hp);
+    dFloat('−'+dm+' ❤',bx,by-20);await wait(1000);
+    D.msg=win===0?`¡Le quitas ${dm} ❤ al Búho!`:`El Búho te quita ${dm} ❤`}
+  else D.msg='Empate: nadie pierde corazones';
+  $('#dmsg').textContent=D.msg;D.ph='done';dRender()}
+function dNext(){const me=D.p[0],ow=D.p[1];
+  if(me.hp<=0||ow.hp<=0){D.ph='end';const w=ow.hp<=0;try{w?SFX.fanfare():SFX.fail()}catch(e){}
+    try{const o=stLoad();o.duel=o.duel||{w:0,l:0};o.duel[w?'w':'l']++;stSave(o)}catch(e){}
+    $('#duel').insertAdjacentHTML('beforeend',`<div class="dend">${w?`<img src="guerreros/${dSprite(me.pj)}-parado.webp" alt="">`:`<div style="width:min(40vw,170px)">${OWL}</div>`}<h2>${w?'¡Ganaste el duelo!':'El Búho ganó'}</h2><p>${w?`Le quitaste todos los corazones al Búho en ${D.round} rondas.`:'¡Casi! Pide la revancha.'}</p><button class="dgo" id="dre">🔁 Revancha</button><button class="dgo" id="dxx" style="background:#4a4458;color:#fff;box-shadow:0 4px 0 #2a2633">Salir</button></div>`);
+    if(w)try{confetti()}catch(e){}return}
+  [0,1].forEach(k=>{const P=D.p[k];P.disc.push(...P.two);P.two=[];P.fight=null;P.col=null;dDraw(k,2)});
+  D.round++;D.sel=[];D.res=null;D.msg='';D.ph='pick2';D.deal=1;try{SFX.draw()}catch(e){}dRender()}
 $('#duel').addEventListener('click',e=>{if(!D)return;const t=e.target;
   if(t.closest('#dx')||t.closest('#dxx')){duelExit();return}
   if(t.closest('#dre')){duelStart();return}
   if(t.closest('.dbig')){t.closest('.dbig').remove();D.lp=0;return}
-  const c=t.closest('.dc[data-id]');
-  if(c&&D.ph==='pick2'&&c.closest('.dhand')){const id=c.dataset.id,i=D.sel.indexOf(id);if(i>=0)D.sel.splice(i,1);else if(D.sel.length<2)D.sel.push(id);try{SFX.pop()}catch(_){}dRender();return}
-  if(c&&D.ph==='pick1'&&D.p[0].two.includes(c.dataset.id)){D.sel=[c.dataset.id];try{SFX.pop()}catch(_){}dRender();return}
+  const cb=t.closest('[data-col]');if(cb&&D.ph==='pick1'){D.col=cb.dataset.col;try{SFX.pop()}catch(_){}dRender();return}
+  const c=t.closest('.dc.pk[data-id]');
+  if(c&&D.ph==='pick2'){const id=c.dataset.id,i=D.sel.indexOf(id);if(i>=0)D.sel.splice(i,1);else if(D.sel.length<2)D.sel.push(id);try{SFX.pop()}catch(_){}dRender();return}
+  if(c&&D.ph==='pick1'){D.sel=[c.dataset.id];D.col=dCols(c.dataset.id)[0];try{SFX.pop()}catch(_){}dRender();return}
   if(t.closest('#dgo')){
-    if(D.ph==='pick2'&&D.sel.length===2){const me=D.p[0],ow=D.p[1];me.two=D.sel.slice();me.hand=me.hand.filter(x=>!me.two.includes(x));ow.two=owlPick2();ow.hand=ow.hand.filter(x=>!ow.two.includes(x));D.sel=[];D.ph='pick1';try{SFX.swoosh()}catch(_){}dRender();return}
-    if(D.ph==='pick1'&&D.sel.length===1){D.p[0].fight=D.sel[0];D.p[1].fight=owlPick1();D.sel=[];dFight();return}
+    if(D.ph==='pick2'&&D.sel.length===2){const me=D.p[0],ow=D.p[1];me.two=D.sel.slice();me.hand=me.hand.filter(x=>!me.two.includes(x));ow.two=owlPick2();ow.hand=ow.hand.filter(x=>!ow.two.includes(x));D.sel=[];D.ph='pick1';
+      try{SFX.swoosh()}catch(_){}dRender();document.querySelectorAll('#dsf .dc,#dsm .dc').forEach((x,i)=>x.animate([{transform:'rotateY(90deg) scale(.8)'},{transform:'none'}],{duration:420,delay:i*90,fill:'backwards'}));return}
+    if(D.ph==='pick1'&&D.sel.length===1){const me=D.p[0];me.fight=D.sel[0];me.col=D.col||dCols(me.fight)[0];const o=owlPick1();D.p[1].fight=o.f;D.p[1].col=o.col;D.sel=[];dFight();return}
     if(D.ph==='done'){dNext();return}}});
 /* mantener el dedo: ver la carta en grande (el toque que suelta no cuenta como selección) */
 {let tm=null;$('#duel').addEventListener('pointerdown',e=>{const c=e.target.closest('.dc[data-id]');if(!c||!D)return;tm=setTimeout(()=>{tm=null;D.lp=1;$('#duel').insertAdjacentHTML('beforeend',`<div class="dbig"><img src="${imgSrc(c.dataset.id)}" alt=""></div>`)},450)});
