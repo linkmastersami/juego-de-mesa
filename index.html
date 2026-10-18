@@ -976,7 +976,7 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
         <button class="lob-friend" id="lob-btn-friend" disabled>👥 Con un amigo</button>
         <button class="lob-friend lob-quick" id="lob-btn-quick">⚡ Partida rápida<small class="lob-onl">🟢 online</small><b id="lob-q" class="lob-qb" style="display:none"></b></button>
       </div>
-      <button class="lob-friend lob-duel" id="lob-btn-duel">🦉 Duelo contra el Búho</button>
+      <button class="lob-friend lob-duel" id="lob-btn-duel" disabled style="filter:grayscale(.6);opacity:.75">🔒 Duelo contra el Búho<small class="lob-onl">Próximamente</small></button>
       <button class="lob-resume lob-hid" id="lob-btn-notif" style="display:none;margin-top:10px">🔔 Avisarme de partidas y actualizaciones</button>
       <div class="lob-icons lob-hid">
         <button id="lob-recs"><i>🏆</i><span>Récords</span></button>
@@ -3998,7 +3998,7 @@ $('#duel').addEventListener('click',e=>{if(!D)return;const t=e.target;
   if(t.closest('#dgo')){
     if(D.ph==='pick'&&D.sel){const me=D.p[0];me.fight=D.sel;me.col=D.col||dCols(me.fight)[0];const o=owlPick1();D.p[1].fight=o.f;D.p[1].col=o.col;dFight();return}
     if(D.ph==='done'){dNext();return}}});
-$('#lob-btn-duel').addEventListener('click',()=>{try{SFX.pop()}catch(e){}duelStart()});
+$('#lob-btn-duel').addEventListener('click',()=>{if($('#lob-btn-duel').disabled)return;try{SFX.pop()}catch(e){}duelStart()}); /* duelo en pausa: botón bloqueado (Próximamente) */
 
 /* ===== aviso: la red actual no deja llegar al servidor del juego (se queda la versión guardada) ===== */
 async function netProbe(){if(!navigator.onLine||sinNet())return;const t0=Date.now();let err='';
