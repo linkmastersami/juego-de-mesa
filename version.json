@@ -29,7 +29,7 @@
   "cartas/reverso.webp": "7d57d7b2f124",
   "cartas/t01.webp": "5aee8037df55",
   "cartas/t02.webp": "286235fc5d8f",
-  "cartas/t03.webp": "f1fe734ea0fb",
+  "cartas/t03.webp": "d1394fd6da1d",
   "cartas/t04.webp": "081d8b52c9f1",
   "cartas/t05.webp": "87a3e770c684",
   "cartas/t06.webp": "01e3f46e1ae9",
@@ -44,7 +44,7 @@
   "cartas/t15.webp": "eb4b969ae769",
   "cartas/t16.webp": "d68345858484",
   "cartas/t17.webp": "c2f70d52600a",
-  "cartas/t18.webp": "45fc35f9aaa6",
+  "cartas/t18.webp": "b0804f9cc92d",
   "cartas/t19.webp": "1f80c4552bcb",
   "cartas/t20.webp": "96a344d2c322",
   "cartas/t21.webp": "8ba224a90c6f",
@@ -101,7 +101,7 @@
   "iconos/i-comunidad.webp": "e5ffa3d48a3e",
   "iconos/i-records.webp": "3f192fdbc183",
   "iconos/i-tableros.webp": "aad177dc6e2d",
-  "index.html": "b984fc8c3505",
+  "index.html": "1cc0a8f8c24b",
   "logo.webp": "a46ce5f9a338",
   "manifest.json": "81bc7f803d05",
   "musica/batalla.mp3": "292447f839b4",
@@ -253,5 +253,5 @@
   "voces/16.mp3": "f67abff52fc8",
   "voces/17.mp3": "e55eb23faa86"
  },
- "version": "356c21e9a0b5"
+ "version": "385ddf85cf40"
 }

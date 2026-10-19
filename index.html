@@ -1982,7 +1982,7 @@ const totB=()=>B.act?sumB()+(B.act===p06()?2*fireDisc():0):0;
 const blk=c=>S.cross.some(y=>y&&y.id==='t06')&&c.id!=='t06';
 /* efecto al entrar a la cruz (t09 absorbe el daño de los demás; los mini-jefes t20-t22 quitan 1 al reloj): se muestra y luego se aplica */
 /* cartas con efecto continuo: al entrar a la cruz se muestran en grande avisando su efecto (el texto sale de la propia carta) */
-const CONT={t03:'Si robas cualquier sombra, pierdes la partida',
+const CONT={t03:'Cada vez que robes una sombra, pierdes 3 corazones',
   t05:'Cada vez que saques oscuridad en la tirada, debes descartar una carta',
   t06:'No se le pueden quitar PV a ningún otro enfrentamiento',
   t07:'No puede ser descartado. Cada vez que otro enfrentamiento sea descartado, sufres 2 de daño',
@@ -1991,7 +1991,7 @@ const CONT={t03:'Si robas cualquier sombra, pierdes la partida',
   t12:'Los demás enfrentamientos tienen −2 PV. Si fallas otro enfrentamiento, sufres su penalización otra vez',
   t14:'No puedes enfrentarlo. Sufres 1 de daño por cada carta que descartes de tu mano',
   t17:'Todo el daño que sufras de otras cartas se duplica',
-  t18:'Si debes descartar más cartas de las que tienes en la mano, pierdes la partida',
+  t18:'Cada vez que descartes cartas de tu mano, pierdes 3 corazones',
   t19:'Pierde 2 PV al final de cada turno',
   t23:'Cada vez que falles otro enfrentamiento y saques oscuridad, sufres 1 de daño'};
 function entryFx(i){const x=S.cross[i];if(!x||x.id[0]!=='t')return null;
@@ -2246,11 +2246,12 @@ function sweep(cont){
   if(id[0]==='g')S.cross[i]={id:'g'+pad(+id.slice(1)+4),p:0};else if(id==='t27'){S.apart.push(id);S.cross[i]=null}else{S.comp.push(id);S.cross[i]=null}
   render();
   res2(id,'<div class="pv">¡Enfrentamiento completado!</div><p>Se quedó sin PV.</p><p>Recompensa:</p>',[...(spec[id]||[[],[]])[0]],()=>sweep(cont))}
-function discCard(id){S.hand.splice(S.hand.indexOf(id),1);S.disc.push(id);qDisc(id);if(S.cross.some(y=>y&&y.id==='t14'))hurt(1)}
-function pickHand(n,b,r){if(!r&&n&&S.mesa.includes('k04'))n++;if(n>S.hand.length&&S.cross.some(y=>y&&y.id==='t18')){S.hp=0;S.why='No tenías cartas suficientes para descartar con este enfrentamiento en juego.';S.whyC=['t18']}if(!n||!S.hand.length)return b();ov(null,S.hand.map(x=>[x,()=>{discCard(x);render();pickHand(n-1,b,1);return 1},0,'',x]),`<p>Descarta ${n} carta(s)</p>`,1)}
+let T18T=0;
+function discCard(id){S.hand.splice(S.hand.indexOf(id),1);S.disc.push(id);qDisc(id);if(S.cross.some(y=>y&&y.id==='t18')&&Date.now()-T18T>1500){T18T=Date.now();hurt(3);if(S.hp<=0){S.why='Las Arenas movedizas te quitaron tus últimos corazones al descartar.';S.whyC=['t18']}}if(S.cross.some(y=>y&&y.id==='t14'))hurt(1)}
+function pickHand(n,b,r){if(!r&&n&&S.mesa.includes('k04'))n++;if(!n||!S.hand.length)return b();ov(null,S.hand.map(x=>[x,()=>{discCard(x);render();pickHand(n-1,b,1);return 1},0,'',x]),`<p>Descarta ${n} carta(s)</p>`,1)}
 const hurt=(n,r)=>{const h0=S.hp;if(MALL&&n>0){fxStamp('¡DAÑO EVITADO!','ok');return}if(M18&&n>0){n--;M18=0;fxStamp('¡DAÑO EVITADO!','ok')}S.hp=Math.max(0,S.hp-n*(!r&&S.cross.some(y=>y&&y.id==='t17')?2:1)-(S.mesa.includes('k05')?1:0));if(S.hp<h0)fxHurt(h0,S.hp)};
 function kShow(id,back,hd){coopKEv(id);try{albGet(id,'v')}catch(e){}const n=+id.slice(1),f=S.final,bj=q=>{S.cross[0].p=Math.max(0,S.cross[0].p-q)};
-  if(S.cross.some(x=>x&&x.id==='t03')){S.hp=0;S.why='Robaste una sombra con este enfrentamiento en juego.';S.whyC=['t03']}
+  if(S.cross.some(x=>x&&x.id==='t03')){hurt(3);if(S.hp<=0){S.why='El Laberinto de enredaderas te quitó tus últimos corazones al robar una sombra.';S.whyC=['t03']}}
   const E={1:[f?'el jefe final recupera 5 PV':'quitar 1 al reloj del eclipse',()=>bj(f?5:1)],3:[f?'el jefe final recupera 10 PV':'quitar 2 al reloj del eclipse',()=>bj(f?10:2)],6:['sufrir 3 de daño',()=>hurt(3)]}[n],b=[];
   if(E)b.push(['Aplicar: '+E[0]+' y barajarla al mazo',()=>{E[1]();S.mesa.splice(S.mesa.indexOf(id),1);S.dK.push(id);shuf(S.dK);render();fxShufK();if(back){back();return 1}}]);
   else if(back)b.push(['Continuar',()=>{back();return 1}]);
