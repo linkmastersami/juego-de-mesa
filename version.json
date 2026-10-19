@@ -61,9 +61,12 @@
   "fondos/album.webp": "41e8d73a2ee9",
   "fondos/comunidad.webp": "b53c237e605c",
   "fondos/derrota.webp": "898296b1038f",
+  "fondos/estandarte.jpg": "3a367cb9e873",
   "fondos/menu.webp": "fbac4e5b0cad",
   "fondos/nombre.webp": "d1efc3373b32",
+  "fondos/pedestal.jpg": "40ae5b4049b0",
   "fondos/records.webp": "e2bf21851c5e",
+  "fondos/repisa.jpg": "1eac65420950",
   "fondos/tableros.webp": "d49d6f5845d2",
   "fondos/victoria.webp": "04d1b27a2897",
   "guerreros/arquera-camina.webp": "f38eda949ef4",
@@ -292,5 +295,5 @@
   "voces/37.wav": "c17ec3fbc04b",
   "voces/38.wav": "c55a81fdbb39"
  },
- "version": "290453b065aa"
+ "version": "b1b66af1a086"
 }
