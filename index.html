@@ -1866,7 +1866,7 @@ async function shareVictory(st){
   }catch(e){}
 }
 function endGame(){if(VS&&!VS.fin){vsFinish('lose',S.why);return}coopOver('lose',S.why);S.over=1;const rr=stRecord(0);fxStamp('DERROTA','ko');
-  const bj=S.cross[0],near=S.final?`👹 ¡Llegaste a la batalla final!${bj&&isBoss(bj.id)?` Al jefe le quedaban ${Math.max(0,LV(bj)-bj.p)} PV`:''}`:`🚪 Te faltaban ${S.dC.length} cartas ${CD().dk} para llegar al jefe final`;
+  const bj=S.cross[0],near=VSA()?'🏰 Asalto a la fortaleza':VSC()?`🏁 Carrera · puntos: tú ${(S.pts||{})[VS.local?'p':MP.role]||0}`:S.final?`👹 ¡Llegaste a la batalla final!${bj&&isBoss(bj.id)?` Al jefe le quedaban ${Math.max(0,LV(bj)-bj.p)} PV`:''}`:`🚪 Te faltaban ${S.dC.length} cartas ${CD().dk} para llegar al jefe final`;
   const dst=`<div class="vst"><div class="vnote">${near}</div><div><span>🕒 Turnos jugados</span><b>${S.turn}</b></div><div><span>🏆 Enfrentamientos completados</span><b>${S.nc||0}</b></div><div><span>🌑 Sombras robadas</span><b>${S.vk||0}</b></div>${bj&&isCtr(bj.id)?`<div><span>${bj.id==='ej1'?'🕯️ Velas':'⏳ Reloj del eclipse'}</span><b>${Math.max(0,bj.p)}</b></div>`:''}</div>${stHtml(rr)}`;
   const cs=(S.whyC||[]).filter(Boolean),cards=cs.length?`<div class="grid" style="grid-template-columns:repeat(${Math.min(cs.length,2)},1fr);max-width:${Math.min(cs.length,2)*110}px;margin:8px auto">${cs.map(id=>`<div>${card(id)}</div>`).join('')}</div>`:'';
   /* ventana fija (sin "Cerrar"): siempre hay una salida, nunca queda el tablero trabado */
@@ -3178,7 +3178,7 @@ function vsInitS(){
   }
 }
 /* el jugador en turno elige: cobrar su recompensa o mandarle una sombra al rival (Carrera) */
-function vsAskK(b){ov(null,[['🎁 Cobrar la recompensa',()=>{VS.skipR=0;close();b();return 1}],['🌑 Mandarle 1 sombra a tu rival',()=>{VS.skipR=1;vsSendK();close();b();return 1}]],'<p>¡Lo venciste! ¿Qué prefieres?</p>',1)}
+function vsAskK(b){if(S.over||VS.fin)return b();ov(null,[['🎁 Cobrar la recompensa',()=>{VS.skipR=0;close();b();return 1}],['🌑 Mandarle 1 sombra a tu rival',()=>{VS.skipR=1;vsSendK();close();b();return 1}]],'<p>¡Lo venciste! ¿Qué prefieres?</p>',1)}
 function vsSendK(){if(VS.local)VS.pend[VSOP()].push(1);else mpSend({k:'vsk'});render()}
 function vsPendK(){if(!VS||!VS.pend)return;const q=VS.pend[VS.local?VS.cur:MP.role]||[];if(!q.length)return;q.shift();const id=S.dK.pop();if(!id)return vsPendK();
   const w=setInterval(()=>{if(FXR||INTRO||$('#ov').classList.contains('on'))return;clearInterval(w);S.mesa.push(id);S.vk=(S.vk||0)+1;render();
@@ -3240,8 +3240,12 @@ function vsAIstep(){
   const vis=e=>e&&e.offsetParent!==null;
   const dy=[...document.querySelectorAll('body>div [data-y]')].filter(b=>!b.disabled&&vis(b));if(dy.length){(dy.find(b=>b.dataset.y!=='-1'&&b.dataset.y!=='0')||dy[0]).click();return}
   const cd=$('#cdlg');if(cd&&cd.classList.contains('on')){const b=[...cd.querySelectorAll('button')].find(vis);if(b){b.click();return}}
-  const o=$('#ov');if(o.classList.contains('on')){const pk=[...o.querySelectorAll('.pks [data-b]')];if(pk.length){pk[Math.floor(Math.random()*pk.length)].click();return}
-    const bs=[...o.querySelectorAll('.btns button')].filter(b=>!b.disabled);const nb=bs.find(b=>!b.classList.contains('ghost')&&!/Cancelar|Cerrar|Mandarle/.test(b.textContent))||bs[0];if(nb)nb.click();return}
+  const o=$('#ov');if(o.classList.contains('on')){const pk=[...o.querySelectorAll('.pks [data-b]')],bs=[...o.querySelectorAll('.btns button')].filter(b=>!b.disabled);
+    const main=bs.find(b=>!b.classList.contains('ghost')&&!/Cancelar|Cerrar|Mandarle|No descartar/.test(b.textContent));
+    /* ventanas donde se marcan varias cartas y luego se confirma: marca una y confirma */
+    const key=((o.querySelector('p')||{}).textContent||'')+'|'+pk.length;VS.aiN=VS.aiK===key?(VS.aiN||0)+1:0;VS.aiK=key;
+    if(pk.length&&!(VS.aiN>=1&&main)){pk[Math.floor(Math.random()*pk.length)].click();return}
+    const nb=main||bs.find(b=>!b.classList.contains('ghost')&&!/Mandarle/.test(b.textContent))||bs[0];if(nb)nb.click();return}
   if(B&&$('#bt').classList.contains('on')&&!CINE){
     if(!B.act){const c=S.hand.find(x=>okc(x)&&x!=='l12');if(c){B.act=c;rb();return}}
     else if(B.as.length<1){const c=S.hand.find(x=>x!==B.act&&!B.as.includes(x)&&oka(x)&&MC[x]);if(c){B.as.push(c);rb();return}}
