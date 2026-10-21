@@ -1259,7 +1259,7 @@ function fxPlay(job){FXQ.push(job);if(FXR)return;FXR=1;FXL.classList.add('on');(
 
 /* ---------- animaciones extra ---------- */
 /* marcador de la cruz: los enfrentamientos muestran los PV que les quedan (bajan al dañarlos); el reloj del centro, su valor */
-const pgV=(i,id,p)=>{if(i===0&&isCtr(id))return p;let lv=null;try{lv=LV({id,p})}catch(e){}if(lv===null||lv===undefined||isNaN(lv))return p;if(lv>=99)return '∞';return Math.max(0,lv-p)};
+const pgV=(i,id,p)=>{if(i===0&&isCtr(id))return p;let lv=null;try{const c=S.cross[i];lv=LV({id,p,x:c&&c.id===id?c.x:0})}catch(e){} /* x: PV extra (Muñeca que parpadea, héroe curado en el Asalto) */if(lv===null||lv===undefined||isNaN(lv))return p;if(lv>=99)return '∞';return Math.max(0,lv-p)};
 const pgC=(i,id)=>i===0&&isCtr(id)?(id==='ej1'?'pg rl vl'+(VEL()<=3?' dark':''):'pg rl'):CH[id]||id==='t14'?'pg hp':'pg ev';
 const PEND={},PGOLD={},PGN={};/* PGOLD: valor de progreso que se sigue mostrando hasta que le toca su animación (antes se veía el nuevo y luego subía/bajaba) */
 let SKIPG=new Set(),PV=[],PHP=null,PM=null,PMA=null,PT=null,PHAB=null,DFQ=[],NOFX=0,BR=0,TP=null,IDLE=0;const BQ=[];
