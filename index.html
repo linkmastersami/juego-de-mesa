@@ -1284,7 +1284,7 @@ const jStamp=(t,k)=>async L=>{k==='ok'?SFX.win():SFX.fail();vib(k==='ok'?[40,40,
 function NP(){try{return Math.min(4,Math.max(1,MP.code?(MP.peer?2:1):1))}catch(e){return 1}}
 function hN(){return 9-NP()}
 /* al empezar el turno con la mano vacía es obligatorio robar un agotamiento (no cuenta como robado a propósito) */
-function forceK(){if(COOP&&!MYT)return;if(S.over||S.hp<=0||S.hand.length||!S.dK.length)return;const id=S.dK.pop();S.vk=(S.vk||0)+1;S.mesa.push(id);S.hand=[];fxPlay(async L=>{L.innerHTML='<div class="fxt">😮‍💨 ¡Te quedaste sin cartas en la mano!</div><p style="color:#fff;text-align:center;font:600 1.1rem Fredoka,sans-serif;margin:8px 16px 0">Robas una sombra y se llena tu mano</p>';SFX.thud();await wait(2600)});draw(hN());render();const w=setInterval(()=>{if(FXR||$('#ov').classList.contains('on'))return;clearInterval(w);kShow(id,0,1)},150)}
+function forceK(){if(COOP&&!MYT)return;if(S.over||S.hp<=0||S.hand.length||!S.dK.length)return;const id=S.dK.pop();S.vk=(S.vk||0)+1;S.mesa.push(id);S.hand=[];fxPlay(async L=>{L.innerHTML='<div class="fxt">😮‍💨 ¡Te quedaste sin cartas en la mano!</div><p style="color:#fff;text-align:center;font:600 1.1rem Fredoka,sans-serif;margin:8px 16px 0">Robas una sombra y se llena tu mano</p>';SFX.thud();await wait(2600)});draw(hN());render();const w=setInterval(()=>{if(FXR||$('#ov').classList.contains('on'))return;clearInterval(w);kShow(id,kEnd,1)},150)}
 const fxTurnB=a=>fxPlay(async L=>{L.innerHTML=a?`<div class="tbn">TURNO</div><div class="tnum"><span class="o">${a}</span><span class="n">${a+1}</span></div>`:`<div class="tbn">TURNO</div><div class="tnum"><span class="n" style="transform:none;animation:pop .5s cubic-bezier(.2,.9,.3,1.3) both">1</span></div>`;SFX.bell();vib([20,30,20]);await wait(a?1800:1500)});
 const fxTurn=a=>{fxTurnB(a);fxPlay(async()=>{try{await turnStartFx()}catch(e){}forceK()})};
 const fxHeal=(a,b)=>fxPlay(async L=>{L.innerHTML=`<div class="fxt">¡Recuperas salud!</div><div class="hw"><div class="hrt heal"><span>💚</span><b>${a}</b></div></div>`;const N=L.querySelector('b');await wait(700);for(let v=a+1;v<=b;v++){N.textContent=v;N.classList.remove('tick');void N.offsetWidth;N.classList.add('tick');SFX.heal();vib(15);await wait(420)}await wait(700)});
@@ -1878,7 +1878,7 @@ const newGame=()=>{RES2=null;RUNFX=0;presHide(1);close();try{localStorage.remove
 function openDeck(k){
   if(k!=='K')return;
   if(k==='K')ov(null,[
-    [`Robar una carta (descartas tu mano y robas ${hN()})`,()=>{if(!S.dK.length)return msg('El mazo está vacío');const id=S.dK.pop();S.vk=(S.vk||0)+1;S.mesa.push(id);S.hand.forEach(x=>S.disc.push(x));S.hand=[];draw(hN());render();kShow(id,0,1);return 1}]
+    [`Robar una carta (descartas tu mano y robas ${hN()})`,()=>{if(!S.dK.length)return msg('El mazo está vacío');const id=S.dK.pop();S.vk=(S.vk||0)+1;S.mesa.push(id);S.hand.forEach(x=>S.disc.push(x));S.hand=[];draw(hN());render();kShow(id,kEnd,1);return 1}]
   ],`<p>Mazo de sombras: ${S.dK.length}</p>`);
 }
 
@@ -2066,7 +2066,7 @@ function entryFx(i){const x=S.cross[i];if(!x||!isDeck(x.id)||x.h)return null;
   if(x.id==='t09'){if(!S.cross.some((y,k)=>y&&k&&k!==i&&y.p>0))return null;return {txt:'Absorbe el daño de los demás enfrentamientos',fn:()=>{S.cross.forEach((y,k)=>{if(y&&k&&k!==i){x.p+=y.p;y.p=0}})}}}
   if(isMJ(x.id)&&S.cross[0])return {kind:'Mini-jefe',txt:'Quita 1 al reloj del eclipse',fn:()=>{S.cross[0].p=VSA()?S.cross[0].p:Math.max(0,S.cross[0].p-1)}};
   return null}
-function dropCh(i){const x=S.cross[i];if(i<=0||!x)return; /* el jefe final (centro de la cruz) nunca se descarta */
+function dropCh(i){const x=S.cross[i];if(i<=0||!x)return;if(/^[mlprn]20$/.test(x.id)&&VSA())return; /* el héroe del Asalto no se puede descartar */ /* el jefe final (centro de la cruz) nunca se descarta */
   if(isG(x.id)){if(isGF(x.id)&&x.id!=='g03'&&x.id!=='eg1'){S.cross[i]={id:flipG(x.id),p:0};setTimeout(()=>achCard(x.id),900)}return}
   if(x.id==='e26'&&!x.h)return;
   if(x.id==='t13'){x.p+=5;return}
@@ -2324,6 +2324,8 @@ let T18T=0;
 function discCard(id){S.hand.splice(S.hand.indexOf(id),1);S.disc.push(id);qDisc(id);if(S.cross.some(y=>y&&y.id==='t18')&&Date.now()-T18T>1500){T18T=Date.now();hurt(3);if(S.hp<=0){S.why='Las Arenas movedizas te quitaron tus últimos corazones al descartar.';S.whyC=['t18']}}if(S.cross.some(y=>y&&y.id==='t14'))hurt(1)}
 function pickHand(n,b,r){if(!r&&n&&S.mesa.includes('k04'))n++;if(!n||!S.hand.length)return b();ov(null,S.hand.map(x=>[x,()=>{discCard(x);render();pickHand(n-1,b,1);return 1},0,'',x]),`<p>Descarta ${n} carta(s)</p>`,1)}
 const hurt=(n,r)=>{const h0=S.hp;if(MALL&&n>0){fxStamp('¡DAÑO EVITADO!','ok');return}if(M18&&n>0){n--;M18=0;fxStamp('¡DAÑO EVITADO!','ok')}S.hp=Math.max(0,S.hp-n*(!r&&S.cross.some(y=>y&&y.id==='t17')?2:1)-(S.mesa.includes('k05')?1:0));if(S.hp<h0)fxHurt(h0,S.hp)};
+/* robar una sombra tú mismo (o por quedarte sin cartas) termina tu turno; las que llegan por otros efectos no */
+function kEnd(){close();render();if(TUT||S.over||S.hp<=0)return;PICK=0;TP=1}
 function kShow(id,back,hd){coopKEv(id);try{albGet(id,'v')}catch(e){}const n=+id.slice(1),f=S.final,bj=q=>{S.cross[0].p=VSA()?S.cross[0].p:Math.max(0,S.cross[0].p-q)};
   if(S.cross.some(x=>x&&x.id==='t03')){hurt(3);if(S.hp<=0){S.why='El Laberinto de enredaderas te quitó tus últimos corazones al robar una sombra.';S.whyC=['t03']}}
   const mh=CK()==='e',E={1:[f?'el jefe final recupera 5 PV':mh?'apagar 1 vela':'quitar 1 al reloj del eclipse',()=>bj(f?5:1)],3:[f?'el jefe final recupera 10 PV':mh?'apagar 2 velas':'quitar 2 al reloj del eclipse',()=>bj(f?10:2)],6:['sufrir 3 de daño',()=>hurt(3)]}[n],b=[];
@@ -3212,6 +3214,7 @@ function vsHud(){
   const hs=[1,2,3,4].map(k=>S.cross[k]).find(y=>y&&/^[mlprn]20$/.test(y.id));if(hs)S.cross[0].p=Math.max(0,20-hs.p);
   const f=k=>{const c0=S.fort&&S.fort[k]&&S.fort[k][0];if(!c0)return 0;return S.cross[0].id===c0.id?S.cross[0].p:c0.p};
   e.textContent=`🏰 Tu héroe ${f(H)} PV · ${nO} ${f(O)} PV`;
+  if(S.cross[0].p>0&&(!COOP||MYT)&&!VS.dq&&[1,2,3,4].every(k=>!S.cross[k])){VS.dq=1;whenFree(()=>{VS.dq=0;if(VSA()&&!S.over&&[1,2,3,4].every(k=>!S.cross[k])){vsDescend();render()}})}
   if(S.cross[0].p<=0&&(!COOP||MYT)&&!VS.wq){VS.wq=1;whenFree(()=>{VS.wq=0;if(!S.over&&!VS.fin)showVictory('Derrotaste al héroe rival.')})}}
 /* armar la fortaleza: eliges 4 de 8 enfrentamientos que tu rival no verá hasta atacarlos */
 function vsPickFort(cb){const pool=vsPool(VS.cal).slice(0,8),ch=[],o=$('#ov');o.style.background='#0d0a14';
