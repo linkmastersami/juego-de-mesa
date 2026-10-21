@@ -6,7 +6,7 @@
   "album/libro-fuego.webp": "6533ac09c203",
   "album/libro-jefe.webp": "716e760c4279",
   "album/libro-rayo.webp": "2b74b4016819",
-  "cartas/e01.webp": "057e3f9c6f39",
+  "cartas/e01.webp": "3f303b30e7dc",
   "cartas/e02.webp": "e1400f88a45b",
   "cartas/e03.webp": "612187df773f",
   "cartas/e04.webp": "0a4447b4c746",
@@ -318,5 +318,5 @@
   "voces/38.mp3": "bdb95078938e",
   "voces/inv.mp3": "88fd37faee29"
  },
- "version": "164c498a3a7c"
+ "version": "78ccaf12cc33"
 }
