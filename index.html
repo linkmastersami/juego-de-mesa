@@ -1749,7 +1749,7 @@ $('#lob-nav').addEventListener('click',e=>{const b=e.target.closest('[data-go]')
 $('#pn-tab').addEventListener('click',e=>{const c=e.target.closest('[data-tab]');if(!c||!c.dataset.tab)return;try{localStorage.setItem('mesa-tab',c.dataset.tab)}catch(_){}tabApply();try{SFX.pop()}catch(_){}paneFill(4)});
 /* deslizar con el dedo entre pantallas (el carrusel de personajes y el libro abierto tienen prioridad) */
 {let x0=null,y0=0,ax=0,dx=0;const pg=$('#pager'),t=$('#ptrack');
- pg.addEventListener('touchstart',e=>{const g=e.target;if(g.closest('.lob-chars,input,.apage-w,#alb-view,.pzem'))return;x0=e.touches[0].clientX;y0=e.touches[0].clientY;ax=0;dx=0},{passive:true});
+ pg.addEventListener('touchstart',e=>{const g=e.target;if(g.closest('.lob-chars,input,.apage-w,#alb-view,.pzem,.peds'))return; /* .peds: héroes del calabozo en Récords, se deslizan de lado */x0=e.touches[0].clientX;y0=e.touches[0].clientY;ax=0;dx=0},{passive:true});
  pg.addEventListener('touchmove',e=>{if(x0===null)return;const mx=e.touches[0].clientX-x0,my=e.touches[0].clientY-y0;
    if(!ax){if(Math.abs(mx)>10&&Math.abs(mx)>Math.abs(my)*1.2)ax=1;else if(Math.abs(my)>10){x0=null;return}else return}
    dx=mx;if((LP===0&&dx>0)||(LP===4&&dx<0))dx*=.3;t.classList.add('drag');t.style.transform=`translateX(calc(${-LP*20}% + ${dx}px))`},{passive:true});
