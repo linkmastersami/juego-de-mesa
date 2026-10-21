@@ -1,11 +1,14 @@
 {
  "files": {
   "album/hoja.webp": "f0bbb7a0ee97",
-  "album/libro-calabozo.webp": "0550c27a1808",
-  "album/libro-espada.webp": "b25e5484e14b",
-  "album/libro-fuego.webp": "6533ac09c203",
-  "album/libro-jefe.webp": "716e760c4279",
-  "album/libro-rayo.webp": "2b74b4016819",
+  "album/libro-calabozo.webp": "6f4cd3ef786b",
+  "album/libro-espada.webp": "ebcb4d7ee44e",
+  "album/libro-fuego.webp": "e276a9f7c422",
+  "album/libro-jefe.webp": "88c3fe38499f",
+  "album/libro-mansion.webp": "2bffd9f5bbb5",
+  "album/libro-nova.webp": "7d8386fcc9e4",
+  "album/libro-rayo.webp": "5771f3d5b447",
+  "album/libro-robi.webp": "55d020315a1f",
   "cartas/e01.webp": "3f303b30e7dc",
   "cartas/e02.webp": "e1400f88a45b",
   "cartas/e03.webp": "612187df773f",
@@ -318,5 +321,5 @@
   "voces/38.mp3": "bdb95078938e",
   "voces/inv.mp3": "88fd37faee29"
  },
- "version": "65a0736e838d"
+ "version": "d1704080ef7b"
 }
