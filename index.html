@@ -1473,7 +1473,7 @@ function finalAnim(fp){
     /* 2) el estado cambia y el tablero queda oculto bajo la animación */
     S.cross.slice(1).forEach(x=>{if(x&&isDeck(x.id))S.disc.push(x.id)});
     S.cross=[{id:j,p:S.cross[0].p},null,null,null,null];perm.forEach((pos,k)=>{S.cross[pos]={id:GS[k],p:0};if(MH)S.cross[pos].h=1});S.final=1;
-    HIDE=new Set([0,1,2,3,4]);render();
+    HIDE=new Set([0,1,2,3,4]);NOFX=1;try{render()}finally{NOFX=0}
     L.classList.add('clear');T.style.opacity=0;bs.forEach((e,i)=>{if(i!==idx)e.style.opacity=0});await wait(350);
     /* 3) el jefe entra en su lugar */
     let c=cellOf(0);await fly(bs[idx],c,900);HIDE.delete(0);c.classList.remove('hid');c.classList.add('land');SFX.thud();vib([30,20,40]);bossSlam(c);bs[idx].remove();await wait(900);
