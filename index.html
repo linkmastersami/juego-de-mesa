@@ -1200,7 +1200,7 @@ const flipG=id=>id[0]==='g'?'g'+pad(+id.slice(1)+4):'eg'+(+id[2]+4),unflipG=id=>
 const bossLock=()=>S.cross.some(x=>x&&(x.id==='g01'||x.id==='eg4'));
 const OCU=new Set(['e01','e02','e09','e25','e28']); /* Mansión: cartas que siempre entran ocultas */
 const VEL=()=>CK()==='e'&&S.cross[0]&&S.cross[0].id==='ej1'?S.cross[0].p:99;
-const velas=n=>{if(VSA())return vsHeal(n);const c=S.cross[0];if(c&&isCtr(c.id))c.p=Math.max(0,Math.min(CK()==='e'?10:99,c.p+n))};
+const velas=n=>{if(VSA())return n>0?vsHeal(n):hurt(-n);const c=S.cross[0];if(c&&isCtr(c.id))c.p=Math.max(0,Math.min(CK()==='e'?10:99,c.p+n))};
 const calNow=()=>TUT||(COOP&&!VS)?'t':(VS&&VS.cal)||CAL;
 const fresh0=()=>{const k=calNow(),D=CALS[k];return {turn:1,hp:10,personaje:CHAR,cal:k,dM:shuf(rng(CHAR,1,18)),dK:shuf(rng('k',1,6)),dC:shuf(D.deck()),hand:[],mesa:[],disc:[],comp:[],cross:[{id:D.ctr,p:7},null,null,null,null],final:0,hab:0,apart:[],vk:0,nc:0}};
 const fresh=()=>{const s=fresh0();s.hand=s.dM.splice(-hN());for(let k=0;k<2;k++)s.disc.push(s.dC.pop());for(let i=1;i<=4;i++){s.cross[i]={id:s.dC.pop(),p:0};if(s.cal==='e'&&OCU.has(s.cross[i].id))s.cross[i].h=1;else if(isMJ(s.cross[i].id))s.cross[0].p=Math.max(0,s.cross[0].p-1)}return s};
@@ -2064,7 +2064,7 @@ function entryFx(i){const x=S.cross[i];if(!x||!isDeck(x.id)||x.h)return null;
   if(/^e2[1-3]$/.test(x.id)&&S.cross[0])return {kind:'Mini-jefe',txt:{e21:'Apaga 1 vela',e22:'Apaga 1 vela y otro enfrentamiento al azar se oculta',e23:'Apaga 1 vela y descartas 1 carta al azar de tu mano'}[x.id],fn:()=>{velas(-1);if(x.id==='e22')hideRand(i);if(x.id==='e23'&&S.hand.length)discCard(S.hand[Math.floor(Math.random()*S.hand.length)])}};
   if(CONT[x.id])return {kind:'Efecto continuo',txt:CONT[x.id],col:'#c58bff',ms:2300,fn:()=>{}};
   if(x.id==='t09'){if(!S.cross.some((y,k)=>y&&k&&k!==i&&y.p>0))return null;return {txt:'Absorbe el daño de los demás enfrentamientos',fn:()=>{S.cross.forEach((y,k)=>{if(y&&k&&k!==i){x.p+=y.p;y.p=0}})}}}
-  if(isMJ(x.id)&&S.cross[0])return {kind:'Mini-jefe',txt:'Quita 1 al reloj del eclipse',fn:()=>{S.cross[0].p=VSA()?S.cross[0].p:Math.max(0,S.cross[0].p-1)}};
+  if(isMJ(x.id)&&S.cross[0])return {kind:'Mini-jefe',txt:'Quita 1 al reloj del eclipse',fn:()=>{S.cross[0].p=VSA()?(hurt(1),S.cross[0].p):Math.max(0,S.cross[0].p-1)}};
   return null}
 function dropCh(i){const x=S.cross[i];if(i<=0||!x)return;if(/^[mlprn]20$/.test(x.id)&&VSA())return; /* el héroe del Asalto no se puede descartar */ /* el jefe final (centro de la cruz) nunca se descarta */
   if(isG(x.id)){if(isGF(x.id)&&x.id!=='g03'&&x.id!=='eg1'){S.cross[i]={id:flipG(x.id),p:0};setTimeout(()=>achCard(x.id),900)}return}
@@ -2082,7 +2082,7 @@ function evt(i){const id=S.cross[i].id,ef=(sel,col)=>{try{albGet(CREP[id]||id,'v
   if(id==='e19')return ov(id,[['Activar: en tu siguiente tirada, la oscuridad cuenta como acierto',()=>{ef('#apart','#ffd34d');S.apart.push(id);S.gato=1;S.cross[i]=null}]]);
   if(id==='e20')return ov(id,[['Activar: recuperar 4 corazones y apagar 1 vela',()=>{ef('#pDisc','#7dffb0');S.hp=Math.min(10,S.hp+4);velas(-1);S.disc.push(id);S.cross[i]=null}]]);
   if(id==='e27'){const dn=()=>{ef('#pDisc','#c58bff');S.disc.push(id);S.cross[i]=null};return ov(id,[['Encender 2 velas',()=>{dn();velas(2)}],['Recuperar 3 corazones',()=>{dn();S.hp=Math.min(10,S.hp+3)}],['Mirar las 3 cartas de arriba de la mansión y acomodarlas',()=>{dn();render();scry(()=>{close();render()});return 1},!S.dC.length]],'<p>Elige qué preguntarle a los espíritus</p>')}
-  if(id==='t24')return ov(id,[['Activar: recuperar 6 corazones y quitar 2 al reloj del eclipse',()=>{ef('#pDisc','#7dffb0');S.hp=Math.min(10,S.hp+6);S.cross[0].p=VSA()?S.cross[0].p:Math.max(0,S.cross[0].p-2);S.disc.push(id);S.cross[i]=null}]]);
+  if(id==='t24')return ov(id,[['Activar: recuperar 6 corazones y quitar 2 al reloj del eclipse',()=>{ef('#pDisc','#7dffb0');S.hp=Math.min(10,S.hp+6);S.cross[0].p=VSA()?(hurt(2),S.cross[0].p):Math.max(0,S.cross[0].p-2);S.disc.push(id);S.cross[i]=null}]]);
   if(id==='t26')return ov(id,[['Activar: +2 al reloj del eclipse y apartar la carta',()=>{ef('#apart','#b06bff');if(VSA())vsHeal(2);else S.cross[0].p+=2;S.apart.push(id);S.cross[i]=null}]]);
   ov(id,[['Activar: descartar este + otro enfrentamiento',()=>{ef('#pDisc','#ff8a4d');S.disc.push(id);S.cross[i]=null;render();pickCh('Elige el enfrentamiento a descartar',x=>{const mj=/^t2[0-2]$/.test(x.id);dropCh(S.cross.indexOf(x));if(mj){S.hand.forEach(h=>S.disc.push(h));S.hand=[];const pm=S.disc.filter(q=>q[0]===PC());S.disc=S.disc.filter(q=>q[0]!==PC());S.dM.push(...pm);shuf(S.dM);fxShufM();draw(hN())}render();close()},()=>close(),null);return 1}]])}
 const unl=()=>(CK()==='e'?[['r','eg5'],['a','eg6'],['v','eg7']]:[['a','g06'],['r','g07'],['v','g08']]).filter(([k,g])=>S.cross.some(x=>x&&x.id===g));
@@ -2299,7 +2299,7 @@ async function res2(id,html,fx,cont){
   if($('#ov').classList.contains('on'))close();
   if(!await fxWait(first?900:350)){RUNFX=0;RES2=null;presHide(1);return}
   if(!fx.length){RUNFX=0;RES2=null;SYON=0;presHide();close();return sweep(cont||(()=>{TP=1}))}
-  const f=fx.shift(),b=()=>res2(id,html,fx,cont),{id:fid,txt}=fxInfo(f[0]);
+  const f=vsMapF(fx.shift()),b=()=>res2(id,html,fx,cont),{id:fid,txt}=fxInfo(f[0]);
   const fail=/No se complet/.test(html),own=fid&&/^([mlprn]\d\d|k\d\d)$/.test(fid),cid=fid||id;
   const kind=own?'Efecto de carta':fail?'Penalización':'Recompensa',col=own?'#6fd0ff':fail?'#ff5c5c':'#ffd34d';
   const tx=txt.charAt(0).toUpperCase()+txt.slice(1);
@@ -2326,9 +2326,9 @@ function pickHand(n,b,r){if(!r&&n&&S.mesa.includes('k04'))n++;if(!n||!S.hand.len
 const hurt=(n,r)=>{const h0=S.hp;if(MALL&&n>0){fxStamp('¡DAÑO EVITADO!','ok');return}if(M18&&n>0){n--;M18=0;fxStamp('¡DAÑO EVITADO!','ok')}S.hp=Math.max(0,S.hp-n*(!r&&S.cross.some(y=>y&&y.id==='t17')?2:1)-(S.mesa.includes('k05')?1:0));if(S.hp<h0)fxHurt(h0,S.hp)};
 /* robar una sombra tú mismo (o por quedarte sin cartas) termina tu turno; las que llegan por otros efectos no */
 function kEnd(){close();render();if(TUT||S.over||S.hp<=0)return;PICK=0;TP=1}
-function kShow(id,back,hd){coopKEv(id);try{albGet(id,'v')}catch(e){}const n=+id.slice(1),f=S.final,bj=q=>{S.cross[0].p=VSA()?S.cross[0].p:Math.max(0,S.cross[0].p-q)};
+function kShow(id,back,hd){coopKEv(id);try{albGet(id,'v')}catch(e){}const n=+id.slice(1),f=S.final,bj=q=>{S.cross[0].p=VSA()?(hurt(q),S.cross[0].p):Math.max(0,S.cross[0].p-q)};
   if(S.cross.some(x=>x&&x.id==='t03')){hurt(3);if(S.hp<=0){S.why='El Laberinto de enredaderas te quitó tus últimos corazones al robar una sombra.';S.whyC=['t03']}}
-  const mh=CK()==='e',E={1:[f?'el jefe final recupera 5 PV':mh?'apagar 1 vela':'quitar 1 al reloj del eclipse',()=>bj(f?5:1)],3:[f?'el jefe final recupera 10 PV':mh?'apagar 2 velas':'quitar 2 al reloj del eclipse',()=>bj(f?10:2)],6:['sufrir 3 de daño',()=>hurt(3)]}[n],b=[];
+  const mh=CK()==='e',E={1:[VSA()?'sufrir 1 de daño':f?'el jefe final recupera 5 PV':mh?'apagar 1 vela':'quitar 1 al reloj del eclipse',()=>bj(f?5:1)],3:[VSA()?'sufrir 2 de daño':f?'el jefe final recupera 10 PV':mh?'apagar 2 velas':'quitar 2 al reloj del eclipse',()=>bj(f?10:2)],6:['sufrir 3 de daño',()=>hurt(3)]}[n],b=[];
   if(E)b.push(['Aplicar: '+E[0]+' y barajarla al mazo',()=>{E[1]();S.mesa.splice(S.mesa.indexOf(id),1);S.dK.push(id);shuf(S.dK);render();fxShufK();if(back){back();return 1}}]);
   else if(back)b.push(['Continuar',()=>{back();return 1}]);
   if(!hd&&!back)b.push([`Descartar toda tu mano y robar ${hN()} (opcional)`,()=>{S.hand.forEach(x=>S.disc.push(x));S.hand=[];draw(hN());render();kShow(id,back,1);return 1}]);
@@ -2336,7 +2336,7 @@ function kShow(id,back,hd){coopKEv(id);try{albGet(id,'v')}catch(e){}const n=+id.
 const dmg=n=>[`sufrir ${n} de daño`,()=>hurt(n)],
  dd=n=>VSA()?[`hacer ${n} de daño al héroe rival`,()=>vsHeroDmg(n)]:[`descartar ${n} del mazo ${CD().dk}`,()=>{const t=S.dC.length;for(let k=0;k<n&&S.dC.length;k++)S.disc.push(S.dC.pop());if(t>S.dC.length)fxDd(t-S.dC.length,t);checkEnd()}],
  hd=n=>[`descartar ${n} de tu mano`,b=>{pickHand(n,b);return 2}],
- boss=n=>[`reloj del eclipse ${n>0?'+':''}${n}`,()=>{if(VSA())return vsHeal(n);S.cross[0].p=Math.max(0,S.cross[0].p+n)}],
+ boss=n=>[`reloj del eclipse ${n>0?'+':''}${n}`,()=>{if(VSA())return n>0?vsHeal(n):hurt(-n);S.cross[0].p=Math.max(0,S.cross[0].p+n)}],
  HAB=['activar tu habilidad',()=>{S.hab=1}],
  vel=n=>[n>0?`encender ${n} vela${n>1?'s':''}`:`apagar ${-n} vela${n<-1?'s':''}`,()=>velas(n)],
  heal=n=>[`recuperar ${n} corazones`,()=>{S.hp=Math.min(10,S.hp+n)}];
@@ -2344,7 +2344,7 @@ const spec={},sp=(id,r,q)=>{spec[id]=[r,q]};
 sp('t01',[dd(2)],[dmg(2)]);
 sp('t02',[HAB,['descartar otro enfrentamiento de la cruz',b=>{pickCh('Descarta otro enfrentamiento',x=>dropCh(S.cross.indexOf(x)),b,null);return 2}]],[dmg(1)]);
 sp('t03',[dd(2)],[hd(1)]);sp('t05',[dd(2)],[hd(2)]);sp('t06',[dd(3)],[dmg(1)]);sp('t07',[dd(1)],[dmg(1)]);
-sp('t08',[dd(2),boss(2)],[['reloj del eclipse −1 (−1 más por cada mini-jefe en juego)',()=>{const m=S.cross.filter(x=>x&&/^t2[0-2]$/.test(x.id)).length;S.cross[0].p=VSA()?S.cross[0].p:Math.max(0,S.cross[0].p-1-m)}]]);
+sp('t08',[dd(2),boss(2)],[['reloj del eclipse −1 (−1 más por cada mini-jefe en juego)',()=>{const m=S.cross.filter(x=>x&&/^t2[0-2]$/.test(x.id)).length;S.cross[0].p=VSA()?(hurt(1-m),S.cross[0].p):Math.max(0,S.cross[0].p-1-m)}]]);
 sp('t10',[dd(2)],[dmg(1)]);
 sp('t11',[dd(1)],[['regresar 3 cartas del descarte al mazo de la torre',()=>{const r=S.disc.filter(x=>x[0]==='t').slice(-3);S.disc=S.disc.filter(x=>!r.includes(x));S.dC.push(...r);shuf(S.dC);fxShufC()}]]);
 sp('t12',[dd(2)],[dmg(1)]);sp('t13',[dd(6)],[dmg(1)]);sp('t14',[dd(4)],[]);sp('t15',[HAB],[]);sp('t16',[dd(6)],[hd(3)]);sp('t17',[dd(1)],[['sufrir 4 de daño',()=>hurt(4,1)]]);sp('t18',[dd(2)],[hd(1)]);
@@ -2428,7 +2428,7 @@ function resolve(h,nd){
     if(S.nch&&(ico(act||'x00',0)||as.some(x=>ico(x,1))))S.nch=0; /* la carga se usó en esta batalla */
     if(!w0)fx.push(['n19: fallaste, Nova gana 2 de carga (máx. 4)',()=>{S.nch=Math.min(4,(S.nch||0)+2)}]);
   }
-  if(S.mesa.includes('k02'))fx.push([`k02: elegir entre 1 de daño o ${CK()==='e'?'apagar 1 vela':'quitar 1 al reloj del eclipse'}`,b=>{ov('k02',[['Sufrir 1 de daño',()=>{hurt(1);render();b();return 1}],[CK()==='e'?'Apagar 1 vela':'Quitar 1 al reloj',()=>{S.cross[0].p=VSA()?S.cross[0].p:Math.max(0,S.cross[0].p-1);render();b();return 1}]],'<p>Elige el efecto</p>',1);return 2}]);
+  if(S.mesa.includes('k02'))fx.push([`k02: elegir entre 1 de daño o ${CK()==='e'?'apagar 1 vela':'quitar 1 al reloj del eclipse'}`,b=>{ov('k02',[['Sufrir 1 de daño',()=>{hurt(1);render();b();return 1}],[CK()==='e'?'Apagar 1 vela':'Quitar 1 al reloj',()=>{S.cross[0].p=VSA()?(hurt(1),S.cross[0].p):Math.max(0,S.cross[0].p-1);render();b();return 1}]],'<p>Elige el efecto</p>',1);return 2}]);
   if(act==='m02')fx.push([`m02: elegir otro enfrentamiento y quitarle 1 PV por cada 🔥 en descartes`,b=>{pickCh('Elige el otro enfrentamiento',x=>{x.p+=fireDisc()},b,c,1);return 2}]);
   if(act==='m07'&&as.length)fx.push([`m07: alguien asistió, puedes descartar cartas (o ninguna) y el que asistió roba igual número`,b=>{CAS()?discDraw(b,1,n=>{if(n)mpSend({k:'draw',n})}):discDraw(b);return 2}]);
   if(act==='m10'&&S.hand.length)fx.push([`m10: poner una carta de tu mano encima del mazo`,b=>{ov(null,S.hand.map(x=>[x,()=>{S.hand.splice(S.hand.indexOf(x),1);S.dM.push(x);qFly(x,'#tHand','#dM','#8ab4ff');render();b();return 1},0,'',x]),'<p>Elige la carta</p>',1);return 2}]);
@@ -3164,6 +3164,11 @@ function vsHeroCH(id){CH[id]={c:'b',l:40};TY[id]='C';delete GCOL[id];spec[id]=[[
 function vsPool(cal){return shuf(CALS[cal].deck().filter(x=>CH[x]&&!isEv(x)&&!['e06','t14'].includes(x)))}
 function vsPts(n){S.pts=S.pts||{};const k=VSME();S.pts[k]=(S.pts[k]||0)+n}
 function vsHeroDmg(n){if(S.cross[0])S.cross[0].p+=n}
+function vsMapF(f){if(!VSA()||!f||typeof f[0]!=='string')return f;let m;const t=f[0];
+  if(m=/descartar (\d+) del mazo[^·:]*/.exec(t))return [t.replace(m[0],`hacer ${m[1]} de daño al héroe rival`),()=>vsHeroDmg(+m[1])];
+  if(m=/(?:apagar (\d+) velas?|quitar (\d+) al reloj del eclipse|reloj del eclipse -(\d+))/.exec(t)){const n=+(m[1]||m[2]||m[3]);return [t.replace(m[0],`sufrir ${n} de daño`),()=>hurt(n)]}
+  if(m=/(?:encender (\d+) velas?|reloj del eclipse \+(\d+))/.exec(t)){const n=+(m[1]||m[2]);return [t.replace(m[0],`el héroe rival recupera ${n} PV`),()=>vsHeal(n)]}
+  return f}
 function vsHeal(n){const c=S.cross[0];if(c&&n>0)c.x=(c.x||0)+n} /* lo que subiría el reloj o las velas le sube vida al héroe rival, sin límite */
 function vsDescend(){}
 function vsInitS(){
