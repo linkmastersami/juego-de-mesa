@@ -1284,7 +1284,7 @@ const jStamp=(t,k)=>async L=>{k==='ok'?SFX.win():SFX.fail();vib(k==='ok'?[40,40,
 function NP(){try{return Math.min(4,Math.max(1,MP.code?(MP.peer?2:1):1))}catch(e){return 1}}
 function hN(){return 9-NP()}
 /* al empezar el turno con la mano vacía es obligatorio robar un agotamiento (no cuenta como robado a propósito) */
-function forceK(){if(COOP&&!MYT)return;if(S.over||S.hp<=0||S.hand.length||!S.dK.length)return;const id=S.dK.pop();S.vk=(S.vk||0)+1;S.mesa.push(id);S.hand=[];fxPlay(async L=>{L.innerHTML='<div class="fxt">😮‍💨 ¡Te quedaste sin cartas en la mano!</div><p style="color:#fff;text-align:center;font:600 1.1rem Fredoka,sans-serif;margin:8px 16px 0">Robas una sombra y se llena tu mano</p>';SFX.thud();await wait(2600)});draw(hN());render();const w=setInterval(()=>{if(FXR||$('#ov').classList.contains('on'))return;clearInterval(w);kShow(id,kEnd,1)},150)}
+function forceK(){if(COOP&&!MYT)return;if(S.over||S.hp<=0||S.hand.length)return;if(!S.dK.length){if(VS){draw(hN());render();PICK=0;TP=1}return}const id=S.dK.pop();S.vk=(S.vk||0)+1;S.mesa.push(id);S.hand=[];fxPlay(async L=>{L.innerHTML='<div class="fxt">😮‍💨 ¡Te quedaste sin cartas en la mano!</div><p style="color:#fff;text-align:center;font:600 1.1rem Fredoka,sans-serif;margin:8px 16px 0">Robas una sombra y se llena tu mano</p>';SFX.thud();await wait(2600)});draw(hN());render();const w=setInterval(()=>{if(FXR||$('#ov').classList.contains('on'))return;clearInterval(w);kShow(id,kEnd,1)},150)}
 const fxTurnB=a=>fxPlay(async L=>{L.innerHTML=a?`<div class="tbn">TURNO</div><div class="tnum"><span class="o">${a}</span><span class="n">${a+1}</span></div>`:`<div class="tbn">TURNO</div><div class="tnum"><span class="n" style="transform:none;animation:pop .5s cubic-bezier(.2,.9,.3,1.3) both">1</span></div>`;SFX.bell();vib([20,30,20]);await wait(a?1800:1500)});
 const fxTurn=a=>{fxTurnB(a);fxPlay(async()=>{try{await turnStartFx()}catch(e){}forceK()})};
 const fxHeal=(a,b)=>fxPlay(async L=>{L.innerHTML=`<div class="fxt">¡Recuperas salud!</div><div class="hw"><div class="hrt heal"><span>💚</span><b>${a}</b></div></div>`;const N=L.querySelector('b');await wait(700);for(let v=a+1;v<=b;v++){N.textContent=v;N.classList.remove('tick');void N.offsetWidth;N.classList.add('tick');SFX.heal();vib(15);await wait(420)}await wait(700)});
@@ -2437,7 +2437,7 @@ function resolve(h,nd){
   if(act==='m15'&&!w0&&S.cross.indexOf(c)>0)fx.push([`m15: descartar el enfrentamiento sin sufrir penalización`,()=>dropCh(S.cross.indexOf(c))]);
   c.p+=add;const win=c.p>=lv&&id!=='g04'&&!(isBoss(id)&&bossLock());if(win&&CH[id]&&add>2*CH[id].l)S.dbl=1;
   {const L=[...(spec[id]||[[],[]])[win?0:1]];
-  if(win&&VSC()&&isDeck(id)&&L.length&&S.dK.length){VS.skipR=0;const L0=L.splice(0);L.push(['🏁 Elegir: cobrar la recompensa o mandarle una sombra a tu rival',b=>{vsAskK(b);return 2}],...L0.map(q=>[q[0],(...a)=>VS.skipR?undefined:q[1](...a)]))}
+  if(win&&VSC()&&isDeck(id)&&L.length){VS.skipR=0;const L0=L.splice(0);L.push(['🏁 Elegir: cobrar la recompensa o mandarle una sombra a tu rival',b=>{vsAskK(b);return 2}],...L0.map(q=>[q[0],(...a)=>VS.skipR?undefined:q[1](...a)]))}
   if(id==='t15'&&!win)L.push(dmg(B.act?sumB()-B.as.reduce((t,x)=>t+av(x),0):10));
   if(id==='t25'&&!win)L.push(hd(lv-c.p));
   if(id==='t30'&&win&&c.p>lv)L.push([`robar ${c.p-lv} carta(s) por exceso`,()=>draw(c.p-lv)]);
@@ -3156,7 +3156,7 @@ $('#ctx').onclick=()=>cDlg('🚪','¿Salir de la partida?','La partida terminar�
 const HCOL={m:'r',l:'v',p:'a',r:'v',n:'a'},HCN={r:'rojo',a:'azul',v:'verde'};
 function VSME(){return VS.local?VS.cur:MP.role}
 function VSOP(){return VS.local?(VS.cur==='p'?'b':'p'):(MP.role==='host'?'guest':'host')}
-const VSPK=['hand','dM','mesa','hp','hab','personaje','vk','gato'];
+const VSPK=['hand','dM','dK','mesa','hp','hab','personaje','vk','gato'];
 const vsClone=o=>JSON.parse(JSON.stringify(o));
 function vsSave(k){const o={};VSPK.forEach(f=>o[f]=S[f]);o.disc=S.disc.filter(x=>!isSh(x));VS.ctx[k]=vsClone(o)}
 function vsLoad(k){const o=VS.ctx[k];VSPK.forEach(f=>S[f]=o[f]);S.disc=S.disc.filter(isSh).concat(o.disc||[]);CHAR=S.personaje||CHAR}
@@ -3167,7 +3167,7 @@ function vsHeroDmg(n){const hs=[1,2,3,4].map(k=>S.cross[k]).find(y=>y&&/^[mlprn]
 function vsDescend(){const c0=S.cross[0];if(!c0||c0.p<=0||[1,2,3,4].some(k=>S.cross[k]))return;const hk=c0.id[0]+'20';vsHeroCH(hk);S.cross[1]={id:hk,p:20-c0.p}}
 function vsInitS(){
   VS.fin=0;VS.wq=0;S.pts={};
-  if(VS.local){const bj=VS.bj,o={dM:shuf(rng(bj,1,18)),mesa:[],hp:10,hab:0,personaje:bj,vk:0,gato:0,disc:[]};o.hand=o.dM.splice(-hN());VS.ctx={b:o};VS.cur='p';VS.pend={p:[],b:[]}}
+  if(VS.local){const bj=VS.bj,o={dM:shuf(rng(bj,1,18)),dK:shuf(rng('k',1,6)),mesa:[],hp:10,hab:0,personaje:bj,vk:0,gato:0,disc:[]};o.hand=o.dM.splice(-hN());VS.ctx={b:o};VS.cur='p';VS.pend={p:[],b:[]}}
   if(VSA()){
     const hk=VS.local?'p':MP.role,ok=VS.local?'b':(MP.role==='host'?'guest':'host'),opj=VS.local?VS.bj:((MP.peer&&MP.peer.char)||'m');
     const mk=(pj,ids)=>[{id:pj+'19',p:20},...ids.map(id=>({id,p:0,h:1}))];
@@ -3178,8 +3178,8 @@ function vsInitS(){
 }
 /* el jugador en turno elige: cobrar su recompensa o mandarle una sombra al rival (Carrera) */
 function vsAskK(b){ov(null,[['🎁 Cobrar la recompensa',()=>{VS.skipR=0;close();b();return 1}],['🌑 Mandarle 1 sombra a tu rival',()=>{VS.skipR=1;vsSendK();close();b();return 1}]],'<p>¡Lo venciste! ¿Qué prefieres?</p>',1)}
-function vsSendK(){const id=S.dK.pop();if(!id)return;if(VS.local)VS.pend[VSOP()].push(id);else mpSend({k:'vsk',id});render()}
-function vsPendK(){if(!VS||!VS.pend)return;const q=VS.pend[VS.local?VS.cur:MP.role]||[];if(!q.length)return;const id=q.shift();
+function vsSendK(){if(VS.local)VS.pend[VSOP()].push(1);else mpSend({k:'vsk'});render()}
+function vsPendK(){if(!VS||!VS.pend)return;const q=VS.pend[VS.local?VS.cur:MP.role]||[];if(!q.length)return;q.shift();const id=S.dK.pop();if(!id)return vsPendK();
   const w=setInterval(()=>{if(FXR||INTRO||$('#ov').classList.contains('on'))return;clearInterval(w);S.mesa.push(id);S.vk=(S.vk||0)+1;render();
     ov(id,[['Continuar',()=>{close();kShow(id,()=>{close();render();setTimeout(vsPendK,300)},1);return 1}]],'<p>🌑 ¡Tu rival te mandó una sombra!</p>',1)},250)}
 /* turno siguiente contra el Búho: se guarda lo de un jugador y se carga lo del otro */
@@ -3258,7 +3258,7 @@ function vsAIstep(){
 /* Compartido: corazones, turno, mazos de calabozo y agotamiento, cartas en mesa, cruz, completados, contadores y descarte de calabozo/agotamiento. Lo demás (mano, mazo, descarte y habilidad del personaje) es de cada jugador. */
 const SHK=['hp','turn','dC','dK','mesa','cross','comp','apart','nc','vk','final'];
 const isSh=x=>isDeck(x)||/^(k|g|j|eg|ej)\d/.test(x);
-const SHKf=()=>!VS?SHK:VS.m==='car'?['turn','dC','dK','cross','comp','apart','nc','final','pts']:['turn','dK','comp','apart','fort'];
+const SHKf=()=>!VS?SHK:VS.m==='car'?['turn','dC','cross','comp','apart','nc','final','pts']:['turn','comp','apart','fort'];
 const coopShared=()=>{const o={};SHKf().forEach(k=>o[k]=S[k]);if(VSA())o.vcross=S.cross;o.dcd=S.disc.filter(isSh);return JSON.parse(JSON.stringify(o))};
 function coopApply(o){SHKf().forEach(k=>{if(o[k]!==undefined)S[k]=o[k]});if(VSA()&&o.vcross&&!MYT)S.cross=o.vcross;S.disc=S.disc.filter(x=>!isSh(x)).concat(o.dcd||[])}
 function coopUi(){document.body.classList.toggle('waitp',!!(COOP&&!COOPEND&&!ctl()&&!COOPBUSY));const sp=$('#coopb span');if(sp)sp.textContent=MYT?'⏳ Tu amigo está aplicando su asistencia':'⏳ Turno de tu amigo';if(!COOP){const e=$('#sbt');if(e)e.classList.remove('on');document.body.classList.remove('sbton')}}
@@ -3381,7 +3381,7 @@ function mpOnMsg(d){
   if(d.k==='rdy'){MP.prdy=d.v?1:0;if(MP.peer&&d.c)MP.peer.char=d.c;if(!COOP)mpRoom();return}
   if(d.k==='vm'){MP.vm=d.m;MP.vcal=d.cal;vsRoomUi();return}
   if(d.k==='fort'){if(VS){VS.opF=d.ids;if(VS.myF)vsWaitF()}return}
-  if(d.k==='vsk'){if(VS&&VS.pend)VS.pend[MP.role].push(d.id);return}
+  if(d.k==='vsk'){if(VS&&VS.pend)VS.pend[MP.role].push(1);return}
   if(d.k==='start')coopBegin(d.first,d.dC,d.dK,d.vm,d.cal);
   else if(d.k==='assistReq'&&COOP)coopAssistAsk(d);
   else if(d.k==='l11Ask'&&COOP)coopL11Ask(d);
