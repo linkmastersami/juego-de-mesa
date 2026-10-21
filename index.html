@@ -3179,13 +3179,13 @@ function vsAskK(b){ov(null,[['🎁 Cobrar la recompensa',()=>{VS.skipR=0;close()
 function vsSendK(){const id=S.dK.pop();if(!id)return;if(VS.local)VS.pend[VSOP()].push(id);else mpSend({k:'vsk',id});render()}
 function vsPendK(){if(!VS||!VS.pend)return;const q=VS.pend[VS.local?VS.cur:MP.role]||[];if(!q.length)return;const id=q.shift();
   const w=setInterval(()=>{if(FXR||INTRO||$('#ov').classList.contains('on'))return;clearInterval(w);S.mesa.push(id);S.vk=(S.vk||0)+1;render();
-    ov(id,[['Continuar',()=>{close();kShow(id,()=>{render();vsPendK()},1);return 1}]],'<p>🌑 ¡Tu rival te mandó una sombra!</p>',1)},250)}
+    ov(id,[['Continuar',()=>{close();kShow(id,()=>{close();render();setTimeout(vsPendK,300)},1);return 1}]],'<p>🌑 ¡Tu rival te mandó una sombra!</p>',1)},250)}
 /* turno siguiente contra el Búho: se guarda lo de un jugador y se carga lo del otro */
 function vsLocalPass(a){
   if(VSA())S.fort[VSOP()]=vsClone(S.cross);
   vsSave(VS.cur);VS.cur=VS.cur==='p'?'b':'p';vsLoad(VS.cur);
   if(VSA()){S.cross=vsClone(S.fort[VSOP()]);vsDescend()}
-  HUDHP=null;PICK=1;B=null;render();
+  HUDHP=null;PICK=1;B=null;NOFX=1;try{render()}finally{NOFX=0}
   const t=VS.cur==='b'?'🦉 Turno del Búho':'⭐ ¡Tu turno!';fxPlay(async L=>{L.innerHTML=`<div class="fxt">${t}</div>`;try{SFX.bell()}catch(e){}await wait(1100)});
   fxTurn(a);vsPendK()}
 function vsFinish(kind,msg){
@@ -3194,7 +3194,7 @@ function vsFinish(kind,msg){
   else{aw=kind==='win';why=aw?0:1}
   VS.fin=1;
   const hk=loc?'p':MP.role,ho=loc?'b':op,hw=loc?(me==='p'?aw:!aw):aw;
-  if(loc&&VS.cur!=='p'){vsSave('b');vsLoad('p');VS.cur='p';HUDHP=null}
+  if(loc&&VS.cur!=='p'){vsSave('b');vsLoad('p');VS.cur='p';HUDHP=null;NOFX=1;try{render()}finally{NOFX=0}}
   const P=S.pts||{},ph=P[hk]||0,po=P[ho]||0,rn=loc?'El Búho':'Tu rival';
   const txt=(w,a,b,rv)=>VS.m==='car'?(why?(w?`${rv} se quedó sin corazones. ¡Ganas la carrera!`:'Te quedaste sin corazones y perdiste la carrera.'):(w?'¡Ganaste la carrera! ':'Perdiste la carrera. ')+`Puntos: tú ${a} · ${rv.toLowerCase().replace('el ','')} ${b}.`)
     :(why?(w?`${rv} se quedó sin corazones. ¡Conquistaste su fortaleza!`:'Te quedaste sin corazones y tu fortaleza cayó.'):(w?'¡Derribaste al héroe rival y conquistaste su fortaleza!':'Tu héroe cayó: el rival conquistó tu fortaleza.'));
@@ -3257,7 +3257,7 @@ const coopShared=()=>{const o={};SHKf().forEach(k=>o[k]=S[k]);if(VSA())o.vcross=
 function coopApply(o){SHKf().forEach(k=>{if(o[k]!==undefined)S[k]=o[k]});if(VSA()&&o.vcross&&!MYT)S.cross=o.vcross;S.disc=S.disc.filter(x=>!isSh(x)).concat(o.dcd||[])}
 function coopUi(){document.body.classList.toggle('waitp',!!(COOP&&!COOPEND&&!ctl()&&!COOPBUSY));const sp=$('#coopb span');if(sp)sp.textContent=MYT?'⏳ Tu amigo está aplicando su asistencia':'⏳ Turno de tu amigo';if(!COOP){const e=$('#sbt');if(e)e.classList.remove('on');document.body.classList.remove('sbton')}}
 function coopWait(t){const w=$('#coopw');if(t){$('#coopw-t').textContent=t;w.classList.add('on')}else w.classList.remove('on')}
-function coopPass(){SYON=0;OWNER='a';COOPFX=0;if(VSA())S.fort[VSOP()]=JSON.parse(JSON.stringify(S.cross));mpSend({k:'pass',sh:coopShared()});if(VSA()){S.cross=JSON.parse(JSON.stringify(S.fort[MP.role]));render()}coopUi();fxTurnB(S.turn-1)}
+function coopPass(){SYON=0;OWNER='a';COOPFX=0;if(VSA())S.fort[VSOP()]=JSON.parse(JSON.stringify(S.cross));mpSend({k:'pass',sh:coopShared()});if(VSA()){S.cross=JSON.parse(JSON.stringify(S.fort[MP.role]));NOFX=1;try{render()}finally{NOFX=0}}coopUi();fxTurnB(S.turn-1)}
 function coopBegin(first,dC,dK,vm,cal){VS=(vm&&vm!=='coop')?{m:vm,local:0,cal:cal||'t',pend:{host:[],guest:[]}}:null;
   const host=MP.role==='host',myFirst=(first==='host')===host;
   $('#coin').className='coin '+(first==='host'?'fa':'fb');
@@ -3391,7 +3391,7 @@ function mpOnMsg(d){
   else if(d.k==='left'&&COOP&&!COOPEND){COOPEND=1;SYQ=null;sbtHide();coopWait(null);COOPBUSY=0;close();presHide(1);$('#bt').classList.remove('on');coopUi();
     cDlg(d.lost?'📡':'🚪',d.lost?'Tu amigo se desconectó':'Tu amigo salió de la partida',d.lost?'Perdió la conexión y no volvió a tiempo. La partida cooperativa terminó.':'Tu amigo salió al menú. La partida cooperativa terminó.',[['Volver al menú',()=>{cDlgOff();toMenu(1)},'main']])}
   else if(d.k==='sy'&&syR())syRecv(d)
-  else if(d.k==='pass'&&COOP){SYQ=null;syOvHide();SYLAST='';coopApply(d.sh);MYT=1;OWNER='a';COOPFX=0;sbtHide();PICK=1;if(VSA()){S.cross=JSON.parse(JSON.stringify(S.fort[VSOP()]));vsDescend()}coopUi();render();fxTurn(d.sh.turn-1);if(VS)vsPendK()}
+  else if(d.k==='pass'&&COOP){SYQ=null;syOvHide();SYLAST='';coopApply(d.sh);MYT=1;OWNER='a';COOPFX=0;sbtHide();PICK=1;if(VSA()){S.cross=JSON.parse(JSON.stringify(S.fort[VSOP()]));vsDescend();NOFX=1;try{render()}finally{NOFX=0}}coopUi();render();fxTurn(d.sh.turn-1);if(VS)vsPendK()}
 }
 /* ===== SINCRONIZACIÓN DEL TURNO AL COMPAÑERO (solo lectura) ===== */
 let SYQ=null,SYLAST='',SYON=0,SYSENT=0,SYSHOW=0;
