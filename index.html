@@ -1650,13 +1650,13 @@ $('#lob-recs').addEventListener('click',showRecs);
 /* ---------- álbum de estampas (una por carta distinta) ---------- */
 const BOOKS=[
   {id:'cal',t:'La Torre del Eclipse',e:'🌑',bc:'linear-gradient(135deg,#4a4f5c,#24262e)',img:'libro-calabozo',ids:rng('t',1,31)},
-  {id:'jef',t:'El jefe final',e:'👹',bc:'linear-gradient(135deg,#5b2a7a,#26102f)',img:'libro-jefe',ids:['j01','j02','j03','j04','g01','g05','g02','g06','g03','g07','g04','g08','k01','k02','k03','k04','k05','k06']},
-  {id:'man',t:'La Mansión Embrujada',e:'👻',bc:'linear-gradient(135deg,#5a2d82,#1d0f2e)',img:'libro-jefe',ids:[...rng('e',1,28),'ej1','ej2','ej3','ej4','eg1','eg5','eg2','eg6','eg3','eg7','eg4','eg8']},
+  {id:'jef',t:'El jefe final',e:'👹',bc:'linear-gradient(135deg,#5b2a7a,#26102f)',img:'libro-jefe',ids:['j01','j02','j03','j04','g01','g05','g02','g06','g03','g07','g04','g08','k01','k02','k03','k04','k05','k06','ej1','ej2','ej3','ej4','eg1','eg5','eg2','eg6','eg3','eg7','eg4','eg8']},
+  {id:'man',t:'La Mansión Embrujada',e:'👻',bc:'linear-gradient(135deg,#5a2d82,#1d0f2e)',img:'libro-mansion',ids:rng('e',1,28)},
   {id:'m',t:'Bruno',e:'🔥',bc:'linear-gradient(135deg,#c0392b,#5e130c)',img:'libro-fuego',ids:rng('m',1,20)},
   {id:'l',t:'Veralyn',e:'🗡️',bc:'linear-gradient(135deg,#2e7d32,#0f3312)',img:'libro-espada',ids:rng('l',1,20)},
   {id:'p',t:'Volti',e:'⚡',bc:'linear-gradient(135deg,#5aa9e6,#1d4f7a)',img:'libro-rayo',ids:rng('p',1,20)},
-  {id:'r',t:'Robi',e:'🏮',bc:'linear-gradient(135deg,#e07a2c,#5a2a08)',img:'libro-fuego',ids:rng('r',1,20)},
-  {id:'n',t:'Nova',e:'🚀',bc:'linear-gradient(135deg,#2bb3a3,#0f3f45)',img:'libro-rayo',ids:rng('n',1,20)}];
+  {id:'r',t:'Robi',e:'🏮',bc:'linear-gradient(135deg,#e07a2c,#5a2a08)',img:'libro-robi',ids:rng('r',1,20)},
+  {id:'n',t:'Nova',e:'🚀',bc:'linear-gradient(135deg,#2bb3a3,#0f3f45)',img:'libro-nova',ids:rng('n',1,20)}];
 const albHas=(o,id)=>!!((o.alb||{})[id]||(o.cards||{})[id]);
 /* gana una estampa (o suma a sus datos): k = v vencida/activada/salió · a acción · s asistencia */
 function albGet(id,k){if(TUT)return;if(VS&&VS.local&&VS.cur==='b')return;try{if(!id)return;id=CREP[id]||id;const o=stLoad();o.alb=o.alb||{};const nw=!albHas(o,id);const e=o.alb[id]=o.alb[id]||{};
