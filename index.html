@@ -2450,7 +2450,7 @@ function resolve(h,nd){
   if(dk&&!win&&S.cross[0]&&S.cross[0].id==='j04'&&S.hand.length)L.push(['j04: descartar una carta al azar y sufrir daño igual a su valor',()=>{const x=S.hand[Math.floor(Math.random()*S.hand.length)];S.hand.splice(S.hand.indexOf(x),1);S.disc.push(x);hurt(MC[x][1])}]);
  if(!win){const k0=S.cross.indexOf(c);
     if(id==='e01'&&k0>0)L.push(['e01: se vuelve a ocultar',()=>{if(S.cross[k0]===c)c.h=1}]);
-    if(id==='e12'&&k0>0)L.push(['e12: regresa al fondo del mazo de la mansión',()=>{if(S.cross[k0]!==c)return;S.cross[k0]=null;S.dC.unshift('e12')}]);
+    if(id==='e12'&&k0>0&&!VSA())L.push(['e12: regresa al fondo del mazo de la mansión',()=>{if(S.cross[k0]!==c)return;S.cross[k0]=null;S.dC.unshift('e12')}]);
     if(id==='e13'){const o=[1,2,3,4].map(k=>S.cross[k]).filter(y=>y&&y!==c&&!y.h&&!isEv(y.id)&&spec[y.id]&&spec[y.id][1].length);if(o.length){const y=o[Math.floor(Math.random()*o.length)];L.push(...spec[y.id][1].map(p=>[`e13 (refleja ${y.id}): ${p[0]}`,p[1]]))}else L.push(['e13: sufrir 1 de daño',()=>hurt(1)])}
     if(id==='e21')L.push(['e21: sufrir 1 de daño extra',()=>hurt(1)]);
     if(id==='eg1')L.push(['eg1: ¡a la carga! recupera todos sus PV',()=>{c.p=0}]);
@@ -2754,8 +2754,8 @@ function startGame(){
     const tw=async n=>{if(TUT)await tutWait(n)};
     await tw(1);await jShuf('m',1)(L);await tw(2);                  /* 1) barajar mazo de personaje */
     const h=S.dM.splice(-hN());S.hand=h;render();await jDraw(h,1)(L);await tw(3);   /* 2) 8 cartas a la mano */
-    await jShuf('k',1)(L);await tw(4);await jShuf('c',1)(L);await tw(5);           /* 3) barajar sombras y torre */
-    const t=S.dC.length;for(let k=0;k<2;k++)S.disc.push(S.dC.pop());SL=0;render();await jDd(2,t)(L);await tw(6);  /* 4) descartar 2 */
+    await jShuf('k',1)(L);await tw(4);if(!VSA())await jShuf('c',1)(L);await tw(5);           /* 3) barajar sombras y torre */
+    const t=S.dC.length;for(let k=0;k<2&&S.dC.length;k++)S.disc.push(S.dC.pop());SL=0;render();if(t)await jDd(Math.min(2,t),t)(L);await tw(6);  /* 4) descartar 2 */
   }catch(e){}finally{SL=0;render()}});                       /* 5) autoFill pone 4 enfrentamientos en la cruz y luego sale TURNO 1 */
 }
 
@@ -3179,7 +3179,7 @@ function vsInitS(){
     const mk=(pj,ids)=>[{id:pj+'19',p:0},...ids.map(id=>({id,p:0,h:1}))];
     vsHeroCH(CHAR+'19');vsHeroCH(opj+'19');
     S.fort={[hk]:mk(CHAR,VS.myF),[ok]:mk(opj,VS.opF)};
-    S.cross=vsClone(S.fort[VS.local||MYT?ok:hk]);
+    S.cross=vsClone(S.fort[VS.local||MYT?ok:hk]);S.dC=[]; /* en el Asalto no hay mazo de calabozo: solo juegan las cartas de las fortalezas */
   }
 }
 /* el jugador en turno elige: cobrar su recompensa o mandarle una sombra al rival (Carrera) */
@@ -3221,9 +3221,11 @@ function vsHud(){
   e.textContent=`🏰 Tu héroe ${f(H)} PV · ${nO} ${f(O)} PV`;
   if(S.cross[0].p>=LV(S.cross[0])&&(!COOP||MYT)&&!VS.wq){VS.wq=1;whenFree(()=>{VS.wq=0;if(!S.over&&!VS.fin)showVictory('Derrotaste al héroe rival.')})}}
 /* armar la fortaleza: eliges 4 de 8 enfrentamientos que tu rival no verá hasta atacarlos */
-function vsPickFort(cb){const pool=vsPool(VS.cal).slice(0,8),ch=[],o=$('#ov');o.style.background='#0d0a14';
-  const show=()=>ov(null,pool.filter(x=>!ch.includes(x)).map(id=>[id,()=>{ch.push(id);if(ch.length<4){show();return 1}o.style.background='';close();cb(ch.slice());return 1},0,'',id,'PV '+CH[id].l]),
-    `<h2>🏰 Arma tu fortaleza</h2><p>Elige 4 enfrentamientos para defenderte (${ch.length} de 4). Entran boca abajo: tu rival no sabrá qué son hasta atacarlos.</p>`,1);show()}
+function vsPickFort(cb){const pool=vsPool(VS.cal).slice(0,9),ch=[],o=$('#ov');o.style.background='#0d0a14';
+  /* tocar una carta la muestra en grande para leer su efecto; se elige con el botón */
+  const look=id=>ov(id,[['✅ Elegir para mi fortaleza',()=>{ch.push(id);if(ch.length<4){show();return 1}o.style.background='';close();cb(ch.slice());return 1}],['↩ Ver las demás',()=>{show();return 1},0,'ghost']],`<p>PV ${CH[id].l} · elegidas ${ch.length} de 4</p>`,1);
+  const show=()=>ov(null,pool.filter(x=>!ch.includes(x)).map(id=>[id,()=>{look(id);return 1},0,'',id,'PV '+CH[id].l]),
+    `<h2>🏰 Arma tu fortaleza</h2><p>Toca una carta para leerla y elige 4 para defenderte (${ch.length} de 4). Entran boca abajo: tu rival no sabrá qué son hasta atacarlos.</p>`,1);show()}
 function vsHeroCol(){const a=B.act,m=a&&MC[a]?String(MC[a][0]):'w';
   if(!a||/^[mlprn]20$/.test(a)||m.includes('w')){B.col='b';B.hc=1;return 0}
   const cs=m.split('').filter(k=>'rav'.includes(k));if(cs.length<=1){B.col=cs[0]||'b';B.hc=1;return 0}
