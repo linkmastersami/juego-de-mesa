@@ -3160,7 +3160,7 @@ const VSPK=['hand','dM','dK','mesa','hp','hab','personaje','vk','gato'];
 const vsClone=o=>JSON.parse(JSON.stringify(o));
 function vsSave(k){const o={};VSPK.forEach(f=>o[f]=S[f]);o.disc=S.disc.filter(x=>!isSh(x));VS.ctx[k]=vsClone(o)}
 function vsLoad(k){const o=VS.ctx[k];VSPK.forEach(f=>S[f]=o[f]);S.disc=S.disc.filter(isSh).concat(o.disc||[]);CHAR=S.personaje||CHAR}
-function vsHeroCH(id){CH[id]={c:'b',l:40};TY[id]='C';delete GCOL[id]}
+function vsHeroCH(id){CH[id]={c:'b',l:40};TY[id]='C';delete GCOL[id];spec[id]=[[],[dmg(1)]]} /* si fallas contra el héroe rival, sufres 1 de daño */
 function vsPool(cal){return shuf(CALS[cal].deck().filter(x=>CH[x]&&!isEv(x)&&!['e06','t14'].includes(x)))}
 function vsPts(n){S.pts=S.pts||{};const k=VSME();S.pts[k]=(S.pts[k]||0)+n}
 function vsHeroDmg(n){if(S.cross[0])S.cross[0].p+=n}
