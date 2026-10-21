@@ -3247,7 +3247,10 @@ function vsAIstep(){
   for(const i of [1,2,3,4]){const c=S.cross[i];if(c&&!c.h&&isEv(c.id)){openCross(i);return}}
   let best=null,bv=-1e9;for(const h of S.hand)for(const i of validCells0(h)){const c=S.cross[i],need=LV(c)-c.p,v=Math.min(MC[h][1],need)*2-Math.abs(need-MC[h][1])*.2+(i===0?5:0);if(v>bv){bv=v;best=[h,i]}}
   if(best){openBat(best[1],null,best[0]);return}
-  const hd=[1,2,3,4].filter(i=>S.cross[i]&&S.cross[i].h);if(hd.length){hidAsk(hd[Math.floor(Math.random()*hd.length)]);return}
+  /* sin cartas que le sirvan: con 3 o más cartas se arriesga con un enfrentamiento oculto; si no, roba una sombra para rehacer su mano (solo tira dados si ya no hay sombras) */
+  const hd=[1,2,3,4].filter(i=>S.cross[i]&&S.cross[i].h);if(hd.length&&S.hand.length>=3){hidAsk(hd[Math.floor(Math.random()*hd.length)]);return}
+  if(S.dK.length&&S.hp>3){openDeck('K');return}
+  if(hd.length){hidAsk(hd[Math.floor(Math.random()*hd.length)]);return}
   const any=[1,2,3,4].find(i=>{const c=S.cross[i];return c&&CH[c.id]&&!blk(c)});if(any){openBat(any);return}
   if(S.dK.length)openDeck('K')}
 
