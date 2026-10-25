@@ -3296,9 +3296,14 @@ async function pushSubApp(ask){const P=pnPlugin();
   let st=await P.checkPermissions();
   if(st.receive!=='granted'){if(!ask)return false;st=await P.requestPermissions();if(st.receive!=='granted')throw new Error('perm:'+st.receive)}
   try{await P.createChannel({id:'avisos',name:'Avisos del juego',description:'Invitaciones, partida rápida y actualizaciones',importance:4,visibility:1})}catch(e){}
-  const tok=await new Promise((ok,ko)=>{let hs=[],to=0;const fin=(f,v)=>{clearTimeout(to);hs.forEach(h=>{try{h.remove()}catch(_){}});f(v)};
+  const reg1=()=>new Promise((ok,ko)=>{let hs=[],to=0;const fin=(f,v)=>{clearTimeout(to);hs.forEach(h=>{try{h.remove()}catch(_){}});f(v)};
     to=setTimeout(()=>fin(ko,new Error('sin respuesta de Firebase')),20000);
     Promise.all([P.addListener('registration',t=>fin(ok,t&&t.value)),P.addListener('registrationError',e=>fin(ko,new Error((e&&e.error)||'registro')))]).then(a=>{hs=a;return P.register()}).catch(e=>fin(ko,e))});
+  /* Google Play a veces responde SERVICE_NOT_AVAILABLE la primera vez (recién instalada o con la red lenta): se reintenta */
+  let tok='';for(let k=0;;k++){try{tok=await reg1();break}catch(e){const m=String((e&&e.message)||e);
+    if(k<3&&/SERVICE_NOT_AVAILABLE|TIMEOUT|sin respuesta/i.test(m)){await new Promise(ok=>setTimeout(ok,2500*(k+1)));continue}
+    if(/SERVICE_NOT_AVAILABLE/i.test(m))throw new Error('el teléfono no pudo conectarse con el servicio de notificaciones de Google (SERVICE_NOT_AVAILABLE).\n\nRevisa que tengas internet, que «Servicios de Google Play» esté actualizado y que no tengas activo un bloqueador de anuncios, DNS privado o VPN. Luego vuelve a intentarlo.');
+    throw e}}
   if(!tok)throw new Error('sin token');
   const r=await fetch(MP_URL+'/push/sub',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({fcm:tok})});
   if(!r.ok)throw new Error(r.status===400?'srv':'servidor '+r.status);
@@ -3891,7 +3896,7 @@ $('#o-canim').addEventListener('change',e=>canimSet(e.target.checked));
 function optSync(){
   $('#o-modo').textContent=sinNet()?'✈️ Jugando sin Internet · toca para cambiar':'🌐 Jugando con Internet · toca para cambiar';
   const of=$('#lob-offline');$('#o-off').style.display=of.style.display==='none'?'none':'';$('#o-off').textContent=of.textContent;$('#o-off').style.background=of.style.background||'';
-  const nb=$('#lob-btn-notif'),nOk=nb.style.display!=='none';$('#o-notif').disabled=!nOk;$('#o-notif').textContent=nOk?nb.textContent:'🔔 Avisos no disponibles en este navegador';
+  const nb=$('#lob-btn-notif'),nOk=nb.style.display!=='none';$('#o-notif').disabled=!nOk;$('#o-notif').textContent=nOk?nb.textContent:pnPlugin()?'🔔 Avisos: conectando con el servidor…':'🔔 Avisos no disponibles en este navegador';
   const st=matchMedia('(display-mode: standalone)').matches||navigator.standalone,ib=$('#o-inst');
   ib.disabled=!_installPrompt;ib.textContent=_installPrompt?'📲 Instalar la aplicación':st?'✅ La aplicación ya está instalada':'📲 Para instalar: menú del navegador → "Agregar a pantalla principal"'}
 let OPTT=null;
