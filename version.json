@@ -2,8 +2,10 @@
  "files": {
   "album/hoja.webp": "f0bbb7a0ee97",
   "album/libro-calabozo.webp": "6f4cd3ef786b",
+  "album/libro-coral.jpg": "a2d2abb164aa",
   "album/libro-espada.webp": "ebcb4d7ee44e",
   "album/libro-fuego.webp": "e276a9f7c422",
+  "album/libro-granito.jpg": "43e37583add5",
   "album/libro-jefe.webp": "88c3fe38499f",
   "album/libro-mansion.webp": "2bffd9f5bbb5",
   "album/libro-nova.webp": "7d8386fcc9e4",
@@ -321,5 +323,5 @@
   "voces/38.mp3": "bdb95078938e",
   "voces/inv.mp3": "88fd37faee29"
  },
- "version": "ee92ff81dc47"
+ "version": "c3b0bbc3a047"
 }
