@@ -3936,10 +3936,10 @@ function pzSala(z,silent){if(z===pzSalaGet()&&!silent)return;const zc=PZ.zc||[];
   try{localStorage.setItem('mesa-pzz',z)}catch(e){}PZ.w.forEach((w,id)=>{if(id!=='@me'&&!w.npc){w.el.remove();PZ.w.delete(id)}});pzSalaUi();PZ.poll=0;pzPoll();try{SFX.pop()}catch(_){}}
 function pzCount(){pzSalaUi();const e=$('#pz-n');if(!e)return;
   e.textContent=!YO?'📜 Registra tu nombre para ver a los demás':sinNet()||!navigator.onLine?'📴 Sin conexión':(PZ.total<=1?'🟢 Solo tú en línea':`🟢 ${PZ.total} en línea`)+(PZ.reg>1?` · ${PZ.reg} aventureros`:'')}
-async function pzPoll(){if(!pzOn()||!YO||!navigator.onLine||sinNet())return pzCount();if(Date.now()-PZ.poll<4000)return;PZ.poll=Date.now();
+async function pzPoll(){if(document.hidden||!YO||!navigator.onLine||sinNet())return pzCount();if(Date.now()-PZ.poll<(pzOn()?4000:12000))return;PZ.poll=Date.now();
   try{const c=new AbortController(),to=setTimeout(()=>c.abort(),8000);
     const r=await fetch(MP_URL+'/plaza',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({n:YO.n,k:YO.k,z:pzSalaGet(),a:AV||'guerrero',ti:selGet('ti'),mc:selGet('mc'),...(PZ.ems?{e:PZ.ems}:{})}),signal:c.signal});clearTimeout(to);PZ.ems=null;
-    const j=await r.json();if(j&&j.zc){PZ.zc=j.zc;PZ.max=j.max||15}if(j&&j.r==='full'){gToast('Las 3 salas están llenas, intenta en un ratito',0,0,3500);return pzCount()}if(!j||j.r!=='ok'||!PZ.el)return;PZ.total=j.total||1;if(typeof j.z==='number'&&j.z!==pzSalaGet()){try{localStorage.setItem('mesa-pzz',j.z)}catch(e){}gToast('Esa sala se llenó, te mandamos a '+PZSAL[j.z],0,0,3500)}
+    const j=await r.json();if(j&&j.zc){PZ.zc=j.zc;PZ.max=j.max||15}if(j&&j.r==='full'){pzOn()&&gToast('Las 3 salas están llenas, intenta en un ratito',0,0,3500);return pzCount()}if(!j||j.r!=='ok'||!PZ.el)return;PZ.total=j.total||1;if(typeof j.z==='number'&&j.z!==pzSalaGet()){try{localStorage.setItem('mesa-pzz',j.z)}catch(e){}pzOn()&&gToast('Esa sala se llenó, te mandamos a '+PZSAL[j.z],0,0,3500)}
     const seen=new Set(['@me']);(j.p||[]).forEach(o=>{if(!AVN[o.a])o.a='guerrero';const id='u:'+o.n;seen.add(id);const w=PZ.w.get(id);
       if(w&&w.a!==o.a){w.el.remove();PZ.w.delete(id)}if(!PZ.w.has(id))pzAdd(id,o.n,o.a,0);
       const w2=PZ.w.get(id);if(w2){w2.off=0;w2.el.classList.remove('off');pzDeco(w2,o.ti,o.mc)}if(w2&&o.e&&o.et&&o.et!==w2.et){w2.et=o.et;
@@ -3953,7 +3953,8 @@ async function pzPoll(){if(!pzOn()||!YO||!navigator.onLine||sinNet())return pzCo
     PZ.reg=j.reg||0;
     PZ.w.forEach((w,id)=>{if(!seen.has(id)&&!w.npc){PZ.w.delete(id);w.el.classList.add('out');setTimeout(()=>w.el.remove(),550)}});
   }catch(e){}pzCount()}
-setInterval(()=>{if(pzOn()){pzPoll();pzLoop()}},2000);
+setInterval(()=>{pzPoll();if(pzOn())pzLoop()},2000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){PZ.poll=0;setTimeout(pzPoll,300)}});
 /* sobre de carta que vuela de un guerrero a otro (solicitud de amistad) */
 function pzMail(a,b){pzFly(a,b,'✉️','💌')}
 function pzFly(a,b,ch,land){if(!PZ.el)return;const hd=w=>{const q=w.b.getBoundingClientRect(),r=PZ.el.getBoundingClientRect();return[q.left+q.width/2-r.left,q.top-r.top+10]};
