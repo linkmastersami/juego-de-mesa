@@ -945,6 +945,39 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
 #amgd .y{background:linear-gradient(180deg,#ffe07a,#e0a92a);color:#3a2808}#amgd .n{background:#4a4555;color:var(--ink)}
 #reg.kb,#amgd.kb,#perfd.kb{justify-content:flex-start;align-items:center;overflow-y:auto}
 #reg.kb .rlogo{display:none}
+
+/* ===== estilo videojuego para ventanas y paneles: marco dorado, fondo de piedra/pergamino, título en cinta ===== */
+#recs .rbox,#opts .rbox,.pane .rbox,#ov:not(.vicp) .box,#cdlg .cb,#alb-view .av,#mp .mbox{
+  position:relative;border:3px solid #c9973a;border-radius:18px;
+  background:url("fondos/panel.webp") center/cover,radial-gradient(130% 90% at 50% 0%,#3d3156 0%,#261d36 55%,#17121f 100%);
+  box-shadow:inset 0 0 0 2px #5a3f14,inset 0 0 0 4px #120d19,inset 0 0 28px #000b,0 0 0 2px #2a1d08,0 14px 34px #000c,0 0 26px #ffd34d1f}
+#recs .rbox::before,#opts .rbox::before,.pane .rbox::before,#ov:not(.vicp) .box::before,#cdlg .cb::before,#mp .mbox::before{content:'';position:absolute;inset:-9px;pointer-events:none;z-index:2;
+  background:
+   radial-gradient(circle,#fff3c4 0 2px,#e9b949 3px 5px,#7a5512 6px 7px,transparent 8px) left top/18px 18px no-repeat,
+   radial-gradient(circle,#fff3c4 0 2px,#e9b949 3px 5px,#7a5512 6px 7px,transparent 8px) right top/18px 18px no-repeat,
+   radial-gradient(circle,#fff3c4 0 2px,#e9b949 3px 5px,#7a5512 6px 7px,transparent 8px) left bottom/18px 18px no-repeat,
+   radial-gradient(circle,#fff3c4 0 2px,#e9b949 3px 5px,#7a5512 6px 7px,transparent 8px) right bottom/18px 18px no-repeat}
+#mp .mbox{padding:18px 14px 16px}
+/* títulos en cinta */
+#recs .rbox>h2,#opts .rbox>h2,.pane .rbox>h2,#cdlg .cb>h2{position:relative;align-self:center;margin:-34px auto 4px;padding:8px 38px 11px;width:max-content;max-width:92%;
+  background:url("fondos/cinta.webp") center/100% 100% no-repeat,linear-gradient(180deg,#c43340,#86141f 70%,#5e0c14);
+  clip-path:polygon(0 0,100% 0,95% 50%,100% 100%,0 100%,5% 50%);color:#ffe08a!important;font:800 1.3rem Fredoka,sans-serif;letter-spacing:.03em;
+  text-shadow:0 2px 0 #3a0508,0 0 10px #ffd34d55;filter:drop-shadow(0 4px 4px #000a)}
+#recs .rbox,#opts .rbox,.pane .rbox{padding-top:26px;margin-top:22px}
+/* subtítulos con adorno */
+#recs h3,#opts h3,.pane .rbox h3{display:flex;align-items:center;gap:8px;color:#e9c46a!important;font:800 .85rem Fredoka,sans-serif!important;letter-spacing:.08em;text-transform:uppercase}
+#recs h3::before,#recs h3::after,#opts h3::before,#opts h3::after,.pane .rbox h3::before,.pane .rbox h3::after{content:'';flex:1;height:2px;background:linear-gradient(90deg,transparent,#c9973a)}
+#recs h3::after,#opts h3::after,.pane .rbox h3::after{background:linear-gradient(90deg,#c9973a,transparent)}
+/* botones de piedra con borde dorado */
+#opts .obtn:not(.odel),#recs .rclose,#opts .rclose,.pane .rclose,#ov .btns button:not([class]),#cdlg .cb button:not(.main),#alb-view>button,#mp .mbtn.sec{
+  background:url("fondos/boton.webp") center/100% 100% no-repeat,linear-gradient(180deg,#5d5470,#3c3450 55%,#2e2740)!important;color:#fff4d6!important;
+  border:2px solid #9c7a3c!important;box-shadow:inset 0 1px 0 #ffffff30,inset 0 -3px 0 #0006,0 4px 0 #120d19,0 6px 10px #0008!important;text-shadow:0 1px 2px #000}
+#opts .obtn:not(.odel):active,#recs .rclose:active,#opts .rclose:active,#ov .btns button:not([class]):active,#alb-view>button:active,#mp .mbtn.sec:active{transform:translateY(3px);box-shadow:inset 0 1px 0 #ffffff30,0 1px 0 #120d19!important}
+#opts .obtn.odel{border:2px solid #ff3b5599!important;box-shadow:0 4px 0 #2a0810}
+#opts .vol,#opts .orow,#opts .oanim{background:#0d0a1488;border:1px solid #c9973a55;border-radius:14px}
+#mp .mslot{background:linear-gradient(180deg,#2a2238,#1a1424)!important;box-shadow:inset 0 0 0 2px #c9973a66!important}
+#alb-view .av{padding:14px 18px}
+#alb-view h3{color:#ffe08a;text-shadow:0 2px 0 #3a0508,0 0 12px #ffd34d66;font:800 1.5rem Fredoka,sans-serif;margin:0}
 </style>
 </head>
 <body>
