@@ -1552,8 +1552,9 @@ async function perfMovido(){const n=YO&&YO.n;try{const g=navigator.serviceWorker
 const PJN={m:'Bruno',l:'Veralyn',p:'Volti',r:'Robi',n:'Nova'},PJI={m:'🔥',l:'🗡️',p:'⚡',r:'🏮',n:'🚀'};
 /* Robi y Nova se desbloquean al completar su mazo en el gacha de la tienda */
 /* estado de la tienda (gemas, compras y gacha), guardado también en el teléfono */
-const TND={g:null,inv:[],shop:{},gc:{},gp:30,t:0,pa:null,pe:null};
-const GSET={r:{nm:'Robi, el niño robot',ic:'🤖'},n:{nm:'Nova, la cazadora estelar',ic:'🚀'}};const GOR={};
+const TND={g:null,inv:[],shop:{},gc:{},gp:60,gad:0,t:0,pa:null,pe:null};
+const GSET={r:{nm:'Robi, el niño robot',ic:'🤖',tot:18,pic:'r19'},n:{nm:'Nova, la cazadora estelar',ic:'🚀',tot:18,pic:'n19'},e:{nm:'La Mansión Embrujada',ic:'👻',tot:28,pic:'ej1',cal:1}};
+const gUnl=k=>GSET[k]&&GSET[k].cal?'cal:'+k:'pj:'+k; /* personaje (pj:) o calabozo (cal:) que se desbloquea al completar */const GOR={};
 try{const c=JSON.parse(localStorage.getItem('mesa-tnd')||'null');if(c){TND.g=c.g;TND.inv=c.inv||[];TND.shop=c.shop||{};TND.gc=c.gc||{}}}catch(e){}
 /* desbloqueo de prueba (botón temporal en el lobby): se guarda solo en este teléfono */
 const DEVU=()=>{try{return JSON.parse(localStorage.getItem('mesa-devu')||'[]')||[]}catch(e){return []}};
@@ -2856,7 +2857,7 @@ function calUi(){const e=$('#lob-cal');if(!e)return;if(!calOk(CAL))CAL='t';
     +(CAL==='e'?'<small>👻 La Mansión es solo para 1 jugador por ahora</small>':'')
     +((!calOk('e')||!pjOk('r'))?'<button class="unl" id="lob-unl">🔓 Desbloquear la Mansión y a Robi (prueba)</button>':'')}
 $('#lob-cal').addEventListener('click',e=>{const b=e.target.closest('[data-cal]');
-  if(b){const k=b.dataset.cal;if(!calOk(k)){try{SFX.down()}catch(_){}return}CAL=k;try{localStorage.setItem('mesa-cal',k)}catch(_){}calUi();try{smp('pestana')}catch(_){}return}
+  if(b){const k=b.dataset.cal;if(!calOk(k)){try{SFX.down()}catch(_){}try{gToast(`${GSET[k]?GSET[k].ic:'🔒'} Desbloquea <b>${CALS[k].nf}</b> completando sus ${GSET[k]?GSET[k].tot:''} cartas en el gacha de Don Trueque (Comunidad).`,null,null,5000)}catch(_){}return}CAL=k;try{localStorage.setItem('mesa-cal',k)}catch(_){}calUi();try{smp('pestana')}catch(_){}return}
   if(e.target.closest('#lob-unl')){const d=DEVU();['cal:e','pj:r'].forEach(x=>{if(!d.includes(x))d.push(x)});try{localStorage.setItem('mesa-devu',JSON.stringify(d))}catch(_){}
     lobLocks();lobPick(CHAR||'m');calUi();try{SFX.fanfare()}catch(_){}}});
 /* selección de personaje */
@@ -3745,7 +3746,7 @@ function pzPick(){let d=$('#pz-pick');if(!d){d=document.createElement('div');d.i
 
 /* ===== TIENDA DE DON TRUEQUE: gemas gratis (nunca dinero real) que se ganan jugando ===== */
 const tndSave=()=>{try{localStorage.setItem('mesa-tnd',JSON.stringify({g:TND.g,inv:TND.inv,shop:TND.shop,gc:TND.gc}))}catch(e){}};
-const tndSet=j=>{if(!j||typeof j.g!=='number')return;TND.g=j.g;TND.inv=j.inv||[];TND.shop=j.shop||TND.shop;TND.gc=j.gc||TND.gc||{};if(j.gp)TND.gp=j.gp;if(j.pa)TND.pa=j.pa;if(j.pe)TND.pe=j.pe;tndSave();try{albDot();recDot()}catch(_){}try{if(lobbyOn()&&LP===0)recRender();if(lobbyOn()&&LP===1)albRender()}catch(_){}try{lobLocks()}catch(e){}tndPaint();
+const tndSet=j=>{if(!j||typeof j.g!=='number')return;TND.g=j.g;TND.inv=j.inv||[];TND.shop=j.shop||TND.shop;TND.gc=j.gc||TND.gc||{};if(j.gp)TND.gp=j.gp;if(typeof j.gad==='number')TND.gad=j.gad;if(j.pa)TND.pa=j.pa;if(j.pe)TND.pe=j.pe;tndSave();try{albDot();recDot()}catch(_){}try{if(lobbyOn()&&LP===0)recRender();if(lobbyOn()&&LP===1)albRender()}catch(_){}try{lobLocks()}catch(e){}tndPaint();
   if(AV&&!avOk(AV)){AV='guerrero';try{localStorage.setItem('mesa-av',AV)}catch(e){}try{pzMe()}catch(e){}}};
 async function tndSync(f){if(!YO||!navigator.onLine||sinNet())return tndPaint();if(!f&&Date.now()-TND.t<20000)return tndPaint();TND.t=Date.now();
   const j=await nPost('/tienda',{n:YO.n,k:YO.k});if(j&&j.r==='ok')tndSet(j);else tndPaint()}
@@ -3763,7 +3764,7 @@ async function adInit(){const A=adPlugin();if(!A||ADS.init)return;ADS.init=1;
     adLoad()}catch(e){ADS.init=0}}
 async function adLoad(){const A=adPlugin();if(!A||ADS.ready||ADS.loading)return;ADS.loading=1;
   try{await A.prepareRewardVideoAd({adId:ADS.unit,isTesting:ADS.test});ADS.ready=true}catch(e){ADS.ready=false;setTimeout(adLoad,60000)}ADS.loading=0}
-const adOk=()=>!!adPlugin()&&ADS.ready;
+function adOk(){try{return !!adPlugin()&&ADS.ready}catch(e){return false}} /* declarada así para poder usarse desde cualquier parte */
 async function adShow(){const A=adPlugin();if(!A||!ADS.ready||ADS.busy)return false;ADS.busy=1;ADS.ready=false;let got=false,l=null;
   window.ADPLAY=1;try{musTick()}catch(e){}try{AC&&AC.suspend()}catch(e){}
   try{l=await A.addListener('onRewardedVideoAdReward',()=>{got=true})}catch(e){}
@@ -3799,6 +3800,7 @@ function tndOpen(tab){let d=$('#tnd');if(!d){d=document.createElement('div');d.i
       const t=e.target.closest('[data-t]');if(t){TNDT=t.dataset.t;try{SFX.pop()}catch(_){}tndBody();return}
       const om=e.target.closest('[data-om],[data-op]');if(om){const k=om.dataset.om||om.dataset.op,x=TND.gc[k]||{o:0};GOR[k]=Math.max(0,Math.min(5,x.o||0,(GOR[k]||0)+(om.dataset.op?1:-1)));try{SFX.tick()}catch(_){}tndBody();return}
       const tr=e.target.closest('[data-tir]');if(tr){gchTirar(tr.dataset.tir);return}
+      const ta=e.target.closest('[data-tirad]');if(ta){gchTirar(ta.dataset.tirad,1);return}
       const vr=e.target.closest('[data-ver]');if(vr){gchVer(vr.dataset.ver);return}
       const u=e.target.closest('[data-use]');if(u){AV=u.dataset.use;try{localStorage.setItem('mesa-av',AV)}catch(_){}try{SFX.pop();pzMe()}catch(_){}PZ.poll=0;pzPoll();tndSay(`¡${AVN[AV]} te queda de maravilla!`);tndBody();return}
       const c=e.target.closest('[data-buy]');if(c){const it=c.dataset.buy,pr=TND.shop[it]||0;
@@ -3818,43 +3820,44 @@ function tndBody(){const b=$('#tnd-b');if(!b)return;$('#tnd').querySelectorAll('
   if(!YO){b.innerHTML=`<p class="tn">📜 Registra tu nombre de aventurero para guardar tus gemas.</p>`;return}
   if(TNDT==='gue'){b.innerHTML=`<p class="tn">Guerreros para pasear por la plaza. Los demás te verán con él.</p><div class="tg">${AVP.map(k=>{const own=TND.inv.includes(k),pr=TND.shop[k]||150;
       return `<div class="ti${own?' own':''}"><img src="guerreros/${k}.webp" alt=""><b>${AVN[k]}</b>${own?(AV===k?'<button class="usd" disabled>✔ Usando</button>':`<button data-use="${k}">Usar</button>`):`<button class="buy" data-buy="${k}">${gemI}${pr}</button>`}</div>`}).join('')}</div>`;return}
-  if(TNDT==='gac'){b.innerHTML=`<div class="gac"><img src="tienda/gacha.webp" alt=""><p>Cada tirada da una carta al azar. Las repetidas dan <b>🔮 orbes</b>: cada uno sube 20 % la suerte de sacar una nueva. ¡Completa el mazo para jugar con él!</p></div>
-      ${Object.keys(GSET).map(k=>{const G=GSET[k],x=TND.gc[k]||{c:[],o:0},n=(x.c||[]).length,own=TND.inv.includes('pj:'+k);
-        const o=Math.min(GOR[k]||0,x.o||0,5),pr=Math.round(Math.max((18-n)/18,o*.2)*100);
-        return `<div class="gs2${own?' own':''}"><img class="gpj" src="${imgSrc(k+'19')}" alt="">
-          <div class="grt"><b>${G.ic} ${G.nm}</b><small>${own?'✔ Mazo completo · ya puedes jugar':`${n} de 18 cartas · 🔮 ${x.o||0} orbe${x.o===1?'':'s'}`}</small>
-            <div class="gbar"><span style="width:${n/18*100}%"></span></div>
+  if(TNDT==='gac'){const adL=adOk()&&TND.gad>0;b.innerHTML=`<div class="gac"><img src="tienda/gacha.webp" alt=""><p>Cada tirada da una carta al azar. Las repetidas dan <b>🔮 orbes</b>: cada uno sube 20 % la suerte de sacar una nueva. ¡Completa el mazo para desbloquearlo!</p></div>
+      ${Object.keys(GSET).map(k=>{const G=GSET[k],T=G.tot,x=TND.gc[k]||{c:[],o:0},n=(x.c||[]).length,own=TND.inv.includes(gUnl(k));
+        const o=Math.min(GOR[k]||0,x.o||0,5),pr=Math.round(Math.max((T-n)/T,o*.2)*100);
+        return `<div class="gs2${own?' own':''}"><img class="gpj" src="${imgSrc(G.pic)}" alt="">
+          <div class="grt"><b>${G.ic} ${G.nm}</b><small>${own?(G.cal?'✔ Mazo completo · ya puedes explorarla':'✔ Mazo completo · ya puedes jugar'):`${n} de ${T} cartas · 🔮 ${x.o||0} orbe${x.o===1?'':'s'}`}</small>
+            <div class="gbar"><span style="width:${n/T*100}%"></span></div>
             ${own?'':`<div class="grow"><span class="gorb">🔮 <button data-om="${k}">−</button><b>${o}</b><button data-op="${k}">+</button></span><span class="gpr">Nueva: <b>${pr} %</b></span></div>
-            <button class="gtir" data-tir="${k}">Tirar ${gemI}${TND.gp}</button>`}
-            <button class="gver" data-ver="${k}">🃏 Ver cartas (${n}/18)</button></div></div>`}).join('')}
-      ${soon('👻','La Mansión Embrujada','Gacha de calabozo')}`;return}
+            <button class="gtir" data-tir="${k}">Tirar ${gemI}${TND.gp}</button>${adL?`<button class="gtir gad" data-tirad="${k}">📺 Tirar gratis · quedan ${TND.gad} hoy</button>`:''}`}
+            <button class="gver" data-ver="${k}">🃏 Ver cartas (${n}/${T})</button></div></div>`}).join('')}`;return}
   b.innerHTML=`${soon('🂠','Reversos de cartas','Cambia el diseño de atrás de tus cartas')}${soon('🖼️','Marcos','Un marco especial para tu perfil')}${soon('🗺️','Tableros','Fondos nuevos para tus partidas')}${soon('😄','Emojis y frases','Más reacciones para la plaza')}${soon('🏷️','Títulos','Un título bajo tu nombre')}${soon('🎁','Regalos','Envía gemas a tus amigos')}`}
 
 
 /* colección del gacha en su propia ventana */
 function gchVer(k){let d=$('#gcol');if(!d){d=document.createElement('div');d.id='gcol';document.body.appendChild(d);
     d.addEventListener('click',e=>{if(e.target.closest('.x')||e.target===d){d.classList.remove('on');return}const c=e.target.closest('[data-cv]');if(c)ov(c.dataset.cv,[])})}
-  const x=TND.gc[k]||{c:[]},G=GSET[k];
-  d.innerHTML=`<div class="bx"><div class="hd"><b>${G.ic} ${G.nm}</b><span>${(x.c||[]).length} de 18</span><button class="x">✕</button></div>
-    <div class="gr">${Array.from({length:18},(_,i)=>{const id=k+String(i+1).padStart(2,'0');return (x.c||[]).includes(id)?`<img data-cv="${id}" src="${imgSrc(id)}" alt="">`:'<span>?</span>'}).join('')}</div>
-    <p>Al completar las 18 cartas recibes también su carta de personaje y su habilidad.</p></div>`;d.classList.add('on')}
+  const x=TND.gc[k]||{c:[]},G=GSET[k],T=G.tot;
+  d.innerHTML=`<div class="bx"><div class="hd"><b>${G.ic} ${G.nm}</b><span>${(x.c||[]).length} de ${T}</span><button class="x">✕</button></div>
+    <div class="gr">${Array.from({length:T},(_,i)=>{const id=k+String(i+1).padStart(2,'0');return (x.c||[]).includes(id)?`<img data-cv="${id}" src="${imgSrc(id)}" alt="">`:'<span>?</span>'}).join('')}</div>
+    <p>${G.cal?`Al completar las ${T} cartas se desbloquea ${G.nm}, con sus retratos y sus jefes.`:`Al completar las ${T} cartas recibes también su carta de personaje y su habilidad.`}</p></div>`;d.classList.add('on')}
 let GVIC=null;const gchVicStop=()=>{try{if(GVIC){GVIC.pause();GVIC=null}}catch(e){}};
 /* tirada del gacha: la máquina gira, sale el pergamino y aparece la carta */
-async function gchTirar(k){if(!YO)return tndSay('Primero registra tu nombre de aventurero.');
-  if((TND.g||0)<TND.gp)return tndSay(`Te faltan ${TND.gp-(TND.g||0)} gemas para una tirada. ¡Juega y vuelve!`);
+async function gchTirar(k,ad){if(!YO)return tndSay('Primero registra tu nombre de aventurero.');
+  if(ad){if(!(TND.gad>0))return tndSay('Ya usaste tus tiradas gratis de hoy. ¡Vuelve mañana!');if(!adOk())return tndSay('El anuncio aún no está listo. Inténtalo en un momento.');
+    const ok=await adShow();if(!ok)return tndSay('El anuncio no terminó, así que no hubo tirada gratis.')}
+  else if((TND.g||0)<TND.gp)return tndSay(`Te faltan ${TND.gp-(TND.g||0)} gemas para una tirada. ¡Juega y vuelve!`);
   const o=Math.min(GOR[k]||0,(TND.gc[k]||{}).o||0,5);
   let d=$('#gch');if(!d){d=document.createElement('div');d.id='gch';document.body.appendChild(d)}
   gchVicStop();d.innerHTML=`<video id="gch-v" src="tienda/gacha.m4v" playsinline preload="auto"></video><div class="gres" id="gch-r"></div><p class="gskip">Toca para saltar</p>`;d.classList.add('on');
   const v=$('#gch-v');try{musDuck(1)}catch(_){}v.playbackRate=1.6;v.volume=Math.min(1,(SND||0)/10);if(!SND)v.muted=true;
-  const req=nPost('/tienda/gacha',{n:YO.n,k:YO.k,s:k,o});let shown=0;
+  const req=nPost('/tienda/gacha',{n:YO.n,k:YO.k,s:k,o,ad:ad?1:0});let shown=0;
   const show=async()=>{if(shown)return;shown=1;const j=await req;d.querySelector('.gskip').style.display='none';const r=$('#gch-r');
-    if(!j||j.r!=='ok'){try{v.pause()}catch(_){}r.innerHTML=`<div class="gmsg"><b>${j&&j.r==='pocas'?'No te alcanzan las gemas':'No se pudo hacer la tirada'}</b><button data-x>Cerrar</button></div>`;if(j)tndSet(j);r.classList.add('on');return}
+    if(!j||j.r!=='ok'){try{v.pause()}catch(_){}r.innerHTML=`<div class="gmsg"><b>${j&&j.r==='pocas'?'No te alcanzan las gemas':j&&j.r==='tope'?'Ya usaste tus tiradas gratis de hoy':'No se pudo hacer la tirada'}</b><button data-x>Cerrar</button></div>`;if(j)tndSet(j);r.classList.add('on');return}
     GOR[k]=0;tndSet(j);const G=GSET[k];
     r.innerHTML=`<div class="gsp">${Array.from({length:26},()=>`<i style="left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${(Math.random()*2).toFixed(2)}s;--s:${(.5+Math.random()*1.2).toFixed(2)}"></i>`).join('')}</div><div class="gray"></div>
       <div class="gcard${j.nuevo?' nw':''}"><div class="gbeat"><img src="${imgSrc(j.card)}" alt=""></div></div>
-      <div class="gmsg"><b>${j.nuevo?'✨ ¡Carta nueva!':'Repetida · +1 orbe 🔮'}</b>${j.fin?`<p>🎉 ¡Completaste el mazo! Ya puedes jugar con <b>${G.nm}</b>.${j.extra?` Tus orbes sobrantes se volvieron ${gemI}${j.extra}.`:''}</p>`:`<p>${(j.gc[k].c||[]).length} de 18 cartas</p>`}
+      <div class="gmsg"><b>${j.nuevo?'✨ ¡Carta nueva!':'Repetida · +1 orbe 🔮'}</b>${j.fin?`<p>🎉 ¡Completaste el mazo! ${G.cal?`Ya puedes explorar <b>${G.nm}</b>.`:`Ya puedes jugar con <b>${G.nm}</b>.`}${j.extra?` Tus orbes sobrantes se volvieron ${gemI}${j.extra}.`:''}</p>`:`<p>${(j.gc[k].c||[]).length} de ${G.tot} cartas</p>`}
       <div class="gbt">${j.fin?'':`<button data-otra="${k}">Otra ${gemI}${TND.gp}</button>`}<button data-x>Listo</button></div></div>`;
-    r.classList.add('on');try{if(SND){const a=new Audio('musica/victoria.mp3');a.loop=false;a.volume=Math.min(1,SND/10*.8);a.play().catch(()=>{});GVIC=a}else{j.nuevo?SFX.fanfare():SFX.pop()}}catch(_){}try{albGet&&albGet(j.card,'v')}catch(_){}};
+    r.classList.add('on');try{if(SND){const a=new Audio('musica/victoria.mp3');a.loop=false;a.volume=Math.min(1,SND/10*.8);a.play().catch(()=>{});GVIC=a}else{j.nuevo?SFX.fanfare():SFX.pop()}}catch(_){}try{albGet&&albGet(j.card,G.cal?undefined:'v')}catch(_){}};
   v.ontimeupdate=()=>{if(v.currentTime>=8.6)show()};v.onended=show;v.onerror=show;
   d.onclick=e=>{if(e.target.closest('[data-x]')){d.classList.remove('on');gchVicStop();try{v.pause()}catch(_){}try{musDuck(0)}catch(_){}tndBody();return}
     const ot=e.target.closest('[data-otra]');if(ot){gchTirar(ot.dataset.otra);return}
