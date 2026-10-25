@@ -389,6 +389,11 @@ body.rvimg .card.hidc img{content:var(--rvimg)}
 .tb .cso .own{font:700 .66rem Fredoka,sans-serif;color:#7dffb0}
 .tb .gift{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:8px 10px;margin-top:8px;border-radius:12px;background:#ffffff10}
 .tb .gift b{flex:1 1 100%;font:700 .85rem Fredoka,sans-serif;color:#fff}
+img{-webkit-touch-callout:none;-webkit-user-drag:none}
+.card,.card img{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+#czoom{position:fixed;inset:0;z-index:300;display:none;place-items:center;background:#000a;pointer-events:none}
+#czoom.on{display:grid;animation:pop .2s cubic-bezier(.2,.9,.3,1.3)}
+#czoom .card{width:min(82vw,380px);height:auto;aspect-ratio:696/1015;filter:drop-shadow(0 12px 30px #000)}
 #coopb{display:none;position:fixed;left:0;right:0;top:56px;bottom:0;z-index:45}
 #coopb span{position:fixed;top:10px;left:50%;transform:translateX(-50%);padding:7px 16px;border-radius:20px;background:#2a1f45ee;color:#f2c14e;font:700 .95rem Fredoka,sans-serif;box-shadow:0 0 0 2px #f2c14e88;pointer-events:none;white-space:nowrap}
 body.waitp #coopb{display:block}
@@ -949,7 +954,7 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
 /* ===== estilo videojuego para ventanas y paneles: marco dorado, fondo de piedra/pergamino, título en cinta ===== */
 #recs .rbox,#opts .rbox,.pane .rbox,#ov:not(.vicp) .box,#cdlg .cb,#alb-view .av,#mp .mbox{
   position:relative;border:3px solid #c9973a;border-radius:18px;
-  background:url("fondos/panel.webp") center/cover,radial-gradient(130% 90% at 50% 0%,#3d3156 0%,#261d36 55%,#17121f 100%);
+  background:linear-gradient(#1c1529d6,#140f1ee6),url("fondos/panel.webp") center/cover,radial-gradient(130% 90% at 50% 0%,#3d3156 0%,#261d36 55%,#17121f 100%);
   box-shadow:inset 0 0 0 2px #5a3f14,inset 0 0 0 4px #120d19,inset 0 0 28px #000b,0 0 0 2px #2a1d08,0 14px 34px #000c,0 0 26px #ffd34d1f}
 #recs .rbox::before,#opts .rbox::before,.pane .rbox::before,#ov:not(.vicp) .box::before,#cdlg .cb::before,#mp .mbox::before{content:'';position:absolute;inset:-9px;pointer-events:none;z-index:2;
   background:
@@ -959,9 +964,8 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
    radial-gradient(circle,#fff3c4 0 2px,#e9b949 3px 5px,#7a5512 6px 7px,transparent 8px) right bottom/18px 18px no-repeat}
 #mp .mbox{padding:18px 14px 16px}
 /* títulos en cinta */
-#recs .rbox>h2,#opts .rbox>h2,.pane .rbox>h2,#cdlg .cb>h2{position:relative;align-self:center;margin:-34px auto 4px;padding:8px 38px 11px;width:max-content;max-width:92%;
-  background:url("fondos/cinta.webp") center/100% 100% no-repeat,linear-gradient(180deg,#c43340,#86141f 70%,#5e0c14);
-  clip-path:polygon(0 0,100% 0,95% 50%,100% 100%,0 100%,5% 50%);color:#ffe08a!important;font:800 1.3rem Fredoka,sans-serif;letter-spacing:.03em;
+#recs .rbox>h2,#opts .rbox>h2,.pane .rbox>h2,#cdlg .cb>h2{position:relative;align-self:center;margin:-40px auto 2px;padding:12px 64px 20px;width:max-content;min-width:230px;max-width:96%;box-sizing:border-box;text-align:center;
+  background:url("fondos/cinta.webp") center/100% 100% no-repeat;color:#ffe08a!important;font:800 1.3rem Fredoka,sans-serif;letter-spacing:.03em;
   text-shadow:0 2px 0 #3a0508,0 0 10px #ffd34d55;filter:drop-shadow(0 4px 4px #000a)}
 #recs .rbox,#opts .rbox,.pane .rbox{padding-top:26px;margin-top:22px}
 /* subtítulos con adorno */
@@ -970,9 +974,9 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
 #recs h3::after,#opts h3::after,.pane .rbox h3::after{background:linear-gradient(90deg,#c9973a,transparent)}
 /* botones de piedra con borde dorado */
 #opts .obtn:not(.odel),#recs .rclose,#opts .rclose,.pane .rclose,#ov .btns button:not([class]),#cdlg .cb button:not(.main),#alb-view>button,#mp .mbtn.sec{
-  background:url("fondos/boton.webp") center/100% 100% no-repeat,linear-gradient(180deg,#5d5470,#3c3450 55%,#2e2740)!important;color:#fff4d6!important;
-  border:2px solid #9c7a3c!important;box-shadow:inset 0 1px 0 #ffffff30,inset 0 -3px 0 #0006,0 4px 0 #120d19,0 6px 10px #0008!important;text-shadow:0 1px 2px #000}
-#opts .obtn:not(.odel):active,#recs .rclose:active,#opts .rclose:active,#ov .btns button:not([class]):active,#alb-view>button:active,#mp .mbtn.sec:active{transform:translateY(3px);box-shadow:inset 0 1px 0 #ffffff30,0 1px 0 #120d19!important}
+  background:linear-gradient(180deg,#4f4763,#3a3349)!important;color:#fff4d6!important;border:solid transparent!important;border-width:10px 14px!important;border-radius:6px!important;
+  border-image:url("fondos/boton.webp") 30 42 fill / 10px 14px stretch!important;background-clip:padding-box!important;box-shadow:0 5px 8px #0009!important;text-shadow:0 1px 2px #000;padding:6px 10px!important}
+#opts .obtn:not(.odel):active,#recs .rclose:active,#opts .rclose:active,#ov .btns button:not([class]):active,#alb-view>button:active,#mp .mbtn.sec:active{transform:translateY(3px) scale(.98);filter:brightness(1.15)}
 #opts .obtn.odel{border:2px solid #ff3b5599!important;box-shadow:0 4px 0 #2a0810}
 #opts .vol,#opts .orow,#opts .oanim{background:#0d0a1488;border:1px solid #c9973a55;border-radius:14px}
 #mp .mslot{background:linear-gradient(180deg,#2a2238,#1a1424)!important;box-shadow:inset 0 0 0 2px #c9973a66!important}
@@ -3438,6 +3442,14 @@ function vsAIstep(){
   const any=[1,2,3,4].find(i=>{const c=S.cross[i];return c&&CH[c.id]&&!blk(c)});if(any){openBat(any);return}
   if(S.dK.length)openDeck('K')}
 
+/* ===== mantener pulsada cualquier carta (tablero, álbum, récords…): se ve en grande mientras no sueltes ===== */
+(()=>{let tm=null,x0=0,y0=0,on=0;const Z=()=>{let z=document.getElementById('czoom');if(!z){z=document.createElement('div');z.id='czoom';document.body.appendChild(z)}return z};
+  document.addEventListener('contextmenu',e=>{if(e.target.closest('.card,img'))e.preventDefault()});
+  document.addEventListener('touchstart',e=>{const c=e.target.closest('.card');if(!c||e.touches.length>1||e.target.closest('#tHand,#dock,#czoom'))return;const id=c.dataset.id;if(!id||id==='back')return;
+    x0=e.touches[0].clientX;y0=e.touches[0].clientY;clearTimeout(tm);tm=setTimeout(()=>{tm=null;const z=Z();z.innerHTML=card(id,'big still');z.classList.add('on');on=1;try{vib(12)}catch(_){}},430)},{passive:true});
+  document.addEventListener('touchmove',e=>{if(tm&&e.touches[0]&&Math.hypot(e.touches[0].clientX-x0,e.touches[0].clientY-y0)>12){clearTimeout(tm);tm=null}},{passive:true});
+  const end=e=>{if(tm){clearTimeout(tm);tm=null}if(on){on=0;Z().classList.remove('on');if(e.cancelable)e.preventDefault()}};
+  document.addEventListener('touchend',end,{passive:false});document.addEventListener('touchcancel',end,{passive:false})})();
 /* ===== MODO COOPERATIVO (2 jugadores) ===== */
 /* Compartido: corazones, turno, mazos de calabozo y agotamiento, cartas en mesa, cruz, completados, contadores y descarte de calabozo/agotamiento. Lo demás (mano, mazo, descarte y habilidad del personaje) es de cada jugador. */
 const SHK=['hp','turn','dC','dK','mesa','cross','comp','apart','nc','vk','final','llave'];
