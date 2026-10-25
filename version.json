@@ -158,6 +158,7 @@
   "musica/jefe.mp3": "9a497621265c",
   "musica/menu.mp3": "4c41a474fb19",
   "musica/victoria.mp3": "ee8f2c8a467b",
+  "personaje7/d08.png": "7f4487a682cc",
   "personajes/personaje 1/m01.webp": "2839765d5169",
   "personajes/personaje 1/m02.webp": "9e23dd5918ce",
   "personajes/personaje 1/m03.webp": "c9e6c256d120",
@@ -323,5 +324,5 @@
   "voces/38.mp3": "bdb95078938e",
   "voces/inv.mp3": "88fd37faee29"
  },
- "version": "c3b0bbc3a047"
+ "version": "142be93d5760"
 }
