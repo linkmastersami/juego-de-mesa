@@ -85,6 +85,13 @@ const AVS = ['arquera', 'barbaro', 'guerrero', 'mago', 'ninja', 'paladin', 'brun
 /* ---- tienda: gemas gratis (nunca dinero real). Se guardan junto al nombre ---- */
 const SHOP = { bruno: 150, robi: 150, veralyn: 150, ninja: 120, paladin: 120 };            /* guerreros a la venta */
 const PREMIUM = Object.keys(SHOP);
+/* catálogo de personalización (reversos, marcos, títulos, emojis y tableros): mismo precio que muestra la tienda del juego */
+const CAT = { 'rv:rubi': 80, 'rv:esme': 80, 'rv:noche': 100, 'rv:oro': 120, 'rv:arco': 180,
+  'mc:oro': 100, 'mc:fuego': 120, 'mc:hielo': 120, 'mc:bosque': 100, 'mc:arco': 200,
+  'ti:valiente': 50, 'ti:cazador': 80, 'ti:sabio': 80, 'ti:fantasma': 80, 'ti:rey': 150, 'ti:leyenda': 250,
+  'em:fiesta': 50, 'em:guerrero': 50, 'em:risa': 50, 'em:amigos': 50,
+  'tb:t01': 100, 'tb:t02': 100, 'tb:t03': 100, 'tb:t04': 100, 'tb:t05': 120, 'tb:t06': 120, 'tb:t07': 150, 'tb:t08': 150 };
+const RGDAY = 100; /* gemas que se pueden regalar al día */
 const GEM0 = 100;                                                /* regalo de bienvenida */
 const GXDAY = +process.env.GDOBLES || 10; /* veces al día que se pueden duplicar las gemas de una partida con un anuncio */
 const GWIN = 30, GLOSE = 10, GDAY = 20, GMAXDAY = 400, GACH = 20, GEST = 5; /* … y por cada logro y estampa nueva */           /* premios por partida y tope diario */
@@ -205,9 +212,10 @@ const server = http.createServer((req, res) => {
       if (!b.bye && AVS.includes(av) && cur.a !== a && (!PREMIUM.includes(a) || (cur.inv || []).includes(a))) { cur.a = a; saveNames(); } /* el aviso de salida no trae guerrero: no se toca */
       LAST.set(n, now); const old = PLAZA.get(n) || {};
       const em = typeof b.e === 'string' && b.e.length <= 28 ? { e: b.e, et: now } : (old.et && now - old.et < 6000 ? { e: old.e, et: old.et } : {});
-      if (b.bye) PLAZA.delete(n); else PLAZA.set(n, { a, t: now, ...em });
+      const own = x => typeof x === 'string' && (cur.inv || []).includes(x) ? x : undefined;
+      if (b.bye) PLAZA.delete(n); else PLAZA.set(n, { a, t: now, ti: own(b.ti), mc: own(b.mc), ...em });
       for (const [m, v] of PLAZA) if (now - v.t > 30000) PLAZA.delete(m);
-      const p = [...PLAZA.entries()].filter(([m]) => m !== n).sort((x, y) => y[1].t - x[1].t).slice(0, 14).map(([m, v]) => ({ n: m, a: v.a, e: v.et && now - v.et < 6000 ? v.e : undefined, et: v.et }));
+      const p = [...PLAZA.entries()].filter(([m]) => m !== n).sort((x, y) => y[1].t - x[1].t).slice(0, 14).map(([m, v]) => ({ n: m, a: v.a, ti: v.ti, mc: v.mc, e: v.et && now - v.et < 6000 ? v.e : undefined, et: v.et }));
       /* los demás aventureros registrados también salen en la plaza, pero apagados (fuera de línea) */
       const o = [...NAMES.entries()].filter(([m]) => m !== n && !PLAZA.has(m)).sort((x, y) => (LAST.get(y[0]) || y[1].t || 0) - (LAST.get(x[0]) || x[1].t || 0)).slice(0, 30).map(([m, v]) => ({ n: m, a: AVS.includes(v.a) ? v.a : 'guerrero' }));
       res.end(JSON.stringify({ r: 'ok', p, o, total: PLAZA.size, reg: NAMES.size }));
@@ -262,7 +270,7 @@ const server = http.createServer((req, res) => {
       const me = okName(n) && NAMES.get(n);
       if (!me || me.h !== hashK(k)) return out({ r: 'bad' });
       gfix(me);
-      const st = () => ({ r: 'ok', g: me.g, inv: me.inv, shop: SHOP, gc: me.gc || {}, gp: GPRICE, pa: me.pa || [], pe: me.pe || [], gad: Math.max(0, GADDAY - (me.gadd === dayKey() ? me.gadn || 0 : 0)) });
+      const st = () => ({ r: 'ok', g: me.g, inv: me.inv, shop: { ...SHOP, ...CAT }, gc: me.gc || {}, gp: GPRICE, pa: me.pa || [], pe: me.pe || [], gad: Math.max(0, GADDAY - (me.gadd === dayKey() ? me.gadn || 0 : 0)) });
       if (url === '/tienda') return out(st());
       /* premio al terminar una partida (cada partida trae su id para no cobrarla dos veces) */
       if (url === '/tienda/ganar') {
@@ -300,11 +308,24 @@ const server = http.createServer((req, res) => {
         return out({ ...st(), add, na: A.length, ne: E.length });
       }
       if (url === '/tienda/comprar') {
-        const it = String(b.it || ''), pr = SHOP[it];
+        const it = String(b.it || ''), pr = SHOP[it] || CAT[it];
         if (!pr) return out({ r: 'bad' });
         if (me.inv.includes(it)) return out({ ...st(), r: 'ya' });
         if (me.g < pr) return out({ ...st(), r: 'pocas' });
         me.g -= pr; me.inv.push(it); saveNames(); return out(st());
+      }
+      /* regalar gemas a un amigo (10, 25, 50 o 100; máximo RGDAY al día) */
+      if (url === '/tienda/regalo') {
+        const a = String(b.a || '').toUpperCase(), c = b.c | 0, d = dayKey();
+        const ot = okName(a) && NAMES.get(a);
+        if (!ot || !(me.f || []).includes(a)) return out({ ...st(), r: 'noamigo' });
+        if (![10, 25, 50, 100].includes(c)) return out({ ...st(), r: 'bad' });
+        if (me.rgd !== d) { me.rgd = d; me.rgn = 0; }
+        if ((me.rgn || 0) + c > RGDAY) return out({ ...st(), r: 'tope', quedan: RGDAY - (me.rgn || 0) });
+        if (me.g < c) return out({ ...st(), r: 'pocas' });
+        gfix(ot); me.g -= c; ot.g += c; me.rgn = (me.rgn || 0) + c; saveNames();
+        pushTo(a, { kind: 'regalo', title: 'Link Master Dungeon', body: `🎁 ${n} te regaló ${c} gemas` });
+        return out({ ...st(), r: 'ok', c, quedan: RGDAY - me.rgn });
       }
       if (url === '/tienda/gacha') {
         const set = String(b.s || ''), tot = GSETS[set];

@@ -351,6 +351,41 @@ body.vsbt #ov .btns,body.vsbt #ov .pks,body.vsbt #bt{pointer-events:none}
 .mmode button:disabled{cursor:default}
 .mmode small{flex-basis:100%;text-align:center;color:#d9c8ff;font-size:.72rem}
 .lob-vs{background:linear-gradient(180deg,#a36bff,#6b3cc9);box-shadow:0 5px 0 #43207f,0 0 22px #a36bff55}
+
+/* ===== personalización: reversos, marcos, títulos y emojis ===== */
+.deck,.bk,.flip .b,.stc,.shf .sc,.card.hidc img{filter:var(--rvf,none)}
+body.rvarco .deck,body.rvarco .bk,body.rvarco .flip .b,body.rvarco .stc,body.rvarco .shf .sc,body.rvarco .card.hidc img,.rvp.anim{animation:rvh 6s linear infinite}
+@keyframes rvh{from{filter:hue-rotate(0deg)}to{filter:hue-rotate(360deg)}}
+.mc-oro{border:2px solid #ffd34d!important;box-shadow:0 0 10px #ffd34daa;background:#3a2a08e6!important;color:#ffe9a0!important}
+.mc-fuego{border:2px solid #ff7a2c!important;box-shadow:0 0 12px #ff4d1a;background:#3a1208e6!important;color:#ffe2c4!important;animation:mcf 1.2s ease-in-out infinite alternate}
+@keyframes mcf{to{box-shadow:0 0 18px #ff4d1a,0 -6px 14px #ffd34daa}}
+.mc-hielo{border:2px solid #8fe3ff!important;box-shadow:0 0 12px #5cc8ff;background:#0d2a3ae6!important;color:#dff6ff!important}
+.mc-bosque{border:2px solid #5fd36a!important;box-shadow:0 0 10px #2f9e44;background:#0f2a12e6!important;color:#d9ffd9!important}
+.mc-arco{border:2px solid transparent!important;background:linear-gradient(#1a1426,#1a1426) padding-box,linear-gradient(90deg,#ff4d4d,#ffd34d,#4dff88,#4dc3ff,#b04dff,#ff4d4d) border-box!important;background-size:100% 100%,300% 100%!important;color:#fff!important;animation:mca 3s linear infinite}
+@keyframes mca{to{background-position:0 0,300% 0}}
+.w .nm .tit{display:block;font:700 .55rem Fredoka,sans-serif;color:#ffe08a;text-align:center;margin-top:-1px}
+.w.me .nm .tit{color:#5a3d00}
+.bn1[class*="mc-"]{display:inline-block;padding:2px 12px;border-radius:12px}
+.ban .bnt{font:700 .78rem Fredoka,sans-serif;color:#ffe08a;margin-top:1px}
+.csub{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin:10px 0 4px}
+.csub button{padding:7px 10px;border-radius:12px;border:2px solid #ffffff26;background:#ffffff12;color:#fff;font:700 .78rem Fredoka,sans-serif;cursor:pointer}
+.csub button.on{border-color:#ffd34d;background:#ffd34d30}
+.csg{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
+.cso{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 6px;border-radius:14px;background:#ffffff10;border:2px solid #ffffff1a;cursor:pointer;text-align:center;font:700 .74rem Fredoka,sans-serif;color:#fff}
+.cso.sel{border-color:#ffd34d;box-shadow:0 0 12px #ffd34d66}
+.cso.lock{opacity:.55}
+.cso small{font-weight:600;font-size:.64rem;color:var(--mute)}
+.cso.sel small{color:#ffd34d}
+.rvp{width:62%;aspect-ratio:696/1015;border-radius:6px;background:#0b1730 url(cartas/reverso.webp) center/100% 100% no-repeat;box-shadow:0 3px 8px #000a}
+.nmp{font:700 .72rem Fredoka,sans-serif;color:#fff;background:#0d0a14c4;border:1px solid #ffffff30;border-radius:10px;padding:2px 9px;white-space:nowrap}
+.cso .emj{font-size:1.05rem;line-height:1.3}
+.tb .csg{grid-template-columns:repeat(3,1fr)}
+.tb .ch{margin:16px 0 0;font:800 1rem Fredoka,sans-serif;color:var(--gold)}
+.tb .ch small{display:block;font:600 .72rem Fredoka,sans-serif;color:var(--mute)}
+.tb .cso .buy,.tb .gift button{border:0;border-radius:10px;padding:5px 8px;font:800 .72rem Fredoka,sans-serif;background:linear-gradient(180deg,#ffe07a,#e0a92a);color:#3a2808;cursor:pointer}
+.tb .cso .own{font:700 .66rem Fredoka,sans-serif;color:#7dffb0}
+.tb .gift{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:8px 10px;margin-top:8px;border-radius:12px;background:#ffffff10}
+.tb .gift b{flex:1 1 100%;font:700 .85rem Fredoka,sans-serif;color:#fff}
 #coopb{display:none;position:fixed;left:0;right:0;top:56px;bottom:0;z-index:45}
 #coopb span{position:fixed;top:10px;left:50%;transform:translateX(-50%);padding:7px 16px;border-radius:20px;background:#2a1f45ee;color:#f2c14e;font:700 .95rem Fredoka,sans-serif;box-shadow:0 0 0 2px #f2c14e88;pointer-events:none;white-space:nowrap}
 body.waitp #coopb{display:block}
@@ -1564,6 +1599,22 @@ const PJN={m:'Bruno',l:'Veralyn',p:'Volti',r:'Robi',n:'Nova',o:'Coral',d:'Granit
 /* estado de la tienda (gemas, compras y gacha), guardado también en el teléfono */
 const TND={g:null,inv:[],shop:{},gc:{},gp:60,gad:0,t:0,pa:null,pe:null};
 const GSET={r:{nm:'Robi, el niño robot',ic:'🤖',tot:18,pic:'r19'},n:{nm:'Nova, la cazadora estelar',ic:'🚀',tot:18,pic:'n19'},o:{nm:'Coral, la capitana del arrecife',ic:'⚓',tot:18,pic:'o19'},d:{nm:'Granito, el gigante de piedra',ic:'🪨',tot:18,pic:'d19'},e:{nm:'La Mansión Embrujada',ic:'👻',tot:28,pic:'ej1',cal:1}};
+/* catálogo de personalización: se compra en la tienda y se elige en la pestaña Tableros */
+const CATI={
+  rv:[['rv:base','Clásico',''],['rv:rubi','Rubí','hue-rotate(115deg) saturate(1.35)'],['rv:esme','Esmeralda','hue-rotate(-75deg) saturate(1.2)'],['rv:noche','Medianoche','grayscale(1) brightness(.72) contrast(1.25)'],['rv:oro','Oro','sepia(1) saturate(2.3) hue-rotate(-12deg) brightness(1.08)'],['rv:arco','Arcoíris','anim']],
+  mc:[['mc:base','Sin marco'],['mc:oro','Dorado'],['mc:fuego','Llamas'],['mc:hielo','Escarcha'],['mc:bosque','Bosque'],['mc:arco','Arcoíris']],
+  ti:[['ti:base','Sin título'],['ti:valiente','El Valiente'],['ti:cazador','Cazador de sombras'],['ti:sabio','Sabio de la torre'],['ti:fantasma','Amigo de los fantasmas'],['ti:rey','Rey del calabozo'],['ti:leyenda','Leyenda viviente']],
+  em:[['em:fiesta','Fiesta',['🎉','🥳','🎂','🎵']],['em:guerrero','Guerrero',['🛡️','💪','🗡️','¡A la carga!']],['em:risa','Risas',['🤣','😜','🙈','¡Jajaja!']],['em:amigos','Amigos',['❤️','🥰','🤝','¡Eres genial!']]]};
+const catOwn=id=>/:base$/.test(id)||TND.inv.includes(id);
+const catNm=id=>{for(const k in CATI){const x=CATI[k].find(y=>y[0]===id);if(x)return x[1]}try{const t=TABS.find(y=>'tb:'+y[0]===id);return t?'el tablero '+t[1]:''}catch(e){return ''}};
+const lsx=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}};
+const selGet=k=>{const v=lsx('mesa-'+k);return v&&catOwn(v)?v:k+':base'};
+const TITN=id=>{const x=CATI.ti.find(y=>y[0]===id);return x&&!/base$/.test(id)?x[1]:''};
+const mcCls=id=>id&&!/base$/.test(id)&&CATI.mc.some(y=>y[0]===id)?id.replace(':','-'):'';
+function rvApply(){try{const id=selGet('rv'),x=CATI.rv.find(y=>y[0]===id)||CATI.rv[0];document.body.style.setProperty('--rvf',x[2]&&x[2]!=='anim'?x[2]:'none');document.body.classList.toggle('rvarco',x[2]==='anim')}catch(e){}}
+const emOff=()=>{try{return JSON.parse(lsx('mesa-emoff')||'[]')||[]}catch(e){return []}};
+const PZEMf=()=>[...PZEM,...CATI.em.filter(p=>catOwn(p[0])&&!emOff().includes(p[0])).flatMap(p=>p[2])];
+setTimeout(rvApply,0);
 const gUnl=k=>GSET[k]&&GSET[k].cal?'cal:'+k:'pj:'+k; /* personaje (pj:) o calabozo (cal:) que se desbloquea al completar */const GOR={};
 try{const c=JSON.parse(localStorage.getItem('mesa-tnd')||'null');if(c){TND.g=c.g;TND.inv=c.inv||[];TND.shop=c.shop||{};TND.gc=c.gc||{}}}catch(e){}
 /* desbloqueo de prueba (botón temporal en el lobby): se guarda solo en este teléfono */
@@ -1731,7 +1782,7 @@ function recRender(){const P=$('#pn-rec'),o=stLoad(),A=o.ach||{},seen=o.achSeen|
   const sh=extra.length?[...SHELVES.slice(0,3),[SHELVES[3][0],[...SHELVES[3][1],...extra]]]:SHELVES;
   const got=ACH.filter(a=>A[a[0]]).length;
   P.innerHTML=`<div class="trh">
-    <div class="ban"><div class="bn1">${YO?YO.n:'AVENTURERO'}</div><div class="bn2">${t[1]} ${t[2]}</div><div class="bnb"><i style="width:${pct}%"></i></div><small>${nx?`${nx[0]-w} victoria${nx[0]-w>1?'s':''} más para ser ${nx[2]} ${nx[1]}`:'¡Eres una leyenda del calabozo!'}</small></div>
+    <div class="ban"><div class="bn1 ${mcCls(selGet('mc'))}">${YO?YO.n:'AVENTURERO'}</div>${TITN(selGet('ti'))?`<div class="bnt">«${TITN(selGet('ti'))}»</div>`:''}<div class="bn2">${t[1]} ${t[2]}</div><div class="bnb"><i style="width:${pct}%"></i></div><small>${nx?`${nx[0]-w} victoria${nx[0]-w>1?'s':''} más para ser ${nx[2]} ${nx[1]}`:'¡Eres una leyenda del calabozo!'}</small></div>
     <div class="plq"><div><b>${o.g||0}</b>Partidas</div><div><b>${w}</b>Victorias</div><div><b>${o.g?Math.round(w/o.g*100):0}%</b>Ganadas</div>
       <div>${(o.st||0)>=2?'<span class="fire">🔥</span>':''}<b>${o.st||0}</b>Racha</div><div><b>${o.bs||0}</b>Mejor racha</div><div><b>${o.nc||0}</b>Más enfrentamientos</div></div>
     <div class="trt">🏛️ Héroes del calabozo</div>
@@ -1761,7 +1812,12 @@ function lobPage(i,inst){i=Math.max(0,Math.min(4,i));const ch=i!==LP,was=LP;LP=i
   t.style.transform=`translateX(${-i*20}%)`;document.querySelectorAll('#lob-nav button').forEach(b=>b.classList.toggle('on',+b.dataset.go===i));
   paneFill(i)}
 $('#lob-nav').addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(b)lobPage(+b.dataset.go)});
-$('#pn-tab').addEventListener('click',e=>{const c=e.target.closest('[data-tab]');if(!c||!c.dataset.tab)return;try{localStorage.setItem('mesa-tab',c.dataset.tab)}catch(_){}tabApply();try{SFX.pop()}catch(_){}paneFill(4)});
+$('#pn-tab').addEventListener('click',e=>{
+  const st=e.target.closest('[data-stab]');if(st){TABSUB=st.dataset.stab;try{SFX.pop()}catch(_){}paneFill(4);return}
+  const bt=e.target.closest('[data-buyt]');if(bt&&bt.dataset.buyt){try{SFX.pop()}catch(_){}tndOpen('mas');return}
+  const sl=e.target.closest('[data-sel]');if(sl){const id=sl.dataset.sel,k=id.slice(0,2);lsx('mesa-'+k,id);if(k==='rv')rvApply();if(k!=='rv')try{pzMe();PZ.poll=0;pzPoll()}catch(_){}try{SFX.pop()}catch(_){}paneFill(4);return}
+  const em=e.target.closest('[data-emt]');if(em){const id=em.dataset.emt;let o=emOff();o=o.includes(id)?o.filter(x=>x!==id):[...o,id];lsx('mesa-emoff',JSON.stringify(o));try{SFX.pop()}catch(_){}paneFill(4);return}
+  const c=e.target.closest('[data-tab]');if(!c||!c.dataset.tab)return;try{localStorage.setItem('mesa-tab',c.dataset.tab)}catch(_){}tabApply();try{SFX.pop()}catch(_){}paneFill(4)});
 /* deslizar con el dedo entre pantallas (el carrusel de personajes y el libro abierto tienen prioridad) */
 {let x0=null,y0=0,ax=0,dx=0;const pg=$('#pager'),t=$('#ptrack');
  pg.addEventListener('touchstart',e=>{const g=e.target;if(g.closest('.lob-chars,input,.apage-w,#alb-view,.pzem,.peds'))return; /* .peds: héroes del calabozo en Récords, se deslizan de lado */x0=e.touches[0].clientX;y0=e.touches[0].clientY;ax=0;dx=0},{passive:true});
@@ -1778,15 +1834,23 @@ setInterval(()=>{const ap=$('#apart');if(!ap||!ap.children.length)return;const h
 const TABS=[['t00','Calabozo','',null],['t01','Cripta de huesos','w1'],['t02','Fragua de lava','wm'],['t03','Ruinas del bosque','wl'],['t04','Templo de la tormenta','wp'],
   ['t05','Caverna de cristal','nc15'],['t06','Biblioteca arcana','fin'],['t07','Sala del trono oscuro','jf3'],['t08','Santuario celestial','w10']];
 const tabUrl=t=>`tableros/${t}.webp`;
-const tabOk=(t,A)=>{const x=TABS.find(y=>y[0]===t);return !!x&&(!x[2]||!!(A||stLoad().ach||{})[x[2]])};
+const tabOk=(t,A)=>{const x=TABS.find(y=>y[0]===t);return !!x&&(!x[2]||!!(A||stLoad().ach||{})[x[2]]||TND.inv.includes('tb:'+t))};
 function tabApply(){let t='t00';try{t=localStorage.getItem('mesa-tab')||'t00'}catch(e){}if(!tabOk(t))t='t00';
   const a=$('#amb');a.classList.toggle('img',t!=='t00');a.style.setProperty('--tab',t!=='t00'?`url("${tabUrl(t)}")`:'none')}
+let TABSUB='tb';
+function cosOpt(k,cur){const pr=id=>TND.shop[id];return `<div class="csg">${CATI[k].map(x=>{const id=x[0],own=catOwn(id),sel=id===cur;
+    const pv=k==='rv'?`<div class="rvp${x[2]==='anim'?' anim':''}" style="${x[2]&&x[2]!=='anim'?'filter:'+x[2]:''}"></div>`:k==='mc'?`<span class="nmp ${mcCls(id)}">${YO?YO.n:'TÚ'}</span>`:k==='ti'?`<span class="nmp">${YO?YO.n:'TÚ'}<small style="display:block;color:#ffe08a;font-size:.6rem">${TITN(id)||'—'}</small></span>`:'';
+    return `<div class="cso${own?'':' lock'}${sel?' sel':''}" ${own?`data-sel="${id}"`:`data-buyt="${id}"`}>${pv}<b>${x[1]}</b><small>${sel?'✔ Usando':own?'Toca para usar':`🔒 ${pr(id)||''} 💎 en la tienda`}</small></div>`}).join('')}</div>`}
 function showTabs(){
   let cur='t00';try{cur=localStorage.getItem('mesa-tab')||'t00'}catch(e){}
-  const A=stLoad().ach||{};
-  $('#recs').innerHTML=`<div class="rbox"><h2>🎨 Tableros</h2><p style="margin:0;text-align:center;color:var(--mute);font-size:.88rem">Gana logros para desbloquear tableros nuevos. Toca uno para jugar con él.</p>
-    <div class="tabg">${TABS.map(([t,n,a])=>{const ok=tabOk(t,A),ach=a&&ACH.find(x=>x[0]===a);
-      return `<div class="tabw"><div class="tabc${ok?'':' lock'}${t===cur?' sel':''}" data-tab="${ok?t:''}" style="${t==='t00'?'background-image:radial-gradient(130% 85% at 50% 38%,#3b3247,#241e2d 55%,#120f17)':`background-image:url('${tabUrl(t)}')`}">${ok?'':'<i>🔒</i>'}<b>${n}</b></div>${ok?'':`<div class="tabl">${ach?ach[1]+' '+ach[3]:''}</div>`}</div>`}).join('')}</div>
+  const A=stLoad().ach||{};let body='';
+  if(TABSUB==='tb')body=`<div class="tabg">${TABS.map(([t,n,a])=>{const ok=tabOk(t,A),ach=a&&ACH.find(x=>x[0]===a),pr=TND.shop['tb:'+t];
+      return `<div class="tabw"><div class="tabc${ok?'':' lock'}${t===cur?' sel':''}" data-tab="${ok?t:''}" data-buyt="${ok?'':'tb:'+t}" style="${t==='t00'?'background-image:radial-gradient(130% 85% at 50% 38%,#3b3247,#241e2d 55%,#120f17)':`background-image:url('${tabUrl(t)}')`}">${ok?'':'<i>🔒</i>'}<b>${n}</b></div>${ok?'':`<div class="tabl">${ach?ach[1]+' '+ach[3]:''}${pr?` · o ${pr} 💎 en la tienda`:''}</div>`}</div>`}).join('')}</div>`;
+  else if(TABSUB==='em'){const off=emOff();body=`<p style="margin:10px 0 0;text-align:center;color:var(--mute);font-size:.8rem">Siempre tienes los básicos. Toca un paquete tuyo para ponerlo o quitarlo de la plaza.</p><div class="csg">${CATI.em.map(([id,nm,e])=>{const own=catOwn(id),on=own&&!off.includes(id);
+      return `<div class="cso${own?'':' lock'}${on?' sel':''}" ${own?`data-emt="${id}"`:`data-buyt="${id}"`}><span class="emj">${e.join(' ')}</span><b>${nm}</b><small>${!own?`🔒 ${TND.shop[id]||''} 💎 en la tienda`:on?'✔ En la plaza':'Apagado'}</small></div>`}).join('')}</div>`}
+  else body=cosOpt(TABSUB,selGet(TABSUB));
+  $('#recs').innerHTML=`<div class="rbox"><h2>🎨 Personaliza</h2><p style="margin:0;text-align:center;color:var(--mute);font-size:.88rem">Compra en la tienda de Don Trueque y elige aquí lo que quieres usar. Los tableros también se ganan con logros.</p>
+    <div class="csub">${[['tb','🗺️ Tableros'],['rv','🂠 Reversos'],['mc','🖼️ Marcos'],['ti','🏷️ Títulos'],['em','😄 Emojis']].map(([k,t])=>`<button data-stab="${k}" class="${k===TABSUB?'on':''}">${t}</button>`).join('')}</div>${body}
     <button class="rclose" id="recs-x">Cerrar</button></div>`;
   $('#recs').classList.add('on')}
 $('#recs').addEventListener('click',e=>{const c=e.target.closest('[data-tab]');if(!c||!c.dataset.tab)return;try{localStorage.setItem('mesa-tab',c.dataset.tab)}catch(_){}tabApply();try{SFX.pop()}catch(_){}showTabs()});
@@ -3705,11 +3769,11 @@ const pzOn=()=>{try{return lobbyOn()&&LP===3&&!document.hidden}catch(e){return f
 function plazaRender(){const P=$('#pn-com');
   if(!PZ.el||!P.contains(PZ.el)){
     P.innerHTML=`<h2 class="ph">🛡️ Comunidad</h2><div class="pz" id="pz"></div>
-      <div class="pzem" id="pz-em">${PZEM.map((e,i)=>`<button data-em="${i}">${e}</button>`).join('')}</div>
+      <div class="pzem" id="pz-em">${PZEMf().map((e,i)=>`<button data-em="${i}">${e}</button>`).join('')}</div>
       <div class="pzbar"><span class="on" id="pz-n">🟢 En la plaza</span><button id="pz-am">👥 Amigos<b class="pzb" id="pz-amb"></b></button><button id="pz-av" class="gh">🧙 Guerrero</button><button id="pz-shop" class="gem"><img src="tienda/gema.webp" alt="">Tienda <b id="pz-g"></b></button></div>
       <p class="pzsoon">Toca el suelo para caminar · toca a un aventurero para agregarlo o invitarlo</p>`;
     $('#pz-am').onclick=()=>amgPanel();
-    $('#pz-em').onclick=e=>{const b=e.target.closest('[data-em]');if(!b)return;const t=PZEM[+b.dataset.em];const me=PZ.w.get('@me');if(me)pzBub(me,t);PZ.ems=t;PZ.poll=0;pzPoll();try{SFX.pop()}catch(_){}};
+    $('#pz-em').onclick=e=>{const b=e.target.closest('[data-em]');if(!b)return;const t=PZEMf()[+b.dataset.em];const me=PZ.w.get('@me');if(me)pzBub(me,t);PZ.ems=t;PZ.poll=0;pzPoll();try{SFX.pop()}catch(_){}};
     PZ.el=$('#pz');PZ.w.forEach(w=>w.el.remove());PZ.w.clear();
     PZ.el.addEventListener('click',e=>{const me=PZ.w.get('@me');if(!me)return;const r=PZ.el.getBoundingClientRect();
       {let best=null,bd=1e9;PZ.w.forEach(w=>{if(w.id==='@me')return;const q=w.b.getBoundingClientRect(),cx=q.left+q.width/2;if(e.clientX>q.left-10&&e.clientX<q.right+10&&e.clientY>q.top-10&&e.clientY<q.bottom+6){const d=Math.abs(e.clientX-cx);if(d<bd){bd=d;best=w}}});if(best){if(best.npc)tndOpen();else amgCard(best.n,best.a);return}}
@@ -3721,7 +3785,8 @@ function plazaRender(){const P=$('#pn-com');
   pzLoop();pzPoll()}
 function pzMe(){const n=YO?YO.n:'Tú',a=AV||'guerrero';let me=PZ.w.get('@me');
   if(me&&(me.a!==a||me.n!==n)){me.el.remove();PZ.w.delete('@me');me=null}
-  if(!me)pzAdd('@me',n,a,1)}
+  if(!me)me=pzAdd('@me',n,a,1);pzDeco(me,selGet('ti'),selGet('mc'))}
+function pzDeco(w,ti,mc){if(!w)return;const nm=w.el.querySelector('.nm');if(!nm)return;const t=TITN(ti),k=(t||'')+'|'+(mc||'');if(w.dk===k)return;w.dk=k;nm.className='nm'+(mcCls(mc)?' '+mcCls(mc):'');nm.textContent=w.n;if(t){const s2=document.createElement('small');s2.className='tit';s2.textContent=t;nm.appendChild(s2)}}
 function pzAdd(id,n,a,mine,base){const el=document.createElement('div');el.className='w in'+(mine?' me':'');base=base||'guerreros/'+a;
   el.innerHTML=`<div class="b"><span class="nm"></span><img class="c" alt="" style="display:none" src="${base}-camina.webp"><img class="p" alt="" src="${base}-parado.webp"><i class="sh"></i></div>`;
   el.querySelector('.nm').textContent=n;PZ.el.appendChild(el);
@@ -3744,11 +3809,11 @@ function pzCount(){const e=$('#pz-n');if(!e)return;
   e.textContent=!YO?'📜 Registra tu nombre para ver a los demás':sinNet()||!navigator.onLine?'📴 Sin conexión':(PZ.total<=1?'🟢 Solo tú en línea':`🟢 ${PZ.total} en línea`)+(PZ.reg>1?` · ${PZ.reg} aventureros`:'')}
 async function pzPoll(){if(!pzOn()||!YO||!navigator.onLine||sinNet())return pzCount();if(Date.now()-PZ.poll<4000)return;PZ.poll=Date.now();
   try{const c=new AbortController(),to=setTimeout(()=>c.abort(),8000);
-    const r=await fetch(MP_URL+'/plaza',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({n:YO.n,k:YO.k,a:AV||'guerrero',...(PZ.ems?{e:PZ.ems}:{})}),signal:c.signal});clearTimeout(to);PZ.ems=null;
+    const r=await fetch(MP_URL+'/plaza',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({n:YO.n,k:YO.k,a:AV||'guerrero',ti:selGet('ti'),mc:selGet('mc'),...(PZ.ems?{e:PZ.ems}:{})}),signal:c.signal});clearTimeout(to);PZ.ems=null;
     const j=await r.json();if(!j||j.r!=='ok'||!PZ.el)return;PZ.total=j.total||1;
     const seen=new Set(['@me']);(j.p||[]).forEach(o=>{if(!AVN[o.a])o.a='guerrero';const id='u:'+o.n;seen.add(id);const w=PZ.w.get(id);
       if(w&&w.a!==o.a){w.el.remove();PZ.w.delete(id)}if(!PZ.w.has(id))pzAdd(id,o.n,o.a,0);
-      const w2=PZ.w.get(id);if(w2){w2.off=0;w2.el.classList.remove('off')}if(w2&&o.e&&o.et&&o.et!==w2.et){w2.et=o.et;
+      const w2=PZ.w.get(id);if(w2){w2.off=0;w2.el.classList.remove('off');pzDeco(w2,o.ti,o.mc)}if(w2&&o.e&&o.et&&o.et!==w2.et){w2.et=o.et;
         const tw=tn=>YO&&tn===YO.n?PZ.w.get('@me'):PZ.w.get('u:'+tn);
         if(o.e.startsWith('MAIL:')){const tn=o.e.slice(5),to=tw(tn);if(to)pzMail(w2,to);if(YO&&tn===YO.n)setTimeout(amgSync,1300)}
         else if(o.e.startsWith('TO:')){const[,tn,ch]=o.e.split(':'),to=tw(tn);if(to&&ch)pzFly(w2,to,ch);else if(ch)pzBub(w2,ch)}
@@ -3854,12 +3919,21 @@ function tndOpen(tab){let d=$('#tnd');if(!d){d=document.createElement('div');d.i
       const ta=e.target.closest('[data-tirad]');if(ta){gchTirar(ta.dataset.tirad,1);return}
       const vr=e.target.closest('[data-ver]');if(vr){gchVer(vr.dataset.ver);return}
       const u=e.target.closest('[data-use]');if(u){AV=u.dataset.use;try{localStorage.setItem('mesa-av',AV)}catch(_){}try{SFX.pop();pzMe()}catch(_){}PZ.poll=0;pzPoll();tndSay(`¡${AVN[AV]} te queda de maravilla!`);tndBody();return}
+      const gf=e.target.closest('[data-gift]');if(gf){const [a,cc]=gf.dataset.gift.split('|');
+        if(gf.dataset.ok!=='1'){gf.dataset.ok='1';gf.textContent='¿Seguro?';setTimeout(()=>{if(gf.isConnected&&gf.dataset.ok==='1'){gf.dataset.ok='';gf.innerHTML=gemI+cc}},3000);return}
+        gf.disabled=true;const j=await nPost('/tienda/regalo',{n:YO.n,k:YO.k,a,c:+cc});
+        if(j&&j.r==='ok'){tndSet(j);try{SFX.fanfare()}catch(_){}tndSay(`¡Listo! Le enviaste ${cc} gemas a ${a}. Hoy puedes regalar ${j.quedan} más.`)}
+        else if(j&&j.r==='tope'){tndSet(j);tndSay(`Hoy ya solo puedes regalar ${j.quedan} gemas.`)}
+        else if(j&&j.r==='pocas'){tndSet(j);tndSay('Mmm… no te alcanzan las gemas.')}
+        else if(j&&j.r==='noamigo')tndSay('Solo puedes regalar gemas a tus amigos.');
+        else tndSay('No pude hablar con el servidor. Inténtalo de nuevo.');
+        tndBody();return}
       const c=e.target.closest('[data-buy]');if(c){const it=c.dataset.buy,pr=TND.shop[it]||0;
         if(!YO)return tndSay('Primero registra tu nombre de aventurero y luego hablamos de negocios.');
         if((TND.g||0)<pr)return tndSay(`Te faltan ${pr-(TND.g||0)} gemas. ¡Gana partidas y vuelve pronto!`);
         if(c.dataset.ok!=='1'){c.dataset.ok='1';c.innerHTML=`¿Seguro? ${gemI}${pr}`;setTimeout(()=>{if(c.isConnected&&c.dataset.ok==='1'){c.dataset.ok='';c.innerHTML=`${gemI}${pr}`}},3000);return}
         c.disabled=true;const j=await nPost('/tienda/comprar',{n:YO.n,k:YO.k,it});
-        if(j&&j.r==='ok'){tndSet(j);try{SFX.fanfare()}catch(_){}tndSay(`¡Trato hecho! ${AVN[it]} ya es tuyo. Tócalo para usarlo en la plaza.`)}
+        if(j&&j.r==='ok'){tndSet(j);try{SFX.fanfare()}catch(_){}tndSay(/:/.test(it)?`¡Trato hecho! ${catNm(it)} ya es tuyo. Elígelo en la pestaña Tableros.`:`¡Trato hecho! ${AVN[it]} ya es tuyo. Tócalo para usarlo en la plaza.`)}
         else if(j&&j.r==='pocas'){tndSet(j);tndSay('Mmm… no te alcanzan las gemas.')}
         else{c.disabled=false;tndSay('No pude hablar con el servidor. Inténtalo de nuevo.')}
         tndBody()}})}
@@ -3880,7 +3954,17 @@ function tndBody(){const b=$('#tnd-b');if(!b)return;$('#tnd').querySelectorAll('
             ${own?'':`<div class="grow"><span class="gorb">🔮 <button data-om="${k}">−</button><b>${o}</b><button data-op="${k}">+</button></span><span class="gpr">Nueva: <b>${pr} %</b></span></div>
             <button class="gtir" data-tir="${k}">Tirar ${gemI}${TND.gp}</button>${adL?`<button class="gtir gad" data-tirad="${k}">📺 Tirar gratis · quedan ${TND.gad} hoy</button>`:''}`}
             <button class="gver" data-ver="${k}">🃏 Ver cartas (${n}/${T})</button></div></div>`}).join('')}`;return}
-  b.innerHTML=`${soon('🂠','Reversos de cartas','Cambia el diseño de atrás de tus cartas')}${soon('🖼️','Marcos','Un marco especial para tu perfil')}${soon('🗺️','Tableros','Fondos nuevos para tus partidas')}${soon('😄','Emojis y frases','Más reacciones para la plaza')}${soon('🏷️','Títulos','Un título bajo tu nombre')}${soon('🎁','Regalos','Envía gemas a tus amigos')}`}
+  {const it=(id,pv,nm)=>{const own=catOwn(id);return `<div class="cso${own?' sel':''}">${pv}<b>${nm}</b>${own?'<span class="own">✔ Tuyo</span>':`<button class="buy" data-buy="${id}">${gemI}${TND.shop[id]||''}</button>`}</div>`};
+   const sec=(t,d,h)=>`<div class="ch">${t}<small>${d}</small></div><div class="csg">${h}</div>`;
+   const tabsV=TABS.filter(([t,n,a])=>a&&TND.shop['tb:'+t]&&!tabOk(t));
+   b.innerHTML=`<p class="tn">Todo lo que compres aquí lo eliges en la pestaña <b>Tableros</b>.</p>`
+    +sec('🂠 Reversos de cartas','Cambia el diseño de atrás de tus cartas',CATI.rv.slice(1).map(x=>it(x[0],`<div class="rvp${x[2]==='anim'?' anim':''}" style="${x[2]!=='anim'?'filter:'+x[2]:''}"></div>`,x[1])).join(''))
+    +sec('🖼️ Marcos','Un marco para tu nombre en la plaza y en tus récords',CATI.mc.slice(1).map(x=>it(x[0],`<span class="nmp ${mcCls(x[0])}">${YO.n}</span>`,x[1])).join(''))
+    +sec('🗺️ Tableros','Cómpralos sin esperar a ganar su logro',tabsV.length?tabsV.map(([t,n])=>it('tb:'+t,`<div class="rvp" style="background-image:url('${tabUrl(t)}')"></div>`,n)).join(''):'<p class="tn" style="grid-column:1/-1">✔ Ya tienes todos los tableros.</p>')
+    +sec('😄 Emojis y frases','Paquetes nuevos de reacciones para la plaza',CATI.em.map(x=>it(x[0],`<span class="emj">${x[2].join(' ')}</span>`,x[1])).join(''))
+    +sec('🏷️ Títulos','Un título bajo tu nombre',CATI.ti.slice(1).map(x=>it(x[0],'',x[1])).join(''))
+    +`<div class="ch">🎁 Regalos<small>Envía gemas a tus amigos (hasta 100 al día). Toca dos veces para confirmar.</small></div>`
+    +(AMG.f.length?AMG.f.map(x=>`<div class="gift"><b>${x.n}</b>${[10,25,50,100].map(c=>`<button data-gift="${x.n}|${c}">${gemI}${c}</button>`).join('')}</div>`).join(''):'<p class="tn">Agrega amigos en la plaza para poder regalarles gemas.</p>')}}
 
 
 /* colección del gacha en su propia ventana */
