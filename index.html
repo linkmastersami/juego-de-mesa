@@ -40,7 +40,6 @@ body.oscuro .app::after{content:'';position:fixed;inset:0;pointer-events:none;ba
 .lob-cal button{flex:1 1 140px;max-width:210px;padding:8px 10px;border-radius:14px;border:2px solid #ffffff26;background:#ffffff12;color:#fff;font:600 .82rem Fredoka,sans-serif;cursor:pointer}
 .lob-cal button.on{border-color:#ffd34d;background:#ffd34d26;box-shadow:0 0 12px #ffd34d55}
 .lob-cal button.lk{opacity:.5}
-.lob-cal .unl{flex-basis:100%;max-width:none;background:#7a3cff3a;border-style:dashed;border-color:#b98cff}
 .lob-cal small{flex-basis:100%;text-align:center;color:#d9c8ff;font-size:.75rem}
 .lbl{font-size:.75rem;color:var(--mute);margin:0 4px}
 .strip{display:flex;gap:6px;overflow-x:auto;height:11dvh;min-height:70px;align-items:stretch}
@@ -1557,9 +1556,9 @@ const GSET={r:{nm:'Robi, el niño robot',ic:'🤖',tot:18,pic:'r19'},n:{nm:'Nova
 const gUnl=k=>GSET[k]&&GSET[k].cal?'cal:'+k:'pj:'+k; /* personaje (pj:) o calabozo (cal:) que se desbloquea al completar */const GOR={};
 try{const c=JSON.parse(localStorage.getItem('mesa-tnd')||'null');if(c){TND.g=c.g;TND.inv=c.inv||[];TND.shop=c.shop||{};TND.gc=c.gc||{}}}catch(e){}
 /* desbloqueo de prueba (botón temporal en el lobby): se guarda solo en este teléfono */
-const DEVU=()=>{try{return JSON.parse(localStorage.getItem('mesa-devu')||'[]')||[]}catch(e){return []}};
-const pjOk=k=>'mlp'.includes(k)||TND.inv.includes('pj:'+k)||DEVU().includes('pj:'+k);
-const calOk=k=>k==='t'||TND.inv.includes('cal:'+k)||DEVU().includes('cal:'+k);
+try{localStorage.removeItem('mesa-devu')}catch(e){} /* el desbloqueo de prueba ya no existe: todo se gana en el gacha */
+const pjOk=k=>'mlp'.includes(k)||TND.inv.includes('pj:'+k);
+const calOk=k=>k==='t'||TND.inv.includes('cal:'+k);
 const stLoad=()=>{try{return JSON.parse(localStorage.getItem('mesa-stats')||'{}')||{}}catch(e){return {}}};
 const stSave=o=>{try{localStorage.setItem('mesa-stats',JSON.stringify(o))}catch(e){}};
 /* cartas que se pueden vencer: copias agrupadas (la primera de cada grupo representa a todas) */
@@ -2854,12 +2853,9 @@ function lobInfo(c){try{document.querySelectorAll('.lob-char').forEach(el=>{cons
 /* elegir calabozo (y botón temporal para desbloquear la Mansión y a Robi) */
 function calUi(){const e=$('#lob-cal');if(!e)return;if(!calOk(CAL))CAL='t';
   e.innerHTML=Object.keys(CALS).map(k=>`<button data-cal="${k}" class="${k===CAL?'on':''}${calOk(k)?'':' lk'}">${k==='t'?'🌑':'👻'} ${CALS[k].nf}${calOk(k)?'':' 🔒'}</button>`).join('')
-    +(CAL==='e'?'<small>👻 La Mansión es solo para 1 jugador por ahora</small>':'')
-    +((!calOk('e')||!pjOk('r'))?'<button class="unl" id="lob-unl">🔓 Desbloquear la Mansión y a Robi (prueba)</button>':'')}
+    +(CAL==='e'?'<small>👻 La Mansión es solo para 1 jugador por ahora</small>':'')}
 $('#lob-cal').addEventListener('click',e=>{const b=e.target.closest('[data-cal]');
-  if(b){const k=b.dataset.cal;if(!calOk(k)){try{SFX.down()}catch(_){}try{gToast(`${GSET[k]?GSET[k].ic:'🔒'} Desbloquea <b>${CALS[k].nf}</b> completando sus ${GSET[k]?GSET[k].tot:''} cartas en el gacha de Don Trueque (Comunidad).`,null,null,5000)}catch(_){}return}CAL=k;try{localStorage.setItem('mesa-cal',k)}catch(_){}calUi();try{smp('pestana')}catch(_){}return}
-  if(e.target.closest('#lob-unl')){const d=DEVU();['cal:e','pj:r'].forEach(x=>{if(!d.includes(x))d.push(x)});try{localStorage.setItem('mesa-devu',JSON.stringify(d))}catch(_){}
-    lobLocks();lobPick(CHAR||'m');calUi();try{SFX.fanfare()}catch(_){}}});
+  if(b){const k=b.dataset.cal;if(!calOk(k)){try{SFX.down()}catch(_){}try{gToast(`${GSET[k]?GSET[k].ic:'🔒'} Desbloquea <b>${CALS[k].nf}</b> completando sus ${GSET[k]?GSET[k].tot:''} cartas en el gacha de Don Trueque (Comunidad).`,null,null,5000)}catch(_){}return}CAL=k;try{localStorage.setItem('mesa-cal',k)}catch(_){}calUi();try{smp('pestana')}catch(_){}return}});
 /* selección de personaje */
 document.querySelectorAll('.lob-char').forEach(el=>el.addEventListener('click',()=>lobPick(el.dataset.char)));
 document.querySelectorAll('.lob-dots i').forEach(d=>d.addEventListener('click',()=>lobPick(d.dataset.d)));
