@@ -92,7 +92,7 @@ const gfix = u => { if (typeof u.g !== 'number') u.g = GEM0; if (!Array.isArray(
 /* gacha: cada personaje nuevo trae sus 18 cartas; las repetidas dan orbes; al completarlo se desbloquea */
 const GSETS = { r: 18, n: 18, e: 28 }, GPRICE = +process.env.GPRECIO || 60, GORB = 10;
 const GUNL = s => s === 'e' ? 'cal:e' : 'pj:' + s;                 /* qué se desbloquea al completar: personaje o calabozo (e = Mansión) */
-const GADDAY = +process.env.GANUNCIOS || 3;                      /* tiradas gratis al día viendo un anuncio */          /* precio por tirada y gemas por orbe sobrante */
+const GADDAY = +process.env.GANUNCIOS || 15;                      /* tiradas gratis al día viendo un anuncio */          /* precio por tirada y gemas por orbe sobrante */
 const gc = (u, s) => { if (!u.gc || typeof u.gc !== 'object') u.gc = {}; const x = u.gc[s] = u.gc[s] || {}; if (!Array.isArray(x.c)) x.c = []; if (typeof x.o !== 'number') x.o = 0; return x; };
 const dayKey = () => new Date(Date.now() - 6 * 3600e3).toISOString().slice(0, 10); /* día de México */
 /* aviso a un jugador en particular (todos sus teléfonos registrados) */
