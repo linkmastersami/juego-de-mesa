@@ -965,6 +965,10 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
 #amgd .fr img{width:36px;height:36px;object-fit:contain}#amgd .fr b{flex:1;color:#fff;font:700 .95rem Fredoka,sans-serif;display:flex;align-items:center;gap:6px}
 #amgd .fr span{display:flex;gap:6px}#amgd .fr input{flex:1;min-width:0;background:#0d0a14;border:1px solid #ffffff33;border-radius:10px;color:#fff;padding:8px;font:700 1rem Fredoka,sans-serif;text-transform:uppercase}
 #amgd .dot{width:9px;height:9px;border-radius:50%;background:#6b6575;display:inline-block}#amgd .dot.on{background:#3ddc84;box-shadow:0 0 6px #3ddc84}
+#amgd .minvl{max-height:34vh;overflow-y:auto;margin-bottom:4px}
+#amgd .fr button:disabled{opacity:.7}
+#amgd a.minvwa{display:block;text-decoration:none;text-align:center;background:linear-gradient(180deg,#3ddc6e,#1c9a46)!important;color:#fff!important;border-radius:14px;padding:12px;font:700 1.05rem Fredoka,sans-serif;margin-bottom:8px}
+#amgd .minvo{width:100%;background:#4a4555!important;color:var(--ink)!important;margin-bottom:8px}
 #amgd .fr button{border:0;border-radius:10px;padding:7px 10px;font:700 .85rem Fredoka,sans-serif;cursor:pointer}#amgd .ok{background:var(--gold);color:#2b2208}#amgd .no{background:#4a4555;color:var(--ink)}
 #amgd .y,#amgd .n{display:block;width:100%;border:0;border-radius:14px;padding:12px;margin-top:8px;font:700 1rem Fredoka,sans-serif;cursor:pointer}
 #amgd .y{background:linear-gradient(180deg,#ffe07a,#e0a92a);color:#3a2808}#amgd .n{background:#4a4555;color:var(--ink)}
@@ -3323,11 +3327,26 @@ $('#mp-leave').addEventListener('click',mpExit);
 $('#mp-retry').addEventListener('click',()=>mpStart(MP.join,MP.quick));
 $('#mp-share').addEventListener('click',async()=>{
   const url=mpLink(),mm=MP.vm||'coop',cn=CALS[calOk(CAL)?CAL:'t'].nf,text=`⚔️ ¡${YO?YO.n:'Tu amigo'} te reta en Link Master Dungeon!\n${mm==='coop'?'🤝 Juguemos juntos':mm==='car'?'🏁 Carrera':'🏰 Asalto a la fortaleza'} en ${cn} ${PJI[CHAR]||'🃏'}\n👉 Toca para sentarte a mi mesa:`;
-  if(navigator.share){try{await navigator.share({title:'Link Master Dungeon',text,url});return}catch(e){if(e&&e.name==='AbortError')return}}
+  mpInvDlg(text,url);amgSync().then(()=>{const d=$('#amgd');if(d&&d.classList.contains('on')&&d.dataset.k==='minv')mpInvDlg(text,url)});return;
   $('#mp-wa').href='https://wa.me/?text='+encodeURIComponent(text+' '+url);
   $('#mp-tg').href='https://t.me/share/url?url='+encodeURIComponent(url)+'&text='+encodeURIComponent(text);
   $('#mp-alt').style.display='block';
 });
+/* invitar: tus amigos (conectados primero) + WhatsApp, otras apps y copiar enlace */
+function mpInvDlg(text,url){const fs=[...AMG.f].sort((x,y)=>(y.on?1:0)-(x.on?1:0)),sent=MP.invd||(MP.invd=new Set());
+  const d=amgDlg(`<h3>📨 Invitar a tu mesa</h3>
+    <div class="sec">Tus amigos</div>
+    <div class="minvl">${fs.length?fs.map(x=>`<div class="fr"><img src="guerreros/${x.a||'guerrero'}.webp" alt=""><b><i class="dot${x.on?' on':''}"></i>${x.n}</b><span><button class="ok" data-minv="${x.n}"${sent.has(x.n)?' disabled':''}>${sent.has(x.n)?'✅ Enviada':'🎮 Invitar'}</button></span></div>`).join('')
+      :'<p style="opacity:.8">Aún no tienes amigos. Agrégalos desde la plaza en Comunidad.</p>'}</div>
+    <div class="sec">Invitar por fuera</div>
+    <a class="y minvwa" href="https://wa.me/?text=${encodeURIComponent(text+' '+url)}" target="_blank" rel="noopener">💬 Invitar por WhatsApp</a>
+    ${navigator.share?'<button class="y minvo" id="minv-sh">📤 Otras apps</button>':''}
+    <button class="y minvo" id="minv-cp">🔗 Copiar enlace</button>
+    <button class="n">Cerrar</button>`,'minv');
+  d.querySelectorAll('[data-minv]').forEach(b=>b.onclick=async()=>{const n=b.dataset.minv;b.disabled=true;b.textContent='…';
+    const j=MP.code?await amgPost('/amigos/invitar',{a:n,c:MP.code}):null;if(j&&j.r==='ok'){sent.add(n);b.textContent='✅ Enviada';try{SFX.pop()}catch(_){}}else{b.disabled=false;b.textContent='🎮 Invitar';try{cToast('No se pudo invitar a '+n)}catch(_){}}});
+  const sh=$('#minv-sh');if(sh)sh.onclick=async()=>{try{await navigator.share({title:'Link Master Dungeon',text,url})}catch(e){}};
+  $('#minv-cp').onclick=async()=>{const b=$('#minv-cp');try{await navigator.clipboard.writeText(url);b.textContent='✅ ¡Enlace copiado!'}catch(e){b.textContent=url}setTimeout(()=>{if(b.isConnected)b.textContent='🔗 Copiar enlace'},2500)}}
 $('#mp-copy').addEventListener('click',async()=>{
   const b=$('#mp-copy');try{await navigator.clipboard.writeText(mpLink());b.textContent='¡Enlace copiado!'}catch(e){b.textContent=mpLink()}
   setTimeout(()=>{b.textContent='Copiar enlace'},2500);
