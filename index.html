@@ -951,6 +951,43 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
 #reg.kb,#amgd.kb,#perfd.kb{justify-content:flex-start;align-items:center;overflow-y:auto}
 #reg.kb .rlogo{display:none}
 
+
+/* ===== sala: mesa de taberna ===== */
+#mp .v-room{position:relative}
+#mp.room .mbox{background:radial-gradient(120% 70% at 50% 45%,#5a3a1e 0%,#2e1c10 55%,#140c07 100%)!important}
+#mp .tv-fr,#mp .tv-me{display:flex;flex-direction:column;align-items:center;gap:2px}
+#mp .seat{width:96px;height:96px;border-radius:50%;background:radial-gradient(#2a1a0e,#120a05);border:4px dashed #c9973a99;display:grid;place-items:center;font:700 2.2rem Fredoka,sans-serif;color:#c9973aaa;overflow:hidden;animation:tvpl 1.6s ease-in-out infinite;margin-bottom:4px}
+#mp .seat.on{border:4px solid #ffd34d;animation:none;background:#120a05}
+#mp .seat .card{width:100%;height:auto;aspect-ratio:auto;border-radius:0;transform:scale(1.35) translateY(14%)}
+@keyframes tvpl{50%{box-shadow:0 0 22px #ffd34d55}}
+#mp .nmp{display:inline-block;font:700 .95rem Fredoka,sans-serif;color:#fff;background:#0d0a14c4;border:1px solid #ffffff30;border-radius:10px;padding:2px 12px}
+#mp .tvt{display:block;color:#ffe08a;font:700 .72rem Fredoka,sans-serif;min-height:0}
+#mp .tv-fr em,#mp .tv-me em{font-style:normal;color:#e7cfa5;font-size:.8rem}
+#mp .tv-fr .mst,#mp .tv-me .mst{font-size:.78rem}
+#mp .tv-mesa{position:relative;margin:12px -4px 4px;padding:26px 8px 18px;border-radius:50%/42%;background:radial-gradient(110% 90% at 50% 35%,#8a5a2b,#5c3818 60%,#3a220e);box-shadow:inset 0 0 0 6px #2a170a,inset 0 10px 30px #ffffff22,0 14px 26px #000c}
+#mp .tv-mesa .mmode{margin:0;gap:10px;justify-content:center}
+#mp .tv-mesa .mmode button{flex:0 0 82px;height:112px;border-radius:10px;background:linear-gradient(160deg,#3d2f55,#1c1528);border:3px solid #c9973a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font:700 .74rem Fredoka,sans-serif;color:#fff;box-shadow:0 8px 14px #000b;transition:transform .2s;padding:4px}
+#mp .tv-mesa .mmode button:nth-child(1){transform:rotate(-7deg)}#mp .tv-mesa .mmode button:nth-child(2){transform:rotate(2deg)}#mp .tv-mesa .mmode button:nth-child(3){transform:rotate(8deg)}
+#mp .tv-mesa .mmode button.on{border-color:#ffd34d;box-shadow:0 0 18px #ffd34d,0 8px 14px #000b;transform:translateY(-10px) scale(1.07)}
+#mp .tv-mesa .mmode button .mi{font-size:1.9rem;line-height:1}
+#mp .tv-mesa .mmode small{color:#f2dcb3;margin-top:6px}
+#mp #mp-msg{color:#f2dcb3;font-size:.85rem;margin:4px 0 8px}
+#mp .tv-me{flex-direction:row;justify-content:center;gap:12px;margin:4px 0 8px;text-align:left}
+#mp .tv-me .tv-mi{display:flex;flex-direction:column;align-items:flex-start;gap:3px}
+#mp #mp-mecard .card{width:92px;height:auto;aspect-ratio:696/1015;box-shadow:0 0 0 3px #ffd34d,0 8px 16px #000c}
+#mp .mpick small{display:none}
+#mp .mpg{display:flex!important;justify-content:center;flex-wrap:wrap;gap:5px!important;max-height:none!important;overflow:visible!important}
+#mp .mpg button{width:38px;height:38px;border-radius:50%!important;border:3px solid #c9973a!important;flex:none}
+#mp .mpg button .card{transform:scale(1.5) translateY(16%)}
+#mp .mpg button span{display:none}
+#mp .mpg button.sel{border-color:#ffd34d!important;transform:scale(1.15)}
+#mp .mpg button.tk::after{content:'🔒';top:20%;background:none;font-size:1rem}
+#mp .tv-act{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;margin-top:10px}
+#mp .tv-act #mp-share[style*="none"]{display:block!important;visibility:hidden}
+#mp .tv-act .mbtn.sec{flex:1;margin:0;padding:8px 6px!important;font-size:.9rem!important}
+#mp .tv-act .seal{flex:none;width:96px;height:96px;margin:0;padding:0;border-radius:50%;font:800 1rem Fredoka,sans-serif;line-height:1.05;color:#fff;background:radial-gradient(circle at 35% 30%,#ff6b6b,#b3121f 60%,#6a0710);box-shadow:0 0 0 4px #7a0a14,0 8px 16px #000c;text-shadow:0 2px 0 #4a0408}
+#mp .tv-act .seal.on{background:radial-gradient(circle at 35% 30%,#7ddf8f,#239a4c 60%,#13602d);box-shadow:0 0 0 4px #0e4a22,0 0 20px #5bdc8a,0 8px 16px #000c}
+#mp .tv-act .seal:disabled{filter:grayscale(.6) brightness(.8)}
 /* ===== estilo videojuego para ventanas y paneles: marco dorado, fondo de piedra/pergamino, título en cinta ===== */
 #recs .rbox,#opts .rbox,.pane .rbox,#ov:not(.vicp) .box,#cdlg .cb,#alb-view .av,#mp .mbox{
   position:relative;border:3px solid #c9973a;border-radius:18px;
@@ -996,23 +1033,20 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
     <button class="mbtn sec" id="mp-cancel">Cancelar</button>
   </div>
   <div class="mv v-room">
-    <div class="mrune" style="width:90px;height:90px"><b></b><u></u><span style="font-size:2rem">👥</span></div>
-    <h2>Sala de juego</h2>
+    <!-- sala estilo "mesa de taberna": tu amigo arriba, la mesa con los modos al centro y tú abajo -->
+    <div class="mcode" id="mp-code" style="display:none">-----</div>
+    <div class="tv-fr"><div class="seat" id="mp-fseat">?</div><b class="nmp" id="mp-frn">Amigo</b><small class="tvt" id="mp-frtit"></small><em id="mp-fr"></em><div class="mst wait" id="mp-frst">⏳</div></div>
+    <div class="tv-mesa"><div class="mmode" id="mp-mode"></div></div>
     <p id="mp-msg"></p>
-    <div class="mcode" id="mp-code" style="display:none">-----</div><!-- el código ya no se muestra: se entra con el enlace o la invitación de amigo -->
-    <div class="mslot"><div><span id="mp-myn">Tú</span><em id="mp-me"></em></div><div class="mst wait" id="mp-myst">⏳ Eligiendo</div></div>
-    <div class="mslot"><div><span id="mp-frn">Amigo</span><em id="mp-fr"></em></div><div class="mst wait" id="mp-frst">⏳</div></div>
+    <div class="tv-me"><div id="mp-mecard"></div><div class="tv-mi"><b class="nmp" id="mp-myn">Tú</b><small class="tvt" id="mp-mytit"></small><em>juega con <span id="mp-me"></span></em><div class="mst wait" id="mp-myst">⏳ Eligiendo</div></div></div>
     <div class="mpick" id="mp-pick"><small>Elige tu personaje (no puede ser el mismo que el de tu amigo)</small><div class="mpg" id="mp-pg"></div></div>
-    <div class="mmode" id="mp-mode"></div>
-    <button class="mbtn" id="mp-rdy">✅ ¡Listo!</button>
+    <div class="tv-act"><button class="mbtn sec" id="mp-share">📨 Invitar</button><button class="mbtn seal" id="mp-rdy">¡LISTO!</button><button class="mbtn sec" id="mp-leave">🚪 Salir</button></div>
     <button class="mbtn" id="mp-go" style="display:none">⚔️ Empezar partida</button>
-    <button class="mbtn" id="mp-share">📨 Invitar a un amigo</button>
     <div class="malt" id="mp-alt">
       <a id="mp-wa" target="_blank" rel="noopener">WhatsApp</a>
       <a id="mp-tg" target="_blank" rel="noopener">Telegram</a>
       <button id="mp-copy">Copiar enlace</button>
     </div>
-    <button class="mbtn sec" id="mp-leave">Salir de la sala</button>
   </div>
   <div class="mv v-err">
     <div class="mrune" style="width:90px;height:90px"><span style="font-size:2.4rem">⚠️</span></div>
@@ -3170,11 +3204,13 @@ function mpRoom(){
   const p=MP.peer,pc=p&&p.char,same=pc&&pc===CHAR;
   if(same&&MP.rdy){MP.rdy=0}
   $('#mp-myn').textContent=YO?YO.n:'Tú';$('#mp-me').textContent=PJN[CHAR]||mpNm(CHAR);
+  {const mn=$('#mp-myn');mn.className='nmp '+mcCls(selGet('mc'));$('#mp-mytit').textContent=TITN(selGet('ti'));$('#mp-mecard').innerHTML=card(CHAR+'19','still');
+   const fs=$('#mp-fseat');fs.classList.toggle('on',!!pc);fs.innerHTML=pc?card(pc+'19','still'):'?';$('#mp-frn').className='nmp '+(p?mcCls(MP.pmc):'');$('#mp-frtit').textContent=p?TITN(MP.pti):''}
   {const st=$('#mp-myst');st.className='mst '+(MP.rdy?'ok':'wait');st.textContent=MP.rdy?'✓ Listo':'⏳ Eligiendo'}
   $('#mp-frn').textContent=p?(MP.pn||'Amigo'):'Amigo';$('#mp-fr').textContent=p?(PJN[pc]||mpNm(pc)):'Esperando…';
   {const st=$('#mp-frst');st.className='mst '+(p&&MP.prdy?'ok':'wait');st.textContent=!p?'⏳':MP.prdy?'✓ Listo':'⏳ Eligiendo'}
   $('#mp-pg').innerHTML=PJO.map(k=>{const tk=pc===k||!pjOk(k);return `<button data-c="${k}" class="${k===CHAR?'sel':''}${tk?' tk':''}" data-who="🔒 ${pc===k?(MP.pn||'Amigo'):'Tienda'}">${card(k+'19','still')}<span>${PJN[k]}</span></button>`}).join('');
-  const r=$('#mp-rdy');r.disabled=!p||same;r.classList.toggle('on',!!MP.rdy);r.textContent=MP.rdy?'✅ ¡Listo! · toca para cambiar':same?'⚠️ Elige otro personaje':'✅ ¡Listo!';
+  const r=$('#mp-rdy');r.disabled=!p||same;r.classList.toggle('on',!!MP.rdy);r.innerHTML=MP.rdy?'✔<br>LISTO':same?'Elige<br>otro':'¡LISTO!';
   $('#mp-msg').textContent=p?(MP.rdy&&MP.prdy?'⚔️ ¡Los dos están listos! Empezando…':MP.rdy?'Esperando a que tu amigo esté listo…':'Elige tu personaje y toca ¡Listo!'):(MP.role==='host'?(MP.pub?'🔎 Buscando jugador… en cuanto alguien toque “Partida rápida” entrará contigo. También puedes invitar a un amigo. Mientras, elige tu personaje.':'Invita a tu amigo para que entre. Mientras, elige tu personaje.'):'Conectado a la sala.');
   $('#mp-go').style.display='none';
   try{vsRoomUi()}catch(e){}
@@ -3183,7 +3219,7 @@ function mpRoom(){
   mpTryStart();
 }
 /* saludo al entrar el amigo: nombre, personaje y si está listo */
-const mpHi=()=>mpSend({k:'hi',n:YO?YO.n:'',c:CHAR,r:MP.rdy?1:0});
+const mpHi=()=>mpSend({k:'hi',n:YO?YO.n:'',c:CHAR,r:MP.rdy?1:0,ti:selGet('ti'),mc:selGet('mc')});
 let MPSTART=0;
 function mpTryStart(){if(MP.role!=='host'||!MP.peer||!MP.rdy||!MP.prdy||MP.peer.char===CHAR||COOP||MPSTART)return;MPSTART=1;
   setTimeout(()=>{MPSTART=0;if(MP.role!=='host'||!MP.peer||!MP.rdy||!MP.prdy||COOP)return;$('#mp-go').click()},900)}
@@ -3412,7 +3448,7 @@ $('#lob-btn-car').addEventListener('click',()=>{try{SFX.pop()}catch(e){}vsLocal(
 $('#lob-btn-asa').addEventListener('click',()=>{try{SFX.pop()}catch(e){}vsLocal('asa')});
 /* sala en línea: el anfitrión elige el modo */
 function vsRoomUi(){const e=$('#mp-mode');if(!e)return;const h=MP.role==='host',m=MP.vm||'coop',cal=h?(calOk(CAL)?CAL:'t'):(MP.vcal||'t');
-  e.innerHTML=[['coop','🤝 Cooperativo'],['car','🏁 Carrera'],['asa','🏰 Asalto']].map(([k,t])=>`<button data-vm="${k}" class="${k===m?'on':''}" ${h?'':'disabled'}>${t}</button>`).join('')
+  e.innerHTML=[['coop','🤝','Cooperativo'],['car','🏁','Carrera'],['asa','🏰','Asalto']].map(([k,i,t])=>`<button data-vm="${k}" class="${k===m?'on':''}" ${h?'':'disabled'}><span class="mi">${i}</span>${t}</button>`).join('')
     +`<small>${m==='coop'?'Juntos contra '+CALS[cal].nf:(m==='car'?'Compiten en el mismo calabozo: gana quien junte más puntos':'Cada quien defiende su fortaleza')+' · '+CALS[cal].nf}${h?'':' · elige el anfitrión'}</small>`}
 $('#mp-mode').addEventListener('click',e=>{const b=e.target.closest('button[data-vm]');if(!b||MP.role!=='host'||COOP)return;MP.vm=b.dataset.vm;try{mpSend({k:'vm',m:MP.vm,cal:calOk(CAL)?CAL:'t'})}catch(_){}vsRoomUi();try{SFX.pop()}catch(_){}});
 /* el Búho juega su turno solo, tocando lo mismo que tocarías tú */
@@ -3573,7 +3609,7 @@ function coopOver(kind,msg){if(!COOP||COOPEND)return;COOPEND=1;mpSend({k:'over',
 function mpOnMsg(d){
   if(!d)return;if(d.k==='ct'){if(d.key===CTKEY&&!MYT)CTREM=d.v;return}
   if(d.k==='rs'){const g=d.got||0;for(let i=OUTB.length-1;i>=0;i--)if(OUTB[i].n<=g)OUTB.splice(i,1);OUTB.forEach(x=>mpRaw({t:'msg',n:x.n,data:x.data}));return}
-  if(d.k==='hi'){MP.pn=d.n||'';if(MP.peer&&d.c)MP.peer.char=d.c;MP.prdy=d.r?1:0;if(MP.role==='host')mpSend({k:'vm',m:MP.vm||'coop',cal:calOk(CAL)?CAL:'t'});if(!COOP)mpRoom();return}
+  if(d.k==='hi'){MP.pn=d.n||'';MP.pti=d.ti||'';MP.pmc=d.mc||'';if(MP.peer&&d.c)MP.peer.char=d.c;MP.prdy=d.r?1:0;if(MP.role==='host')mpSend({k:'vm',m:MP.vm||'coop',cal:calOk(CAL)?CAL:'t'});if(!COOP)mpRoom();return}
   if(d.k==='rdy'){MP.prdy=d.v?1:0;if(MP.peer&&d.c)MP.peer.char=d.c;if(!COOP)mpRoom();return}
   if(d.k==='vm'){MP.vm=d.m;MP.vcal=d.cal;vsRoomUi();return}
   if(d.k==='fort'){if(VS){VS.opF=d.ids;if(VS.myF)vsWaitF()}return}
