@@ -3088,8 +3088,7 @@ function lobInfo(c){try{document.querySelectorAll('.lob-char').forEach(el=>{cons
   $('#lob-info').innerHTML=`<div class="li">${d[0]}</div><div><b>${PJN[c]}</b><span>${d[1]}</span><small>${p.g?`🏆 ${p.w||0} victorias en ${p.g} partidas${p.bt?` · récord: ${p.bt} turnos`:''}`:'Aún no has jugado con este personaje'}</small></div>`;$('#lob-info').classList.add('on')}catch(e){}}
 /* elegir calabozo (y botón temporal para desbloquear la Mansión y a Robi) */
 function calUi(){const e=$('#lob-cal');if(!e)return;if(!calOk(CAL))CAL='t';
-  e.innerHTML=Object.keys(CALS).map(k=>`<button data-cal="${k}" class="${k===CAL?'on':''}${calOk(k)?'':' lk'}">${k==='t'?'🌑':'👻'} ${CALS[k].nf}${calOk(k)?'':' 🔒'}</button>`).join('')
-    +(CAL==='e'?'<small>👻 La Mansión es solo para 1 jugador por ahora</small>':'')}
+  e.innerHTML=Object.keys(CALS).map(k=>`<button data-cal="${k}" class="${k===CAL?'on':''}${calOk(k)?'':' lk'}">${k==='t'?'🌑':'👻'} ${CALS[k].nf}${calOk(k)?'':' 🔒'}</button>`).join('')}
 $('#lob-cal').addEventListener('click',e=>{const b=e.target.closest('[data-cal]');
   if(b){const k=b.dataset.cal;if(!calOk(k)){try{SFX.down()}catch(_){}try{gToast(`${GSET[k]?GSET[k].ic:'🔒'} Desbloquea <b>${CALS[k].nf}</b> completando sus ${GSET[k]?GSET[k].tot:''} cartas en el gacha de Don Trueque (Comunidad).`,null,null,5000)}catch(_){}return}CAL=k;try{localStorage.setItem('mesa-cal',k)}catch(_){}calUi();try{smp('pestana')}catch(_){}return}});
 /* selección de personaje */
