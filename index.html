@@ -3866,7 +3866,7 @@ function byeGo(){window.BYE=1;try{vzStop()}catch(e){}try{document.querySelectorA
     b.innerHTML=`<div class="bx"><div class="ow">${OWL}</div><h2>¡Hasta pronto, aventurero!</h2><p>Tu progreso está guardado.<br>Ya puedes cerrar el juego: desliza hacia arriba desde la parte de abajo de la pantalla (o abre tus apps recientes) y quítalo.</p><button id="bye-back">⚔️ Seguir jugando</button></div>`;
     b.classList.add('on');$('#bye-back').onclick=()=>{b.classList.remove('on');window.BYE=0;try{AC&&AC.resume()}catch(e){}}},350)}
 
-/* ===== TUTORIAL GUIADO: el Búho enseña a jugar con una partida de práctica arreglada (Mario) ===== */
+/* ===== TUTORIAL GUIADO: el Búho enseña a jugar con una partida de práctica arreglada (Bruno) ===== */
 const OWL='<img src="guia/buho.webp" alt="" onerror="this.replaceWith(document.createTextNode(\'🦉\'))">';
 document.body.insertAdjacentHTML('beforeend',`<div id="tut"><div id="tutsc"></div><svg><defs><mask id="tutm"><rect width="100%" height="100%" fill="#fff"/><g id="tuth"></g></mask></defs><rect width="100%" height="100%" fill="#05030aa8" mask="url(#tutm)"/></svg><div id="tutr"></div><div class="tbub bot" id="tutb"></div><div class="thand" id="tutp">👆</div></div><div id="tutq"></div>`);
 /* partida arreglada: mano y enfrentamientos fijos (Bruno) */
