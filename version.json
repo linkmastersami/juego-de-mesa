@@ -315,6 +315,10 @@
   "tableros/t06.webp": "4639a0983b0b",
   "tableros/t07.webp": "d13add3a6534",
   "tableros/t08.webp": "df272cca3775",
+  "tableros/t09.jpg": "ff55d05bce49",
+  "tableros/t10.jpg": "6327f83734f0",
+  "tableros/t11.jpg": "8d5f31d5fda4",
+  "tableros/t12.jpg": "b23f822eb7d4",
   "tienda/fondo.webp": "89edea846baa",
   "tienda/gacha.webp": "54d4acc01144",
   "tienda/gema.webp": "e23d9a9b4d85",
@@ -363,5 +367,5 @@
   "voces/38.mp3": "bdb95078938e",
   "voces/inv.mp3": "88fd37faee29"
  },
- "version": "35e35a724824"
+ "version": "eda140f6635b"
 }
