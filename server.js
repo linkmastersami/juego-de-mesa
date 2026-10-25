@@ -86,11 +86,11 @@ const AVS = ['arquera', 'barbaro', 'guerrero', 'mago', 'ninja', 'paladin', 'brun
 const SHOP = { bruno: 150, robi: 150, veralyn: 150, ninja: 120, paladin: 120 };            /* guerreros a la venta */
 const PREMIUM = Object.keys(SHOP);
 /* catálogo de personalización (reversos, marcos, títulos, emojis y tableros): mismo precio que muestra la tienda del juego */
-const CAT = { 'rv:rubi': 80, 'rv:esme': 80, 'rv:noche': 100, 'rv:oro': 120, 'rv:arco': 180,
+const CAT = { 'rv:rubi': 80, 'rv:esme': 80, 'rv:noche': 100, 'rv:oro': 120, 'rv:arco': 180, 'rv:dragon': 150, 'rv:mar': 150, 'rv:bosque': 150, 'rv:estelar': 150,
   'mc:oro': 100, 'mc:fuego': 120, 'mc:hielo': 120, 'mc:bosque': 100, 'mc:arco': 200,
   'ti:valiente': 50, 'ti:cazador': 80, 'ti:sabio': 80, 'ti:fantasma': 80, 'ti:rey': 150, 'ti:leyenda': 250,
   'em:fiesta': 50, 'em:guerrero': 50, 'em:risa': 50, 'em:amigos': 50,
-  'tb:t01': 100, 'tb:t02': 100, 'tb:t03': 100, 'tb:t04': 100, 'tb:t05': 120, 'tb:t06': 120, 'tb:t07': 150, 'tb:t08': 150 };
+  'tb:t01': 100, 'tb:t02': 100, 'tb:t03': 100, 'tb:t04': 100, 'tb:t05': 120, 'tb:t06': 120, 'tb:t07': 150, 'tb:t08': 150, 'tb:t09': 150, 'tb:t10': 150, 'tb:t11': 150, 'tb:t12': 150 };
 const RGDAY = 100; /* gemas que se pueden regalar al día */
 const GEM0 = 100;                                                /* regalo de bienvenida */
 const GXDAY = +process.env.GDOBLES || 10; /* veces al día que se pueden duplicar las gemas de una partida con un anuncio */

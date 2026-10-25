@@ -370,16 +370,19 @@ body.rvarco .deck,body.rvarco .bk,body.rvarco .flip .b,body.rvarco .stc,body.rva
 .csub{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin:10px 0 4px}
 .csub button{padding:7px 10px;border-radius:12px;border:2px solid #ffffff26;background:#ffffff12;color:#fff;font:700 .78rem Fredoka,sans-serif;cursor:pointer}
 .csub button.on{border-color:#ffd34d;background:#ffd34d30}
-.csg{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
-.cso{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 6px;border-radius:14px;background:#ffffff10;border:2px solid #ffffff1a;cursor:pointer;text-align:center;font:700 .74rem Fredoka,sans-serif;color:#fff}
+.csg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:10px}
+body.rvimg .deck:not(#dM):not(#dK),body.rvimg .bk,body.rvimg .flip .b,body.rvimg .stc:not(.pjd),body.rvimg .shf:not(.m):not(.k) .sc{background-image:var(--rvimg)!important}
+body.rvimg .card.hidc img{content:var(--rvimg)}
+.cso{min-width:0;position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 6px;border-radius:14px;background:#ffffff10;border:2px solid #ffffff1a;cursor:pointer;text-align:center;font:700 .74rem Fredoka,sans-serif;color:#fff}
 .cso.sel{border-color:#ffd34d;box-shadow:0 0 12px #ffd34d66}
 .cso.lock{opacity:.55}
 .cso small{font-weight:600;font-size:.64rem;color:var(--mute)}
 .cso.sel small{color:#ffd34d}
 .rvp{width:62%;aspect-ratio:696/1015;border-radius:6px;background:#0b1730 url(cartas/reverso.webp) center/100% 100% no-repeat;box-shadow:0 3px 8px #000a}
-.nmp{font:700 .72rem Fredoka,sans-serif;color:#fff;background:#0d0a14c4;border:1px solid #ffffff30;border-radius:10px;padding:2px 9px;white-space:nowrap}
+.nmp{max-width:100%;box-sizing:border-box;overflow:hidden;text-overflow:ellipsis;font:700 .72rem Fredoka,sans-serif;color:#fff;background:#0d0a14c4;border:1px solid #ffffff30;border-radius:10px;padding:2px 9px;white-space:nowrap}
 .cso .emj{font-size:1.05rem;line-height:1.3}
-.tb .csg{grid-template-columns:repeat(3,1fr)}
+.tb .csg{grid-template-columns:repeat(3,minmax(0,1fr))}
+.cso .nmp small{white-space:normal;line-height:1.15}
 .tb .ch{margin:16px 0 0;font:800 1rem Fredoka,sans-serif;color:var(--gold)}
 .tb .ch small{display:block;font:600 .72rem Fredoka,sans-serif;color:var(--mute)}
 .tb .cso .buy,.tb .gift button{border:0;border-radius:10px;padding:5px 8px;font:800 .72rem Fredoka,sans-serif;background:linear-gradient(180deg,#ffe07a,#e0a92a);color:#3a2808;cursor:pointer}
@@ -1601,7 +1604,7 @@ const TND={g:null,inv:[],shop:{},gc:{},gp:60,gad:0,t:0,pa:null,pe:null};
 const GSET={r:{nm:'Robi, el niño robot',ic:'🤖',tot:18,pic:'r19'},n:{nm:'Nova, la cazadora estelar',ic:'🚀',tot:18,pic:'n19'},o:{nm:'Coral, la capitana del arrecife',ic:'⚓',tot:18,pic:'o19'},d:{nm:'Granito, el gigante de piedra',ic:'🪨',tot:18,pic:'d19'},e:{nm:'La Mansión Embrujada',ic:'👻',tot:28,pic:'ej1',cal:1}};
 /* catálogo de personalización: se compra en la tienda y se elige en la pestaña Tableros */
 const CATI={
-  rv:[['rv:base','Clásico',''],['rv:rubi','Rubí','hue-rotate(115deg) saturate(1.35)'],['rv:esme','Esmeralda','hue-rotate(-75deg) saturate(1.2)'],['rv:noche','Medianoche','grayscale(1) brightness(.72) contrast(1.25)'],['rv:oro','Oro','sepia(1) saturate(2.3) hue-rotate(-12deg) brightness(1.08)'],['rv:arco','Arcoíris','anim']],
+  rv:[['rv:base','Clásico',''],['rv:rubi','Rubí','hue-rotate(115deg) saturate(1.35)'],['rv:esme','Esmeralda','hue-rotate(-75deg) saturate(1.2)'],['rv:noche','Medianoche','grayscale(1) brightness(.72) contrast(1.25)'],['rv:oro','Oro','sepia(1) saturate(2.3) hue-rotate(-12deg) brightness(1.08)'],['rv:arco','Arcoíris','anim'],['rv:dragon','Dragón','img:cartas/reverso-dragon.webp'],['rv:mar','Profundidades','img:cartas/reverso-mar.webp'],['rv:bosque','Bosque encantado','img:cartas/reverso-bosque.webp'],['rv:estelar','Constelación','img:cartas/reverso-estelar.webp']],
   mc:[['mc:base','Sin marco'],['mc:oro','Dorado'],['mc:fuego','Llamas'],['mc:hielo','Escarcha'],['mc:bosque','Bosque'],['mc:arco','Arcoíris']],
   ti:[['ti:base','Sin título'],['ti:valiente','El Valiente'],['ti:cazador','Cazador de sombras'],['ti:sabio','Sabio de la torre'],['ti:fantasma','Amigo de los fantasmas'],['ti:rey','Rey del calabozo'],['ti:leyenda','Leyenda viviente']],
   em:[['em:fiesta','Fiesta',['🎉','🥳','🎂','🎵']],['em:guerrero','Guerrero',['🛡️','💪','🗡️','¡A la carga!']],['em:risa','Risas',['🤣','😜','🙈','¡Jajaja!']],['em:amigos','Amigos',['❤️','🥰','🤝','¡Eres genial!']]]};
@@ -1611,7 +1614,9 @@ const lsx=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k);localStora
 const selGet=k=>{const v=lsx('mesa-'+k);return v&&catOwn(v)?v:k+':base'};
 const TITN=id=>{const x=CATI.ti.find(y=>y[0]===id);return x&&!/base$/.test(id)?x[1]:''};
 const mcCls=id=>id&&!/base$/.test(id)&&CATI.mc.some(y=>y[0]===id)?id.replace(':','-'):'';
-function rvApply(){try{const id=selGet('rv'),x=CATI.rv.find(y=>y[0]===id)||CATI.rv[0];document.body.style.setProperty('--rvf',x[2]&&x[2]!=='anim'?x[2]:'none');document.body.classList.toggle('rvarco',x[2]==='anim')}catch(e){}}
+const rvImg=x=>x&&/^img:/.test(x[2]||'')?x[2].slice(4):'';
+function rvApply(){try{const id=selGet('rv'),x=CATI.rv.find(y=>y[0]===id)||CATI.rv[0],im=rvImg(x);document.body.style.setProperty('--rvf',x[2]&&x[2]!=='anim'&&!im?x[2]:'none');document.body.classList.toggle('rvarco',x[2]==='anim');document.body.classList.toggle('rvimg',!!im);if(im)document.body.style.setProperty('--rvimg',`url("${im}")`)}catch(e){}}
+const rvPv=x=>{const im=rvImg(x);return `<div class="rvp${x[2]==='anim'?' anim':''}" style="${im?`background-image:url('${im}')`:x[2]&&x[2]!=='anim'?'filter:'+x[2]:''}"></div>`};
 const emOff=()=>{try{return JSON.parse(lsx('mesa-emoff')||'[]')||[]}catch(e){return []}};
 const PZEMf=()=>[...PZEM,...CATI.em.filter(p=>catOwn(p[0])&&!emOff().includes(p[0])).flatMap(p=>p[2])];
 setTimeout(rvApply,0);
@@ -1832,14 +1837,15 @@ setInterval(()=>{const ap=$('#apart');if(!ap||!ap.children.length)return;const h
 
 /* ---------- tableros desbloqueables (carpeta tableros/) ---------- */
 const TABS=[['t00','Calabozo','',null],['t01','Cripta de huesos','w1'],['t02','Fragua de lava','wm'],['t03','Ruinas del bosque','wl'],['t04','Templo de la tormenta','wp'],
-  ['t05','Caverna de cristal','nc15'],['t06','Biblioteca arcana','fin'],['t07','Sala del trono oscuro','jf3'],['t08','Santuario celestial','w10']];
+  ['t05','Caverna de cristal','nc15'],['t06','Biblioteca arcana','fin'],['t07','Sala del trono oscuro','jf3'],['t08','Santuario celestial','w10'],
+  ['t09','Barco fantasma','shop'],['t10','Jardín de los dulces','shop'],['t11','Taller del inventor','shop'],['t12','Volcán dormido','shop']]; /* 'shop': solo se compran en la tienda */
 const tabUrl=t=>`tableros/${t}.webp`;
-const tabOk=(t,A)=>{const x=TABS.find(y=>y[0]===t);return !!x&&(!x[2]||!!(A||stLoad().ach||{})[x[2]]||TND.inv.includes('tb:'+t))};
+const tabOk=(t,A)=>{const x=TABS.find(y=>y[0]===t);return !!x&&(!x[2]||(x[2]!=='shop'&&!!(A||stLoad().ach||{})[x[2]])||TND.inv.includes('tb:'+t))};
 function tabApply(){let t='t00';try{t=localStorage.getItem('mesa-tab')||'t00'}catch(e){}if(!tabOk(t))t='t00';
   const a=$('#amb');a.classList.toggle('img',t!=='t00');a.style.setProperty('--tab',t!=='t00'?`url("${tabUrl(t)}")`:'none')}
 let TABSUB='tb';
 function cosOpt(k,cur){const pr=id=>TND.shop[id];return `<div class="csg">${CATI[k].map(x=>{const id=x[0],own=catOwn(id),sel=id===cur;
-    const pv=k==='rv'?`<div class="rvp${x[2]==='anim'?' anim':''}" style="${x[2]&&x[2]!=='anim'?'filter:'+x[2]:''}"></div>`:k==='mc'?`<span class="nmp ${mcCls(id)}">${YO?YO.n:'TÚ'}</span>`:k==='ti'?`<span class="nmp">${YO?YO.n:'TÚ'}<small style="display:block;color:#ffe08a;font-size:.6rem">${TITN(id)||'—'}</small></span>`:'';
+    const pv=k==='rv'?rvPv(x):k==='mc'?`<span class="nmp ${mcCls(id)}">${YO?YO.n:'TÚ'}</span>`:k==='ti'?`<span class="nmp">${YO?YO.n:'TÚ'}<small style="display:block;color:#ffe08a;font-size:.6rem">${TITN(id)||'—'}</small></span>`:'';
     return `<div class="cso${own?'':' lock'}${sel?' sel':''}" ${own?`data-sel="${id}"`:`data-buyt="${id}"`}>${pv}<b>${x[1]}</b><small>${sel?'✔ Usando':own?'Toca para usar':`🔒 ${pr(id)||''} 💎 en la tienda`}</small></div>`}).join('')}</div>`}
 function showTabs(){
   let cur='t00';try{cur=localStorage.getItem('mesa-tab')||'t00'}catch(e){}
@@ -3958,7 +3964,7 @@ function tndBody(){const b=$('#tnd-b');if(!b)return;$('#tnd').querySelectorAll('
    const sec=(t,d,h)=>`<div class="ch">${t}<small>${d}</small></div><div class="csg">${h}</div>`;
    const tabsV=TABS.filter(([t,n,a])=>a&&TND.shop['tb:'+t]&&!tabOk(t));
    b.innerHTML=`<p class="tn">Todo lo que compres aquí lo eliges en la pestaña <b>Tableros</b>.</p>`
-    +sec('🂠 Reversos de cartas','Cambia el diseño de atrás de tus cartas',CATI.rv.slice(1).map(x=>it(x[0],`<div class="rvp${x[2]==='anim'?' anim':''}" style="${x[2]!=='anim'?'filter:'+x[2]:''}"></div>`,x[1])).join(''))
+    +sec('🂠 Reversos de cartas','Cambia el diseño de atrás de tus cartas',CATI.rv.slice(1).map(x=>it(x[0],rvPv(x),x[1])).join(''))
     +sec('🖼️ Marcos','Un marco para tu nombre en la plaza y en tus récords',CATI.mc.slice(1).map(x=>it(x[0],`<span class="nmp ${mcCls(x[0])}">${YO.n}</span>`,x[1])).join(''))
     +sec('🗺️ Tableros','Cómpralos sin esperar a ganar su logro',tabsV.length?tabsV.map(([t,n])=>it('tb:'+t,`<div class="rvp" style="background-image:url('${tabUrl(t)}')"></div>`,n)).join(''):'<p class="tn" style="grid-column:1/-1">✔ Ya tienes todos los tableros.</p>')
     +sec('😄 Emojis y frases','Paquetes nuevos de reacciones para la plaza',CATI.em.map(x=>it(x[0],`<span class="emj">${x[2].join(' ')}</span>`,x[1])).join(''))
