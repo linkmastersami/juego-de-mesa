@@ -3255,13 +3255,13 @@ $('#mp-pick').addEventListener('click',e=>{const b=e.target.closest('button[data
   if(b.dataset.c===CHAR)return;CHAR=b.dataset.c;try{localStorage.setItem('mesa-pj',CHAR)}catch(_){}MP.rdy=0;mpRaw({t:'char',char:CHAR});if(MP.peer)mpSend({k:'rdy',v:0,c:CHAR});try{SFX.pop()}catch(_){}mpRoom()});
 $('#mp-rdy').addEventListener('click',()=>{if(!MP.peer||MP.peer.char===CHAR)return;MP.rdy=MP.rdy?0:1;mpSend({k:'rdy',v:MP.rdy,c:CHAR});try{MP.rdy?SFX.bell():SFX.tap()}catch(_){}mpRoom()});
 /* ===== PARTIDA RÁPIDA + AVISOS ===== */
-let QN=0,QPUSH=0,QKEY='',NREF=0;
+let QN=0,QPUSH=0,QFCM=0,QKEY='',NREF=0;
 function setBadge(n){try{if(n>0&&navigator.setAppBadge)navigator.setAppBadge(n);else if(!n&&navigator.clearAppBadge)navigator.clearAppBadge()}catch(e){}}
 function qUi(){const b=$('#lob-q');b.style.display=QN>0?'':'none';b.textContent=QN>0?(QN===1?'1 buscando':QN+' buscando'):'';$('#lob-btn-quick').classList.toggle('hot',QN>0);setBadge(QN)}
 async function qPoll(){
   if(!lobbyOn()&&(COOP||TUT||!GAMEON))return;if(sinNet()||document.hidden||MP.code||!navigator.onLine)return;
   try{const c=new AbortController(),to=setTimeout(()=>c.abort(),6000);const r=await fetch(MP_URL+'/quick',{cache:'no-store',signal:c.signal});clearTimeout(to);if(!r.ok)return;
-    const j=await r.json();const q0=QN;QN=j.n|0;if(QN>q0&&!MP.code)qToast();QPUSH=!!j.push;QKEY=j.key||'';qUi();notifUi()}catch(e){}}
+    const j=await r.json();const q0=QN;QN=j.n|0;if(QN>q0&&!MP.code)qToast();QPUSH=!!j.push;QFCM=!!j.fcm;QKEY=j.key||'';qUi();notifUi()}catch(e){}}
 /* aviso dentro del juego: alguien acaba de abrir una partida rápida (en cualquier pantalla del menú o jugando solo) */
 /* aviso que baja desde arriba (dentro del juego) con un botón de acción */
 function gToast(html,btn,go,ms){let t=$('#qtoast');if(!t){t=document.createElement('div');t.id='qtoast';document.body.appendChild(t)}
@@ -3290,7 +3290,22 @@ $('#lob-btn-quick').addEventListener('click',()=>{
   if(!pjOk(CHAR))return;
   mpStart(null,1)});
 const b64u=s=>{const r=(s+'='.repeat((4-s.length%4)%4)).replace(/-/g,'+').replace(/_/g,'/'),a=atob(r);return Uint8Array.from([...a].map(c=>c.charCodeAt(0)))};
+/* dentro de la app de Android los avisos web no existen: se usan los nativos (Firebase) con el plugin PushNotifications */
+const pnPlugin=()=>{try{const C=window.Capacitor;return C&&C.isNativePlatform&&C.isNativePlatform()&&C.Plugins&&C.Plugins.PushNotifications||null}catch(e){return null}};
+async function pushSubApp(ask){const P=pnPlugin();
+  let st=await P.checkPermissions();
+  if(st.receive!=='granted'){if(!ask)return false;st=await P.requestPermissions();if(st.receive!=='granted')throw new Error('perm:'+st.receive)}
+  try{await P.createChannel({id:'avisos',name:'Avisos del juego',description:'Invitaciones, partida rápida y actualizaciones',importance:4,visibility:1})}catch(e){}
+  const tok=await new Promise((ok,ko)=>{let hs=[],to=0;const fin=(f,v)=>{clearTimeout(to);hs.forEach(h=>{try{h.remove()}catch(_){}});f(v)};
+    to=setTimeout(()=>fin(ko,new Error('sin respuesta de Firebase')),20000);
+    Promise.all([P.addListener('registration',t=>fin(ok,t&&t.value)),P.addListener('registrationError',e=>fin(ko,new Error((e&&e.error)||'registro')))]).then(a=>{hs=a;return P.register()}).catch(e=>fin(ko,e))});
+  if(!tok)throw new Error('sin token');
+  const r=await fetch(MP_URL+'/push/sub',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({fcm:tok})});
+  if(!r.ok)throw new Error(r.status===400?'srv':'servidor '+r.status);
+  try{localStorage.setItem('mesa-push','1');localStorage.setItem('mesa-pushep','fcm:'+tok)}catch(e){}
+  return true}
 async function pushSub(ask){
+  if(pnPlugin())return pushSubApp(ask);
   if(!('serviceWorker' in navigator)||!('PushManager' in window)||!('Notification' in window))return false;
   if(Notification.permission==='denied')return false;
   if(Notification.permission!=='granted'){if(!ask)return false;const pr=await Notification.requestPermission();if(pr!=='granted')throw new Error('perm:'+pr)}
@@ -3306,12 +3321,15 @@ async function pushSub(ask){
   try{localStorage.setItem('mesa-push','1');localStorage.setItem('mesa-pushep',sub.endpoint)}catch(e){}
   return true}
 function notifUi(){
-  const b=$('#lob-btn-notif'),can=QPUSH&&('PushManager' in window)&&('Notification' in window)&&Notification.permission!=='denied';
-  b.style.display=can?'':'none';let on=0;try{on=localStorage.getItem('mesa-push')==='1'&&Notification.permission==='granted'}catch(e){}
+  const app=!!pnPlugin(),b=$('#lob-btn-notif'),can=app?QFCM:QPUSH&&('PushManager' in window)&&('Notification' in window)&&Notification.permission!=='denied';
+  b.style.display=can?'':'none';let on=0;try{on=localStorage.getItem('mesa-push')==='1'&&(app||Notification.permission==='granted')}catch(e){}
   b.textContent=on?'🔔 Avisos activados · toca para desactivar':'🔔 Avisarme de partidas y actualizaciones';
   if(on&&!NREF){NREF=1;pushSub(0).catch(()=>{})}} /* una vez por sesión: renueva la suscripción en el servidor */
 $('#lob-btn-notif').addEventListener('click',async()=>{
   let on=0;try{on=localStorage.getItem('mesa-push')==='1'}catch(e){}
+  if(on&&pnPlugin()){let ep='';try{ep=localStorage.getItem('mesa-pushep')||''}catch(e){}
+    if(ep)fetch(MP_URL+'/push/unsub',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({endpoint:ep})}).catch(()=>{});
+    try{await pnPlugin().unregister()}catch(e){}try{localStorage.removeItem('mesa-push');localStorage.removeItem('mesa-pushep')}catch(e){}notifUi();return}
   if(on){try{const reg=await navigator.serviceWorker.ready,sb=await reg.pushManager.getSubscription();if(sb){fetch(MP_URL+'/push/unsub',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({endpoint:sb.endpoint})}).catch(()=>{});await sb.unsubscribe()}}catch(e){}
     try{localStorage.removeItem('mesa-push');localStorage.removeItem('mesa-pushep')}catch(e){}notifUi();return}
   const b0=$('#lob-btn-notif'),t0=b0.textContent;b0.textContent='⏳ Activando avisos…';b0.disabled=true;
@@ -4585,7 +4603,7 @@ const enApp=()=>matchMedia('(display-mode: standalone)').matches||matchMedia('(d
 function onbFin(){$('#reg').classList.remove('on');try{localStorage.removeItem('mesa-onb')}catch(e){}try{notifUi()}catch(e){}}
 function onbAvisos(err){const c=$('#reg-c');$('#reg').classList.add('on');
   let on=0;try{on=localStorage.getItem('mesa-push')==='1'}catch(e){}if(on)return onbInstalar();
-  const sop=('serviceWorker' in navigator)&&('PushManager' in window)&&('Notification' in window);
+  const sop=!!pnPlugin()||('serviceWorker' in navigator)&&('PushManager' in window)&&('Notification' in window);
   c.innerHTML=`<h2>🔔 Activa los avisos</h2><p>Así sabrás cuando <b>tu amigo te espera</b> para jugar, cuando alguien busca <b>partida rápida</b> y cuando hay una <b>actualización</b> del juego.</p>
     ${err?`<div class="warn">${err}</div>`:''}
     ${sop?'<button class="rgo" id="onb-on">🔔 Activar avisos</button>':'<div class="warn">Este navegador no permite avisos. En iPhone, primero instala el juego en la pantalla de inicio.</div>'}
@@ -4653,6 +4671,13 @@ function amgDot(){try{amgFriendBtn()}catch(e){}const n=AMG.rq.length+AMG.inv.len
 setInterval(()=>{if(YO&&!document.hidden)amgSync()},10000);setTimeout(amgSync,3000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)amgSync()});
 try{navigator.serviceWorker.addEventListener('message',e=>{const d=e.data||{};if(d.t==='amigos'){amgSync();if(d.ver){try{lobPage(3)}catch(_){}setTimeout(()=>amgPanel(),400)}}if(d.t==='sala'&&d.c)amgJoin(d.c)})}catch(e){}
+/* avisos nativos de la app: con el juego abierto se actualiza lo que haga falta; al tocar uno se va a lo que avisa (como en sw.js) */
+{const P=pnPlugin();if(P){
+  P.addListener('pushNotificationReceived',n=>{const d=(n&&n.data)||{};if(d.kind==='quick')qPoll();else if(d.kind==='inv'||d.kind==='amigo')amgSync();
+    else if(n&&n.body){const t=document.createElement('b');t.textContent=n.body;gToast(t.outerHTML,null,null,5000)}});
+  P.addListener('pushNotificationActionPerformed',a=>{const d=(a&&a.notification&&a.notification.data)||{};setTimeout(()=>{try{
+    if(d.kind==='quick')qPoll();else if(d.kind==='inv'&&d.sala)amgJoin(String(d.sala).toUpperCase().replace(/[^A-Z0-9]/g,''));
+    else if(d.kind==='amigo'){amgSync();try{lobPage(3)}catch(_){}setTimeout(()=>amgPanel(),400)}}catch(e){}},1500)})}}
 if(new URLSearchParams(location.search).get('com'))setTimeout(()=>{try{lobPage(3)}catch(e){}amgPanel()},1500);
 function amgDlg(h,k){let d=$('#amgd');if(!d){d=document.createElement('div');d.id='amgd';document.body.appendChild(d)}d.dataset.k=k||'';
   d.innerHTML=`<div class="bx">${h}</div>`;d.classList.add('on');d.onclick=e=>{if(e.target===d||e.target.closest('.n'))d.classList.remove('on')};return d}

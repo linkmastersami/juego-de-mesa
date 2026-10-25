@@ -16,6 +16,33 @@ const VAPID_PUBLIC = process.env.VAPID_PUBLIC || 'BIyNaaaLkcqYomZkvKt6Rp1u9Oy3lx
 const VAPID_PRIVATE = process.env.VAPID_PRIVATE || '';
 const pushOn = !!(webpush && VAPID_PRIVATE);
 if (pushOn) webpush.setVapidDetails(process.env.VAPID_SUBJECT || 'https://linkmastersami.github.io/juego-de-mesa/', VAPID_PUBLIC, VAPID_PRIVATE);
+/* ---- avisos de la app de Android (Firebase Cloud Messaging): se activan con FCM_SA = el JSON de la cuenta de servicio de Firebase.
+   Las suscripciones de la app se guardan junto a las web como { endpoint: 'fcm:<token>', fcm: '<token>' } ---- */
+let FCM = null; try { const j = JSON.parse(process.env.FCM_SA || ''); if (j.project_id && j.client_email && j.private_key) FCM = j; } catch {}
+const fcmOn = !!FCM, anyPush = pushOn || fcmOn;
+let fcmTok = '', fcmExp = 0;
+async function fcmAuth() {
+  if (fcmTok && Date.now() < fcmExp) return fcmTok;
+  const b64 = o => Buffer.from(JSON.stringify(o)).toString('base64url'), t = Math.floor(Date.now() / 1000);
+  const un = b64({ alg: 'RS256', typ: 'JWT' }) + '.' + b64({ iss: FCM.client_email, scope: 'https://www.googleapis.com/auth/firebase.messaging', aud: 'https://oauth2.googleapis.com/token', iat: t, exp: t + 3600 });
+  const jwt = un + '.' + crypto.sign('RSA-SHA256', Buffer.from(un), FCM.private_key).toString('base64url');
+  const r = await fetch('https://oauth2.googleapis.com/token', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=' + jwt });
+  const j = await r.json(); if (!j.access_token) throw new Error('fcm auth ' + r.status);
+  fcmTok = j.access_token; fcmExp = Date.now() + ((j.expires_in || 3600) - 300) * 1000; return fcmTok;
+}
+/* manda un aviso a una suscripción (web o app); si ya no existe lanza un error con statusCode 410 como web-push */
+async function pushSend(s, payload, ttl) {
+  if (!s.fcm) { if (!pushOn) return false; await webpush.sendNotification(s, JSON.stringify(payload), { TTL: ttl }); return true; }
+  if (!fcmOn) return false;
+  const r = await fetch(`https://fcm.googleapis.com/v1/projects/${FCM.project_id}/messages:send`, { method: 'POST', headers: { Authorization: 'Bearer ' + await fcmAuth(), 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message: { token: s.fcm, notification: { title: payload.title || 'Link Master Dungeon', body: payload.body || '' }, data: { kind: payload.kind || '', sala: payload.sala || '' },
+      android: { priority: 'high', ttl: ttl + 's', notification: { channel_id: 'avisos', tag: payload.kind || 'lm', icon: 'ic_stat_aviso', color: '#3d8bff' } } } }) });
+  if (r.ok) return true;
+  const txt = await r.text().catch(() => '');
+  if (r.status === 404 || /UNREGISTERED|registration token/i.test(txt)) { const e = new Error('fcm gone'); e.statusCode = 410; throw e; }
+  if (r.status === 401) fcmTok = '';
+  throw new Error('fcm ' + r.status);
+}
 /* ---- respaldo en GitHub (rama "datos" del repositorio): nombres de jugadores y suscripciones de avisos.
    Render borra su disco en cada reinicio; con GH_TOKEN los datos se recuperan al arrancar. ---- */
 const GH_TOKEN = process.env.GH_TOKEN || '', GH_REPO = process.env.GH_REPO || 'linkmastersami/juego-de-mesa', GH_BRANCH = process.env.GH_BRANCH || 'datos';
@@ -71,10 +98,10 @@ const saveNames = () => ghPut('nombres.json', () => Object.fromEntries(NAMES));
   console.log('Datos cargados:', NAMES.size, 'nombres,', SUBS.size, 'suscripciones', GH_TOKEN ? '(respaldo en GitHub activo)' : '(sin GH_TOKEN: solo memoria)');
 })();
 async function pushAll(payload, skip) {
-  if (!pushOn) return 0;
+  if (!anyPush) return 0;
   let n = 0;
   await Promise.all([...SUBS.values()].filter(s => s.endpoint !== skip).map(async s => {
-    try { await webpush.sendNotification(s, JSON.stringify(payload), { TTL: 3600 }); n++; }
+    try { if (await pushSend(s, payload, 3600)) n++; }
     catch (e) { if (e && (e.statusCode === 404 || e.statusCode === 410)) { SUBS.delete(s.endpoint); saveSubs(); } }
   }));
   return n;
@@ -106,11 +133,11 @@ const gc = (u, s) => { if (!u.gc || typeof u.gc !== 'object') u.gc = {}; const x
 const dayKey = () => new Date(Date.now() - 6 * 3600e3).toISOString().slice(0, 10); /* día de México */
 /* aviso a un jugador en particular (todos sus teléfonos registrados) */
 async function pushTo(name, payload) {
-  const u = NAMES.get(name); if (!pushOn || !u || !Array.isArray(u.ep)) return 0;
+  const u = NAMES.get(name); if (!anyPush || !u || !Array.isArray(u.ep)) return 0;
   let n = 0;
   for (const ep of u.ep.slice()) {
     const s = SUBS.get(ep); if (!s) { u.ep = u.ep.filter(x => x !== ep); continue; }
-    try { await webpush.sendNotification(s, JSON.stringify(payload), { TTL: 600 }); n++; }
+    try { if (await pushSend(s, payload, 600)) n++; }
     catch (e) { if (e && (e.statusCode === 404 || e.statusCode === 410)) { SUBS.delete(ep); u.ep = u.ep.filter(x => x !== ep); saveSubs(); } }
   }
   return n;
@@ -233,7 +260,7 @@ const server = http.createServer((req, res) => {
       if (!me || me.h !== hashK(k)) return out({ r: 'bad' });
       const now = Date.now(); LAST.set(n, now);
       me.f = Array.isArray(me.f) ? me.f : []; me.rq = Array.isArray(me.rq) ? me.rq : [];
-      if (typeof b.ep === 'string' && /^https:\/\//.test(b.ep) && SUBS.has(b.ep)) { me.ep = Array.isArray(me.ep) ? me.ep : []; if (!me.ep.includes(b.ep)) { me.ep.push(b.ep); me.ep = me.ep.slice(-3); saveNames(); } }
+      if (typeof b.ep === 'string' && /^(https:\/\/|fcm:)/.test(b.ep) && SUBS.has(b.ep)) { me.ep = Array.isArray(me.ep) ? me.ep : []; if (!me.ep.includes(b.ep)) { me.ep.push(b.ep); me.ep = me.ep.slice(-3); saveNames(); } }
       const a = String(b.a || '').toUpperCase(), ot = a && okName(a) && NAMES.get(a);
       const fix = u => { u.f = Array.isArray(u.f) ? u.f : []; u.rq = Array.isArray(u.rq) ? u.rq : []; };
       if (url === '/amigos/pedir') {
@@ -362,9 +389,17 @@ const server = http.createServer((req, res) => {
   }
   if (url === '/health') { res.writeHead(200, { 'Content-Type': 'text/plain' }); return res.end('ok'); }
   /* cuántas salas rápidas están esperando jugador */
-  if (url === '/quick') { res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }); return res.end(JSON.stringify({ n: waiting().length, push: pushOn, key: VAPID_PUBLIC })); }
+  if (url === '/quick') { res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }); return res.end(JSON.stringify({ n: waiting().length, push: pushOn, fcm: fcmOn, key: VAPID_PUBLIC })); }
   if (req.method === 'POST' && url === '/push/sub') {
     return readBody(req, b => {
+      /* token de la app de Android */
+      if (b && typeof b.fcm === 'string') {
+        if (!fcmOn || !/^[\w:-]{20,400}$/.test(b.fcm)) { res.writeHead(400); return res.end(); }
+        const ep = 'fcm:' + b.fcm;
+        if (SUBS.size > 5000 && !SUBS.has(ep)) { res.writeHead(503); return res.end(); }
+        if (!SUBS.has(ep)) { SUBS.set(ep, { endpoint: ep, fcm: b.fcm }); saveSubs(); }
+        res.writeHead(204); return res.end();
+      }
       const s = b && b.sub;
       if (!pushOn || !s || typeof s.endpoint !== 'string' || !/^https:\/\//.test(s.endpoint) || !s.keys || !s.keys.p256dh || !s.keys.auth) { res.writeHead(400); return res.end(); }
       if (SUBS.size > 5000 && !SUBS.has(s.endpoint)) { res.writeHead(503); return res.end(); }
@@ -378,7 +413,7 @@ const server = http.createServer((req, res) => {
   /* aviso de actualización: lo llama GitHub Actions con la clave NOTIFY_KEY (máx. 1 cada 20 min) */
   if (req.method === 'POST' && url === '/push/update') {
     const k = process.env.NOTIFY_KEY;
-    if (!pushOn || !k || req.headers['x-key'] !== k) { res.writeHead(403); return res.end(); }
+    if (!anyPush || !k || req.headers['x-key'] !== k) { res.writeHead(403); return res.end(); }
     if (Date.now() - lastUpdPush < 20 * 60 * 1000) { res.writeHead(429); return res.end(); }
     lastUpdPush = Date.now();
     return pushAll({ kind: 'update', title: 'Link Master Dungeon', body: '¡Hay una actualización nueva del juego!', badge: 1 }).then(n => { res.writeHead(200); res.end(String(n)); });
@@ -451,7 +486,7 @@ wss.on('connection', ws => {
       rooms.set(code, { host: ws, guest: null, hostChar: char, pub: true, t0: Date.now(), tok: { host: tok, guest: null }, v2: { host: !!m.v, guest: false }, gone: { host: null, guest: null } });
       ws.room = code; ws.role = 'host';
       send(ws, { t: 'created', code, char, tok, pub: 1 });
-      if (pushOn && Date.now() - lastQuickPush > 2 * 60 * 1000) { /* máx. 1 aviso cada 2 min */
+      if (anyPush && Date.now() - lastQuickPush > 2 * 60 * 1000) { /* máx. 1 aviso cada 2 min */
         lastQuickPush = Date.now();
         pushAll({ kind: 'quick', title: 'Link Master Dungeon', body: '⚔️ ¡Alguien está buscando jugador! Entra a partida rápida.', badge: 1 }, typeof m.ep === 'string' ? m.ep : null);
       }
