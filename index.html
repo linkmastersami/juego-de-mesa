@@ -1209,7 +1209,8 @@ const bossLock=()=>S.cross.some(x=>x&&(x.id==='g01'||x.id==='eg4'));
 const OCU=new Set(['e01','e02','e09','e25','e28']); /* Mansión: cartas que siempre entran ocultas */
 const VEL=()=>CK()==='e'&&S.cross[0]&&S.cross[0].id==='ej1'?S.cross[0].p:99;
 const velas=n=>{if(VSA())return n>0?vsHeal(n):hurt(-n);const c=S.cross[0];if(c&&isCtr(c.id))c.p=Math.max(0,Math.min(CK()==='e'?10:99,c.p+n))};
-const calNow=()=>TUT||(COOP&&!VS)?'t':(VS&&VS.cal)||CAL;
+var COOPCAL='t'; /* calabozo de la partida con un amigo: lo elige el anfitrión */
+const calNow=()=>TUT?'t':COOP&&!VS?(COOPCAL||'t'):(VS&&VS.cal)||CAL;
 const fresh0=()=>{const k=calNow(),D=CALS[k];return {turn:1,hp:10,personaje:CHAR,cal:k,dM:shuf(rng(CHAR,1,18)),dK:shuf(rng('k',1,6)),dC:shuf(D.deck()),hand:[],mesa:[],disc:[],comp:[],cross:[{id:D.ctr,p:7},null,null,null,null],final:0,hab:0,apart:[],vk:0,nc:0}};
 const fresh=()=>{const s=fresh0();s.hand=s.dM.splice(-hN());for(let k=0;k<2;k++)s.disc.push(s.dC.pop());for(let i=1;i<=4;i++){s.cross[i]={id:s.dC.pop(),p:0};if(s.cal==='e'&&OCU.has(s.cross[i].id))s.cross[i].h=1;else if(isMJ(s.cross[i].id))s.cross[0].p=Math.max(0,s.cross[0].p-1)}return s};
 let S=fresh(),NEWG=1;
@@ -2771,7 +2772,7 @@ async function autoFill(){
   const i=[1,2,3,4].find(k=>!S.cross[k]);if(!i)return;
   if(!S.dC.length){startFinal();return}
   AFB=1;const d=S.dC[S.dC.length-1],blk=document.createElement('div'),hid0=CK()==='e'&&(OCU.has(d)||VEL()<=3);
-  if(COOP&&MYT&&!INTRO)sy('fill',{i,id:d});
+  if(COOP&&MYT&&!INTRO)sy('fill',{i,id:d,h:hid0?1:0});
   try{
     const cell=$('#cross').children[[null,1,null,2,0,3,null,4,null].indexOf(i)],dk=$('#dC');
     if(cell&&dk){
@@ -3291,7 +3292,7 @@ $('#lob-btn-asa').addEventListener('click',()=>{try{SFX.pop()}catch(e){}vsLocal(
 /* sala en línea: el anfitrión elige el modo */
 function vsRoomUi(){const e=$('#mp-mode');if(!e)return;const h=MP.role==='host',m=MP.vm||'coop',cal=h?(calOk(CAL)?CAL:'t'):(MP.vcal||'t');
   e.innerHTML=[['coop','🤝 Cooperativo'],['car','🏁 Carrera'],['asa','🏰 Asalto']].map(([k,t])=>`<button data-vm="${k}" class="${k===m?'on':''}" ${h?'':'disabled'}>${t}</button>`).join('')
-    +`<small>${m==='coop'?'Juntos contra La Torre del Eclipse':(m==='car'?'Compiten en el mismo calabozo: gana quien junte más puntos':'Cada quien defiende su fortaleza')+' · '+CALS[cal].nf}${h?'':' · elige el anfitrión'}</small>`}
+    +`<small>${m==='coop'?'Juntos contra '+CALS[cal].nf:(m==='car'?'Compiten en el mismo calabozo: gana quien junte más puntos':'Cada quien defiende su fortaleza')+' · '+CALS[cal].nf}${h?'':' · elige el anfitrión'}</small>`}
 $('#mp-mode').addEventListener('click',e=>{const b=e.target.closest('button[data-vm]');if(!b||MP.role!=='host'||COOP)return;MP.vm=b.dataset.vm;try{mpSend({k:'vm',m:MP.vm,cal:calOk(CAL)?CAL:'t'})}catch(_){}vsRoomUi();try{SFX.pop()}catch(_){}});
 /* el Búho juega su turno solo, tocando lo mismo que tocarías tú */
 setInterval(()=>{if(!VS||!VS.local||VS.cur!=='b'||S.over||VS.fin)return;try{if(lobbyOn())return;vsAIstep()}catch(e){}},750);
@@ -3322,7 +3323,7 @@ function vsAIstep(){
 
 /* ===== MODO COOPERATIVO (2 jugadores) ===== */
 /* Compartido: corazones, turno, mazos de calabozo y agotamiento, cartas en mesa, cruz, completados, contadores y descarte de calabozo/agotamiento. Lo demás (mano, mazo, descarte y habilidad del personaje) es de cada jugador. */
-const SHK=['hp','turn','dC','dK','mesa','cross','comp','apart','nc','vk','final'];
+const SHK=['hp','turn','dC','dK','mesa','cross','comp','apart','nc','vk','final','llave'];
 const isSh=x=>isDeck(x)||/^(k|g|j|eg|ej)\d/.test(x);
 const SHKf=()=>!VS?SHK:VS.m==='car'?['turn','dC','cross','comp','apart','nc','final','pts']:['turn','comp','apart','fort'];
 const coopShared=()=>{const o={};SHKf().forEach(k=>o[k]=S[k]);if(VSA())o.vcross=S.cross;o.dcd=S.disc.filter(isSh);return JSON.parse(JSON.stringify(o))};
@@ -3330,7 +3331,7 @@ function coopApply(o){SHKf().forEach(k=>{if(o[k]!==undefined)S[k]=o[k]});if(VSA(
 function coopUi(){document.body.classList.toggle('waitp',!!(COOP&&!COOPEND&&!ctl()&&!COOPBUSY));const sp=$('#coopb span');if(sp)sp.textContent=MYT?'⏳ Tu amigo está aplicando su asistencia':'⏳ Turno de tu amigo';if(!COOP){const e=$('#sbt');if(e)e.classList.remove('on');document.body.classList.remove('sbton')}}
 function coopWait(t){const w=$('#coopw');if(t){$('#coopw-t').textContent=t;w.classList.add('on')}else w.classList.remove('on')}
 function coopPass(){SYON=0;OWNER='a';COOPFX=0;if(VSA())S.fort[VSOP()]=JSON.parse(JSON.stringify(S.cross));mpSend({k:'pass',sh:coopShared()});if(VSA()){S.cross=JSON.parse(JSON.stringify(S.fort[MP.role]));NOFX=1;try{render()}finally{NOFX=0}}coopUi();fxTurnB(S.turn-1)}
-function coopBegin(first,dC,dK,vm,cal){VS=(vm&&vm!=='coop')?{m:vm,local:0,cal:cal||'t',pend:{host:[],guest:[]}}:null;
+function coopBegin(first,dC,dK,vm,cal){COOPCAL=cal||'t';VS=(vm&&vm!=='coop')?{m:vm,local:0,cal:cal||'t',pend:{host:[],guest:[]}}:null;
   const host=MP.role==='host',myFirst=(first==='host')===host;
   $('#coin').className='coin '+(first==='host'?'fa':'fb');
   $('#coin-t').textContent='Lanzando la moneda…';$('#coin-r').textContent='';
@@ -3340,7 +3341,7 @@ function coopBegin(first,dC,dK,vm,cal){VS=(vm&&vm!=='coop')?{m:vm,local:0,cal:ca
 }
 $('#mp-go').addEventListener('click',()=>{
   if(MP.role!=='host'||!MP.peer)return;
-  const vm=MP.vm||'coop',cal=vm==='coop'?'t':(calOk(CAL)?CAL:'t'),first=Math.random()<.5?'host':'guest',dC=shuf(CALS[cal].deck()),dK=shuf(rng('k',1,6));
+  const vm=MP.vm||'coop',cal=calOk(CAL)?CAL:'t',first=Math.random()<.5?'host':'guest',dC=shuf(CALS[cal].deck()),dK=shuf(rng('k',1,6));
   mpSend({k:'start',first,dC,dK,vm,cal});coopBegin(first,dC,dK,vm,cal);
 });
 /* ---- asistencia del compañero ---- */
@@ -3486,7 +3487,7 @@ function syTap(i){if(!SYSHOW)return;const b=$('#ov .btns');const x=b&&b.querySel
 const syHold=()=>INTRO||SL||SFB||CINE||COOPBUSY;
 function syApply(sh){if(syHold()){SYQ=sh;return}coopApply(sh);render()}
 setInterval(()=>{if(SYQ&&syR()&&!syHold()){const s=SYQ;SYQ=null;coopApply(s);render()}},250);
-async function syFill(i,d){
+async function syFill(i,d,hd){
   while(AFB)await wait(100);
   if(MYT||S.cross[i])return;
   AFB=1;const blk=document.createElement('div');
@@ -3495,7 +3496,7 @@ async function syFill(i,d){
     if(cell&&dk){
       const A=dkRect(),C=cell.getBoundingClientRect();
       const dx=A.left+A.width/2-(C.left+C.width/2),dy=A.top+A.height/2-(C.top+C.height/2),sx=A.width/C.width,sy2=A.height/C.height,P='perspective(900px) ';
-      blk.className='fblk';blk.innerHTML=`<div class="flip" style="left:${C.left}px;top:${C.top}px;width:${C.width}px;height:${C.height}px"><div class="b"></div><div class="a">${card(d)}</div></div>`;
+      blk.className='fblk';blk.innerHTML=`<div class="flip" style="left:${C.left}px;top:${C.top}px;width:${C.width}px;height:${C.height}px"><div class="b"></div><div class="a">${hd?HIDC():card(d)}</div></div>`;
       document.body.appendChild(blk);
       await blk.firstChild.animate([
         {transform:`${P}translate(${dx}px,${dy}px) scale(${sx},${sy2}) rotateY(180deg)`},
@@ -3505,7 +3506,7 @@ async function syFill(i,d){
     }
   }catch(e){}
   blk.remove();
-  if(!MYT&&!S.cross[i]){S.cross[i]={id:d,p:S.apart.includes('t27')&&TY[d]&&TY[d]!=='C'?2:0};render();SFX.place();vib(10)}
+  if(!MYT&&!S.cross[i]){S.cross[i]={id:d,p:S.apart.includes('t27')&&TY[d]&&TY[d]!=='C'?2:0};if(hd)S.cross[i].h=1;render();SFX.place();vib(10)}
   AFB=0;
 }
 function syRecv(d){
@@ -3525,7 +3526,7 @@ function syRecv(d){
   else if(d.e==='ov')syOvShow(a.html);
   else if(d.e==='ovx')syOvHide();
   else if(d.e==='tap')syTap(a.i);
-  else if(d.e==='fill')syFill(a.i,a.id);
+  else if(d.e==='fill')syFill(a.i,a.id,a.h);
   else if(d.e==='final'&&!SFB&&!S.final)finalAnim(a.fp);
 }
 /* mostrar lobby al iniciar */
