@@ -213,12 +213,16 @@ const server = http.createServer((req, res) => {
       LAST.set(n, now); const old = PLAZA.get(n) || {};
       const em = typeof b.e === 'string' && b.e.length <= 28 ? { e: b.e, et: now } : (old.et && now - old.et < 6000 ? { e: old.e, et: old.et } : {});
       const own = x => typeof x === 'string' && (cur.inv || []).includes(x) ? x : undefined;
-      if (b.bye) PLAZA.delete(n); else PLAZA.set(n, { a, t: now, ti: own(b.ti), mc: own(b.mc), ...em });
       for (const [m, v] of PLAZA) if (now - v.t > 30000) PLAZA.delete(m);
-      const p = [...PLAZA.entries()].filter(([m]) => m !== n).sort((x, y) => y[1].t - x[1].t).slice(0, 14).map(([m, v]) => ({ n: m, a: v.a, ti: v.ti, mc: v.mc, e: v.et && now - v.et < 6000 ? v.e : undefined, et: v.et }));
+      /* 3 salas de plaza, máximo PZMAX aventureros en cada una */
+      const PZMAX = 15, zc = [0, 0, 0]; let z = [0, 1, 2].includes(b.z) ? b.z : 0;
+      for (const [m, v] of PLAZA) if (m !== n) zc[v.z || 0]++;
+      if (!b.bye && zc[z] >= PZMAX) { const f = [0, 1, 2].find(i => zc[i] < PZMAX); if (f === undefined) return res.end(JSON.stringify({ r: 'full', zc })); z = f; }
+      if (b.bye) PLAZA.delete(n); else { PLAZA.set(n, { a, t: now, ti: own(b.ti), mc: own(b.mc), z, ...em }); zc[z]++; }
+      const p = [...PLAZA.entries()].filter(([m, v]) => m !== n && (v.z || 0) === z).sort((x, y) => y[1].t - x[1].t).slice(0, 14).map(([m, v]) => ({ n: m, a: v.a, ti: v.ti, mc: v.mc, e: v.et && now - v.et < 6000 ? v.e : undefined, et: v.et }));
       /* los demás aventureros registrados también salen en la plaza, pero apagados (fuera de línea) */
-      const o = [...NAMES.entries()].filter(([m]) => m !== n && !PLAZA.has(m)).sort((x, y) => (LAST.get(y[0]) || y[1].t || 0) - (LAST.get(x[0]) || x[1].t || 0)).slice(0, 30).map(([m, v]) => ({ n: m, a: AVS.includes(v.a) ? v.a : 'guerrero' }));
-      res.end(JSON.stringify({ r: 'ok', p, o, total: PLAZA.size, reg: NAMES.size }));
+      const o = [...NAMES.entries()].filter(([m]) => m !== n && !PLAZA.has(m)).sort((x, y) => (LAST.get(y[0]) || y[1].t || 0) - (LAST.get(x[0]) || x[1].t || 0)).slice(0, 8).map(([m, v]) => ({ n: m, a: AVS.includes(v.a) ? v.a : 'guerrero' }));
+      res.end(JSON.stringify({ r: 'ok', p, o, z, zc, max: PZMAX, total: PLAZA.size, reg: NAMES.size }));
     });
   }
   /* ---- amigos: solicitudes, lista, invitaciones (todo con nombre + clave) ---- */

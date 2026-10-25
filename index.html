@@ -695,7 +695,12 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
 .mdl .gm,.stk .gm{position:absolute;z-index:3;right:-4px;bottom:-4px;font-style:normal;font-size:.8rem;filter:drop-shadow(0 1px 2px #000);animation:cobp 1.4s ease-in-out infinite}
 
 /* ===== menú de opciones ===== */
-#lobby #lob-yo{position:absolute}
+#lobby #lob-yo{position:absolute;z-index:7;flex-direction:column;align-items:flex-start;gap:0;background:none;border:0;padding:0;max-width:calc(100% - 140px)}
+#lob-yo .yon{background:#0d0a14d9;border:2px solid #ffd34d55;border-radius:14px;padding:6px 12px;font:800 .95rem Fredoka,sans-serif;color:#ffd34d;letter-spacing:.06em;display:flex;flex-direction:column;max-width:100%;box-sizing:border-box}
+#lob-yo .yon b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#lob-yo .yon .tit{font:800 .66rem Fredoka,sans-serif;color:#ffe066!important;letter-spacing:.02em;text-shadow:0 0 4px #ffb300,0 0 9px #ffcc33aa,0 1px 1px #000;animation:titb 2.2s ease-in-out infinite}
+#lob-yo .yog{display:flex;align-items:center;gap:4px;margin:-2px 0 0 10px;background:linear-gradient(180deg,#1f8fb0,#0d4a5e);border:2px solid #53e0f0aa;border-top:0;border-radius:0 0 10px 10px;padding:2px 9px 3px;font:800 .8rem Fredoka,sans-serif;color:#e8fbff}
+#lob-yo .yog img{width:16px;height:auto}
 #lobby #lob-exit{position:absolute;top:calc(env(safe-area-inset-top,0px) + 66px);right:18px;z-index:5;display:grid;place-items:center;width:38px;height:38px;border-radius:12px;border:2px solid #ff6b6b55;background:#2a0d12b3;color:#ff8a8a;font-size:1.15rem;line-height:1;cursor:pointer;box-shadow:0 4px 12px #0008;padding:0}
 #bye{position:fixed;inset:0;z-index:120;display:none;place-items:center;background:radial-gradient(circle at 50% 40%,#2b2238,#0b0910);color:#fff;text-align:center;padding:24px;font-family:Fredoka,sans-serif}#bye.on{display:grid}#bye .bx{max-width:340px}#bye .ow{width:120px;height:120px;margin:0 auto 6px}#bye .ow img{width:100%;height:100%;object-fit:contain}#bye h2{color:var(--gold);margin:6px 0}#bye p{opacity:.85;line-height:1.35}#bye button{margin-top:16px;border:0;border-radius:14px;padding:12px 22px;background:var(--gold);color:#2b2208;font:800 1rem Fredoka,sans-serif}
 #lobby #lob-menu{position:absolute;top:calc(env(safe-area-inset-top,0px) + 12px);right:14px;z-index:5;width:46px;height:46px;border-radius:14px;border:2px solid #ffffff2a;background:#0d0a14b3;color:#fff;font-size:1.5rem;line-height:1;cursor:pointer;box-shadow:0 4px 12px #0008}
@@ -833,6 +838,11 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
 @keyframes pzin{from{opacity:0}to{opacity:1}}
 .pz .tgt{position:absolute;width:22px;height:10px;border:2px solid #ffd34d;border-radius:50%;transform:translate(-50%,-50%);pointer-events:none;animation:pztg .6s ease-out forwards}
 @keyframes pztg{from{opacity:1;transform:translate(-50%,-50%) scale(.4)}to{opacity:0;transform:translate(-50%,-50%) scale(1.6)}}
+.pzsal{display:flex;gap:6px;justify-content:center;width:100%;max-width:520px;margin:0 0 8px}
+.pzsal button{flex:1;min-width:0;border:2px solid #ffd34d44;border-radius:12px;background:#0d0a14c4;color:#e9e4f2;font:700 .82rem Fredoka,sans-serif;padding:6px 4px;cursor:pointer;display:flex;flex-direction:column;align-items:center;line-height:1.15}
+.pzsal button small{font:600 .7rem Fredoka,sans-serif;opacity:.8}
+.pzsal button.on{border-color:#ffd34d;background:linear-gradient(180deg,#5a3d12,#2b1d08);color:#ffe066;box-shadow:0 0 10px #ffb30066}
+.pzsal button.full{opacity:.45}
 .pzbar{display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;width:100%;max-width:520px;margin-top:6px}
 .pzbar .on{font:600 .85rem Fredoka,sans-serif;color:#e9e4f2;background:#0d0a14c4;border-radius:12px;padding:6px 12px}
 .pzbar button{font:700 .85rem Fredoka,sans-serif;border:0;border-radius:12px;padding:8px 14px;background:var(--gold);color:#2b2208;cursor:pointer}
@@ -1628,7 +1638,9 @@ const BADW=['PUTO','PUTA','PUTI','PENDEJ','PENDJ','PNDJ','PENDE','VERGA','VRGA',
 const nNorm=n=>n.replace(/0/g,'O').replace(/1/g,'I').replace(/3/g,'E').replace(/4/g,'A').replace(/5/g,'S').replace(/7/g,'T').replace(/8/g,'B').replace(/Ñ/g,'N');
 const nBad=n=>{const a=nNorm(n);return BADW.some(w=>a.includes(nNorm(w))||n.includes(w))};
 const nClean=v=>v.toUpperCase().replace(/[^A-Z0-9Ñ]/g,'').slice(0,8);
-function yoUi(){const e=$('#lob-yo');if(!e)return;e.style.display=YO?'block':'none';if(YO)e.textContent='👤 '+YO.n}
+function yoUi(){const e=$('#lob-yo');if(!e)return;e.style.display=YO?'flex':'none';if(!YO)return;
+  const mc=mcCls(selGet('mc')),t=TITN(selGet('ti')),g=typeof TND!=='undefined'&&TND.g!==null?TND.g:'…';
+  e.innerHTML=`<div class="yon${mc?' '+mc:''}"><b>👤 ${YO.n}</b>${t?`<small class="tit">${t}</small>`:''}</div><div class="yog"><img src="tienda/gema.webp" alt="gemas"><b>${g}</b></div>`}
 async function nPost(path,body){const c=new AbortController(),to=setTimeout(()=>c.abort(),12000);try{const r=await fetch(MP_URL+path,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body),signal:c.signal});clearTimeout(to);return r.ok?await r.json():null}catch(e){clearTimeout(to);return null}}
 async function nWake(){const t0=Date.now();while(Date.now()-t0<90000){try{const c=new AbortController(),to=setTimeout(()=>c.abort(),8000);const r=await fetch(MP_URL+'/health',{cache:'no-store',signal:c.signal});clearTimeout(to);if(r.ok)return true}catch(e){}await new Promise(r=>setTimeout(r,1500))}return false}
 function regShow(msg){
@@ -1914,7 +1926,7 @@ $('#lob-nav').addEventListener('click',e=>{const b=e.target.closest('[data-go]')
 $('#pn-tab').addEventListener('click',e=>{
   const st=e.target.closest('[data-stab]');if(st){TABSUB=st.dataset.stab;try{SFX.pop()}catch(_){}paneFill(4);return}
   const bt=e.target.closest('[data-buyt]');if(bt&&bt.dataset.buyt){try{SFX.pop()}catch(_){}tndOpen('mas');return}
-  const sl=e.target.closest('[data-sel]');if(sl){const id=sl.dataset.sel,k=id.slice(0,2);lsx('mesa-'+k,id);if(k==='rv')rvApply();if(k!=='rv')try{pzMe();PZ.poll=0;pzPoll()}catch(_){}try{SFX.pop()}catch(_){}paneFill(4);return}
+  const sl=e.target.closest('[data-sel]');if(sl){const id=sl.dataset.sel,k=id.slice(0,2);lsx('mesa-'+k,id);if(k==='rv')rvApply();if(k!=='rv')try{pzMe();PZ.poll=0;pzPoll()}catch(_){}try{yoUi()}catch(_){}try{SFX.pop()}catch(_){}paneFill(4);return}
   const em=e.target.closest('[data-emt]');if(em){const id=em.dataset.emt;let o=emOff();o=o.includes(id)?o.filter(x=>x!==id):[...o,id];lsx('mesa-emoff',JSON.stringify(o));try{SFX.pop()}catch(_){}paneFill(4);return}
   const c=e.target.closest('[data-tab]');if(!c||!c.dataset.tab)return;try{localStorage.setItem('mesa-tab',c.dataset.tab)}catch(_){}tabApply();try{SFX.pop()}catch(_){}paneFill(4)});
 /* deslizar con el dedo entre pantallas (el carrusel de personajes y el libro abierto tienen prioridad) */
@@ -3879,11 +3891,12 @@ const PZ={w:new Map(),raf:0,last:0,poll:0,total:1,el:null};
 const pzOn=()=>{try{return lobbyOn()&&LP===3&&!document.hidden}catch(e){return false}};
 function plazaRender(){const P=$('#pn-com');
   if(!PZ.el||!P.contains(PZ.el)){
-    P.innerHTML=`<h2 class="ph">🛡️ Comunidad</h2><div class="pz" id="pz"></div>
+    P.innerHTML=`<h2 class="ph">🛡️ Comunidad</h2><div class="pzsal" id="pz-sal">${PZSAL.map((t,i)=>`<button data-z="${i}">${t}<small>–</small></button>`).join('')}</div><div class="pz" id="pz"></div>
       <div class="pzem" id="pz-em">${PZEMf().map((e,i)=>`<button data-em="${i}">${e}</button>`).join('')}</div>
       <div class="pzbar"><span class="on" id="pz-n">🟢 En la plaza</span><button id="pz-am">👥 Amigos<b class="pzb" id="pz-amb"></b></button><button id="pz-av" class="gh">🧙 Guerrero</button><button id="pz-shop" class="gem"><img src="tienda/gema.webp" alt="">Tienda <b id="pz-g"></b></button></div>
       <p class="pzsoon">Toca el suelo para caminar · toca a un aventurero para agregarlo o invitarlo</p>`;
     $('#pz-am').onclick=()=>amgPanel();
+    $('#pz-sal').onclick=e=>{const b=e.target.closest('[data-z]');if(!b)return;pzSala(+b.dataset.z)};
     $('#pz-em').onclick=e=>{const b=e.target.closest('[data-em]');if(!b)return;const t=PZEMf()[+b.dataset.em];const me=PZ.w.get('@me');if(me)pzBub(me,t);PZ.ems=t;PZ.poll=0;pzPoll();try{SFX.pop()}catch(_){}};
     PZ.el=$('#pz');PZ.w.forEach(w=>w.el.remove());PZ.w.clear();
     PZ.el.addEventListener('click',e=>{const me=PZ.w.get('@me');if(!me)return;const r=PZ.el.getBoundingClientRect();
@@ -3916,12 +3929,17 @@ function pzLoop(){if(PZ.raf)return;PZ.last=performance.now();
         if(Math.abs(dx)>1&&fl!==w.fl){w.fl=fl;w.c.classList.toggle('fl',fl);w.p.classList.toggle('fl',fl)}if(dist<2)w.wt=w.id==='@me'?0:2+Math.random()*4}
       pzPos(w)});
     PZ.raf=requestAnimationFrame(f)};PZ.raf=requestAnimationFrame(f)}
-function pzCount(){const e=$('#pz-n');if(!e)return;
+const PZSAL=['⛲ Fuente','🍺 Taberna','🌙 Mercado'];
+function pzSalaGet(){const z=+(localStorage.getItem('mesa-pzz')||0);return z>=0&&z<3?z:0}
+function pzSalaUi(){const box=$('#pz-sal');if(!box)return;const z=pzSalaGet(),zc=PZ.zc||[];box.querySelectorAll('[data-z]').forEach(b=>{const i=+b.dataset.z;b.classList.toggle('on',i===z);const n=zc[i];b.querySelector('small').textContent=n==null?'–':n+'/'+(PZ.max||15);b.classList.toggle('full',n>=(PZ.max||15)&&i!==z)})}
+function pzSala(z,silent){if(z===pzSalaGet()&&!silent)return;const zc=PZ.zc||[];if(!silent&&zc[z]>=(PZ.max||15)){gToast('Esa sala está llena 🙅',0,0,3500);return}
+  try{localStorage.setItem('mesa-pzz',z)}catch(e){}PZ.w.forEach((w,id)=>{if(id!=='@me'&&!w.npc){w.el.remove();PZ.w.delete(id)}});pzSalaUi();PZ.poll=0;pzPoll();try{SFX.pop()}catch(_){}}
+function pzCount(){pzSalaUi();const e=$('#pz-n');if(!e)return;
   e.textContent=!YO?'📜 Registra tu nombre para ver a los demás':sinNet()||!navigator.onLine?'📴 Sin conexión':(PZ.total<=1?'🟢 Solo tú en línea':`🟢 ${PZ.total} en línea`)+(PZ.reg>1?` · ${PZ.reg} aventureros`:'')}
 async function pzPoll(){if(!pzOn()||!YO||!navigator.onLine||sinNet())return pzCount();if(Date.now()-PZ.poll<4000)return;PZ.poll=Date.now();
   try{const c=new AbortController(),to=setTimeout(()=>c.abort(),8000);
-    const r=await fetch(MP_URL+'/plaza',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({n:YO.n,k:YO.k,a:AV||'guerrero',ti:selGet('ti'),mc:selGet('mc'),...(PZ.ems?{e:PZ.ems}:{})}),signal:c.signal});clearTimeout(to);PZ.ems=null;
-    const j=await r.json();if(!j||j.r!=='ok'||!PZ.el)return;PZ.total=j.total||1;
+    const r=await fetch(MP_URL+'/plaza',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({n:YO.n,k:YO.k,z:pzSalaGet(),a:AV||'guerrero',ti:selGet('ti'),mc:selGet('mc'),...(PZ.ems?{e:PZ.ems}:{})}),signal:c.signal});clearTimeout(to);PZ.ems=null;
+    const j=await r.json();if(j&&j.zc){PZ.zc=j.zc;PZ.max=j.max||15}if(j&&j.r==='full'){gToast('Las 3 salas están llenas, intenta en un ratito',0,0,3500);return pzCount()}if(!j||j.r!=='ok'||!PZ.el)return;PZ.total=j.total||1;if(typeof j.z==='number'&&j.z!==pzSalaGet()){try{localStorage.setItem('mesa-pzz',j.z)}catch(e){}gToast('Esa sala se llenó, te mandamos a '+PZSAL[j.z],0,0,3500)}
     const seen=new Set(['@me']);(j.p||[]).forEach(o=>{if(!AVN[o.a])o.a='guerrero';const id='u:'+o.n;seen.add(id);const w=PZ.w.get(id);
       if(w&&w.a!==o.a){w.el.remove();PZ.w.delete(id)}if(!PZ.w.has(id))pzAdd(id,o.n,o.a,0);
       const w2=PZ.w.get(id);if(w2){w2.off=0;w2.el.classList.remove('off');pzDeco(w2,o.ti,o.mc)}if(w2&&o.e&&o.et&&o.et!==w2.et){w2.et=o.et;
@@ -4013,7 +4031,7 @@ async function tndCobrar(k,id,btn){if(!YO)return;btn.disabled=true;btn.textConte
   tndSet(j);btn.outerHTML=`<div class="cob ok">${gemI}+${j.add||0} gemas cobradas</div>`;try{SFX.combo(6)}catch(_){}
   try{const r=btn.getBoundingClientRect?null:null}catch(_){}}
 const cobHtml=(k,id,n)=>!YO?'':TND[k==='a'?'pa':'pe']===null?'':tndCobrable(k,id)?`<button class="cob" id="alb-cob" data-k="${k}" data-id="${id}">Cobrar ${gemI}${n}</button>`:`<div class="cob ok">${gemI}${n} ya cobradas</div>`;
-function tndPaint(){const g=TND.g===null?'…':TND.g;const a=$('#pz-g');if(a)a.textContent=g;const b=$('#tnd-g');if(b)b.textContent=g;const d=$('#tnd');if(d&&d.classList.contains('on'))tndBody()}
+function tndPaint(){try{yoUi()}catch(_){}const g=TND.g===null?'…':TND.g;const a=$('#pz-g');if(a)a.textContent=g;const b=$('#tnd-g');if(b)b.textContent=g;const d=$('#tnd');if(d&&d.classList.contains('on'))tndBody()}
 /* el puesto y Don Trueque en la plaza */
 function pzMerc(){if(!PZ.el)return;if(!PZ.el.querySelector('.puesto')){const p=document.createElement('img');p.className='puesto';p.src='tienda/puesto.webp';p.alt='Tienda';PZ.el.appendChild(p)}
   if(!PZ.w.has('@merc')){const w=pzAdd('@merc','🛒 Don Trueque','merc',0,'tienda/mercader');w.npc=1;w.x=w.tx=.78;w.y=w.ty=.6;w.wt=2;w.el.classList.add('npc');pzPos(w)}}
