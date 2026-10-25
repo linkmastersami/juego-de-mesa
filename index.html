@@ -2,7 +2,16 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<title>Juego de mesa</title>
+<title>Link Master Dungeon</title>
+<meta name="description" content="Juego de cartas y calabozos: elige tu héroe, vence enfrentamientos y derrota al jefe final. Juega solo o con un amigo, gratis desde tu teléfono.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Link Master Dungeon">
+<meta property="og:title" content="⚔️ ¡Te retan en Link Master Dungeon!">
+<meta property="og:description" content="Entra a la mesa y juega conmigo: cartas, calabozos y jefes. Gratis desde tu teléfono.">
+<meta property="og:image" content="https://juego-de-mesa.linkmaster542.workers.dev/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#2b2833">
 <meta name="mobile-web-app-capable" content="yes">
@@ -3300,8 +3309,8 @@ $('#mp-back').addEventListener('click',mpExit);
 $('#mp-leave').addEventListener('click',mpExit);
 $('#mp-retry').addEventListener('click',()=>mpStart(MP.join,MP.quick));
 $('#mp-share').addEventListener('click',async()=>{
-  const url=mpLink(),text='¡Juega conmigo en Link Master! Entra a mi sala '+MP.code+':';
-  if(navigator.share){try{await navigator.share({title:'Link Master',text,url});return}catch(e){if(e&&e.name==='AbortError')return}}
+  const url=mpLink(),mm=MP.vm||'coop',cn=CALS[calOk(CAL)?CAL:'t'].nf,text=`⚔️ ¡${YO?YO.n:'Tu amigo'} te reta en Link Master Dungeon!\n${mm==='coop'?'🤝 Juguemos juntos':mm==='car'?'🏁 Carrera':'🏰 Asalto a la fortaleza'} en ${cn} ${PJI[CHAR]||'🃏'}\n👉 Toca para sentarte a mi mesa:`;
+  if(navigator.share){try{await navigator.share({title:'Link Master Dungeon',text,url});return}catch(e){if(e&&e.name==='AbortError')return}}
   $('#mp-wa').href='https://wa.me/?text='+encodeURIComponent(text+' '+url);
   $('#mp-tg').href='https://t.me/share/url?url='+encodeURIComponent(url)+'&text='+encodeURIComponent(text);
   $('#mp-alt').style.display='block';
