@@ -2789,7 +2789,7 @@ const want=()=>{const o=$('#ov');
   return document.body.classList.contains('finalph')?'jefe':'batalla'};
 const fade=(a,to,ms,end)=>{const v0=gv(a),t0=performance.now();FD++;const st=()=>{const k=Math.min(1,(performance.now()-t0)/ms);try{sv(a,v0+(to-v0)*k)}catch(e){}if(k<1)requestAnimationFrame(st);else{FD--;end&&end()}};st()};
 let UNL=0;
-function musTick(){if(!UNL||MV<=0||document.hidden||window.BYE){if(CUR&&!au(CUR).paused&&(MV<=0||document.hidden||window.BYE))au(CUR).pause();return}
+function musTick(){if(!UNL||MV<=0||document.hidden||window.BYE||window.ADPLAY){if(CUR&&!au(CUR).paused&&(MV<=0||document.hidden||window.BYE||window.ADPLAY))au(CUR).pause();return}
   const w=want();
   if(w!==CUR){const old=CUR;CUR=w;DONE=null;
     if(old){const o=au(old);fade(o,0,500,()=>{o.pause();try{o.currentTime=0}catch(e){}})}
@@ -3751,7 +3751,31 @@ async function tndSync(f){if(!YO||!navigator.onLine||sinNet())return tndPaint();
   const j=await nPost('/tienda',{n:YO.n,k:YO.k});if(j&&j.r==='ok')tndSet(j);else tndPaint()}
 async function tndGanar(win){if(!YO||!navigator.onLine||sinNet())return;if(!S.gid)S.gid=Date.now().toString(36)+Math.random().toString(36).slice(2,7);
   const j=await nPost('/tienda/ganar',{n:YO.n,k:YO.k,id:S.gid,win:win?1:0});if(!j||j.r!=='ok')return;tndSet(j);
-  if(j.add>0)setTimeout(()=>{try{gToast(`<img src="tienda/gema.webp" alt="" style="width:26px;vertical-align:middle"> <b>+${j.add} gemas</b>${j.dia?' · ¡primera victoria del día!':''}`,null,null,4500)}catch(e){}},2600)}
+  if(j.add>0){const id=S.gid,add=j.add,dx=!!j.dx;setTimeout(()=>{try{const h=`<img src="tienda/gema.webp" alt="" style="width:26px;vertical-align:middle"> <b>+${add} gemas</b>${j.dia?' · ¡primera victoria del día!':''}`;
+    if(dx&&adOk())gToast(h+'<br><small>Mira un anuncio y duplícalas</small>','📺 Duplicar',()=>adDouble(id),14000);else gToast(h,null,null,4500)}catch(e){}},2600)}}
+/* ===== ANUNCIOS CON RECOMPENSA (Google AdMob). Solo existen dentro de la app de Android (Capacitor);
+   en el navegador no hay anuncios y el botón "Duplicar" no aparece. Siempre son opcionales. ===== */
+const ADS={unit:'ca-app-pub-3940256099942544/5224354917',test:true,ready:false,busy:0,init:0,loading:0}; /* unit de PRUEBA de Google: cambiar por el tuyo al publicar y poner test:false */
+const adPlugin=()=>{try{const C=window.Capacitor;return C&&C.isNativePlatform&&C.isNativePlatform()&&C.Plugins&&C.Plugins.AdMob||null}catch(e){return null}};
+async function adInit(){const A=adPlugin();if(!A||ADS.init)return;ADS.init=1;
+  try{await A.initialize({initializeForTesting:ADS.test});
+    try{const c=await A.requestConsentInfo();if(c&&c.isConsentFormAvailable&&c.status==='REQUIRED')await A.showConsentForm()}catch(e){}
+    adLoad()}catch(e){ADS.init=0}}
+async function adLoad(){const A=adPlugin();if(!A||ADS.ready||ADS.loading)return;ADS.loading=1;
+  try{await A.prepareRewardVideoAd({adId:ADS.unit,isTesting:ADS.test});ADS.ready=true}catch(e){ADS.ready=false;setTimeout(adLoad,60000)}ADS.loading=0}
+const adOk=()=>!!adPlugin()&&ADS.ready;
+async function adShow(){const A=adPlugin();if(!A||!ADS.ready||ADS.busy)return false;ADS.busy=1;ADS.ready=false;let got=false,l=null;
+  window.ADPLAY=1;try{musTick()}catch(e){}try{AC&&AC.suspend()}catch(e){}
+  try{l=await A.addListener('onRewardedVideoAdReward',()=>{got=true})}catch(e){}
+  try{const r=await A.showRewardVideoAd();if(r&&(r.amount!==undefined||r.type))got=true}catch(e){}
+  try{l&&l.remove()}catch(e){}window.ADPLAY=0;try{AC&&AC.resume()}catch(e){}try{musTick()}catch(e){}ADS.busy=0;setTimeout(adLoad,1500);return got}
+async function adDouble(id){if(!YO)return;
+  const ok=await adShow();if(!ok){gToast('El anuncio no terminó. Tus gemas se quedan como estaban.',null,null,4500);return}
+  const j=await nPost('/tienda/doble',{n:YO.n,k:YO.k,id});
+  if(j&&j.r==='ok'&&j.add>0){tndSet(j);try{SFX.combo(6)}catch(_){}gToast(`<img src="tienda/gema.webp" alt="" style="width:26px;vertical-align:middle"> <b>¡+${j.add} gemas extra!</b> Duplicaste tu premio.`,null,null,5000)}
+  else if(j&&j.r==='tope')gToast('Ya duplicaste el máximo de partidas por hoy. Vuelve mañana.',null,null,5000);
+  else gToast('No se pudieron duplicar las gemas. Revisa tu conexión e inténtalo en otra partida.',null,null,5000)}
+setTimeout(()=>{try{adInit()}catch(e){}},3000);
 const gemI='<img class="gi" src="tienda/gema.webp" alt="gemas">';
 /* gemas por logros (20) y estampas (5): se cobran tocando el logro o la estampa; el servidor paga cada uno una sola vez */
 function tndCobrable(k,id){return !!YO&&TND[k==='a'?'pa':'pe']!==null&&!TND[k==='a'?'pa':'pe'].includes(id)}

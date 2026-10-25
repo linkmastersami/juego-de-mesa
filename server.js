@@ -84,6 +84,7 @@ const AVS = ['arquera', 'barbaro', 'guerrero', 'mago', 'ninja', 'paladin', 'brun
 const SHOP = { bruno: 150, robi: 150, veralyn: 150, ninja: 120, paladin: 120 };            /* guerreros a la venta */
 const PREMIUM = Object.keys(SHOP);
 const GEM0 = 100;                                                /* regalo de bienvenida */
+const GXDAY = +process.env.GDOBLES || 10; /* veces al día que se pueden duplicar las gemas de una partida con un anuncio */
 const GWIN = 30, GLOSE = 10, GDAY = 20, GMAXDAY = 400, GACH = 20, GEST = 5; /* … y por cada logro y estampa nueva */           /* premios por partida y tope diario */
 const gfix = u => { if (typeof u.g !== 'number') u.g = GEM0; if (!Array.isArray(u.inv)) u.inv = [];
   if (PREMIUM.includes(u.a) && !u.inv.includes(u.a)) u.inv.push(u.a); /* quien ya lo usaba antes de la tienda se lo queda */
@@ -270,7 +271,20 @@ const server = http.createServer((req, res) => {
         if (win && !me.gw) { add += GDAY; me.gw = 1; }              /* primera victoria del día */
         add = Math.max(0, Math.min(add, GMAXDAY - (me.gn || 0)));
         me.gn = (me.gn || 0) + add; me.g += add; me.gids = [...me.gids, id].slice(-30);
-        saveNames(); return out({ ...st(), add, dia: !!(win && add > GWIN) });
+        if (!me.ga || typeof me.ga !== 'object') me.ga = {};
+        if (add > 0) { me.ga[id] = add; const ks = Object.keys(me.ga); if (ks.length > 30) ks.slice(0, ks.length - 30).forEach(x => delete me.ga[x]); }
+        saveNames(); return out({ ...st(), add, dia: !!(win && add > GWIN), dx: add > 0 && (me.gxd === d ? me.gxn || 0 : 0) < GXDAY });
+      }
+      /* duplicar las gemas de una partida viendo un anuncio con recompensa (una vez por partida, máximo GXDAY al día) */
+      if (url === '/tienda/doble') {
+        const id = String(b.id || '').slice(0, 40), d = dayKey();
+        if (me.gd !== d) { me.gd = d; me.gn = 0; me.gw = 0; me.gids = []; }
+        if (me.gxd !== d) { me.gxd = d; me.gxn = 0; }
+        const amt = me.ga && me.ga[id];
+        if (!id || !amt || !(me.gids || []).includes(id)) return out({ ...st(), r: 'no', add: 0 });
+        if ((me.gxn || 0) >= GXDAY) return out({ ...st(), r: 'tope', add: 0 });
+        delete me.ga[id]; me.gxn = (me.gxn || 0) + 1; me.g += amt;
+        saveNames(); return out({ ...st(), add: amt, quedan: GXDAY - me.gxn });
       }
       /* logros y estampas: cada uno paga una sola vez (también los que ya tenías) */
       if (url === '/tienda/premios') {
