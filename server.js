@@ -90,7 +90,7 @@ const gfix = u => { if (typeof u.g !== 'number') u.g = GEM0; if (!Array.isArray(
   if (PREMIUM.includes(u.a) && !u.inv.includes(u.a)) u.inv.push(u.a); /* quien ya lo usaba antes de la tienda se lo queda */
   return u; };
 /* gacha: cada personaje nuevo trae sus 18 cartas; las repetidas dan orbes; al completarlo se desbloquea */
-const GSETS = { r: 18, n: 18, e: 28 }, GPRICE = +process.env.GPRECIO || 60, GORB = 10;
+const GSETS = { r: 18, n: 18, e: 28, o: 18, d: 18 }, GPRICE = +process.env.GPRECIO || 60, GORB = 10;
 const GUNL = s => s === 'e' ? 'cal:e' : 'pj:' + s;                 /* qué se desbloquea al completar: personaje o calabozo (e = Mansión) */
 const GADDAY = +process.env.GANUNCIOS || 15;                      /* tiradas gratis al día viendo un anuncio */          /* precio por tirada y gemas por orbe sobrante */
 const gc = (u, s) => { if (!u.gc || typeof u.gc !== 'object') u.gc = {}; const x = u.gc[s] = u.gc[s] || {}; if (!Array.isArray(x.c)) x.c = []; if (typeof x.o !== 'number') x.o = 0; return x; };
