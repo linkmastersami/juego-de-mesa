@@ -69,6 +69,10 @@
   "cartas/k04.webp": "1ed6d79c53bc",
   "cartas/k05.webp": "612dd9904d54",
   "cartas/k06.webp": "41f67d4c44ad",
+  "cartas/reverso-bosque.jpg": "0f1958bc305a",
+  "cartas/reverso-dragon.jpg": "794d15c1ef27",
+  "cartas/reverso-estelar.jpg": "bf9bd2d781ff",
+  "cartas/reverso-mar.jpg": "a1b174555085",
   "cartas/reverso-personaje.webp": "67f77c3fd847",
   "cartas/reverso-sombra.webp": "04ea176fec00",
   "cartas/reverso.webp": "7d57d7b2f124",
@@ -367,5 +371,5 @@
   "voces/38.mp3": "bdb95078938e",
   "voces/inv.mp3": "88fd37faee29"
  },
- "version": "eda140f6635b"
+ "version": "927fa486291f"
 }
