@@ -585,8 +585,8 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
 .lob-dots{display:flex;gap:8px;justify-content:center;margin:18px 0 10px}.lob-dots i{width:8px;height:8px;border-radius:50%;background:#ffffff40;transition:background .3s,transform .3s}.lob-dots i.on{background:var(--gold);transform:scale(1.3)}
 #lob-info{margin:0 0 12px;background:#0d0a14b3;backdrop-filter:blur(4px)}
 .lob-start{position:relative;overflow:hidden;font:800 1.5rem Fredoka,sans-serif;letter-spacing:.08em;padding:16px;background:linear-gradient(180deg,#ffe07a,#f2b632);box-shadow:0 6px 0 #a8740f,0 0 30px #ffd34d55;margin-top:2px}
-.lob-start::after{content:'';position:absolute;top:0;bottom:0;width:40%;left:-60%;background:linear-gradient(100deg,transparent,#ffffff88,transparent);transform:skewX(-20deg);animation:shine 3.2s ease-in-out infinite}
-@keyframes shine{0%,60%{left:-60%}100%{left:130%}}
+.lob-start::after{content:'';position:absolute;top:0;bottom:0;width:40%;left:-60%;background:linear-gradient(100deg,transparent,#ffffff88,transparent);transform:skewX(-20deg);will-change:transform;animation:shine 3.2s ease-in-out infinite}
+@keyframes shine{0%,60%{transform:translateX(0) skewX(-20deg)}100%{transform:translateX(475%) skewX(-20deg)}} /* con transform (no left) para no redibujar el botón en cada cuadro */
 .lob-start:active{transform:translateY(4px);box-shadow:0 2px 0 #a8740f}
 .lob-play{display:flex;width:100%;max-width:420px;border-radius:18px;box-shadow:0 6px 0 #00000055,0 0 30px #ffd34d44;margin-top:2px}
 .lob-play .lob-start{flex:2;width:auto;max-width:none;margin:0;box-shadow:inset 0 -6px 0 #a8740f}
@@ -783,8 +783,11 @@ body.finalph #amb.img{filter:sepia(.35) saturate(1.5) hue-rotate(-25deg) brightn
 .book .bt{position:relative;font:800 .95rem Fredoka,sans-serif;color:#fff;text-align:center;text-shadow:0 2px 6px #000;padding:0 18px 0 22px;line-height:1.1}
 .book .bp{position:absolute;left:22px;right:12px;bottom:12px;height:16px;border-radius:99px;background:#000a;overflow:hidden;font:700 .7rem Fredoka,sans-serif;color:#fff;display:grid;place-items:center}
 .book .bp i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#ffd34d,#ffb300)}.book .bp span{position:relative;text-shadow:0 1px 2px #000}
-.book.full{box-shadow:inset 10px 0 0 #0005,0 0 0 3px #ffd34d,0 0 26px #ffd34dcc,0 10px 22px #000c;animation:bglow 2s ease-in-out infinite}
-@keyframes bglow{50%{box-shadow:inset 10px 0 0 #0005,0 0 0 3px #fff3b0,0 0 40px #ffd34d,0 10px 22px #000c}}
+/* libro completo: el brillo que late es una capa aparte que solo cambia de opacidad (animar box-shadow trababa el menú en la app de Android) */
+.book.full{box-shadow:inset 10px 0 0 #0005,0 0 0 3px #ffd34d,0 0 26px #ffd34dcc,0 10px 22px #000c;overflow:visible}
+.book.full img{border-radius:inherit}
+.book.full::after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;box-shadow:0 0 0 3px #fff3b0,0 0 40px #ffd34d;opacity:0;will-change:opacity;animation:bglow 2s ease-in-out infinite}
+@keyframes bglow{50%{opacity:1}}
 .book .bn{position:absolute;top:8px;right:10px;background:#ff3b55;color:#fff;border-radius:99px;font:800 .65rem Fredoka,sans-serif;padding:2px 7px;z-index:2}
 .abar{display:flex;align-items:center;gap:10px;width:100%;max-width:440px;margin-bottom:8px}
 .abar button{border:0;border-radius:12px;background:#0d0a14cc;color:#fff;font:700 .95rem Fredoka,sans-serif;padding:8px 12px;cursor:pointer}
