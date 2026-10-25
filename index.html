@@ -1661,11 +1661,24 @@ const ACH=[
   ['mini3','🎭','Trío de mini-jefes','Completa los 3 mini-jefes distintos (azul, verde y rojo) en una partida',(o,g)=>g.mini>=3],
   ['c52w','🌙','La profecía','Gana gracias a la Estrella del alba',(o,g)=>g.win&&g.c52,'t26'],
   ['nb5','🪄','Sin mover un dedo','Completa 5 enfrentamientos sin batallar contra ellos en una partida',(o,g)=>g.ncs>=5],
-  ['dbl','💥','Aplastante','Completa un enfrentamiento haciendo en la batalla más del doble de su nivel',(o,g)=>g.dbl]
+  ['dbl','💥','Aplastante','Completa un enfrentamiento haciendo en la batalla más del doble de su nivel',(o,g)=>g.dbl],
+  ['mns','👻','Primera visita','Juega una partida en la Mansión Embrujada',(o,g)=>g.cal==='e'],
+  ['mnw','🕯️','Cazafantasmas','Gana una partida en la Mansión Embrujada',(o,g)=>g.win&&g.cal==='e'&&!g.vs],
+  ['mnj','👑','Fin del embrujo','Vence a los 3 jefes de la Mansión',o=>o.boss&&['ej2','ej3','ej4'].every(k=>o.boss[k])],
+  ['cpm','🫂','Sustos en equipo','Gana la Mansión con un amigo',(o,g)=>g.win&&g.coop&&g.cal==='e'],
+  ['car','🏁','Primero en la meta','Gana una Carrera',(o,g)=>g.win&&g.vs==='car'],
+  ['asa','🏰','Conquistador','Gana un Asalto',(o,g)=>g.win&&g.vs==='asa'],
+  ['buho','🦉','Más listo que el Búho','Gana un duelo contra el Búho',(o,g)=>g.win&&!!g.vs&&g.vsl],
+  ['onl','🌐','Rival digno','Gana un duelo en línea',(o,g)=>g.win&&!!g.vs&&!g.vsl],
+  ['all7','🌟','Todos los héroes','Gana con los 7 personajes',o=>PJO.every(k=>o.pj&&o.pj[k]&&o.pj[k].w)],
+  ['gch','🎰','Coleccionista','Completa un mazo en el gacha',()=>TND.inv.some(x=>/^(pj|cal):/.test(x))],
+  ['est','🎨','Con estilo','Compra algo para personalizar en la tienda',()=>TND.inv.some(x=>/^(rv|mc|ti|em|tb):/.test(x))],
+  ['tab3','🗺️','Decorador','Consigue 3 tableros',()=>TND.inv.filter(x=>/^tb:/.test(x)).length>=3],
+  ['reg','🎁','Generoso','Regálale gemas a un amigo',o=>!!o.gift]
 ];
 /* un logro por cada carta distinta, la primera vez que la vences */
 const CACH=id=>['card:'+id,null,'¡Primera vez!',isG(id)?'Volteaste este guardián por primera vez':isBoss(id)?'Venciste a este jefe final por primera vez':'Completaste esta carta por primera vez',null,id];
-const liveG=(win)=>({win:!!win,pj:S.personaje||'m',hp:Math.max(0,S.hp),turn:S.turn,vk:S.vk||0,nc:S.nc||0,coop:!!COOP,final:!!S.final,boss:S.cross[0]&&isBoss(S.cross[0].id)?S.cross[0].id:null,mini:new Set((S.minis||[]).filter(x=>isMJ(x))).size,ncs:S.ncs||0,dbl:!!S.dbl,c52:!!S.c52w});
+const liveG=(win)=>({win:!!win,pj:S.personaje||'m',hp:Math.max(0,S.hp),turn:S.turn,vk:S.vk||0,nc:S.nc||0,coop:!!COOP&&!VS,cal:S.cal||'t',vs:VS?VS.m:'',vsl:!!(VS&&VS.local),final:!!S.final,boss:S.cross[0]&&isBoss(S.cross[0].id)?S.cross[0].id:null,mini:new Set((S.minis||[]).filter(x=>isMJ(x))).size,ncs:S.ncs||0,dbl:!!S.dbl,c52:!!S.c52w});
 /* notificación al estilo consola: una a la vez */
 const ATQ=[];let ATB=0;
 function achToast(a){ATQ.push(a);if(!ATB)achNext()}
@@ -1779,7 +1792,7 @@ albDot();setTimeout(recDot,500);
 /* ---------- Sala de Trofeos (pantalla Récords) ---------- */
 const TITLES=[[0,'🪵','Novato'],[3,'🗡️','Aventurero'],[10,'🛡️','Guerrero'],[25,'⚔️','Héroe'],[50,'👑','Leyenda']];
 const titleOf=w=>{let t=TITLES[0];TITLES.forEach(x=>{if(w>=x[0])t=x});return t};
-const SHELVES=[['Primeros pasos',['tut','g1','c1','w1','fin']],['Héroes',['wm','wl','wp','w3p','jf3','coop']],['Retos',['nok','hp10','hp1','fast','nc15','mini3','c52w','nb5','dbl']],['Leyenda',['w5','g10','w10','st3','allc']]];
+const SHELVES=[['Primeros pasos',['tut','g1','c1','w1','fin']],['Héroes',['wm','wl','wp','wr','wn','wo','wd','w3p','all7','jf3','coop']],['La Mansión',['mns','mnw','mnj','cpm']],['Duelos',['car','asa','buho','onl']],['Tienda',['gch','est','tab3','reg']],['Retos',['nok','hp10','hp1','fast','nc15','mini3','c52w','nb5','dbl']],['Leyenda',['w5','g10','w10','st3','allc']]];
 function recRender(){const P=$('#pn-rec'),o=stLoad(),A=o.ach||{},seen=o.achSeen||{},w=o.w||0,t=titleOf(w),nx=TITLES.find(x=>x[0]>w),pj=o.pj||{};
   const prev=t[0],pct=nx?Math.round((w-prev)/(nx[0]-prev)*100):100;
   const best=Math.max(0,...PJO.map(k=>(pj[k]||{}).w||0));
@@ -1836,8 +1849,9 @@ setInterval(()=>{const ap=$('#apart');if(!ap||!ap.children.length)return;const h
   let y=h.bottom;if(ct.classList.contains('on')){const r=ct.getBoundingClientRect();if(r.height)y=Math.max(y,r.bottom)}ap.style.top=Math.round(y+8)+'px'},300);
 
 /* ---------- tableros desbloqueables (carpeta tableros/) ---------- */
-const TABS=[['t00','Calabozo','',null],['t01','Cripta de huesos','w1'],['t02','Fragua de lava','wm'],['t03','Ruinas del bosque','wl'],['t04','Templo de la tormenta','wp'],
-  ['t05','Caverna de cristal','nc15'],['t06','Biblioteca arcana','fin'],['t07','Sala del trono oscuro','jf3'],['t08','Santuario celestial','w10'],
+/* todos los tableros (menos el de siempre) se consiguen solo en la tienda */
+const TABS=[['t00','Calabozo','',null],['t01','Cripta de huesos','shop'],['t02','Fragua de lava','shop'],['t03','Ruinas del bosque','shop'],['t04','Templo de la tormenta','shop'],
+  ['t05','Caverna de cristal','shop'],['t06','Biblioteca arcana','shop'],['t07','Sala del trono oscuro','shop'],['t08','Santuario celestial','shop'],
   ['t09','Barco fantasma','shop'],['t10','Jardín de los dulces','shop'],['t11','Taller del inventor','shop'],['t12','Volcán dormido','shop']]; /* 'shop': solo se compran en la tienda */
 const tabUrl=t=>`tableros/${t}.webp`;
 const tabOk=(t,A)=>{const x=TABS.find(y=>y[0]===t);return !!x&&(!x[2]||(x[2]!=='shop'&&!!(A||stLoad().ach||{})[x[2]])||TND.inv.includes('tb:'+t))};
@@ -1855,7 +1869,7 @@ function showTabs(){
   else if(TABSUB==='em'){const off=emOff();body=`<p style="margin:10px 0 0;text-align:center;color:var(--mute);font-size:.8rem">Siempre tienes los básicos. Toca un paquete tuyo para ponerlo o quitarlo de la plaza.</p><div class="csg">${CATI.em.map(([id,nm,e])=>{const own=catOwn(id),on=own&&!off.includes(id);
       return `<div class="cso${own?'':' lock'}${on?' sel':''}" ${own?`data-emt="${id}"`:`data-buyt="${id}"`}><span class="emj">${e.join(' ')}</span><b>${nm}</b><small>${!own?`🔒 ${TND.shop[id]||''} 💎 en la tienda`:on?'✔ En la plaza':'Apagado'}</small></div>`}).join('')}</div>`}
   else body=cosOpt(TABSUB,selGet(TABSUB));
-  $('#recs').innerHTML=`<div class="rbox"><h2>🎨 Personaliza</h2><p style="margin:0;text-align:center;color:var(--mute);font-size:.88rem">Compra en la tienda de Don Trueque y elige aquí lo que quieres usar. Los tableros también se ganan con logros.</p>
+  $('#recs').innerHTML=`<div class="rbox"><h2>🎨 Personaliza</h2><p style="margin:0;text-align:center;color:var(--mute);font-size:.88rem">Compra en la tienda de Don Trueque y elige aquí lo que quieres usar.</p>
     <div class="csub">${[['tb','🗺️ Tableros'],['rv','🂠 Reversos'],['mc','🖼️ Marcos'],['ti','🏷️ Títulos'],['em','😄 Emojis']].map(([k,t])=>`<button data-stab="${k}" class="${k===TABSUB?'on':''}">${t}</button>`).join('')}</div>${body}
     <button class="rclose" id="recs-x">Cerrar</button></div>`;
   $('#recs').classList.add('on')}
@@ -3868,7 +3882,7 @@ function pzPick(){let d=$('#pz-pick');if(!d){d=document.createElement('div');d.i
 
 /* ===== TIENDA DE DON TRUEQUE: gemas gratis (nunca dinero real) que se ganan jugando ===== */
 const tndSave=()=>{try{localStorage.setItem('mesa-tnd',JSON.stringify({g:TND.g,inv:TND.inv,shop:TND.shop,gc:TND.gc}))}catch(e){}};
-const tndSet=j=>{if(!j||typeof j.g!=='number')return;TND.g=j.g;TND.inv=j.inv||[];TND.shop=j.shop||TND.shop;TND.gc=j.gc||TND.gc||{};if(j.gp)TND.gp=j.gp;if(typeof j.gad==='number')TND.gad=j.gad;if(j.pa)TND.pa=j.pa;if(j.pe)TND.pe=j.pe;tndSave();try{albDot();recDot()}catch(_){}try{if(lobbyOn()&&LP===0)recRender();if(lobbyOn()&&LP===1)albRender()}catch(_){}try{lobLocks()}catch(e){}tndPaint();
+const tndSet=j=>{if(!j||typeof j.g!=='number')return;const inv0=TND.inv.length;TND.g=j.g;TND.inv=j.inv||[];if(TND.inv.length!==inv0)setTimeout(()=>{try{achScan(0)}catch(e){}},900);TND.shop=j.shop||TND.shop;TND.gc=j.gc||TND.gc||{};if(j.gp)TND.gp=j.gp;if(typeof j.gad==='number')TND.gad=j.gad;if(j.pa)TND.pa=j.pa;if(j.pe)TND.pe=j.pe;tndSave();try{albDot();recDot()}catch(_){}try{if(lobbyOn()&&LP===0)recRender();if(lobbyOn()&&LP===1)albRender()}catch(_){}try{lobLocks()}catch(e){}tndPaint();
   if(AV&&!avOk(AV)){AV='guerrero';try{localStorage.setItem('mesa-av',AV)}catch(e){}try{pzMe()}catch(e){}}};
 async function tndSync(f){if(!YO||!navigator.onLine||sinNet())return tndPaint();if(!f&&Date.now()-TND.t<20000)return tndPaint();TND.t=Date.now();
   const j=await nPost('/tienda',{n:YO.n,k:YO.k});if(j&&j.r==='ok')tndSet(j);else tndPaint()}
@@ -3928,7 +3942,7 @@ function tndOpen(tab){let d=$('#tnd');if(!d){d=document.createElement('div');d.i
       const gf=e.target.closest('[data-gift]');if(gf){const [a,cc]=gf.dataset.gift.split('|');
         if(gf.dataset.ok!=='1'){gf.dataset.ok='1';gf.textContent='¿Seguro?';setTimeout(()=>{if(gf.isConnected&&gf.dataset.ok==='1'){gf.dataset.ok='';gf.innerHTML=gemI+cc}},3000);return}
         gf.disabled=true;const j=await nPost('/tienda/regalo',{n:YO.n,k:YO.k,a,c:+cc});
-        if(j&&j.r==='ok'){tndSet(j);try{SFX.fanfare()}catch(_){}tndSay(`¡Listo! Le enviaste ${cc} gemas a ${a}. Hoy puedes regalar ${j.quedan} más.`)}
+        if(j&&j.r==='ok'){tndSet(j);{const o=stLoad();o.gift=1;stSave(o)}setTimeout(()=>achScan(0),900);try{SFX.fanfare()}catch(_){}tndSay(`¡Listo! Le enviaste ${cc} gemas a ${a}. Hoy puedes regalar ${j.quedan} más.`)}
         else if(j&&j.r==='tope'){tndSet(j);tndSay(`Hoy ya solo puedes regalar ${j.quedan} gemas.`)}
         else if(j&&j.r==='pocas'){tndSet(j);tndSay('Mmm… no te alcanzan las gemas.')}
         else if(j&&j.r==='noamigo')tndSay('Solo puedes regalar gemas a tus amigos.');
@@ -3939,7 +3953,7 @@ function tndOpen(tab){let d=$('#tnd');if(!d){d=document.createElement('div');d.i
         if((TND.g||0)<pr)return tndSay(`Te faltan ${pr-(TND.g||0)} gemas. ¡Gana partidas y vuelve pronto!`);
         if(c.dataset.ok!=='1'){c.dataset.ok='1';c.innerHTML=`¿Seguro? ${gemI}${pr}`;setTimeout(()=>{if(c.isConnected&&c.dataset.ok==='1'){c.dataset.ok='';c.innerHTML=`${gemI}${pr}`}},3000);return}
         c.disabled=true;const j=await nPost('/tienda/comprar',{n:YO.n,k:YO.k,it});
-        if(j&&j.r==='ok'){tndSet(j);try{SFX.fanfare()}catch(_){}tndSay(/:/.test(it)?`¡Trato hecho! ${catNm(it)} ya es tuyo. Elígelo en la pestaña Tableros.`:`¡Trato hecho! ${AVN[it]} ya es tuyo. Tócalo para usarlo en la plaza.`)}
+        if(j&&j.r==='ok'){tndSet(j);try{SFX.fanfare()}catch(_){}setTimeout(()=>achScan(0),900);tndSay(/:/.test(it)?`¡Trato hecho! ${catNm(it)} ya es tuyo. Elígelo en la pestaña Tableros.`:`¡Trato hecho! ${AVN[it]} ya es tuyo. Tócalo para usarlo en la plaza.`)}
         else if(j&&j.r==='pocas'){tndSet(j);tndSay('Mmm… no te alcanzan las gemas.')}
         else{c.disabled=false;tndSay('No pude hablar con el servidor. Inténtalo de nuevo.')}
         tndBody()}})}
@@ -3966,7 +3980,7 @@ function tndBody(){const b=$('#tnd-b');if(!b)return;$('#tnd').querySelectorAll('
    b.innerHTML=`<p class="tn">Todo lo que compres aquí lo eliges en la pestaña <b>Tableros</b>.</p>`
     +sec('🂠 Reversos de cartas','Cambia el diseño de atrás de tus cartas',CATI.rv.slice(1).map(x=>it(x[0],rvPv(x),x[1])).join(''))
     +sec('🖼️ Marcos','Un marco para tu nombre en la plaza y en tus récords',CATI.mc.slice(1).map(x=>it(x[0],`<span class="nmp ${mcCls(x[0])}">${YO.n}</span>`,x[1])).join(''))
-    +sec('🗺️ Tableros','Cómpralos sin esperar a ganar su logro',tabsV.length?tabsV.map(([t,n])=>it('tb:'+t,`<div class="rvp" style="background-image:url('${tabUrl(t)}')"></div>`,n)).join(''):'<p class="tn" style="grid-column:1/-1">✔ Ya tienes todos los tableros.</p>')
+    +sec('🗺️ Tableros','Fondos nuevos para tus partidas',tabsV.length?tabsV.map(([t,n])=>it('tb:'+t,`<div class="rvp" style="background-image:url('${tabUrl(t)}')"></div>`,n)).join(''):'<p class="tn" style="grid-column:1/-1">✔ Ya tienes todos los tableros.</p>')
     +sec('😄 Emojis y frases','Paquetes nuevos de reacciones para la plaza',CATI.em.map(x=>it(x[0],`<span class="emj">${x[2].join(' ')}</span>`,x[1])).join(''))
     +sec('🏷️ Títulos','Un título bajo tu nombre',CATI.ti.slice(1).map(x=>it(x[0],'',x[1])).join(''))
     +`<div class="ch">🎁 Regalos<small>Envía gemas a tus amigos (hasta 100 al día). Toca dos veces para confirmar.</small></div>`
