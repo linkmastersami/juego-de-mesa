@@ -93,8 +93,6 @@ const saveNames = () => ghPut('nombres.json', () => Object.fromEntries(NAMES));
     for (const m of BORRAR) { const v = NAMES.get(m); if (v && (v.t || 0) < ANTES) { NAMES.delete(m); n++; } }
     if (n) { for (const v of NAMES.values()) { if (Array.isArray(v.f)) v.f = v.f.filter(x => !BORRAR.includes(x)); if (Array.isArray(v.rq)) v.rq = v.rq.filter(x => !BORRAR.includes(x)); } saveNames(); console.log('Perfiles de prueba borrados:', n); } }
   const sb = await ghGet('subs.json'); if (Array.isArray(sb)) { sb.forEach(s => s && s.endpoint && !SUBS.has(s.endpoint) && SUBS.set(s.endpoint, s)); try { fs.writeFileSync(SUBS_FILE, JSON.stringify([...SUBS.values()])); } catch {} }
-  /* gemas de prueba: solo para SAMILINK, una sola vez */
-  { const u = NAMES.get('SAMILINK'); if (u && !u.prueba500k) { gfix(u); u.g = 500000; u.prueba500k = 1; saveNames(); console.log('SAMILINK: 500000 gemas de prueba'); } }
   console.log('Datos cargados:', NAMES.size, 'nombres,', SUBS.size, 'suscripciones', GH_TOKEN ? '(respaldo en GitHub activo)' : '(sin GH_TOKEN: solo memoria)');
 })();
 async function pushAll(payload, skip) {
