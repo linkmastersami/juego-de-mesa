@@ -87,12 +87,22 @@ const norm = n => n.replace(/0/g, 'O').replace(/1/g, 'I').replace(/3/g, 'E').rep
 const badName = n => { const a = norm(n); return BAD.some(w => a.includes(norm(w)) || n.includes(w)); };
 const saveNames = () => ghPut('nombres.json', () => Object.fromEntries(NAMES));
 (async () => {
+  const SUBS_QUITAR = new Set(); /* avisos de perfiles de prueba borrados */
   const nm = await ghGet('nombres.json'); if (nm && typeof nm === 'object') Object.entries(nm).forEach(([n, v]) => { if (okName(n) && v && v.h) NAMES.set(n, v); });
   /* perfiles de prueba que se borran una sola vez (solo los creados antes de esta fecha) */
   { const BORRAR = ['LUIS', 'YOSI', 'JOSE', 'JORGE'], ANTES = Date.parse('2026-10-11T18:00:00Z'); let n = 0;
     for (const m of BORRAR) { const v = NAMES.get(m); if (v && (v.t || 0) < ANTES) { NAMES.delete(m); n++; } }
-    if (n) { for (const v of NAMES.values()) { if (Array.isArray(v.f)) v.f = v.f.filter(x => !BORRAR.includes(x)); if (Array.isArray(v.rq)) v.rq = v.rq.filter(x => !BORRAR.includes(x)); } saveNames(); console.log('Perfiles de prueba borrados:', n); } }
+    if (n) { for (const v of NAMES.values()) { if (Array.isArray(v.f)) v.f = v.f.filter(x => !BORRAR.includes(x)); if (Array.isArray(v.rq)) v.rq = v.rq.filter(x => !BORRAR.includes(x)); } saveNames(); console.log('Perfiles de prueba borrados:', n); }
+  }
+  /* segunda limpieza de perfiles de prueba (antes de abrir la prueba cerrada): también se quitan sus avisos */
+  { const BORRAR = ['SAMI', 'SAMI2', 'JOSE', 'LUIS', 'SASZDC'], ANTES = Date.parse('2026-10-27T06:00:00Z'); let n = 0;
+    for (const m of BORRAR) { const v = NAMES.get(m); if (v && (v.t || 0) < ANTES) { if (Array.isArray(v.ep)) v.ep.forEach(e => SUBS_QUITAR.add(e)); NAMES.delete(m); n++; } }
+    if (n) {
+      for (const v of NAMES.values()) { if (Array.isArray(v.f)) v.f = v.f.filter(x => !BORRAR.includes(x)); if (Array.isArray(v.rq)) v.rq = v.rq.filter(x => !BORRAR.includes(x)); if (Array.isArray(v.ep)) v.ep.forEach(e => SUBS_QUITAR.delete(e)); }
+      saveNames(); console.log('Perfiles de prueba borrados (2):', n);
+    } }
   const sb = await ghGet('subs.json'); if (Array.isArray(sb)) { sb.forEach(s => s && s.endpoint && !SUBS.has(s.endpoint) && SUBS.set(s.endpoint, s)); try { fs.writeFileSync(SUBS_FILE, JSON.stringify([...SUBS.values()])); } catch {} }
+  if (SUBS_QUITAR.size) { SUBS_QUITAR.forEach(e => SUBS.delete(e)); saveSubs(); }
   console.log('Datos cargados:', NAMES.size, 'nombres,', SUBS.size, 'suscripciones', GH_TOKEN ? '(respaldo en GitHub activo)' : '(sin GH_TOKEN: solo memoria)');
 })();
 async function pushAll(payload, skip) {
