@@ -151,6 +151,7 @@ async function pushTo(name, payload) {
   return n;
 }
 const LAST = new Map(); /* NOMBRE -> última vez que abrió el juego (para "conectado") */
+const BRAG = new Map(); /* NOMBRE -> [{ de, t }] victorias que le presumieron sus amigos (solo en memoria) */
 const INV = new Map();  /* NOMBRE invitado -> [{ de, c, t }] */
 /* la invitación sigue viva mientras la sala exista, su anfitrión siga ahí y el lugar sea para el invitado (máx. 1 hora) */
 const invOk = (x, n) => { const rm = rooms.get(x.c); return !!rm && Date.now() - x.t < 60 * 60000 && !!rm.host && (rm.host.readyState === 1 || !!rm.gone.host) && (!rm.guest || rm.gn === n); };
@@ -295,11 +296,19 @@ const server = http.createServer((req, res) => {
         pushTo(a, { kind: 'inv', sala: c, title: 'Link Master Dungeon', body: `⚔️ ${n} te está esperando para jugar` });
         return out({ r: 'ok' });
       }
+      if (url === '/amigos/presumir') {
+        const t = String(b.t || '').replace(/[<>&]/g, '').slice(0, 140);
+        if (!ot || !me.f.includes(a) || !t) return out({ r: 'none' });
+        const L = (BRAG.get(a) || []).filter(x => now - x.ts < 86400000 && x.de !== n).slice(-9); L.push({ de: n, t, ts: now }); BRAG.set(a, L);
+        pushTo(a, { kind: 'amigo', title: 'Link Master Dungeon', body: `🏆 ${t}` });
+        return out({ r: 'ok' });
+      }
       if (url === '/amigos/noinv') { INV.set(n, (INV.get(n) || []).filter(x => x.de !== a)); return out({ r: 'ok' }); }
       /* /amigos: estado completo */
       const on = m => now - (LAST.get(m) || 0) < 45000;
       const inv = (INV.get(n) || []).filter(x => invOk(x, n) && me.f.includes(x.de));
-      return out({ r: 'ok', f: me.f.map(m => ({ n: m, a: (NAMES.get(m) || {}).a || 'guerrero', on: on(m) })).sort((x, y) => (y.on - x.on) || x.n.localeCompare(y.n)), rq: me.rq.slice(), inv: inv.map(x => ({ de: x.de, c: x.c })) });
+      const bg = (BRAG.get(n) || []).filter(x => now - x.ts < 86400000).map(x => ({ de: x.de, t: x.t })); BRAG.delete(n);
+      return out({ r: 'ok', bg, f: me.f.map(m => ({ n: m, a: (NAMES.get(m) || {}).a || 'guerrero', on: on(m) })).sort((x, y) => (y.on - x.on) || x.n.localeCompare(y.n)), rq: me.rq.slice(), inv: inv.map(x => ({ de: x.de, c: x.c })) });
     });
   }
   if (req.method === 'POST' && url.startsWith('/tienda')) {

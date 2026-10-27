@@ -2059,10 +2059,23 @@ async function shareVictory(st){
     const blob=await new Promise(r=>cv.toBlob(r,'image/png'));
     const f=new File([blob],'victoria.png',{type:'image/png'});
     const LINK=location.origin+location.pathname.replace(/index\.html$/,''),TXT=`${YO?YO.n+': ':''}¡Gané en Link Master con ${PJN[pj]} en ${st.turn} turnos! ⚔️ ¿Puedes superarme? Juega gratis aquí: ${LINK}`;
-    /* algunas apps (como WhatsApp) quitan el texto al compartir una imagen: el enlace también se copia para pegarlo */
-    try{await navigator.clipboard.writeText(TXT);cToast('🔗 Enlace del juego copiado · pégalo en tu mensaje')}catch(e){}
-    if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:'¡Victoria en Link Master!',text:TXT});return}
-    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='victoria.png';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+    const BR=`${YO?YO.n:'Tu amigo'} ganó en ${CALS[calNow()]?CALS[calNow()].nf:'el calabozo'} con ${PJN[pj]} en ${st.turn} turnos. ¿Puedes superarlo?`;
+    const canF=navigator.canShare&&navigator.canShare({files:[f]}),sent=new Set();
+    const save=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='victoria.png';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000)};
+    const draw=()=>{const fs=[...AMG.f].sort((x,y)=>(y.on?1:0)-(x.on?1:0));
+      const d=amgDlg(`<h3>🏆 Presume tu victoria</h3>
+        ${YO?`<div class="sec">Tus amigos</div><div class="minvl">${fs.length?fs.map(x=>`<div class="fr"><img src="guerreros/${x.a||'guerrero'}.webp" alt=""><b><i class="dot${x.on?' on':''}"></i>${x.n}</b><span><button class="ok" data-brag="${x.n}"${sent.has(x.n)?' disabled':''}>${sent.has(x.n)?'✅ Enviado':'🏆 Presumir'}</button></span></div>`).join('')
+          :'<p style="opacity:.8">Aún no tienes amigos. Agrégalos desde la plaza en Comunidad.</p>'}</div>`:''}
+        <div class="sec">Compartir por fuera</div>
+        <a class="y minvwa" href="https://wa.me/?text=${encodeURIComponent(TXT)}" target="_blank" rel="noopener">💬 Enviar por WhatsApp</a>
+        ${canF?'<button class="y minvo" id="vsh-img">📤 Compartir imagen</button>':''}
+        <button class="y minvo" id="vsh-sv">💾 Guardar imagen</button>
+        <button class="n">Cerrar</button>`,'vsh');
+      d.querySelectorAll('[data-brag]').forEach(b=>b.onclick=async()=>{const n=b.dataset.brag;b.disabled=true;b.textContent='…';const j=await amgPost('/amigos/presumir',{a:n,t:BR});
+        if(j&&j.r==='ok'){sent.add(n);b.textContent='✅ Enviado';try{SFX.pop()}catch(_){}}else{b.disabled=false;b.textContent='🏆 Presumir';try{cToast('No se pudo enviar a '+n)}catch(_){}}});
+      const si=$('#vsh-img');if(si)si.onclick=async()=>{try{await navigator.clipboard.writeText(TXT);cToast('🔗 Enlace copiado · pégalo en tu mensaje')}catch(e){}try{await navigator.share({files:[f],title:'¡Victoria en Link Master!',text:TXT})}catch(e){}};
+      $('#vsh-sv').onclick=save};
+    draw();if(YO)amgSync().then(()=>{const d=$('#amgd');if(d&&d.classList.contains('on')&&d.dataset.k==='vsh')draw()});
   }catch(e){}
 }
 function endGame(){if(VS&&!VS.fin){vsFinish('lose',S.why);return}coopOver('lose',S.why);S.over=1;const rr=stRecord(0);fxStamp('DERROTA','ko');
@@ -4671,6 +4684,7 @@ async function amgSync(){const j=await amgPost('/amigos');if(!j||j.r!=='ok')retu
     if(nr.length&&!TUT)gToast(`📨 <b>${nr.length===1?nr[0]+' quiere ser tu amigo':nr.length+' solicitudes de amistad'}</b>`,'👥 Ver',()=>{if(lobbyOn())try{lobPage(3)}catch(_){}amgPanel()});
     else if(nf.length&&!TUT)gToast(`🤝 <b>${nf[0]} aceptó tu solicitud de amistad</b>`,'👥 Ver',()=>{if(lobbyOn())try{lobPage(3)}catch(_){}amgPanel()},8000)}
   AMG.f=j.f||[];AMG.rq=j.rq||[];AMG.inv=j.inv||[];AMG.t=Date.now();amgDot();
+  (j.bg||[]).forEach((x,i)=>setTimeout(()=>gToast(`🏆 <b>${x.t}</b>`,0,0,9000),i*9500));
   if($('#amgd')&&$('#amgd').classList.contains('on')&&$('#amgd').dataset.k==='panel')amgPanel(1);
   for(const v of AMG.inv){const k=v.de+':'+v.c;if(AMG.seen.has(k))continue;AMG.seen.add(k);amgInvite(v);break}}
 function amgDot(){try{amgFriendBtn()}catch(e){}const n=AMG.rq.length+AMG.inv.length;const b=$('#pz-amb');if(b){b.textContent=n||'';b.style.display=n?'':'none'}
