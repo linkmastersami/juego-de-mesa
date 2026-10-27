@@ -306,6 +306,7 @@
   "personajes/personaje 7/d18.webp": "5882c19afc78",
   "personajes/personaje 7/d19.webp": "992e6ad6944a",
   "personajes/personaje 7/d20.webp": "6edc66789f4d",
+  "privacidad.html": "eb45d34eb715",
   "sonidos/amigo.mp3": "a509390a7514",
   "sonidos/carta.mp3": "c8844d91fefd",
   "sonidos/espada.mp3": "19cce4ce7420",
@@ -375,5 +376,5 @@
   "voces/38.mp3": "bdb95078938e",
   "voces/inv.mp3": "88fd37faee29"
  },
- "version": "8fafde082899"
+ "version": "476f8b54c726"
 }
