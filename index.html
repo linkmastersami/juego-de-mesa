@@ -2322,7 +2322,7 @@ function openBat(i,k0,act){const go=k=>{PICK=0;B={i,act:act||null,as:[],col:k,m1
 let BIN=0;
 function rb(){
   const c=S.cross[B.i],cin=BIN;BIN=0;dockVar();
-  const hint=(VSA()&&B.i===0?'🎨 Solo cuentan los dados del color de tu carta (blanca o habilidad: solo el blanco) · ':'')+(GCOL[c.id]?`🛡️ Guardián: si en los dados no sale ${GCOL[c.id]}, −2 al poder · `:'')+(c.id==='eg2'?'💃 Sin asistencias · ':'')+(c.id==='e08'?'🕸️ Cada asistencia suma 1 menos · ':'')+(c.id==='e03'?'🛡️ Hueca: los dados no le hacen daño · ':'')+(c.sus?'😱 Susto: −2 a tu poder · ':'')+(!B.act?'Arrastra una carta de tu mano hasta aquí':CAS()?'Al lanzar los dados, tu amigo podrá asistirte':B.as.length<2?'Arrastra cartas a tu carta para asistirla (máx. 2) · tócalas para quitarlas':'Ya tienes 2 asistencias');
+  const hint=(VSA()&&B.i===0?'🎨 Solo cuentan los dados del color de tu carta (blanca o habilidad: solo el blanco) · ':'')+(GCOL[c.id]?`🛡️ Guardián: si en los dados no sale ${GCOL[c.id]}, −2 al poder · `:'')+(c.id==='eg2'?'💃 Sin asistencias · ':'')+(c.id==='e08'?'🕸️ Cada asistencia suma 1 menos · ':'')+(c.id==='e03'?'🛡️ Hueca: los dados no le hacen daño · ':'')+(c.sus?'😱 Susto: −2 a tu poder · ':'')+(!B.act?'Arrastra una carta de tu mano hasta aquí':CAS()&&B.as.length<2?`Arrastra cartas a tu carta para asistirla · tu amigo podrá poner ${2-B.as.length} asistencia${B.as.length?'':'s'} más`:B.as.length<2?'Arrastra cartas a tu carta para asistirla (máx. 2) · tócalas para quitarlas':'Ya tienes 2 asistencias');
   $('#bt').innerHTML=`<div class="bf${cin?' in':''}"><div class="bc"><div class="cw">${card(c.id)}</div><div class="orb">${Math.max(0,LV(c)-c.p)}</div><small>falta</small></div><b class="vsx">VS</b>
     <div class="bc"><div class="cw${B.act?'':' drop'}" id="bact">${B.act?`<div data-bp="a" class="ca">${card(B.act)}</div>`:'<span>Arrastra aquí<br>tu carta</span>'}<div class="ass">${B.as.map((x,k)=>`<div data-bp="s${k}">${card(x)}</div>`).join('')}</div></div><div class="orb p">${totB()}</div><small>tu ataque${l05on()?' · +1':''}</small></div></div>
   <div class="bhint">${hint}</div>
@@ -2336,22 +2336,22 @@ $('#bt').onclick=e=>{
   /* ---- MODO ASISTENCIA COOPERATIVA ---- */
   if(CAD){
     const g=k=>{const n=e.target.closest(`[data-${k}]`);return n?n.dataset[k]:null};let v;
-    if((v=g('cah'))!==null){const sel=CAD._sel,ok=sel.size<2&&okaC(v,CAD.col);NOSY=1;ov(v,[['Usar como asistencia',()=>{if(CAD&&CAD._sel.size<2&&okaC(v,CAD.col))CAD._sel.add(v);rbC()},!ok],['Cancelar',()=>{},0,'ghost']],ok?'':`<p>${sel.size>=2?'Ya elegiste 2 asistencias.':'Esta carta no puede asistir en este enfrentamiento (color).'}</p>`,1);NOSY=0;return}
+    if((v=g('cah'))!==null){const sel=CAD._sel,mx=CAD.max??2,ok=sel.size<mx&&okaC(v,CAD.col);NOSY=1;ov(v,[['Usar como asistencia',()=>{if(CAD&&CAD._sel.size<(CAD.max??2)&&okaC(v,CAD.col))CAD._sel.add(v);rbC()},!ok],['Cancelar',()=>{},0,'ghost']],ok?'':`<p>${sel.size>=mx?`Ya elegiste ${mx} asistencia${mx>1?'s':''}.`:'Esta carta no puede asistir en este enfrentamiento (color).'}</p>`,1);NOSY=0;return}
     if((v=g('cap'))!==null){CAD._sel.delete(v);rbC();return}
     if(e.target.id==='cas-cancel'){CAD._sel.clear();rbC();return}
-    if(e.target.id==='cas-go'){const as=[...CAD._sel],d=CAD;CAD=null;COOPBUSY=0;OWNER='a';$('#bt').classList.remove('on');try{fanRender()}catch(_){}coopUi();SBTL=null;sbtRender({cid:d.cid,falta:d.falta,act:d.act,as,tot:(d.tot||0)+as.reduce((t,x)=>t+avF(x,d.cid),0),n:0,ph:'dice'});mpSend({k:'assistRes',as});return}
+    if(e.target.id==='cas-go'){const as=[...CAD._sel],d=CAD;CAD=null;COOPBUSY=0;OWNER='a';$('#bt').classList.remove('on');try{fanRender()}catch(_){}coopUi();SBTL=null;sbtRender({cid:d.cid,falta:d.falta,act:d.act,as:[...(d.own||[]),...as],tot:(d.tot||0)+as.reduce((t,x)=>t+avF(x,d.cid),0),n:0,ph:'dice'});mpSend({k:'assistRes',as});return}
     return;
   }
   /* ---- MODO NORMAL ---- */
   const g=k=>{const n=e.target.closest(`[data-${k}]`);return n?n.dataset[k]:null};let v;
-  if((v=g('bh'))!==null){NOSY=1;ov(v,[['Jugar como acción',()=>{B.act=v;rb()},!!B.act||!okc(v)||v==='l12'],['Jugar como asistencia',()=>{B.as.push(v);rb()},CAS()||!B.act||B.as.length>1||!oka(v)]]);NOSY=0}
+  if((v=g('bh'))!==null){NOSY=1;ov(v,[['Jugar como acción',()=>{B.act=v;rb()},!!B.act||!okc(v)||v==='l12'],['Jugar como asistencia',()=>{B.as.push(v);rb()},!B.act||B.as.length>1||!oka(v)]]);NOSY=0}
   else if((v=g('bp'))!==null){if(v==='a'){B.act=null;B.as=[]}else B.as.splice(+v[1],1);rb()}
   else if(e.target.closest('#m20disc')){discDraw(()=>{render();rb()},1,null,1)}
   else if(e.target.closest('#n02disc')){const L=S.hand.filter(x=>x!==B.act&&!B.as.includes(x));ov(null,[...L.map(x=>[x,()=>{discCard(x);B.n02=1;close();render();rb();return 1},0,'',x]),['Cancelar',()=>{close();rb();return 1},0,'ghost']],'<p>Elige la carta a descartar (+2)</p>',1)}
   else if(e.target.id==='l20m'){B.v20=Math.max(0,(B.v20===undefined?7:B.v20)-1);rb()}
   else if(e.target.id==='l20p'){B.v20=Math.min(7,(B.v20===undefined?7:B.v20)+1);rb()}
   else if(e.target.id==='nogo'){B=null;PICK=1;$('#bt').classList.remove('on');try{sy('batx',{})}catch(e){}render();try{SFX.down()}catch(e){}}
-  else if(e.target.id==='go'){if(VSA()&&B.i===0&&!B.hc&&vsHeroCol())return;const pfxB=S.personaje||'m';if(S.cross[B.i].id==='t29'&&!B.d55){B.d55=1;if(S.hand.length){pickHand(1,()=>{close();if(B.act&&B.act!==p20()&&!S.hand.includes(B.act)){B.act=null;B.as=[]}B.as=B.as.filter(x=>S.hand.includes(x));rb()},1);return}}if(B.act==='m17'&&B.v17===undefined){const d=S.dM.pop();B.v17=0;if(d){S.disc.push(d);const fi3=getFI();B.v17=MC[d][1]+(+(fi3[+d.slice(1)-1]||'00')[0]?2:0)}render();rb()}if(CAS()&&B.act&&!B.coopOk){coopAsk();return}cine(COLN[col()],noDice(B.act)||S.cross[B.i]?.id==='g02'?1:0)}
+  else if(e.target.id==='go'){if(VSA()&&B.i===0&&!B.hc&&vsHeroCol())return;const pfxB=S.personaje||'m';if(S.cross[B.i].id==='t29'&&!B.d55){B.d55=1;if(S.hand.length){pickHand(1,()=>{close();if(B.act&&B.act!==p20()&&!S.hand.includes(B.act)){B.act=null;B.as=[]}B.as=B.as.filter(x=>S.hand.includes(x));rb()},1);return}}if(B.act==='m17'&&B.v17===undefined){const d=S.dM.pop();B.v17=0;if(d){S.disc.push(d);const fi3=getFI();B.v17=MC[d][1]+(+(fi3[+d.slice(1)-1]||'00')[0]?2:0)}render();rb()}if(CAS()&&B.act&&!B.coopOk){B.own=B.as.slice();if(B.own.length<2){coopAsk();return}B.coopOk=1}cine(COLN[col()],noDice(B.act)||S.cross[B.i]?.id==='g02'?1:0)}
 };
 /* ===== MANO EN ABANICO (estilo Pokémon TCG Pocket) =====
    · mantener el dedo: el abanico se abre y la carta bajo el dedo se ve en grande; deslizar recorre las cartas
@@ -2366,7 +2366,7 @@ function dockVar(){try{const d=$('#dock'),t=d?d.getBoundingClientRect().top:0;if
   const cr=$('#cross'),h=cr?cr.clientHeight:0;if(h>120){const w=Math.max(60,Math.min(innerWidth*.29,150,(h-14)/(3*1.458)));if(Math.abs((cr._cw||0)-w)>.5){cr._cw=w;cr.style.setProperty('--cw',w.toFixed(1)+'px')}}}catch(e){}}
 const FAN={st:0,ids:[],x0:0,y0:0,i:-1,t:0,pid:null,tm:null,src:null,id:null,can:[],hov:null,end:0,dirty:0};
 function fanList(){let L=S.hand.slice();if(B)L=L.filter(x=>x!==B.act&&!B.as.includes(x));if(CAD)L=L.filter(x=>!CAD._sel.has(x));return L}
-function fanOk(id){if(TUT&&TUT.onlyAs&&B)return id===TUT.onlyAs&&!CAS()&&B.as.length<2&&oka(id);if(CAD)return CAD._sel.size<2&&okaC(id,CAD.col);if(B)return B.act?(!CAS()&&B.as.length<2&&oka(id)):(okc(id)&&id!=='l12');return true}
+function fanOk(id){if(TUT&&TUT.onlyAs&&B)return id===TUT.onlyAs&&!CAS()&&B.as.length<2&&oka(id);if(CAD)return CAD._sel.size<(CAD.max??2)&&okaC(id,CAD.col);if(B)return B.act?(B.as.length<2&&oka(id)):(okc(id)&&id!=='l12');return true}
 /* enfrentamientos que se pueden enfrentar con esta carta ahora mismo */
 function canBoard(){return !COOP||ctl()}
 function validCells(id){const vc=validCells0(id);if(TUT&&TUT.only)return id===TUT.only.id&&vc.includes(TUT.only.cell)?[TUT.only.cell]:[];return vc}
@@ -2428,7 +2428,7 @@ function fanDrop(){const id=FAN.id,h=FAN.hov;FAN.end=performance.now();
   if(h===null||h===undefined){fanBack();return}
   if(h==='bact'){fanClose();
     if(CAD){if(CAD._sel.size<2&&okaC(id,CAD.col)){CAD._sel.add(id);try{SFX.place()}catch(e){}rbC()}return}
-    if(!B)return;if(!B.act){if(okc(id)&&id!=='l12')B.act=id}else if(!CAS()&&B.as.length<2&&oka(id))B.as.push(id);try{SFX.place()}catch(e){}rb();return}
+    if(!B)return;if(!B.act){if(okc(id)&&id!=='l12')B.act=id}else if(B.as.length<2&&oka(id))B.as.push(id);try{SFX.place()}catch(e){}rb();return}
   const i=h;fanClose();openBat(i,null,id)}
 /* la carta vuelve a su lugar en el abanico (o a la carta de habilidad) */
 function fanBack(){const g=$('#fgh'),src=FAN.src,id=FAN.id,gr=g.getBoundingClientRect();
@@ -2440,7 +2440,7 @@ function fanBack(){const g=$('#fgh'),src=FAN.src,id=FAN.id,gr=g.getBoundingClien
   c.animate([{transform:'none'},{transform:`translate(${tr.left-gr.left}px,${tr.top-gr.top}px) scale(${tr.width/gr.width})`}],{duration:260,easing:'cubic-bezier(.3,.7,.4,1)',fill:'forwards'}).finished.then(()=>{c.remove();tgt.style.visibility=''},()=>{c.remove();tgt.style.visibility=''});try{SFX.down()}catch(e){}}
 function fanTap(id){if(!id)return;
   if(CAD){const sel=CAD._sel,ok=sel.size<2&&okaC(id,CAD.col);NOSY=1;ov(id,[['Usar como asistencia',()=>{if(CAD&&CAD._sel.size<2&&okaC(id,CAD.col))CAD._sel.add(id);rbC()},!ok],['Cancelar',()=>{},0,'ghost']],ok?'':`<p>${sel.size>=2?'Ya elegiste 2 asistencias.':'Esta carta no puede asistir en este enfrentamiento (color).'}</p>`,1);NOSY=0;return}
-  if(B){NOSY=1;ov(id,[['Jugar como acción',()=>{B.act=id;rb()},!!B.act||!okc(id)||id==='l12'],['Jugar como asistencia',()=>{B.as.push(id);rb()},CAS()||!B.act||B.as.length>1||!oka(id)]]);NOSY=0;return}
+  if(B){NOSY=1;ov(id,[['Jugar como acción',()=>{B.act=id;rb()},!!B.act||!okc(id)||id==='l12'],['Jugar como asistencia',()=>{B.as.push(id);rb()},!B.act||B.as.length>1||!oka(id)]]);NOSY=0;return}
   const k=S.hand.indexOf(id);if(k>=0)openHand(k)}
 {const f=$('#tHand'),hb=$('#m20');
   const down=(e,src)=>{if(FAN.st||e.button>0)return;if(src==='fan'&&!FAN.ids.length)return;
@@ -2601,16 +2601,16 @@ function resolve(h,nd){
   M18=0;MALL=0;const c=S.cross[B.i],lv=LV(c),id=c.id,bi=B.i;
   const g5pre=S.cross.some(x=>x&&x.id==='g05'); /* g05 solo actúa si ya estaba volteado antes de esta tirada */
   const e8pre=S.cross.some(x=>x&&x.id==='eg8'),gat=!!S.gato;
-  const pfx=S.personaje||'m',fi=getFI();
+  const pfx=S.personaje||'m',fi=getFI(),own=CAS()?(B.own||[]).slice():B.as.slice();
   const m06b=B.act===p06()?2*fireDisc():0,add=Math.max(0,sumB()+h+m06b);B.p0=c.p;if(c.sus)c.sus=0;
-  [B.act,...(CAS()?[]:B.as)].filter(Boolean).forEach(x=>{if(x===p20()){S.hab=0;return}S.hand.splice(S.hand.indexOf(x),1);S.disc.push(x)});
-  try{albUse(B.act,'a');if(!CAS())B.as.forEach(x=>albUse(x,'s'))}catch(e){}
+  [B.act,...own].filter(Boolean).forEach(x=>{if(x===p20()){S.hab=0;return}S.hand.splice(S.hand.indexOf(x),1);S.disc.push(x)});
+  try{albUse(B.act,'a');own.forEach(x=>albUse(x,'s'))}catch(e){}
   const act=B.act,as=B.as.slice(),fx=[];
-  const nf=(act?+fi[+act.slice(1)-1][0]:0)+(CAS()?0:as.reduce((t,x)=>t+ +(fi[+x.slice(1)-1]||'00')[1],0));
+  const nf=(act?+fi[+act.slice(1)-1][0]:0)+own.reduce((t,x)=>t+ +(fi[+x.slice(1)-1]||'00')[1],0);
   if(pfx==='d'){if(act==='d20')S.esc=0;const ne=Math.min(3-(S.esc||0),nf+(act==='d10'||as.includes('d10')?1:0));if(ne>0){S.esc=(S.esc||0)+ne;fx.push([`d19: ganas ${ne} escudo${ne>1?'s':''} (tienes ${S.esc} de 3)`,()=>{}])}} /* escudos de Granito */
   if(nf&&pfx==='m')fx.push([`robar ${nf} carta(s) por fuego (m19)`,()=>draw(nf)]);
   if(act==='m01')fx.push([`m01: sufrir 1 de daño`,()=>hurt(1)],[`m01: barajar en el mazo en lugar del descarte`,()=>{const k=S.disc.lastIndexOf('m01');if(k<0)return;S.disc.splice(k,1);S.dM.push('m01');shuf(S.dM);fxShufM()}]);
-  if(act==='m05')fx.push([`m05: robar ${CAS()?1:1+as.length} carta(s)`,()=>draw(CAS()?1:1+as.length)]);
+  if(act==='m05')fx.push([`m05: robar ${1+own.length} carta(s)`,()=>draw(1+own.length)]);
   if(act==='m04'){fx.push([`m04 (elige): activar tu habilidad o regresar una sombra`,b=>{const km=S.mesa.filter(x=>/^k0[245]$/.test(x));ov('m04',[['Activar la carta de habilidad',()=>{S.hab=1;render();b();return 1}],...(km.length?[['Regresar una sombra a su mazo',b2=>{ov(null,km.map(x=>[x,()=>{S.mesa.splice(S.mesa.indexOf(x),1);S.dK.push(x);shuf(S.dK);render();fxShufK();b();return 1},0,'',x]),'<p>Elige la sombra a regresar</p>',1);return 1}]]:[])],'<p>Elige el efecto</p>',1);return 2}]);fx.push([`m04: barajar los descartes de personaje al mazo (sin esta carta)`,()=>{const d=S.disc.filter(x=>x[0]===pfx&&x!=='m04');S.disc=S.disc.filter(x=>!d.includes(x));S.dM.push(...d);shuf(S.dM);fxShufM()}]);}
   if(act==='m13'&&S.hand.length)fx.push([`m13: devolverla a tu mano`,()=>{S.disc.splice(S.disc.lastIndexOf('m13'),1);S.hand.push('m13');qFly('m13','#pDm','#tHand','#7dffb0')}]);
   if(act==='m18')M18=1;
@@ -2742,7 +2742,7 @@ function resolve(h,nd){
   B=null;$('#bt').classList.remove('on');$('#sh-st').classList.remove('on');render();
   fxStamp(win?(isBoss(id)?'¡VICTORIA!':'¡COMPLETADO!'):'FALLASTE',win?'ok':'ko');if(win&&isBoss(id)){confetti();whenFree(()=>showVictory('Derrotaste al jefe final.'));return}
   const R2=()=>res2(id,`<div class="pv">${win?(isBoss(id)?'¡GANAS LA PARTIDA!':'¡Enfrentamiento completado!'):'No se completó'}</div><p>Cartas: +${add-h} · Dados: +${h}${win?'':` · Le quedan ${Math.max(0,lv-c.p)} PV`}</p><p>${win?'Recompensa:':'Penalización:'}</p>`,fx);
-  if(CAS()&&as.length)coopFx({as,act,bi},R2);else R2();
+  const fas=as.filter(x=>!own.includes(x));if(CAS()&&fas.length)coopFx({as:fas,act,bi},R2);else R2();
 }
 
 
@@ -3598,7 +3598,7 @@ function coopDing0(){try{const ac=DING||(DING=new (window.AudioContext||window.w
 function coopAsk(){
   if(B.coopWait)return;
   B.coopWait=1;OWNER='f';coopUi();
-  mpSend({k:'assistReq',act:B.act,col:col(),cid:S.cross[B.i].id,falta:Math.max(0,LV(S.cross[B.i])-S.cross[B.i].p),tot:totB()});
+  mpSend({k:'assistReq',act:B.act,own:B.as.slice(),max:Math.max(0,2-B.as.length),col:col(),cid:S.cross[B.i].id,falta:Math.max(0,LV(S.cross[B.i])-S.cross[B.i].p),tot:totB()});
   coopWait('Tu amigo está eligiendo cartas para asistirte…');
 }
 /* amigo: solo cartas del color del enfrentamiento (la blanca sirve para cualquiera) */
@@ -3612,8 +3612,8 @@ function rbC(){
   const sel=d._sel,selArr=[...sel],sumAs=selArr.reduce((t,x)=>t+avF(x,d.cid),0),total=(d.tot||0)+sumAs,cin=!d._shown;d._shown=1;
   $('#bt').innerHTML=`<div class="bhint">🤝 Tu amigo te pide asistencia <b id="cas-t" style="color:#ffd34d;white-space:nowrap"></b></div>
     <div class="bf${cin?' in':''}"><div class="bc"><div class="cw">${card(d.cid)}</div><div class="orb">${d.falta}</div><small>falta</small></div><b class="vsx">VS</b>
-    <div class="bc"><div class="cw" id="bact">${d.act?`<div class="ca" style="cursor:default">${card(d.act)}</div>`:'<div class="ca drop" style="display:grid;place-items:center">Sin carta</div>'}<div class="ass">${selArr.map(x=>`<div data-cap="${x}">${card(x)}</div>`).join('')}</div></div><div class="orb p">${total}</div><small>ataque${sumAs?` · +${sumAs} tuyo`:''}</small></div></div>
-    <div class="bhint">${sel.size<2?'Arrastra cartas de tu mano a la carta de tu amigo para asistirla (máx. 2)':'Ya elegiste 2 asistencias'}${sel.size?' · tócalas para quitarlas':''}</div>
+    <div class="bc"><div class="cw" id="bact">${d.act?`<div class="ca" style="cursor:default">${card(d.act)}</div>`:'<div class="ca drop" style="display:grid;place-items:center">Sin carta</div>'}<div class="ass">${(d.own||[]).map(x=>`<div style="cursor:default">${card(x)}</div>`).join('')}${selArr.map(x=>`<div data-cap="${x}">${card(x)}</div>`).join('')}</div></div><div class="orb p">${total}</div><small>ataque${sumAs?` · +${sumAs} tuyo`:''}</small></div></div>
+    <div class="bhint">${(d.own||[]).length?`Tu amigo ya puso ${d.own.length} asistencia · `:''}${sel.size<(d.max??2)?`Arrastra cartas de tu mano a la carta de tu amigo para asistirla (máx. ${d.max??2})`:`Ya elegiste ${d.max??2} asistencia${(d.max??2)>1?'s':''}`}${sel.size?' · tócalas para quitarlas':''}</div>
     <div class="btns"><button id="cas-go">${sel.size?`🎲 Asistir con ${sel.size} y lanzar`:'🎲 Lanzar dados sin asistir'}</button></div>`;
   const o=$('#bt .orb.p');if(o&&d._last!==undefined&&d._last!==total)o.animate([{transform:'scale(1.45)'},{transform:'scale(1)'}],{duration:280});
   d._last=total;try{fanRender()}catch(e){}
@@ -3697,7 +3697,7 @@ function mpOnMsg(d){
   else if(d.k==='assistReq'&&COOP)coopAssistAsk(d);
   else if(d.k==='l11Ask'&&COOP)coopL11Ask(d);
   else if(d.k==='l11Res'&&COOPL11)COOPL11(d.use);
-  else if(d.k==='assistRes'&&COOP&&B&&B.coopWait){coopWait(null);B.coopWait=0;B.as=(d.as||[]).slice(0,2);B.coopOk=1;OWNER='a';coopUi();rb();setTimeout(coopGo,900)}
+  else if(d.k==='assistRes'&&COOP&&B&&B.coopWait){coopWait(null);B.coopWait=0;B.as=[...(B.own||[]),...(d.as||[]).slice(0,Math.max(0,2-(B.own||[]).length))];B.coopOk=1;OWNER='a';coopUi();rb();setTimeout(coopGo,900)}
   else if(d.k==='cineStart'&&COOP&&!MYT){coopWait(null);$('#bt').classList.remove('on');sbtHide();CAD=null;CMQ.length=0;cine(d.color,d.nd,d)}
   else if(d.k==='cm'&&COOP)CMQ.push(d)
   else if(d.k==='fxAssist'&&COOP)coopFxRun(d);
